@@ -1,20 +1,25 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import userRoutes from './routes/userRoutes.js';  // นำเข้า routes ของผู้ใช้
-import jobRoutes from './routes/jobRoutes.js'; // นำเข้า jobRoutes
-import adminRoutes from './routes/adminRoutes.js';  // นำเข้า adminRoutes
+import userRoutes from './routes/userRoutes.js';
+import jobRoutes from './routes/jobRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+import { logCleanup } from './utils/logCleanup.js'; // นำเข้า log cleanup
 
 dotenv.config();
 
 const app = express();
-// ใช้ express.json() เพื่ออ่านข้อมูล JSON จาก request body
+
 app.use(express.json());
 
-
-// ใช้งาน routes
+//  routes
 app.use('/api/users', userRoutes);
 app.use('/api/jobs', jobRoutes);
-app.use('/api/admin', adminRoutes);  // เชื่อมต่อเส้นทาง adminRoutes ที่ /api/admin
+app.use('/api/admin', adminRoutes);
+
+// ตั้งเวลาให้ลบ log ทุกๆ 7 วัน (604800000 มิลลิวินาที)
+setInterval(logCleanup, 604800000);
+
+
 
 
 

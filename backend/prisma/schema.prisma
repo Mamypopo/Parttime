@@ -10,6 +10,7 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -42,34 +43,47 @@ model User {
 }
 
 model Job {
-  id              Int      @id @default(autoincrement())
-  title           String // ชื่องาน
-  position        String // ตำแหน่งงานที่ต้องการ
-  work_date       DateTime // วันที่ทำงาน
-  location        String // สถานที่
-  start_time      DateTime // เวลาเริ่ม
-  end_time        DateTime // เวลาสิ้นสุด
-  wage            Float // ค่าแรง
-  required_people Int // จำนวนคนที่ต้องการ
-  completed       Boolean  @default(false) // สถานะงาน
-  created_by      Int // ผู้สร้างงาน
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
-  details         String // รายละเอียดเพิ่มเติม
+  id         Int      @id @default(autoincrement())
+  title      String // ชื่องาน
+  work_date  DateTime // วันที่ทำงาน
+  location   String // สถานที่
+  start_time DateTime // เวลาเริ่ม
+  end_time   DateTime // เวลาสิ้นสุด
+  completed  Boolean  @default(false) // สถานะงาน (เสร็จสิ้นหรือยัง)
+  details    String // รายละเอียดเพิ่มเติม
+  created_by Int // ผู้สร้างงาน (Admin)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  creator          Admin              @relation(fields: [created_by], references: [id])
-  JobParticipation JobParticipation[] // ผู้เข้าร่วมงาน
+  creator          Admin              @relation(fields: [created_by], references: [id]) // ความสัมพันธ์กับ Admin
+  JobPositions     JobPosition[] // ความสัมพันธ์กับ JobPosition (หลายตำแหน่งในงานเดียว)
+  JobParticipation JobParticipation[] // ผู้เข้าร่วมในงานนี้
+}
+
+model JobPosition {
+  id               Int                @id @default(autoincrement())
+  position_name    String // ชื่อตำแหน่งงาน
+  wage             Float // ค่าแรงของตำแหน่งนี้
+  required_people  Int // จำนวนคนที่ต้องการในตำแหน่งนี้
+  details          String // รายละเอียดงานในตำแหน่งนี้
+  job_id           Int // เชื่อมกับตาราง Job
+  status           String             @default("open") // เพิ่มฟิลด์ status พร้อมค่าดีฟอลต์เป็น 'open'
+  job              Job                @relation(fields: [job_id], references: [id]) // ความสัมพันธ์กับ Job
+  JobParticipation JobParticipation[] // ผู้เข้าร่วมในตำแหน่งนี้
 }
 
 model JobParticipation {
-  id         Int      @id @default(autoincrement())
-  user_id    Int
-  job_id     Int
-  status     String // สถานะของผู้เข้าร่วมงาน เช่น สำเร็จ, ล้มเหลว
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  user User @relation(fields: [user_id], references: [id]) // ความสัมพันธ์กับ User
-  job  Job  @relation(fields: [job_id], references: [id]) // ความสัมพันธ์กับ Job
+  id              Int      @id @default(autoincrement())
+  user_id         Int // ผู้ใช้ที่สมัครเข้าร่วม
+  job_position_id Int // ตำแหน่งงานที่สมัคร
+  status          String // สถานะของผู้เข้าร่วมงาน (สำเร็จ, ล้มเหลว, อื่นๆ)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  user        User        @relation(fields: [user_id], references: [id]) // ความสัมพันธ์กับผู้ใช้
+  jobPosition JobPosition @relation(fields: [job_position_id], references: [id]) // ความสัมพันธ์กับตำแหน่งงาน
+  Job         Job?        @relation(fields: [jobId], references: [id])
+  jobId       Int?
 }
 
 model Log {

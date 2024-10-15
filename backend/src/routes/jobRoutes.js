@@ -1,25 +1,25 @@
 import express from 'express';
-import { createJob, getAllJobs, applyForJob, approveJobParticipation, updateJobStatus, getUserHistory, } from '../controllers/jobController.js';
+import { createJob, getAllJobs, applyForJob, approveJobParticipation, markJobAsCompleted, getUserHistory, } from '../controllers/jobController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 // Route สร้างงานใหม่ (เฉพาะแอดมิน)
-router.post('/create', createJob);
+router.post('/create', authMiddleware, createJob);
 
 // Route ดึงรายการงานทั้งหมด
-router.get('/', getAllJobs);
+router.get('/', authMiddleware, getAllJobs);
 
 // Route สำหรับการสมัครงาน ของ user
 router.post('/apply', authMiddleware, applyForJob);
 
 // Route สำหรับอนุมัติการสมัครงาน
-router.put('/approve', approveJobParticipation);
+router.put('/approve', authMiddleware, approveJobParticipation);
 
 // Route สำหรับการอัปเดตสถานะหลังจบการทำงาน
 
-router.put('/update-status', updateJobStatus);
+router.put('/mark-complete', authMiddleware, markJobAsCompleted);
 
 // Route สำหรับการดูประวัติงาน user 
-router.get('/history/:userId', getUserHistory);
+router.get('/history/:userId', authMiddleware, getUserHistory);
 
 export default router;
