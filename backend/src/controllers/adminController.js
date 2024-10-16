@@ -1,4 +1,5 @@
-import { createAdmin, checkExistingAdmin } from '../models/adminModel.js';
+import * as adminModel from '../models/adminModel.js';
+import * as userModel from '../models/userModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { createLog } from '../models/logModel.js';
@@ -16,7 +17,7 @@ export const registerAdmin = async (req, res) => {
     }
 
     // ตรวจสอบว่ามีอีเมลซ้ำหรือไม่
-    const existingAdmin = await checkExistingAdmin(email);
+    const existingAdmin = await adminModel.checkExistingAdmin(email);
     if (existingAdmin) {
         return res.status(400).json({ message: "Email already exists in the system" });
     }
@@ -26,8 +27,8 @@ export const registerAdmin = async (req, res) => {
 
     // สร้างแอดมินใหม่
     try {
-        const newAdmin = await createAdmin({ email, password: hashedPassword, first_name, last_name });
-        await createLog(newAdmin.id, 'Admin registration successful', req.originalUrl, req.method, `Admin ${newAdmin.first_name} ${newAdmin.last_name} registered successfully`, ip, userAgent);
+        const newAdmin = await adminModel.createAdmin({ email, password: hashedPassword, first_name, last_name });
+        await createLog(null, newAdmin.id, 'Admin registration successful', req.originalUrl, req.method, `Admin ${newAdmin.first_name} ${newAdmin.last_name} registered successfully`, ip, userAgent);
         res.status(201).json({ message: 'Admin registered successfully', admin: newAdmin });
     } catch (error) {
         res.status(500).json({ message: 'Error registering admin', error: error.message });
@@ -37,25 +38,25 @@ export const registerAdmin = async (req, res) => {
 export const loginAdmin = async (req, res) => {
     const { email, password } = req.body;
     const ip = req.ip;
-
     const userAgent = req.headers['user-agent'];
     try {
-        // ค้นหาแอดมินใน table แยกของแอดมิน
-        const admin = await prisma.admin.findUnique({ where: { email } });
 
+        const admin = await adminModel.findAdminByEmail(email);
         if (!admin) {
             return res.status(404).json({ message: "Admin not found" });
         }
 
         // ตรวจสอบรหัสผ่าน
-        const isMatch = await bcrypt.compare(password, admin.password);
+        const isMatch = await adminModel.verifyPassword(password, admin.password);
         if (!isMatch) {
             return res.status(401).json({ message: "Invalid credentials" });
         }
 
         // สร้าง JWT token
         const token = jwt.sign({ id: admin.id, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        await createLog(admin.id, 'login', req.originalUrl, req.method, `ข้อมูล = ${admin.first_name} ${admin.last_name}  ${admin.email} `, ip, userAgent);
+        // บันทึก log ของการเข้าสู่ระบบ
+        const logDetails = `Admin ${admin.first_name} ${admin.last_name} (${admin.email}) logged in successfully`;
+        await createLog(null, admin.id, 'Admin login', req.originalUrl, req.method, logDetails, ip, userAgent);
 
         res.status(200).json({
             message: "Admin login successful",
@@ -68,6 +69,25 @@ export const loginAdmin = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+};
+
+
+export const getAdminById = async (req, res) => {
+    const { adminId } = req.params;
+    try {
+        const id = parseInt(adminId);
+        if (isNaN(id)) {
+            throw new Error('Invalid admin ID');
+        }
+
+        const admin = await adminModel.findAdminById(id);
+        if (!admin) {
+            return res.status(404).json({ message: "Admin not found" });
+        }
+        res.status(200).json(admin);
+    } catch (error) {
+        res.status(500).json({ message: `Error fetching admin: ${error.message}` });
     }
 };
 
@@ -90,58 +110,50 @@ export const getPendingUsers = async (req, res) => {
     }
 };
 export const approveUser = async (req, res) => {
-    const { userId } = req.body;
+    const { userId, status } = req.body;  // รับ status จาก frontend เช่น 'approved' หรือ 'rejected'
+    const adminId = req.user.id;
     const ip = req.ip;
     const userAgent = req.headers['user-agent'];
+
     try {
         // ตรวจสอบว่าผู้ใช้มีอยู่จริงและได้รับการยืนยันอีเมลแล้วหรือไม่
-        const user = await prisma.user.findUnique({ where: { id: userId } });
+        const user = await userModel.getUserById(userId);
 
         if (!user || !user.email_verified) {
             return res.status(400).json({ message: "User not found or email not verified." });
         }
 
-        // อัปเดตสถานะ approved เป็น true
-        await prisma.user.update({
-            where: { id: userId },
-            data: { approved: true }
-        });
-        await createLog(userId, 'User approved successfully', req.originalUrl, req.method, `User ${user.first_name} ${user.last_name} approved successfully`, ip, userAgent);
+        // ตรวจสอบสถานะที่ส่งมาให้เป็น approved หรือ rejected
+        if (!['approved', 'rejected'].includes(status)) {
+            return res.status(400).json({ message: "Invalid status. Please use 'approved' or 'rejected'." });
+        }
 
-        res.status(200).json({ message: "User approved successfully." });
+        // อัปเดตสถานะผู้ใช้ (true สำหรับ approved, false สำหรับ rejected)
+        const isApproved = status === 'approved';
+        await adminModel.updateUserApprovalStatus(userId, isApproved);
+
+        // ดึงข้อมูลแอดมิน
+        const admin = await adminModel.findAdminById(adminId);
+        const adminName = `${admin.first_name} ${admin.last_name}`;
+
+        // บันทึก log พร้อมสถานะที่ได้รับ
+        const logMessage = `User ${user.first_name} ${user.last_name} ${status} by Admin ${adminName}`;
+        await createLog(
+            userId,
+            adminId,
+            `User ${status} successfully`,
+            req.originalUrl,
+            req.method,
+            logMessage,
+            ip,
+            userAgent
+        );
+
+        res.status(200).json({ message: `User ${status} successfully.` });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
-// export const applyForJob = async (req, res) => {
-//     const { userId, jobId } = req.body;
-//     const ip = req.ip;
-//     const userAgent = req.headers['user-agent'];
-//     try {
-//         const user = await prisma.user.findUnique({ where: { id: userId } });
 
-//         // ตรวจสอบว่าผู้ใช้ได้รับการยืนยันอีเมลและได้รับการอนุมัติหรือไม่
-//         if (!user.email_verified) {
-//             return res.status(400).json({ message: "Please verify your email first." });
-//         }
-
-//         if (!user.approved) {
-//             return res.status(400).json({ message: "Your account is pending admin approval." });
-//         }
-
-//         // สมัครงาน
-//         const jobParticipation = await prisma.jobParticipation.create({
-//             data: {
-//                 user_id: userId,
-//                 job_id: jobId,
-//                 status: 'pending'
-//             }
-//         });
-//         await logAction(userId, 'Job application submitted', req.originalUrl, req.method, `Job application submitted for userId: ${userId}, jobId: ${jobId}`, ip, userAgent);
-//         res.status(200).json({ message: "Job application submitted successfully." });
-//     } catch (error) {
-//         res.status(500).json({ message: error.message });
-//     }
-// };
 

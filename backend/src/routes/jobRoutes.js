@@ -1,5 +1,5 @@
 import express from 'express';
-import { createJob, getAllJobs, applyForJob, approveJobParticipation, markJobAsCompleted, getUserHistory, } from '../controllers/jobController.js';
+import { createJob, getAllJobs, applyForJob, approveJobParticipation, markJobAsCompleted, deleteJob } from '../controllers/jobController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
@@ -7,7 +7,7 @@ const router = express.Router();
 router.post('/create', authMiddleware, createJob);
 
 // Route ดึงรายการงานทั้งหมด
-router.get('/', authMiddleware, getAllJobs);
+router.get('/', getAllJobs);
 
 // Route สำหรับการสมัครงาน ของ user
 router.post('/apply', authMiddleware, applyForJob);
@@ -19,7 +19,8 @@ router.put('/approve', authMiddleware, approveJobParticipation);
 
 router.put('/mark-complete', authMiddleware, markJobAsCompleted);
 
-// Route สำหรับการดูประวัติงาน user 
-router.get('/history/:userId', authMiddleware, getUserHistory);
+// Route สำหรับการลบงาน
+
+router.delete('/:jobId', authMiddleware, deleteJob);
 
 export default router;

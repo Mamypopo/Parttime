@@ -1,12 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';  // เพิ่มการใช้งาน bcrypt สำหรับ hash password
 import jwt from 'jsonwebtoken';  // เพิ่มการใช้งาน JWT
-import { getUserById, getUserByEmail, getAllUsers, checkExistingUser } from '../models/userModel.js';
+import * as userModel from '../models/userModel.js';
 import { calculateAge } from '../utils/calculateAge.js';
 import { sendVerificationEmail } from '../utils/email.js';
 import { createLog } from '../models/logModel.js';
-
-
 import { createUser } from '../models/userModel.js';
 
 
@@ -35,7 +33,7 @@ export const registerUser = async (req, res) => {
         }
 
         // ตรวจสอบว่าผู้ใช้มีในระบบแล้วหรือไม่
-        const existingUser = await checkExistingUser(email, national_id);
+        const existingUser = await userModel.checkExistingUser(email, national_id);
         if (existingUser) {
             return res.status(400).json({ message: "Email or National ID already exists in the system" });
         }
@@ -52,10 +50,10 @@ export const registerUser = async (req, res) => {
         // สร้าง verification token สำหรับส่ง email ยืนยันตัวตน
         const verificationToken = jwt.sign(
             { email: email },
-            process.env.JWT_SECRET,  // ใช้ JWT_SECRET จาก .env
-            { expiresIn: '48h' } // โทเค็นหมดอายุใน 24 ชั่วโมง
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
         );
-        // สร้างผู้ใช้ใหม่ในฐานข้อมูล
+
         const user = await createUser({
             email,
             password: hashedPassword,
@@ -65,12 +63,12 @@ export const registerUser = async (req, res) => {
             national_id,
             gender,
             birth_date: new Date(birth_date),
-            age,  // ส่งอายุที่คำนวณแล้ว
+            age,
             education_level_url,
             phone_number,
             line_id,
             profile_image,
-            skills: skillsString, // แปลง array เป็น string
+            skills: skillsString,
             verification_token: verificationToken
         });
 
@@ -78,7 +76,7 @@ export const registerUser = async (req, res) => {
         await sendVerificationEmail(user, verificationToken);
 
         // เก็บ log การลงทะเบียนสำเร็จ
-        await createLog(user.id, 'Register', '/api/users/register', 'POST', `User ${email} registered successfully`, req.ip, req.headers['user-agent']);
+        await createLog(user.id, null, 'Register', '/api/users/register', 'POST', `User  ${first_name} ${last_name} ${email} registered successfully`, req.ip, req.headers['user-agent']);
 
         res.status(201).json({ message: 'User registered successfully', user });
 
@@ -93,16 +91,10 @@ export const verifyEmail = async (req, res) => {
     try {
         // ตรวจสอบความถูกต้องของ token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-
-        // ค้นหาผู้ใช้ตามอีเมลที่ถอดรหัสได้จาก token
-        const user = await prisma.user.findUnique({
-            where: { email: decoded.email }
-        });
-
-        // ตรวจสอบโทเค็นในฐานข้อมูล
-        console.log("Token in database:", user.verification_token); // ดูโทเค็นที่บันทึกในฐานข้อมูล
-
+        const user = await userModel.getUserByEmail(decoded.email)
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
         // ตรวจสอบว่าโทเค็นตรงกันหรือไม่
         if (user.verification_token !== token) {
             return res.status(400).json({ message: 'Token mismatch.' });
@@ -114,15 +106,11 @@ export const verifyEmail = async (req, res) => {
         }
 
         // อัปเดตสถานะการยืนยันอีเมล และลบ verification token
-        await prisma.user.update({
-            where: { email: decoded.email },
-            data: { email_verified: true, verification_token: null }
-        });
-
+        await userModel.verifyUserEmail(decoded.email);
 
         res.status(200).json({ message: 'Email verified successfully.' });
     } catch (error) {
-        console.error("Error during verification:", error); // ตรวจสอบว่ามีข้อผิดพลาดใดๆ หรือไม่
+        console.error("Error during verification:", error);
         if (error.name === 'TokenExpiredError') {
             return res.status(401).json({ message: 'Token has expired. Please request a new one.' });
         }
@@ -136,15 +124,13 @@ export const loginUser = async (req, res) => {
 
     try {
         // ค้นหาผู้ใช้ตามอีเมล
-        const user = await getUserByEmail(email);
+        const user = await userModel.getUserByEmail(email);
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-
         // ตรวจสอบรหัสผ่าน
-        const isMatch = await bcrypt.compare(password, user.password);
-
+        const isMatch = await userModel.verifyPassword(password, user.password);
         if (!isMatch) {
             return res.status(401).json({ message: 'Invalid password' });
         }
@@ -158,7 +144,7 @@ export const loginUser = async (req, res) => {
 
         // เก็บรายละเอียดเพิ่มเติมของ user เช่น ชื่อ, นามสกุล, เบอร์โทรศัพท์
         const userDetails = `User ${user.email} (Name: ${user.first_name} ${user.last_name}, Phone: ${user.phone_number}) logged in successfully`;
-        await createLog(user.id, 'Login', '/api/users/login', 'POST', userDetails, req.ip, req.headers['user-agent']);
+        await createLog(user.id, null, 'Login', '/api/users/login', 'POST', userDetails, req.ip, req.headers['user-agent']);
         res.status(200).json({ token, message: 'Login successful' });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -174,13 +160,13 @@ export const getUser = async (req, res) => {
         let user;
         if (id) {
             // ดึงข้อมูลตาม ID
-            user = await getUserById(id);
+            user = await userModel.getUserById(id);
         } else if (email) {
             // ดึงข้อมูลตาม Email
-            user = await getUserByEmail(email);
+            user = await userModel.getUserByEmail(email);
         } else {
             // หากไม่มี id หรือ email ให้ดึงผู้ใช้ทั้งหมด
-            user = await getAllUsers();
+            user = await userModel.getAllUsers();
         }
 
         if (!user || (Array.isArray(user) && user.length === 0)) {
@@ -188,6 +174,23 @@ export const getUser = async (req, res) => {
         }
 
         res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+export const getUserHistory = async (req, res) => {
+    const { userId } = req.params; // รับ userId จาก request parameters
+
+    try {
+        const jobHistory = await userModel.getUserJobHistory(userId);
+
+        if (!jobHistory || jobHistory.length === 0) {
+            return res.status(404).json({ message: 'No job history found for this user' });
+        }
+
+        res.status(200).json(jobHistory);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

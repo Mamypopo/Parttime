@@ -1,36 +1,63 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 // ฟังก์ชันสำหรับสร้างแอดมินใหม่
 export const createAdmin = async (adminData) => {
     const { email, password, first_name, last_name } = adminData;
 
-    try {
-        const newAdmin = await prisma.admin.create({
-            data: {
-                email,
-                password,
-                first_name,
-                last_name,
-            },
-        });
+    return await prisma.admin.create({
+        data: {
+            email,
+            password,
+            first_name,
+            last_name,
+        },
+    });
+};
 
-        return newAdmin;
-    } catch (error) {
-        console.error("Error creating admin:", error.message);
-        throw new Error("Unable to create admin.");
-    }
+export const verifyPassword = async (password, hashedPassword) => {
+    return await bcrypt.compare(password, hashedPassword);
 };
 
 // ฟังก์ชันสำหรับตรวจสอบว่ามีอีเมลซ้ำหรือไม่
 export const checkExistingAdmin = async (email) => {
-    try {
-        const existingAdmin = await prisma.admin.findUnique({
-            where: { email: email },
-        });
-        return existingAdmin;
-    } catch (error) {
-        console.error("Error checking existing admin:", error.message);
-        throw new Error("Unable to check existing admin.");
+    return await prisma.admin.findUnique({
+        where: { email: email },
+    });
+};
+
+export const findAdminById = async (adminId) => {
+    const admin = await prisma.admin.findUnique({
+        where: {
+            id: adminId, // ใช้ adminId ในการค้นหา
+        },
+    });
+
+    if (!admin) {
+        throw new Error('Admin not found');
     }
+
+    return admin;
+};
+
+export const findAdminByEmail = async (email) => {
+    return await prisma.admin.findUnique({
+        where: { email }
+    });
+};
+
+export const approveUserById = async (userId) => {
+    return await prisma.user.update({
+        where: { id: userId },
+        data: { approved: true }
+    });
+};
+
+// ฟังก์ชันอัปเดตสถานะการอนุมัติของผู้ใช้
+export const updateUserApprovalStatus = async (userId, isApproved) => {
+    return prisma.user.update({
+        where: { id: userId },
+        data: { approved: isApproved },  // ใช้ isApproved ในการอัปเดตค่า true หรือ false
+    });
 };

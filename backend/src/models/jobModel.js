@@ -5,67 +5,55 @@ const prisma = new PrismaClient();
 // ฟังก์ชันสำหรับสร้างงานใหม่
 export const createJob = async (jobData, adminId) => {
     const { title, work_date, location, start_time, end_time, details, positions } = jobData;
-    try {
-        // สร้างงานในตาราง Job
-        const job = await prisma.job.create({
-            data: {
-                title,
-                work_date: new Date(work_date),
-                location,
-                start_time: new Date(start_time),
-                end_time: new Date(end_time),
-                details,
-                created_by: adminId // ใช้ adminId ที่ได้จาก authMiddleware
-            }
-        });
 
-        // สร้างตำแหน่งงานในตาราง JobPosition
-        const jobPositions = positions.map(position => ({
-            position_name: position.name,
-            wage: position.wage,
-            details: position.details,
-            required_people: position.required_people,
-            job_id: job.id
-        }));
+    // สร้างงานในตาราง Job
+    const job = await prisma.job.create({
+        data: {
+            title,
+            work_date: new Date(work_date),
+            location,
+            start_time: new Date(start_time),
+            end_time: new Date(end_time),
+            details,
+            created_by: adminId // ใช้ adminId ที่ได้จาก authMiddleware
+        }
+    });
 
-        await prisma.jobPosition.createMany({
-            data: jobPositions
-        });
+    // สร้างตำแหน่งงานในตาราง JobPosition
+    const jobPositions = positions.map(position => ({
+        position_name: position.name,
+        wage: position.wage,
+        details: position.details,
+        required_people: position.required_people,
+        job_id: job.id
+    }));
 
-        return job;
-    } catch (error) {
-        throw new Error('Error creating job: ' + error.message);
-    }
+    await prisma.jobPosition.createMany({
+        data: jobPositions
+    });
+
+    return job;
 };
 
 // ฟังก์ชันสำหรับดึงงานทั้งหมด
 export const getAllJobs = async () => {
-    try {
-        const jobs = await prisma.job.findMany({
-            include: {
-                JobPositions: true // ดึงข้อมูลตำแหน่งงานที่เชื่อมโยงกับแต่ละงาน
-            }
-        });
-        return jobs;
-    } catch (error) {
-        throw new Error('Error fetching jobs: ' + error.message);
-    }
+    return await prisma.job.findMany({
+        include: {
+            JobPositions: true // ดึงข้อมูลตำแหน่งงานที่เชื่อมโยงกับแต่ละงาน
+        }
+    });
 };
 
 // ฟังก์ชันสำหรับดึงงานตาม ID
 export const getJobById = async (jobId) => {
-    try {
-        const job = await prisma.job.findUnique({
-            where: { id: jobId },
-            include: {
-                JobPositions: true // ดึงข้อมูลตำแหน่งงานที่เชื่อมโยงกับงานนี้
-            }
-        });
-        return job;
-    } catch (error) {
-        throw new Error('Error fetching job by ID: ' + error.message);
-    }
+    return await prisma.job.findUnique({
+        where: { id: jobId },
+        include: {
+            JobPositions: true // ดึงข้อมูลตำแหน่งงานที่เชื่อมโยงกับงานนี้
+        }
+    });
 };
+
 // ฟังก์ชันสำหรับอัปเดตงาน
 export const updateJob = async (jobId, jobData) => {
     const { title, work_date, location, start_time, end_time, details, positions } = jobData;
@@ -106,38 +94,45 @@ export const updateJob = async (jobId, jobData) => {
     }
 };
 
-// ฟังก์ชันสำหรับลบงาน
-export const deleteJob = async (jobId) => {
-    try {
-        await prisma.jobPosition.deleteMany({
-            where: { job_id: jobId }
-        });
-        await prisma.job.delete({
-            where: { id: jobId }
-        });
-    } catch (error) {
-        throw new Error('Error deleting job: ' + error.message);
-    }
+
+
+export const findJobById = async (jobId) => {
+    return await prisma.job.findUnique({
+        where: { id: jobId }
+    });
 };
 
-/// ขั้นตอนการสมัครงาน
+// ฟังก์ชันสำหรับลบงาน
+export const deleteJobById = async (jobId) => {
+    // ลบ JobParticipation ที่เกี่ยวข้องกับงานนี้ก่อน
+    await prisma.jobParticipation.deleteMany({
+        where: { jobPosition: { job_id: jobId } }
+    });
+
+    // ลบ JobPosition ที่เกี่ยวข้องกับงานนี้
+    await prisma.jobPosition.deleteMany({
+        where: { job_id: jobId }
+    });
+
+    // ลบงานจากตาราง Job
+    return await prisma.job.delete({
+        where: { id: jobId }
+    });
+};
+
 // ฟังก์ชันสำหรับการบันทึกการสมัครงาน
 export const createJobParticipation = async (userId, jobId, jobPositionId) => {
-    try {
-        const jobParticipation = await prisma.jobParticipation.create({
-            data: {
-                user_id: userId,
-                jobId: jobId,
-                job_position_id: jobPositionId, // บันทึกตำแหน่งงานที่สมัคร
-                status: 'pending',
-                created_at: new Date()
-            }
-        });
-        return jobParticipation;
-    } catch (error) {
-        throw new Error('Error creating job participation: ' + error.message);
-    }
+    return prisma.jobParticipation.create({
+        data: {
+            user_id: userId,
+            jobId: jobId,
+            job_position_id: jobPositionId, // บันทึกตำแหน่งงานที่สมัคร
+            status: 'pending',
+            created_at: new Date()
+        }
+    });
 };
+
 
 // ฟังก์ชันตรวจสอบการสมัครงานที่มีอยู่แล้ว
 export const findExistingJobParticipation = async (userId, jobId, jobPositionId) => {
@@ -164,66 +159,57 @@ export const findExistingDayApplication = async (userId) => {
     });
 };
 
-//จบขั้นตอนการสมัครงาน
 
 
 
-// ฟังก์ชันอัปเดตสถานะการสมัครงาน
+// // ฟังก์ชันอัปเดตสถานะการสมัครงาน
+// export const updateJobParticipationStatus = async (jobParticipationId, status) => {
+//     try {
+//         return await prisma.jobParticipation.update({
+//             where: { id: jobParticipationId },
+//             data: { status },
+//         });
+//     } catch (error) {
+//         throw new Error('Error updating job participation status: ' + error.message);
+//     }
+// };
+
 export const updateJobParticipationStatus = async (jobParticipationId, status) => {
-    try {
-        return await prisma.jobParticipation.update({
-            where: { id: jobParticipationId },
-            data: { status },
-        });
-    } catch (error) {
-        throw new Error('Error updating job participation status: ' + error.message);
-    }
+    return prisma.jobParticipation.update({
+        where: { id: jobParticipationId },
+        data: { status },
+        include: {
+            jobPosition: { include: { job: true } },  // ดึงข้อมูล Job ผ่าน JobPosition
+            user: true  // ดึงข้อมูลผู้ใช้
+        }
+    });
+};
+// ฟังก์ชันเพื่อค้นหา Job Participation ตาม ID
+export const findJobParticipationById = async (jobParticipationId) => {
+    return prisma.jobParticipation.findUnique({
+        where: { id: jobParticipationId },
+        include: {
+            jobPosition: true,   // ดึงข้อมูลตำแหน่งงานที่สมัคร
+            user: true           // ดึงข้อมูลผู้ใช้
+        }
+    });
 };
 
 
-// ฟังก์ชันอัปเดตจำนวนคนที่เหลือใน JobPosition
-export const updateJobRequiredPeople = async (jobPositionId, requiredPeople) => {
-    try {
-        // อัปเดตจำนวนคนที่เหลือในตำแหน่งงาน
-        await prisma.jobPosition.update({
-            where: { id: jobPositionId },
-            data: {
-                required_people: requiredPeople,
-                status: requiredPeople === 0 ? 'closed' : 'open', // ปิดตำแหน่งถ้าจำนวนคนเหลือ 0
-            },
-        });
-    } catch (error) {
-        throw new Error('Error updating job required people: ' + error.message);
-    }
+// ฟังก์ชันเพื่ออัปเดตจำนวนคนที่เหลือใน JobPosition พร้อมอัปเดตสถานะ
+export const updateJobPositionRemainingSlots = async (jobPositionId, remainingSlots) => {
+    return prisma.jobPosition.update({
+        where: { id: jobPositionId },
+        data: {
+            required_people: remainingSlots,
+            status: remainingSlots === 0 ? 'closed' : 'open' // ปิดตำแหน่งถ้าจำนวนคนเหลือ 0
+        }
+    });
 };
-//ดึงประวัติงานทั้งหมดของ user
-export const getUserJobHistory = async (userId) => {
-    try {
-        const jobHistory = await prisma.jobParticipation.findMany({
-            where: {
-                user_id: parseInt(userId)
-            },
-            select: {
-                status: true,
-                created_at: true,
-                updated_at: true,
-                jobPosition: {
-                    select: {
-                        position_name: true,
-                        wage: true,
-                        job: { // ดึงข้อมูลงานผ่าน jobPosition
-                            select: {
-                                title: true,
-                                location: true,
-                                work_date: true
-                            }
-                        }
-                    }
-                }
-            }
-        });
-        return jobHistory;
-    } catch (error) {
-        throw new Error('Error retrieving job history: ' + error.message);
-    }
+
+// ฟังก์ชันดึงข้อมูลตำแหน่งงานตาม jobPositionId
+export const findJobPositionById = async (jobPositionId) => {
+    return prisma.jobPosition.findUnique({
+        where: { id: jobPositionId }
+    });
 };

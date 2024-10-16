@@ -1,23 +1,23 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-// ฟังก์ชันสำหรับบันทึก Log ลงในฐานข้อมูล
-export const createLog = async (userId, action, requestUrl, method, details, ipAddress, userAgent) => {
+
+export const createLog = async (userId, adminId, action, requestUrl, method, details, ip, userAgent) => {
     try {
         await prisma.log.create({
             data: {
-                user_id: userId,
-                action,
+                user: userId ? { connect: { id: userId } } : undefined, // connect เฉพาะเมื่อมี userId
+                admin: adminId ? { connect: { id: adminId } } : undefined, // connect เฉพาะเมื่อมี adminId
+                action: action,
                 request_url: requestUrl,
-                method,
-                details,
-                ip_address: ipAddress || 'Unknown IP', // ตรวจสอบ ipAddress ถ้าไม่มีให้ใช้ 'Unknown IP'
-                user_agent: userAgent || 'Unknown User Agent' // ตรวจสอบ userAgent ถ้าไม่มีให้ใช้ 'Unknown User Agent'
-            },
+                method: method,
+                details: details,
+                ip_address: ip,
+                user_agent: userAgent,
+                timestamp: new Date(),
+            }
         });
     } catch (error) {
-        console.error("Error creating log:", error);
+        console.error("Error creating log:", error.message);
     }
 };
-
-

@@ -24,7 +24,7 @@ model User {
   last_name           String
   national_id         String   @unique // เลขบัตรประชาชน
   gender              String
-  birth_date          DateTime // วันเกิด
+  birth_date          DateTime @db.Timestamptz // วันเกิด
   age                 Int // อายุ (คำนวณจากวันเกิด)
   education_level_url String // วุฒิการศึกษา
   phone_number        String // เบอร์โทร
@@ -35,26 +35,25 @@ model User {
   verification_token  String? // โทเค็นยืนยันอีเมล
   approved            Boolean  @default(false)
   role                String   @default("user") // บทบาท
-  created_at          DateTime @default(now())
-  updated_at          DateTime @updatedAt
+  created_at          DateTime @default(now()) @db.Timestamptz
+  updated_at          DateTime @updatedAt @db.Timestamptz
 
   JobParticipation JobParticipation[] // ความสัมพันธ์กับงานที่สมัคร
   Log              Log[]
 }
 
 model Job {
-  id         Int      @id @default(autoincrement())
-  title      String // ชื่องาน
-  work_date  DateTime // วันที่ทำงาน
-  location   String // สถานที่
-  start_time DateTime // เวลาเริ่ม
-  end_time   DateTime // เวลาสิ้นสุด
-  completed  Boolean  @default(false) // สถานะงาน (เสร็จสิ้นหรือยัง)
-  details    String // รายละเอียดเพิ่มเติม
-  created_by Int // ผู้สร้างงาน (Admin)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
+  id               Int                @id @default(autoincrement())
+  title            String // ชื่องาน
+  work_date        DateTime           @db.Timestamptz // วันที่ทำงาน
+  location         String // สถานที่
+  start_time       DateTime           @db.Timestamptz // เวลาเริ่ม
+  end_time         DateTime           @db.Timestamptz // เวลาสิ้นสุด
+  completed        Boolean            @default(false) // สถานะงาน (เสร็จสิ้นหรือยัง)
+  details          String // รายละเอียดเพิ่มเติม
+  created_by       Int // ผู้สร้างงาน (Admin)
+  created_at       DateTime           @default(now()) @db.Timestamptz
+  updated_at       DateTime           @updatedAt @db.Timestamptz
   creator          Admin              @relation(fields: [created_by], references: [id]) // ความสัมพันธ์กับ Admin
   JobPositions     JobPosition[] // ความสัมพันธ์กับ JobPosition (หลายตำแหน่งในงานเดียว)
   JobParticipation JobParticipation[] // ผู้เข้าร่วมในงานนี้
@@ -68,7 +67,7 @@ model JobPosition {
   details          String // รายละเอียดงานในตำแหน่งนี้
   job_id           Int // เชื่อมกับตาราง Job
   status           String             @default("open") // เพิ่มฟิลด์ status พร้อมค่าดีฟอลต์เป็น 'open'
-  job              Job                @relation(fields: [job_id], references: [id]) // ความสัมพันธ์กับ Job
+  job              Job                @relation(fields: [job_id], references: [id], onDelete: Cascade) // ความสัมพันธ์กับ Job
   JobParticipation JobParticipation[] // ผู้เข้าร่วมในตำแหน่งนี้
 }
 
@@ -77,8 +76,8 @@ model JobParticipation {
   user_id         Int // ผู้ใช้ที่สมัครเข้าร่วม
   job_position_id Int // ตำแหน่งงานที่สมัคร
   status          String // สถานะของผู้เข้าร่วมงาน (สำเร็จ, ล้มเหลว, อื่นๆ)
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  created_at      DateTime @default(now()) @db.Timestamptz
+  updated_at      DateTime @updatedAt @db.Timestamptz
 
   user        User        @relation(fields: [user_id], references: [id]) // ความสัมพันธ์กับผู้ใช้
   jobPosition JobPosition @relation(fields: [job_position_id], references: [id]) // ความสัมพันธ์กับตำแหน่งงาน
@@ -89,14 +88,16 @@ model JobParticipation {
 model Log {
   id          Int      @id @default(autoincrement())
   user_id     Int? // ผู้ใช้ที่ทำการกระทำ
+  admin_id    Int? // ผู้ดูแลระบบที่ทำการกระทำ (กรณีที่ไม่มี user)
   action      String // ประเภทการกระทำ
   request_url String // URL ที่ร้องขอ
   method      String // HTTP method
   details     String // รายละเอียดเพิ่มเติม
-  timestamp   DateTime @default(now()) // เวลาที่เกิดเหตุการณ์
+  timestamp   DateTime @default(now()) @db.Timestamptz // เวลาที่เกิดเหตุการณ์
   ip_address  String // IP ของผู้ใช้
   user_agent  String? // ข้อมูลเบราว์เซอร์
   user        User?    @relation(fields: [user_id], references: [id]) // ความสัมพันธ์กับผู้ใช้
+  admin       Admin?   @relation(fields: [admin_id], references: [id]) // ความสัมพันธ์กับผู้ดูแลระบบ
 }
 
 model Admin {
@@ -106,7 +107,8 @@ model Admin {
   first_name String // ชื่อ
   last_name  String // นามสกุล
   role       String   @default("admin") // กำหนด role ให้เป็น admin
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at DateTime @default(now()) @db.Timestamptz
+  updated_at DateTime @updatedAt @db.Timestamptz
   Job        Job[]
+  Log        Log[]
 }
