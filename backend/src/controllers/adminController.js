@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { createLog } from '../models/logModel.js';
 import { PrismaClient } from '@prisma/client'; // นำเข้า Prisma Client
-
+import { notifyUser } from '../utils/wsServer.js';
 const prisma = new PrismaClient(); // สร้างอินสแตนซ์ของ Prisma Client
 
 export const registerAdmin = async (req, res) => {
@@ -109,8 +109,10 @@ export const getPendingUsers = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+
 export const approveUser = async (req, res) => {
-    const { userId, status } = req.body;  // รับ status จาก frontend เช่น 'approved' หรือ 'rejected'
+    const { userId, status } = req.body;  // อาจจะต้องแก้เป็น params
     const adminId = req.user.id;
     const ip = req.ip;
     const userAgent = req.headers['user-agent'];
@@ -122,6 +124,9 @@ export const approveUser = async (req, res) => {
         if (!user || !user.email_verified) {
             return res.status(400).json({ message: "User not found or email not verified." });
         }
+        if (user.approved) {
+            return res.status(400).json({ message: 'User has already been approved' });
+        }
 
         // ตรวจสอบสถานะที่ส่งมาให้เป็น approved หรือ rejected
         if (!['approved', 'rejected'].includes(status)) {
@@ -132,10 +137,29 @@ export const approveUser = async (req, res) => {
         const isApproved = status === 'approved';
         await adminModel.updateUserApprovalStatus(userId, isApproved);
 
+
         // ดึงข้อมูลแอดมิน
         const admin = await adminModel.findAdminById(adminId);
         const adminName = `${admin.first_name} ${admin.last_name}`;
 
+
+        // ส่งการแจ้งเตือนไปยังผู้ใช้
+        const message = JSON.stringify({
+            type: 'user_approval',
+            message: `การสมัครสมาชิกของคุณถูก${status === 'approved' ? 'อนุมัติ' : 'ปฏิเสธ'}`,
+            userId: user.id,
+        });
+
+        notifyUser(user.id, message);
+
+        // บันทึกการแจ้งเตือนในฐานข้อมูล
+        await prisma.notification.create({
+            data: {
+                message,
+                type: 'user_approval',
+                userId: user.id,
+            },
+        });
         // บันทึก log พร้อมสถานะที่ได้รับ
         const logMessage = `User ${user.first_name} ${user.last_name} ${status} by Admin ${adminName}`;
         await createLog(

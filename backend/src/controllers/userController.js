@@ -5,9 +5,8 @@ import * as userModel from '../models/userModel.js';
 import { calculateAge } from '../utils/calculateAge.js';
 import { sendVerificationEmail } from '../utils/email.js';
 import { createLog } from '../models/logModel.js';
-import { createUser } from '../models/userModel.js';
-
-
+import { notifyAdmins } from '../utils/wsServer.js';
+import * as adminModel from '../models/adminModel.js'
 const prisma = new PrismaClient(); // สร้าง PrismaClient
 
 export const registerUser = async (req, res) => {
@@ -54,7 +53,7 @@ export const registerUser = async (req, res) => {
             { expiresIn: '24h' }
         );
 
-        const user = await createUser({
+        const user = await userModel.createUser({
             email,
             password: hashedPassword,
             prefix,
@@ -69,17 +68,26 @@ export const registerUser = async (req, res) => {
             line_id,
             profile_image,
             skills: skillsString,
+            role: 'user',
             verification_token: verificationToken
         });
-
         // ส่ง email ยืนยันตัวตน
         await sendVerificationEmail(user, verificationToken);
 
+
+
+        // ส่งการแจ้งเตือนไปยังแอดมินทุกคน
+        const message = {
+            type: 'user_registration',
+            message: `ผู้ใช้ใหม่ ${first_name} ${last_name} สมัครสมาชิกแล้ว รอการอนุมัติ`,
+            userId: user.id
+        };
+        notifyAdmins(JSON.stringify(message)); // ส่งข้อความแจ้งเตือนผ่าน WebSocket
+
+
         // เก็บ log การลงทะเบียนสำเร็จ
         await createLog(user.id, null, 'Register', '/api/users/register', 'POST', `User  ${first_name} ${last_name} ${email} registered successfully`, req.ip, req.headers['user-agent']);
-
         res.status(201).json({ message: 'User registered successfully', user });
-
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -137,7 +145,7 @@ export const loginUser = async (req, res) => {
 
         // สร้าง JWT Token
         const token = jwt.sign(
-            { userId: user.id, email: user.email },
+            { userId: user.id, email: user.email, role: user.role },
             process.env.JWT_SECRET, // ใช้ environment variable สำหรับ key
             { expiresIn: '1h' } // Token หมดอายุใน 1 ชั่วโมง
         );
@@ -195,3 +203,4 @@ export const getUserHistory = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+

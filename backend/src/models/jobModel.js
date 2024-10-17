@@ -35,6 +35,8 @@ export const createJob = async (jobData, adminId) => {
     return job;
 };
 
+
+
 // ฟังก์ชันสำหรับดึงงานทั้งหมด
 export const getAllJobs = async () => {
     return await prisma.job.findMany({
@@ -49,7 +51,8 @@ export const getJobById = async (jobId) => {
     return await prisma.job.findUnique({
         where: { id: jobId },
         include: {
-            JobPositions: true // ดึงข้อมูลตำแหน่งงานที่เชื่อมโยงกับงานนี้
+            JobPositions: true, // ดึงข้อมูลตำแหน่งงานที่เชื่อมโยงกับงานนี้
+            creator: true
         }
     });
 };

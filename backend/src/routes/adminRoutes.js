@@ -1,6 +1,7 @@
 import express from 'express';
 import { registerAdmin, approveUser, getPendingUsers, loginAdmin, getAdminById } from '../controllers/adminController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
+
 const router = express.Router();
 
 router.post('/login-admin', loginAdmin);
@@ -14,5 +15,6 @@ router.post('/approve-reject-user', authMiddleware, approveUser);
 router.get('/pending-users', getPendingUsers);
 
 router.get('/admin/:adminId', getAdminById);
+
 
 export default router;

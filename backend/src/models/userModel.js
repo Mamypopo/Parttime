@@ -14,15 +14,15 @@ export const createUser = async (userData) => {
             national_id: userData.national_id,
             gender: userData.gender,
             birth_date: userData.birth_date,
-            age: userData.age, // ส่ง age ให้กับ Prisma
+            age: userData.age,
             education_level_url: userData.education_level_url,
             phone_number: userData.phone_number,
             line_id: userData.line_id,
             profile_image: userData.profile_image,
-            skills: userData.skills, // ตรวจสอบว่า skills ถูกส่งไปถูกต้อง
-            role: userData.role, // เพิ่ม role ในการบันทึกข้อมูลผู้ใช้
-            verification_token: userData.verification_token, // บันทึก token ไว้ใน database
-            email_verified: false // เริ่มต้นเป็น false
+            skills: userData.skills,
+            role: userData.role,
+            verification_token: userData.verification_token,
+            email_verified: false
         }
     });
 };

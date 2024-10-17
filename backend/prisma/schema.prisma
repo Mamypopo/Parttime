@@ -40,6 +40,7 @@ model User {
 
   JobParticipation JobParticipation[] // ความสัมพันธ์กับงานที่สมัคร
   Log              Log[]
+  Notification     Notification[]
 }
 
 model Job {
@@ -101,14 +102,27 @@ model Log {
 }
 
 model Admin {
-  id         Int      @id @default(autoincrement())
-  email      String   @unique
-  password   String
-  first_name String // ชื่อ
-  last_name  String // นามสกุล
-  role       String   @default("admin") // กำหนด role ให้เป็น admin
-  created_at DateTime @default(now()) @db.Timestamptz
-  updated_at DateTime @updatedAt @db.Timestamptz
-  Job        Job[]
-  Log        Log[]
+  id           Int            @id @default(autoincrement())
+  email        String         @unique
+  password     String
+  first_name   String // ชื่อ
+  last_name    String // นามสกุล
+  role         String         @default("admin") // กำหนด role ให้เป็น admin
+  created_at   DateTime       @default(now()) @db.Timestamptz
+  updated_at   DateTime       @updatedAt @db.Timestamptz
+  Job          Job[]
+  Log          Log[]
+  Notification Notification[]
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  adminId   Int? // อ้างอิงไปยัง Admin
+  userId    Int? // อ้างอิงไปยัง User
+  type      String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  admin     Admin?   @relation(fields: [adminId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
 }

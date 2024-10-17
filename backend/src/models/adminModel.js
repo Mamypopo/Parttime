@@ -41,6 +41,11 @@ export const findAdminById = async (adminId) => {
     return admin;
 };
 
+export const findAllAdmins = async () => {
+    return prisma.admin.findMany();
+};
+
+
 export const findAdminByEmail = async (email) => {
     return await prisma.admin.findUnique({
         where: { email }

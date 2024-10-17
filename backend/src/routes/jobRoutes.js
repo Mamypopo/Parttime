@@ -13,7 +13,7 @@ router.get('/', getAllJobs);
 router.post('/apply', authMiddleware, applyForJob);
 
 // Route สำหรับอนุมัติการสมัครงาน
-router.put('/approve', authMiddleware, approveJobParticipation);
+router.put('/approve/:id', authMiddleware, approveJobParticipation);
 
 // Route สำหรับการอัปเดตสถานะหลังจบการทำงาน
 
