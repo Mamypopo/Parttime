@@ -40,7 +40,7 @@ model User {
 
   JobParticipation JobParticipation[] // ความสัมพันธ์กับงานที่สมัคร
   Log              Log[]
-  Notification     Notification[]
+  notifications    Notification[] // ความสัมพันธ์กับ Notification
 }
 
 model Job {
@@ -58,6 +58,7 @@ model Job {
   creator          Admin              @relation(fields: [created_by], references: [id]) // ความสัมพันธ์กับ Admin
   JobPositions     JobPosition[] // ความสัมพันธ์กับ JobPosition (หลายตำแหน่งในงานเดียว)
   JobParticipation JobParticipation[] // ผู้เข้าร่วมในงานนี้
+  Notification     Notification[]
 }
 
 model JobPosition {
@@ -117,12 +118,12 @@ model Admin {
 
 model Notification {
   id        Int      @id @default(autoincrement())
-  adminId   Int? // อ้างอิงไปยัง Admin
-  userId    Int? // อ้างอิงไปยัง User
-  type      String
   message   String
-  isRead    Boolean  @default(false)
   createdAt DateTime @default(now()) @db.Timestamptz
   admin     Admin?   @relation(fields: [adminId], references: [id])
+  adminId   Int?
   user      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+  job       Job?     @relation(fields: [jobId], references: [id])
+  jobId     Int?
 }

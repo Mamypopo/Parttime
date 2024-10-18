@@ -5,7 +5,6 @@ import * as userModel from '../models/userModel.js';
 import { calculateAge } from '../utils/calculateAge.js';
 import { sendVerificationEmail } from '../utils/email.js';
 import { createLog } from '../models/logModel.js';
-import { notifyAdmins } from '../utils/wsServer.js';
 import * as adminModel from '../models/adminModel.js'
 const prisma = new PrismaClient(); // สร้าง PrismaClient
 
@@ -71,22 +70,15 @@ export const registerUser = async (req, res) => {
             role: 'user',
             verification_token: verificationToken
         });
+
         // ส่ง email ยืนยันตัวตน
         await sendVerificationEmail(user, verificationToken);
+        const userId = user.id;
 
-
-
-        // ส่งการแจ้งเตือนไปยังแอดมินทุกคน
-        const message = {
-            type: 'user_registration',
-            message: `ผู้ใช้ใหม่ ${first_name} ${last_name} สมัครสมาชิกแล้ว รอการอนุมัติ`,
-            userId: user.id
-        };
-        notifyAdmins(JSON.stringify(message)); // ส่งข้อความแจ้งเตือนผ่าน WebSocket
 
 
         // เก็บ log การลงทะเบียนสำเร็จ
-        await createLog(user.id, null, 'Register', '/api/users/register', 'POST', `User  ${first_name} ${last_name} ${email} registered successfully`, req.ip, req.headers['user-agent']);
+        await createLog(user.id, null, 'Register', '/api/users/register', 'POST', `User ${first_name} ${last_name} ${email} registered successfully`, req.ip, req.headers['user-agent']);
         res.status(201).json({ message: 'User registered successfully', user });
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -145,7 +137,11 @@ export const loginUser = async (req, res) => {
 
         // สร้าง JWT Token
         const token = jwt.sign(
-            { userId: user.id, email: user.email, role: user.role },
+            {
+                userId: user.id,
+                email: user.email,
+                role: user.role
+            },
             process.env.JWT_SECRET, // ใช้ environment variable สำหรับ key
             { expiresIn: '1h' } // Token หมดอายุใน 1 ชั่วโมง
         );
@@ -204,3 +200,30 @@ export const getUserHistory = async (req, res) => {
     }
 };
 
+
+
+// ดึงการแจ้งเตือนของผู้ใช้
+export const getUserNotifications = async (req, res) => {
+    try {
+        console.log('req.user:', req.user); // เพิ่ม log เพื่อตรวจสอบ
+
+        if (!req.user || !req.user.id) {
+            return res.status(400).json({ message: 'User ID is missing.' });
+        }
+
+        const userId = req.user.id;
+
+        const notifications = await prisma.notification.findMany({
+            where: {
+                userId: userId,
+                adminId: null
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        res.status(200).json({ notifications });
+    } catch (error) {
+        console.error('Error loading user notifications:', error);
+        res.status(500).json({ message: 'Failed to load notifications.', error: error.message });
+    }
+};

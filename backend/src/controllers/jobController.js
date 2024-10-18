@@ -3,7 +3,8 @@ import * as jobModel from '../models/jobModel.js';
 import { createLog } from '../models/logModel.js';
 import * as adminModel from '../models/adminModel.js';
 import * as userModel from '../models/userModel.js';
-import { notifyUser } from '../utils/wsServer.js';
+import * as adminController from '../controllers/adminController.js'
+import * as notificationModel from '../models/notificationModel.js'
 const prisma = new PrismaClient();
 
 // ฟังก์ชันสร้างงานใหม่ (สำหรับแอดมิน)
@@ -124,11 +125,14 @@ export const deleteJob = async (req, res) => {
 // ฟังก์ชันสมัครงาน
 export const applyForJob = async (req, res) => {
     const { jobId, jobPositionId } = req.body; // jobId และตำแหน่งงานที่ผู้ใช้สมัคร
-    const userId = req.user.userId;
+    // const userId = req.user.userId;
+    const userId = req.user.id; // เปลี่ยนจาก req.user.userId เป็น req.user.id
     const ip = req.headers['x-forwarded-for'] || req.ip || 'Unknown IP';
     const userAgent = req.headers['user-agent'] || 'Unknown User Agent';
 
     try {
+        console.log('req.user:', req.user); // เพิ่ม log นี้
+        console.log('req.body:', req.body); // เพิ่ม log นี้
         if (!userId) {
             return res.status(400).json({ message: 'ไม่พบ userId กรุณาเข้าสู่ระบบใหม่' });
         }
@@ -180,27 +184,15 @@ export const applyForJob = async (req, res) => {
         if (!job) {
             return res.status(404).json({ message: 'Job not found' });
         }
-        // ส่งการแจ้งเตือนไปยัง admin ที่สร้างงานนั้น
-        const message = JSON.stringify({
-            type: 'job_application',
-            message: `มีการสมัครงานใหม่ในงาน ${job.title}`,
-            jobId: job.id,
-            userId: userId,
-        });
 
-        notifyUser(job.created_by, message);
 
-        // บันทึกการแจ้งเตือนในฐานข้อมูล
-        await prisma.notification.create({
-            data: {
-                message,
-                type: 'job_application',
-                adminId: job.created_by,
-            },
-        });
+        // แจ้งเตือนผู้สร้างงาน
+        await notifyJobOwner(jobPositionId, userId);
+
         await createLog(userId, null, 'Apply Job', '/api/jobs/apply', 'POST', `User ${userName} (${userEmail}) applied for job with ID: ${jobId}`, ip, userAgent);
         res.status(200).json({ message: 'สมัครงานสำเร็จ กรุณารอการอนุมัติจากแอดมินผู้สร้างงาน', jobParticipation });
     } catch (error) {
+        console.error('Error in applyForJob:', error); // เพิ่ม log นี้
         await createLog(userId, null, 'Apply Job', '/api/jobs/apply', 'POST', `Error applying for job: ${error.message}`, ip, userAgent, 'ERROR');
         res.status(500).json({ message: `เกิดข้อผิดพลาด: ${error.message}` });
     }
@@ -281,6 +273,19 @@ export const approveJobParticipation = async (req, res) => {
             remainingSlots -= 1;
             await jobModel.updateJobPositionRemainingSlots(jobPosition.id, remainingSlots);
         }
+
+
+
+        // สร้างข้อความแจ้งเตือนตามสถานะ
+        const notificationMessage = status === 'approved'
+            ? `คุณได้รับการอนุมัติให้เข้าร่วมงาน ${job.title} ในตำแหน่ง ${jobPosition.position_name}`
+            : `คำขอเข้าร่วมงาน ${job.title} ในตำแหน่ง ${jobPosition.position_name} ของคุณไม่ได้รับการอนุมัติ`;
+
+        // สร้างการแจ้งเตือนสำหรับผู้ใช้
+        await notificationModel.createNotification(user.id, notificationMessage, 'JOB_APPLICATION_STATUS');
+
+
+
         const admin = await adminModel.findAdminById(adminId);
         if (!admin) {
             console.error(`Admin with id ${adminId} not found`);
@@ -297,7 +302,11 @@ export const approveJobParticipation = async (req, res) => {
                 jobParticipation: updatedJobParticipation,
                 jobPosition: {
                     position_name: jobPosition.position_name,
-                    remaining_slots: remainingSlots // จำนวนคนที่เหลือหลังจากอนุมัติ
+                    remaining_slots: remainingSlots
+                },
+                notification: {
+                    message: notificationMessage,
+                    userId: user.id
                 }
             }
         });
@@ -324,15 +333,16 @@ export const markJobAsCompleted = async (req, res) => {
     try {
         // ดึงข้อมูลการสมัครงานปัจจุบัน
         const currentJobParticipation = await jobModel.findJobParticipationById(jobParticipationId);
-
         if (!currentJobParticipation) {
             return res.status(404).json({ message: 'ไม่พบข้อมูลการสมัครงาน' });
         }
-
+        const userId = currentJobParticipation.user_id; // ใช้ user_id แทน user.id
+        console.log('User ID from JobParticipation:', userId);
         // ตรวจสอบว่ามีการอัปเดตสถานะเป็น successful, needs improvement, หรือ failed ไปแล้วหรือไม่
         if (['successful', 'needs improvement', 'failed'].includes(currentJobParticipation.status)) {
             return res.status(400).json({ message: `การสมัครงานนี้ได้รับการอัปเดตสถานะเป็น ${currentJobParticipation.status} แล้ว` });
         }
+
         // อัปเดตสถานะการสมัครงานเป็น 'successful'
         const updatedJobParticipation = await jobModel.updateJobParticipationStatus(jobParticipationId, status);
 
@@ -340,8 +350,37 @@ export const markJobAsCompleted = async (req, res) => {
         const jobId = updatedJobParticipation.jobPosition.job.id;
         const userName = `${updatedJobParticipation.user.first_name} ${updatedJobParticipation.user.last_name}`;
         const userEmail = updatedJobParticipation.user.email;
-        const userId = req.user && req.user.role === 'user' ? req.user.id : null;
+        // const userId = req.user && req.user.role === 'user' ? req.user.id : null;
         const adminId = req.user && req.user.role === 'admin' ? req.user.id : null;
+
+
+        // สร้างข้อความแจ้งเตือนตามสถานะ
+        let notificationMessage = '';
+        switch (status) {
+            case 'successful':
+                notificationMessage = `ยินดีด้วย! คุณได้ทำงาน ${updatedJobParticipation.jobPosition.job.title} เสร็จสมบูรณ์แล้ว`;
+                break;
+            case 'needs improvement':
+                notificationMessage = `งาน ${updatedJobParticipation.jobPosition.job.title} ของคุณต้องการการปรับปรุง โปรดติดต่อผู้จัดการงานสำหรับรายละเอียดเพิ่มเติม`;
+                break;
+            case 'failed':
+                notificationMessage = `ขออภัย งาน ${updatedJobParticipation.jobPosition.job.title} ของคุณไม่ผ่านการประเมิน โปรดติดต่อผู้จัดการงานสำหรับข้อมูลเพิ่มเติม`;
+                break;
+            default:
+                notificationMessage = `สถานะงาน ${updatedJobParticipation.jobPosition.job.title} ของคุณได้รับการอัปเดตเป็น ${status}`;
+        }
+        // สร้างการแจ้งเตือนสำหรับผู้ใช้
+        // สร้างการแจ้งเตือนสำหรับผู้ใช้
+        try {
+            const notification = await notificationModel.createNotification(userId, notificationMessage, 'JOB_COMPLETION_STATUS');
+            console.log('Created Notification:', notification);
+        } catch (notificationError) {
+            console.error('Error creating notification:', notificationError);
+        }
+
+
+
+
         // บันทึก log การอัปเดตสถานะ พร้อมชื่อและอีเมลผู้ใช้
         await createLog(
             userId, // ตรวจสอบว่ามี userId หรือไม่
@@ -368,3 +407,35 @@ export const markJobAsCompleted = async (req, res) => {
 
 
 
+export const notifyJobOwner = async (jobPositionId, applicantId) => {
+    try {
+        const jobPosition = await prisma.jobPosition.findUnique({
+            where: { id: jobPositionId },
+            include: {
+                job: true,
+            },
+        });
+
+        if (!jobPosition) {
+            throw new Error('ไม่พบตำแหน่งงานที่ระบุ');
+        }
+
+        await prisma.notification.create({
+            data: {
+                message: `มีผู้สมัครใหม่สำหรับตำแหน่ง: ${jobPosition.position_name} โดยผู้ใช้รหัส: ${applicantId}`,
+                admin: {
+                    connect: { id: jobPosition.job.created_by },
+                },
+                job: {
+                    connect: { id: jobPosition.job.id },
+                },
+                user: {
+                    connect: { id: applicantId },
+                },
+            },
+        });
+    } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการแจ้งเตือนเจ้าของงาน:', error);
+        throw error;
+    }
+};
