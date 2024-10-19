@@ -24,33 +24,6 @@ import nodemailer from 'nodemailer';
 //     await transporter.sendMail(mailOptions);
 // };
 
-// export const sendVerificationEmail = async (user, token) => {
-//     // สร้างบัญชีชั่วคราวสำหรับทดสอบ
-//     let testAccount = await nodemailer.createTestAccount();
-//     console.log(testAccount);
-//     const transporter = nodemailer.createTransport({
-//         host: 'smtp.ethereal.email',
-//         port: 587,
-//         auth: {
-//             user: process.env.EMAIL_USER,  // ใช้ตัวแปรจาก .env
-//             pass: process.env.EMAIL_PASS   // ใช้ตัวแปรจาก .env
-//         }
-//     });
-
-//     const mailOptions = {
-//         from: '"YourApp" <noreply@yourapp.com>',
-//         to: user.email,
-//         subject: 'Verify your email address',
-//         html: `
-//       <h1>Hi ${user.first_name},</h1>
-//       <p>Please verify your email by clicking the link below:</p>
-//       <a href="http://localhost:8000/api/users/verify-email?token=${token}">Verify Email</a>
-//     `
-//     };
-
-//     let info = await transporter.sendMail(mailOptions);
-//     console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info)); // URL แสดงอีเมลที่ส่งไป
-// };
 
 export const sendVerificationEmail = async (user, token) => {
     // สร้างบัญชีชั่วคราวสำหรับทดสอบ

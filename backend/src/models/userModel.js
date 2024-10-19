@@ -4,63 +4,90 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 export const createUser = async (userData) => {
-    return await prisma.user.create({
-        data: userData
-    });
-};
-// ฟังก์ชันอัปเดตสถานะการยืนยันอีเมล
-export const verifyUserEmail = async (email) => {
-    return prisma.user.update({
-        where: { email: email },
+    const { password, ...otherData } = userData;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    return prisma.user.create({
         data: {
-            email_verified: true,
-            verification_token: null // ลบ token หลังยืนยัน
+            ...otherData,
+            password: hashedPassword,
         },
     });
 };
 
+export const verifyPassword = (password, hashedPassword) =>
+    bcrypt.compare(password, hashedPassword);
 
-export const verifyPassword = async (inputPassword, storedHashedPassword) => {
-    return bcrypt.compare(inputPassword, storedHashedPassword);
-};
 
-export const checkExistingUser = async (email, national_id) => {
-    return await prisma.user.findFirst({
+// ฟังก์ชันอัปเดตสถานะการยืนยันอีเมล
+export const verifyUserEmail = (email) =>
+    prisma.user.update({
+        where: { email },
+        data: {
+            email_verified: true,
+            verification_token: null
+        },
+    });
+
+export const checkExistingUser = (email, national_id) =>
+    prisma.user.findFirst({
         where: {
             OR: [
-                { email: email },
-                { national_id: national_id }
+                { email },
+                { national_id }
             ]
         }
     });
-};
+
 // ฟังก์ชันดึงผู้ใช้ตาม ID
-export const getUserById = async (userId) => {
-    return prisma.user.findUnique({
+export const getUserById = (userId, fields) =>
+    prisma.user.findUnique({
         where: { id: parseInt(userId) },
+        select: createSelectObject(fields)
     });
-};
+
 // ฟังก์ชันดึงผู้ใช้ตาม Email
-export const getUserByEmail = async (email) => {
-    return prisma.user.findUnique({
+export const getUserByEmail = (email, fields) =>
+    prisma.user.findUnique({
         where: { email },
+        select: createSelectObject(fields)
     });
-};
+
 
 // ดึงข้อมูลผู้ใช้ทั้งหมด
-export const getAllUsers = async () => {
-    return await prisma.user.findMany();  // ดึงข้อมูลผู้ใช้ทั้งหมด
+export const getAllUsers = (limit = 10, offset = 0, fields) =>
+    prisma.user.findMany({
+        take: parseInt(limit),
+        skip: parseInt(offset),
+        ...(createSelectObject(fields) && { select: createSelectObject(fields) })
+    });
+
+
+// ฟังก์ชันช่วยสร้าง select object
+const createSelectObject = (fields) => {
+    if (!fields) return null;
+    const selectFields = fields.split(',').reduce((acc, field) => {
+        acc[field.trim()] = true;
+        return acc;
+    }, {});
+    return Object.keys(selectFields).length > 0 ? selectFields : null;
 };
 
+
+
+// ฟังก์ชันนับจำนวนผู้ใช้ทั้งหมด
+export const getTotalUsersCount = () => prisma.user.count();
+
+
 // ฟังก์ชันสำหรับดึงผู้ใช้ที่รอการอนุมัติ
-export const findPendingUsers = async () => {
-    return await prisma.user.findMany({
+export const findPendingUsers = () =>
+    prisma.user.findMany({
         where: { approved: false },
     });
-};
+
+
 //ดึงประวัติงานทั้งหมดของ user
-export const getUserJobHistory = async (userId) => {
-    return prisma.jobParticipation.findMany({
+export const getUserJobHistory = (userId, limit = 10, offset = 0) =>
+    prisma.jobParticipation.findMany({
         where: {
             user_id: parseInt(userId),
         },
@@ -72,7 +99,7 @@ export const getUserJobHistory = async (userId) => {
                 select: {
                     position_name: true,
                     wage: true,
-                    job: { // ดึงข้อมูลงานผ่าน jobPosition
+                    job: {
                         select: {
                             title: true,
                             location: true,
@@ -82,7 +109,17 @@ export const getUserJobHistory = async (userId) => {
                 },
             },
         },
+        orderBy: {
+            created_at: 'desc',
+        },
+        take: parseInt(limit),
+        skip: parseInt(offset),
     });
-};
 
 
+export const getTotalJobHistoryCount = (userId) =>
+    prisma.jobParticipation.count({
+        where: {
+            user_id: parseInt(userId),
+        },
+    });

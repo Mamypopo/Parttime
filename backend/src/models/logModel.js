@@ -2,21 +2,29 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 
-export const createLog = async (userId, adminId, action, requestUrl, method, details, ip, userAgent) => {
+export const createLog = async (
+    userId,
+    adminId,
+    action,
+    requestUrl,
+    method,
+    details,
+    ip,
+    userAgent) => {
     try {
-        await prisma.log.create({
-            data: {
-                user: userId ? { connect: { id: userId } } : undefined, // connect เฉพาะเมื่อมี userId
-                admin: adminId ? { connect: { id: adminId } } : undefined, // connect เฉพาะเมื่อมี adminId
-                action: action,
-                request_url: requestUrl,
-                method: method,
-                details: details,
-                ip_address: ip,
-                user_agent: userAgent,
-                timestamp: new Date(),
-            }
-        });
+        const logData = {
+            action: action,
+            request_url: requestUrl,
+            method: method,
+            details: details,
+            ip_address: ip,
+            user_agent: userAgent,
+            timestamp: new Date(),
+        }
+        if (userId) logData.user = { connect: { id: userId } };
+        if (adminId) logData.admin = { connect: { id: adminId } };
+
+        await prisma.log.create({ data: logData });
     } catch (error) {
         console.error("Error creating log:", error.message);
     }

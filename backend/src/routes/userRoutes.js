@@ -1,21 +1,29 @@
-// src/routes/userRoutes.js
 import express from 'express';
-import { registerUser, getUser, loginUser, verifyEmail, getUserHistory, getUserNotifications } from '../controllers/userController.js';
+import {
+    registerUser,
+    getUser,
+    loginUser,
+    verifyEmail,
+    getUserHistory,
+    getUserNotifications,
+    getProfile
+} from '../controllers/userController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// user/???
-router.post('/login', loginUser);
-
+// เส้นทางสาธารณะ
 router.post('/register', registerUser);
-
-router.get('/getuser', getUser);
-
+router.post('/login', loginUser);
 router.get('/verify-email', verifyEmail);
 
-// Route สำหรับการดูประวัติงาน user 
-router.get('/history/:userId', authMiddleware, getUserHistory);
+// เส้นทางที่ต้องการการยืนยันตัวตน
+router.use(authMiddleware);
 
-router.get('/notifications', authMiddleware, getUserNotifications);
+router.get('/users', getUser);
+router.get('/profile', getProfile); // ใช้ฟังก์ชัน getUser สำหรับการดึงโปรไฟล์ของตัวเอง
+
+router.get('/history/:userId', getUserHistory);
+router.get('/notifications', getUserNotifications);
+
 export default router;

@@ -1,23 +1,31 @@
 import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
 
-// ฟังก์ชันลบ log ที่เก่ากว่า 7 วัน
+
+/**
+ * ลบ log ที่เก่ากว่า 7 วัน
+ * @returns {Promise<number>} จำนวน log ที่ถูกลบ
+ */
+
+export const initPrisma = () => {
+    prisma = new PrismaClient();
+};
+
 export const logCleanup = async () => {
+    if (!prisma) {
+        initPrisma();
+    }
     try {
-        const currentDate = new Date();
-        const cutoffDate = new Date(currentDate.setDate(currentDate.getDate() - 7)); // เก็บ log 7 วัน
-
-        // ลบ log ที่เก่ากว่า 7 วัน
-        await prisma.log.deleteMany({
+        const result = await prisma.log.deleteMany({
             where: {
                 timestamp: {
-                    lt: cutoffDate
+                    lt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
                 }
             }
         });
-
-        console.log('Log cleanup completed');
+        console.log(`ลบ log สำเร็จ: ${result.count} รายการถูกลบ`);
+        return result.count;
     } catch (error) {
-        console.error('Error during log cleanup:', error);
+        console.error('เกิดข้อผิดพลาดในการลบ log:', error);
+        throw error;
     }
 };

@@ -1,26 +1,28 @@
 import express from 'express';
-import { createJob, getAllJobs, applyForJob, approveJobParticipation, markJobAsCompleted, deleteJob } from '../controllers/jobController.js';
-import { authMiddleware } from '../middleware/authMiddleware.js';
+import {
+    createJob,
+    getAllJobs,
+    applyForJob,
+    approveJobParticipation,
+    markJobAsCompleted,
+    deleteJob
+} from '../controllers/jobController.js';
+import { authMiddleware, checkAdminRole } from '../middleware/authMiddleware.js';
+
 const router = express.Router();
 
-// Route สร้างงานใหม่ (เฉพาะแอดมิน)
-router.post('/create', authMiddleware, createJob);
-
-// Route ดึงรายการงานทั้งหมด
+// เส้นทางสาธารณะ
 router.get('/', getAllJobs);
 
-// Route สำหรับการสมัครงาน ของ user
-router.post('/apply', authMiddleware, applyForJob);
+// เส้นทางที่ต้องการการยืนยันตัวตน
+router.use(authMiddleware);
 
-// Route สำหรับอนุมัติการสมัครงาน
-router.put('/approve/:id', authMiddleware, approveJobParticipation);
+router.post('/apply', applyForJob);
+router.put('/mark-complete', markJobAsCompleted);
 
-// Route สำหรับการอัปเดตสถานะหลังจบการทำงาน
-
-router.put('/mark-complete', authMiddleware, markJobAsCompleted);
-
-// Route สำหรับการลบงาน
-
-router.delete('/:jobId', authMiddleware, deleteJob);
+// เส้นทางสำหรับแอดมิน
+router.post('/create', checkAdminRole, createJob);
+router.put('/approve/:id', checkAdminRole, approveJobParticipation);
+router.delete('/:jobId', checkAdminRole, deleteJob);
 
 export default router;

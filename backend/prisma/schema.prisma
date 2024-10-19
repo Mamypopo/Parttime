@@ -59,6 +59,8 @@ model Job {
   JobPositions     JobPosition[] // ความสัมพันธ์กับ JobPosition (หลายตำแหน่งในงานเดียว)
   JobParticipation JobParticipation[] // ผู้เข้าร่วมในงานนี้
   Notification     Notification[]
+
+  @@index([work_date, location, title])
 }
 
 model JobPosition {
