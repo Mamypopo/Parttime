@@ -9,10 +9,11 @@ import * as notificationModel from '../models/notificationModel.js'
 const prisma = new PrismaClient(); // สร้าง PrismaClient
 
 export const registerUser = async (req, res) => {
+
     try {
         const {
             email, password, prefix, first_name, last_name, national_id,
-            gender, birth_date, education_level_url, phone_number,
+            gender, birth_date, education_certificate, phone_number,
             line_id, profile_image, skills
         } = req.body;
 
@@ -40,7 +41,7 @@ export const registerUser = async (req, res) => {
         const user = await userModel.createUser({
             email, password, prefix, first_name, last_name,
             national_id, gender, birth_date: new Date(birth_date), age,
-            education_level_url, phone_number, line_id, profile_image,
+            education_certificate, phone_number, line_id, profile_image,
             skills: skillsString, role: 'user', verification_token: verificationToken
         });
 

@@ -4,13 +4,8 @@ import userRoutes from './routes/userRoutes.js';
 import jobRoutes from './routes/jobRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import { logCleanup } from './utils/logCleanup.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const app = express();
-
 
 dotenv.config();
 
@@ -18,7 +13,6 @@ dotenv.config();
 app.use(express.json());
 
 //  routes
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/users', userRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/admin', adminRoutes);
