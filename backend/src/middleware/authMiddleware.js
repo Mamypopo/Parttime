@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 
 export const authMiddleware = (req, res, next) => {
-    console.log('Verifying token...');
     const authHeader = req.headers['authorization'];
     if (!authHeader) {
         return res.status(401).json({ message: 'No token provided' });
@@ -22,10 +21,8 @@ export const authMiddleware = (req, res, next) => {
             email: decoded.email,
             role: decoded.role
         };
-        console.log('Decoded token:', decoded); // เพิ่ม log นี้
         next(); // ไปยัง middleware ถัดไป
     } catch (error) {
-        console.error('Token verification error:', error);
         return res.status(401).json({ message: 'Invalid token' });
     }
 };

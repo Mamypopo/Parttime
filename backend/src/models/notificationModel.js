@@ -10,23 +10,9 @@ export const createUserNotification = (userId, message) =>
     });
 
 
-// export const createAdminNotification = async ({ userId, message, adminId, jobId }) => {
-//     if (!adminId) {
-//         throw new Error('ต้องระบุ adminId สำหรับการแจ้งเตือนที่เกี่ยวข้องกับแอดมิน');
-//     }
-//     return prisma.notification.create({
-//         data: {
-//             userId,
-//             message,
-//             adminId,
-//             jobId,
-//         },
-//     });
-// };
-
-export const createAdminNotification = async ({ userId, content, jobId }) => {
-    if (!userId) {
-        throw new Error('ต้องระบุ userId สำหรับการสร้างการแจ้งเตือน');
+export const createAdminNotification = async ({ userId, content, jobId, adminId }) => {
+    if (!adminId) {
+        throw new Error('ต้องระบุ adminId สำหรับการสร้างการแจ้งเตือนสำหรับแอดมิน');
     }
 
     if (!content) {
@@ -37,6 +23,7 @@ export const createAdminNotification = async ({ userId, content, jobId }) => {
         const notification = await prisma.notification.create({
             data: {
                 userId,
+                adminId,
                 message: content,
                 jobId,
                 createdAt: new Date()
@@ -48,6 +35,8 @@ export const createAdminNotification = async ({ userId, content, jobId }) => {
         throw error;
     }
 };
+
+
 
 export const getUserNotifications = (userId) =>
     prisma.notification.findMany({

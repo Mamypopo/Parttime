@@ -5,7 +5,8 @@ import {
     applyForJob,
     approveJobParticipation,
     markJobAsCompleted,
-    deleteJob
+    deleteJob,
+    editJob
 } from '../controllers/jobController.js';
 import { authMiddleware, checkAdminRole } from '../middleware/authMiddleware.js';
 
@@ -24,5 +25,6 @@ router.put('/mark-complete', markJobAsCompleted);
 router.post('/create', checkAdminRole, createJob);
 router.put('/approve/:id', checkAdminRole, approveJobParticipation);
 router.delete('/:jobId', checkAdminRole, deleteJob);
+router.put('/editJob/:jobId', checkAdminRole, editJob);
 
 export default router;

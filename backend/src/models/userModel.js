@@ -5,7 +5,13 @@ const prisma = new PrismaClient();
 
 export const createUser = async (userData) => {
     const { password, ...otherData } = userData;
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // ตรวจสอบว่ามีรหัสผ่านหรือไม่
+    if (!password) {
+        throw new Error('Password is required');
+    }
+
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
     return prisma.user.create({
         data: {
             ...otherData,
@@ -13,6 +19,7 @@ export const createUser = async (userData) => {
         },
     });
 };
+
 
 export const verifyPassword = (password, hashedPassword) =>
     bcrypt.compare(password, hashedPassword);
@@ -27,7 +34,17 @@ export const verifyUserEmail = (email) =>
             verification_token: null
         },
     });
-
+export const updateUser = async (userId, userData) => {
+    try {
+        return await prisma.user.update({
+            where: { id: userId },
+            data: userData
+        });
+    } catch (error) {
+        console.error('Error updating user:', error);
+        throw error;
+    }
+};
 export const checkExistingUser = (email, national_id) =>
     prisma.user.findFirst({
         where: {

@@ -50,24 +50,43 @@ export const registerUser = async (req, res) => {
         await createLog(
             user.id,
             null,
+            'Register successfully',
             '/api/users/register',
             'POST',
-            `ผู้ใช้ ${first_name} ${last_name} (${email}) ลงทะเบียนสำเร็จ`,
+            `User { Name: ${first_name} ${last_name} Email: ${email} } registered success`,
             req.ip,
             req.headers['user-agent'],
-            'Register'
         );
         res.status(201).json({ message: 'ลงทะเบียนผู้ใช้สำเร็จ', user });
 
     } catch (error) {
         console.error('เกิดข้อผิดพลาดในการลงทะเบียน:', error);
+
+        try {
+            await createLog(
+                null,
+                null,
+                'User Registration Failed',
+                '/api/users/register',
+                'POST',
+                `Registration attempt failed. Error: ${error.message}`,
+                ip,
+                userAgent
+            );
+        } catch (logError) {
+            console.error('ไม่สามารถสร้างบันทึกสำหรับการลงทะเบียนที่ล้มเหลวได้:', logError);
+        }
+
         res.status(400).json({ message: 'เกิดข้อผิดพลาดในการลงทะเบียน กรุณาลองใหม่อีกครั้ง' });
     }
 };
 
 // ฟังก์ชันยืนยันอีเมล
 export const verifyEmail = async (req, res) => {
-    const { token } = req.query; // รับ token จาก query string
+    const { token } = req.query;
+    const ip = req.ip || 'Unknown IP';
+    const userAgent = req.headers['user-agent'] || 'Unknown User Agent';
+
     try {
         // ตรวจสอบความถูกต้องของ token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -86,14 +105,45 @@ export const verifyEmail = async (req, res) => {
         }
 
         await userModel.verifyUserEmail(decoded.email);
+        await createLog(
+            user.id,
+            null,
+            'Email Verification successfully',
+            '/api/users/verify-email',
+            'GET',
+            `Email verified successfully for User ID ${user.id}`,
+            ip,
+            userAgent
+        );
 
         res.status(200).json({ message: 'ยืนยันอีเมลสำเร็จ' });
     } catch (error) {
         console.error("เกิดข้อผิดพลาดในการยืนยัน:", error);
+
+        let responseMessage = 'โทเค็นไม่ถูกต้องหรือหมดอายุ';
+        let statusCode = 400;
+
         if (error.name === 'TokenExpiredError') {
-            return res.status(401).json({ message: 'โทเค็นหมดอายุ กรุณาขอโทเค็นใหม่' });
+            responseMessage = 'โทเค็นหมดอายุ กรุณาขอโทเค็นใหม่';
+            statusCode = 401;
         }
-        res.status(400).json({ message: 'โทเค็นไม่ถูกต้องหรือหมดอายุ' });
+
+        try {
+            await createLog(
+                null,
+                null,
+                'Email Verification Failed',
+                '/api/users/verify-email',
+                'GET',
+                `Email verification failed: ${error.message}`,
+                ip,
+                userAgent
+            );
+        } catch (logError) {
+            console.error('ไม่สามารถสร้างบันทึกสำหรับการยืนยันอีเมลที่ล้มเหลวได้:', logError);
+        }
+
+        res.status(statusCode).json({ message: responseMessage });
     }
 };
 
@@ -120,16 +170,98 @@ export const loginUser = async (req, res) => {
         );
 
 
-        const userDetails = `ผู้ใช้ ${user.email} (ชื่อ: ${user.first_name} ${user.last_name}, โทร: ${user.phone_number}) เข้าสู่ระบบสำเร็จ`;
-        await createLog(user.id, null, 'Login', '/api/users/login', 'POST', userDetails, req.ip, req.headers['user-agent']);
+        const userDetails = `User { Name: ${user.first_name} ${user.last_name} Email: ${user.email} Phone: ${user.phone_number} }  logged in successfully`;
+        await createLog(user.id, null, 'Login successfully', '/api/users/login', 'POST', userDetails, req.ip, req.headers['user-agent']);
 
         res.status(200).json({ token, message: 'เข้าสู่ระบบสำเร็จ' });
     } catch (error) {
         console.error('เกิดข้อผิดพลาดในการเข้าสู่ระบบ:', error);
+
+        try {
+            await createLog(
+                null,
+                null,
+                'User Login Failed',
+                '/api/users/login',
+                'POST',
+                `Login attempt failed. Error: ${error.message}`,
+                ip,
+                userAgent
+            );
+        } catch (logError) {
+            console.error('ไม่สามารถสร้างบันทึกสำหรับการเข้าสู่ระบบที่ล้มเหลวได้:', logError);
+        }
+
         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองใหม่อีกครั้ง' });
     }
 };
 
+export const updateUserProfile = async (req, res) => {
+    try {
+        const userId = req.user.id; // สมมติว่าเรามี middleware ที่เก็บข้อมูลผู้ใช้ใน req.user
+        const {
+            prefix, first_name, last_name, gender, birth_date,
+            education_level_url, phone_number, line_id, profile_image, skills
+        } = req.body;
+
+        // ตรวจสอบว่าผู้ใช้มีอยู่จริง
+        const existingUser = await userModel.getUserById(userId);
+        if (!existingUser) {
+            return res.status(404).json({ message: "ไม่พบข้อมูลผู้ใช้" });
+        }
+
+        const age = birth_date ? calculateAge(birth_date) : existingUser.age;
+        const skillsString = Array.isArray(skills) ? skills.join(',') : skills;
+
+        const updatedUser = await userModel.updateUser(userId, {
+            prefix: prefix || existingUser.prefix,
+            first_name: first_name || existingUser.first_name,
+            last_name: last_name || existingUser.last_name,
+            gender: gender || existingUser.gender,
+            birth_date: birth_date ? new Date(birth_date) : existingUser.birth_date,
+            age,
+            education_level_url: education_level_url || existingUser.education_level_url,
+            phone_number: phone_number || existingUser.phone_number,
+            line_id: line_id || existingUser.line_id,
+            profile_image: profile_image || existingUser.profile_image,
+            skills: skillsString || existingUser.skills
+        });
+
+        // เก็บ log การอัปเดตโปรไฟล์สำเร็จ
+        await createLog(
+            userId,
+            null,
+            'Update Profile successfully',
+            '/api/users/update-profile',
+            'PUT',
+            `User { Name: ${updatedUser.first_name} ${updatedUser.last_name} Email: ${updatedUser.email} } updated profile`,
+            req.ip,
+            req.headers['user-agent'],
+        );
+
+        res.status(200).json({ message: 'อัปเดตข้อมูลผู้ใช้สำเร็จ', user: updatedUser });
+
+    } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการอัปเดตข้อมูลผู้ใช้:', error);
+
+        try {
+            await createLog(
+                req.user.id,
+                null,
+                'User Profile Update Failed',
+                '/api/users/update-profile',
+                'PUT',
+                `Profile update attempt failed. Error: ${error.message}`,
+                req.ip,
+                req.headers['user-agent']
+            );
+        } catch (logError) {
+            console.error('ไม่สามารถสร้างบันทึกสำหรับการอัปเดตโปรไฟล์ที่ล้มเหลวได้:', logError);
+        }
+
+        res.status(400).json({ message: 'เกิดข้อผิดพลาดในการอัปเดตข้อมูลผู้ใช้ กรุณาลองใหม่อีกครั้ง' });
+    }
+};
 
 // ฟังก์ชันดึงข้อมูลผู้ใช้ตาม ID หรือ Email หรือทั้งหมด
 export const getUser = async (req, res) => {
@@ -201,7 +333,6 @@ export const getUserHistory = async (req, res) => {
     }
 };
 
-// ดึงการแจ้งเตือนของผู้ใช้
 export const getUserNotifications = async (req, res) => {
     try {
 

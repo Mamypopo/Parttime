@@ -9,8 +9,7 @@
     "start": "node src/server.js",
     "local": "nodemon src/server.js",
     "generate-mock-data": "node scripts/generateMockData.js",
-  "clear-db": "node scripts/clearDatabase.js"
-
+    "clear-db": "node scripts/clearDatabase.js"
   },
   "keywords": [],
   "author": "",
@@ -22,11 +21,11 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
     "node-cache": "^5.1.2",
     "node-schedule": "^2.1.1",
     "nodemailer": "^6.9.15",
-    "pg": "^8.13.0",
-    "websocket": "^1.0.35"
+    "pg": "^8.13.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.7",

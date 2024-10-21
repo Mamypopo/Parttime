@@ -12,14 +12,14 @@ export const registerAdmin = async (req, res) => {
     const { ip, headers: { 'user-agent': userAgent } } = req;
 
     try {
-        // ตรวจสอบ admin_secret ก่อน
+
         if (admin_secret !== process.env.ADMIN_SECRET) {
-            return res.status(403).json({ message: "Invalid admin secret." });
+            return res.status(403).json({ message: "รหัสลับของผู้ดูแลระบบไม่ถูกต้อง" });
         }
 
         const existingAdmin = await adminModel.checkExistingAdmin(email);
         if (existingAdmin) {
-            return res.status(400).json({ message: "Email already exists in the system" });
+            return res.status(400).json({ message: "อีเมลนี้มีอยู่ในระบบแล้ว" });
         }
 
 
@@ -34,10 +34,10 @@ export const registerAdmin = async (req, res) => {
         await createLog(
             null,
             newAdmin.id,
-            'ลงทะเบียนแอดมินสำเร็จ',
+            'Admin Registration successfully',
             req.originalUrl,
             req.method,
-            `แอดมิน ${newAdmin.first_name} ${newAdmin.last_name} ลงทะเบียนสำเร็จ`,
+            `Admin { Name: ${newAdmin.first_name} ${newAdmin.last_name}  Email: ${newAdmin.email}  } registered successfully`,
             ip,
             userAgent
         );
@@ -51,7 +51,20 @@ export const registerAdmin = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('เกิดข้อผิดพลาดในการลงทะเบียนแอดมิน:', error);
+        try {
+            await createLog(
+                null,
+                null,
+                'Admin Registration Failed',
+                req.originalUrl,
+                req.method,
+                `Failed to register new admin. Reason: ${error.message}`,
+                ip,
+                userAgent
+            );
+        } catch (logError) {
+            console.error('ไม่สามารถสร้างบันทึกสำหรับการลงทะเบียนแอดมินที่สำเร็จได้:', logError);
+        }
         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการลงทะเบียนแอดมิน' });
     }
 };
@@ -59,6 +72,7 @@ export const registerAdmin = async (req, res) => {
 export const loginAdmin = async (req, res) => {
     const { email, password } = req.body;
     const { ip, headers: { 'user-agent': userAgent } } = req;
+    let admin;
     try {
 
         const admin = await adminModel.findAdminByEmail(email);
@@ -78,20 +92,20 @@ export const loginAdmin = async (req, res) => {
             { expiresIn: '1d' }
         );
 
-        // บันทึก log ของการเข้าสู่ระบบ
+
         await createLog(
             null,
             admin.id,
-            'แอดมินเข้าสู่ระบบ',
+            'Admin login successfully',
             req.originalUrl,
             req.method,
-            `แอดมิน ${admin.first_name} ${admin.last_name} (${admin.email}) เข้าสู่ระบบสำเร็จ`,
+            `Admin { Name: ${admin.first_name} ${admin.last_name} Email: ${admin.email} } logged in successfully`,
             ip,
             userAgent
         );
 
         res.status(200).json({
-            message: "Admin login successful",
+            message: "แอดมินล็อคอินสำเร็จ",
             token,
             admin: {
                 id: admin.id,
@@ -100,7 +114,20 @@ export const loginAdmin = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('เกิดข้อผิดพลาดในการเข้าสู่ระบบของแอดมิน:', error);
+        try {
+            await createLog(
+                null,
+                admin?.id || null,
+                'Admin Login Failed',
+                req.originalUrl,
+                req.method,
+                `Admin login attempt failed. Admin ID: ${admin?.id || 'Unknown'}`,
+                ip,
+                userAgent
+            );
+        } catch (logError) {
+            console.error('Failed to create log for admin login failure:', logError);
+        }
         res.status(500).json({ message: error.message });
     }
 };
@@ -178,7 +205,7 @@ export const approveUser = async (req, res) => {
         const admin = await adminModel.findAdminById(adminId);
         const adminName = `${admin.first_name} ${admin.last_name}`;
         // บันทึก log พร้อมสถานะที่ได้รับ
-        const logMessage = `User ${user.first_name} ${user.last_name} ${status} by Admin ${adminName}`;
+        const logMessage = `User { Name: ${user.first_name} ${user.last_name} } Status: ${status} by Admin { Name: ${adminName} }`;
         await createLog(
             userIdAsInt,
             adminId,
@@ -190,9 +217,19 @@ export const approveUser = async (req, res) => {
             userAgent
         );
 
-        res.status(200).json({ message: `User ${status} successfully.` });
+        res.status(200).json({ message: `อัปเดตสถานะผู้ใช้เป็น ${status} สำเร็จ.` });
     } catch (error) {
         console.error('เกิดข้อผิดพลาดในการอนุมัติ/ปฏิเสธผู้ใช้:', error);
+        await createLog(
+            userIdAsInt,
+            adminId,
+            `User ${status} Failed`,
+            req.originalUrl,
+            req.method,
+            `Failed to ${status} user. User ID: ${userIdAsInt}. Error: ${error.message}`,
+            ip,
+            userAgent
+        );
         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดำเนินการ กรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ' });
     }
 };
