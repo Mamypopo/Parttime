@@ -202,7 +202,7 @@ export const updateUserProfile = async (req, res) => {
         const userId = req.user.id; // สมมติว่าเรามี middleware ที่เก็บข้อมูลผู้ใช้ใน req.user
         const {
             prefix, first_name, last_name, gender, birth_date,
-            education_level_url, phone_number, line_id, profile_image, skills
+            education_certificate, phone_number, line_id, profile_image, skills
         } = req.body;
 
         // ตรวจสอบว่าผู้ใช้มีอยู่จริง
@@ -221,7 +221,7 @@ export const updateUserProfile = async (req, res) => {
             gender: gender || existingUser.gender,
             birth_date: birth_date ? new Date(birth_date) : existingUser.birth_date,
             age,
-            education_level_url: education_level_url || existingUser.education_level_url,
+            education_certificate: education_certificate || existingUser.education_certificate,
             phone_number: phone_number || existingUser.phone_number,
             line_id: line_id || existingUser.line_id,
             profile_image: profile_image || existingUser.profile_image,
