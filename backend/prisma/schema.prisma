@@ -37,6 +37,7 @@ model User {
   role                  String   @default("user") // บทบาท
   created_at            DateTime @default(now()) @db.Timestamptz
   updated_at            DateTime @updatedAt @db.Timestamptz
+  user_documents        String? // ฟิลด์ใหม่สำหรับเก็บเอกสารของผู้ใช้
 
   JobParticipation JobParticipation[] // ความสัมพันธ์กับงานที่สมัคร
   Log              Log[]

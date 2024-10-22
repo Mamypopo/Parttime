@@ -215,6 +215,9 @@ export const deleteJob = async (req, res) => {
             return res.status(403).json({ message: 'คุณไม่มีสิทธิ์ลบงานนี้ เนื่องจากคุณไม่ใช่ผู้สร้างงาน' });
         }
 
+
+        const applicants = await jobModel.getJobApplicants(jobIdInt);
+
         await jobModel.deleteJobById(jobIdInt);
 
         const admin = await adminModel.findAdminById(adminId);
@@ -230,6 +233,19 @@ export const deleteJob = async (req, res) => {
             ip,
             userAgent
         );
+
+        // ส่งการแจ้งเตือนไปยังผู้สมัครงานทุกคน
+        if (applicants.length > 0) {
+            const notificationPromises = applicants.map(applicant =>
+                notificationModel.createUserNotification(
+                    applicant.id,
+                    `งาน "${job.title}" ที่คุณสมัครได้ถูกยกเลิก`,
+                    'JOB_DELETED',
+                    { jobId: jobIdInt }
+                )
+            );
+            await Promise.all(notificationPromises);
+        }
 
         res.status(200).json({ message: 'ลบงานสำเร็จ', job });
     } catch (error) {
