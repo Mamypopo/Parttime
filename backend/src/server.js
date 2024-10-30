@@ -13,7 +13,7 @@ app.use(cors());
 dotenv.config();
 
 
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static('uploads'))
 app.use(express.json());
 app.use(cors());
 //  routes

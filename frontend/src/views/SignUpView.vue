@@ -63,11 +63,7 @@
       v-model="form.birthdate"
       class="w-full px-4 py-2 rounded-[15px] text-gray-400 bg-gray-50 border border-gray-200 date-input"
     >
-    <img 
-      src="@/assets/icon/calendar.svg" 
-      alt="Calendar" 
-      class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none" 
-    />
+    <i class="fa-regular fa-calendar absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none text-gray-500"></i>
   </div>
 </div>
       </div>
@@ -91,7 +87,7 @@
     <div class="space-y-4">
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
         <h3 class="text-lg font-medium text-gray-700 mb-4">Email Password</h3>
-        <div class="space-y-4">
+        <div class="space-y-4"> 
           <div>
             <label class="block text-sm text-gray-600 mb-1">Email</label>
             <input type="email" v-model="form.email" placeholder="Your email address"
@@ -135,7 +131,7 @@
           <label class="block text-sm text-gray-600 mb-1">Profile</label>
           <button type="button" @click="$refs.profileInput.click()"
                   class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 flex items-center gap-2 text-gray-400">
-            <img src="@/assets/icon/profile.svg" alt="Profile" class="w-4 h-4" />
+            <i class="fa-regular fa-user"></i>
             <span class="truncate">{{ profileFileName || 'Upload' }}</span>
           </button>
           <input type="file" ref="profileInput" @change="handleFileChange('profilePic', $event)" class="hidden">
@@ -144,7 +140,7 @@
           <label class="block text-sm text-gray-600 mb-1">Education</label>
           <button type="button" @click="$refs.educationInput.click()"
                   class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 flex items-center gap-2 text-gray-400">
-            <img src="@/assets/icon/document.svg" alt="Document" class="w-4 h-4" />
+          <i class="fa-regular fa-file"></i>
             <span class="truncate">{{ educationFileName || 'Upload' }}</span>
           </button>
           <input type="file" ref="educationInput" @change="handleFileChange('educationCertificate', $event)" class="hidden">
@@ -154,7 +150,7 @@
         <label class="block text-sm text-gray-600 mb-1">Documents</label>
         <button type="button" @click="$refs.documentsInput.click()"
                 class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 flex items-center gap-2 text-gray-400">
-          <img src="@/assets/icon/folder.svg" alt="Folder" class="w-4 h-4" />
+            <i class="fa-regular fa-file"></i>
           <span class="truncate">{{ documentsCount ? `${documentsCount} files` : 'Upload' }}</span>
         </button>
         <input type="file" multiple ref="documentsInput" @change="handleFileChange('documents', $event)" class="hidden">
@@ -200,18 +196,14 @@
       <button 
         type="submit" 
         class="px-8 py-2.5 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors disabled:opacity-50 w-full sm:w-auto"
-        :disabled="loading">
-        <span v-if="loading" class="flex items-center gap-2">
-          <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24"><!-- Add loading spinner SVG --></svg>
-          กำลังสมัคร...
-        </span>
-        <span v-else>SIGN UP</span>
+        > 
+        <span >SIGN UP</span>
       </button>
 
 
           <p class="mt-4 text-gray-600">
             Already have an account? 
-            <router-link to="/signin" class="text-[#CDE45F] hover:underline">Sign in</router-link>
+            <router-link to="/signin-user" class="text-[#CDE45F] hover:underline">Sign in</router-link>
           </p>
         </div>
       </form>
@@ -236,7 +228,8 @@
 <script>
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import { ref, computed } from 'vue'
+
+const baseURL = import.meta.env.VITE_API_URL
 
 export default {
   data() {
@@ -270,104 +263,143 @@ export default {
         'PHP',
         'Java'
         // เพิ่ม skills อื่นๆ ตามต้องการ
-      ]
+      ],
+         loading: false,
+      passwordsMatch: true, 
     }
   },
 
   methods: {
-    // จัดการการเลือกไฟล์
-    handleFileChange(type, event) {
-      const files = event.target.files;
-      if (!files || !files.length) return;
+  validateForm() {
+    // เช็คข้อมูลที่จำเป็น
+    const requiredFields = {
+      email: 'อีเมล',
+      password: 'รหัสผ่าน',
+      firstname: 'ชื่อ',
+      lastname: 'นามสกุล',
+      nationalId: 'เลขบัตรประชาชน',
+      phone: 'เบอร์โทรศัพท์',
+      birthdate: 'วันเกิด'
+    }
 
-      if (type === 'profilePic') {
-        this.profileFileName = files[0].name;
-      } else if (type === 'educationCertificate') {
-        this.educationFileName = files[0].name;
-      } else if (type === 'documents') {
-        this.documentsCount = files.length;
-      }
-    },
-
-    // ส่งข้อมูลลงทะเบียน
-    async register() {
-      try {
-        const formData = new FormData();
-        
-        // เพิ่มข้อมูลทั่วไป
-        formData.append('email', this.form.email);
-        formData.append('password', this.form.password);
-        formData.append('prefix', this.form.prefix);
-        formData.append('first_name', this.form.firstname);
-        formData.append('last_name', this.form.lastname);
-        formData.append('national_id', this.form.nationalId);
-        formData.append('gender', this.form.gender);
-        formData.append('birth_date', this.form.birthdate);
-        formData.append('phone_number', this.form.phone);
-        formData.append('line_id', this.form.lineId);
-        formData.append('skills', JSON.stringify(this.form.skills)); // แปลง array เป็น JSON string
-
-        // เพิ่มไฟล์
-        const profileInput = this.$refs.profileInput;
-        const educationInput = this.$refs.educationInput;
-        const documentsInput = this.$refs.documentsInput;
-
-        if (profileInput && profileInput.files[0]) {
-          formData.append('profile_image', profileInput.files[0]);
-        }
-
-        if (educationInput && educationInput.files[0]) {
-          formData.append('education_certificate', educationInput.files[0]);
-        }
-
-        if (documentsInput && documentsInput.files) {
-          Array.from(documentsInput.files).forEach(file => {
-            formData.append('user_documents', file);
-          });
-        }
-
-        // ส่งข้อมูลไปยัง API
-        const response = await axios.post('http://localhost:8000/api/users/register', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-
-        // แสดง success message
-        await Swal.fire({
-          icon: 'success',
-          title: 'ลงทะเบียนสำเร็จ',
-          text: response.data.message
-        });
-
-        // redirect ไปหน้า login
-      //  this.$router.push('/login');
- 
-      } catch (error) {
-        // แสดง error messageF
+    for (const [field, label] of Object.entries(requiredFields)) {
+      if (!this.form[field]) {
         Swal.fire({
-          icon: 'error',
-          title: 'เกิดข้อผิดพลาด',
-          text: error.response?.data?.message || 'ไม่สามารถลงทะเบียนได้'
-        });
-        console.error('Registration error:', error);
-      }
-    },
-
-    // validation methods (ถ้าต้องการเพิ่ม)
-    validateForm() {
-      // เพิ่ม validation logic ตามต้องการ
-      if (!this.form.email || !this.form.password) {
-        Swal.fire({
-          icon: 'error',
+          icon: 'warning',
           title: 'กรุณากรอกข้อมูลให้ครบ',
-          text: 'Email และ Password เป็นข้อมูลที่จำเป็น'
-        });
-        return false;
+          text: `กรุณากรอก${label}`,
+          timer: 1500,
+          showConfirmButton: false
+        })
+        return false
       }
-      return true;
+    }
+
+    // เช็คไฟล์ที่จำเป็น
+    const profileInput = this.$refs.profileInput
+    const educationInput = this.$refs.educationInput
+    
+    if (!profileInput?.files[0]) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'กรุณาเลือกรูปโปรไฟล์',
+        timer: 1500,
+        showConfirmButton: false
+      })
+      return false
+    }
+
+    if (!educationInput?.files[0]) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'กรุณาเลือกไฟล์วุฒิการศึกษา',
+        timer: 1500,
+        showConfirmButton: false
+      })
+      return false
+    }
+
+    return true
+  },
+
+  async register() {
+    if (!this.validateForm()) return
+
+    try {
+      // แสดง loading
+      Swal.fire({
+        title: 'กำลังลงทะเบียน...',
+        text: 'กรุณารอสักครู่',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading()
+        }
+      })
+
+      const formData = new FormData()
+      
+      // เพิ่มข้อมูลทั่วไป
+      formData.append('email', this.form.email)
+      formData.append('password', this.form.password)
+      formData.append('prefix', this.form.prefix)
+      formData.append('first_name', this.form.firstname)
+      formData.append('last_name', this.form.lastname)
+      formData.append('national_id', this.form.nationalId)
+      formData.append('gender', this.form.gender)
+      formData.append('birth_date', this.form.birthdate)
+      formData.append('phone_number', this.form.phone)
+      formData.append('line_id', this.form.lineId)
+      formData.append('skills', JSON.stringify(this.form.skills))
+
+      // เพิ่มไฟล์
+      const profileInput = this.$refs.profileInput
+      const educationInput = this.$refs.educationInput
+      const documentsInput = this.$refs.documentsInput
+
+      if (profileInput?.files[0]) {
+        formData.append('profile_image', profileInput.files[0])
+      }
+
+      if (educationInput?.files[0]) {
+        formData.append('education_certificate', educationInput.files[0])
+      }
+
+      if (documentsInput?.files) {
+        Array.from(documentsInput.files).forEach(file => {
+          formData.append('user_documents', file)
+        })
+      }
+
+      // ส่งข้อมูลไปยัง API
+     const response = await axios.post(`${baseURL}/api/users/register`, formData, {
+  headers: {
+    'Content-Type': 'multipart/form-data'
+  }
+})
+      // แสดง success message
+      await Swal.fire({
+        icon: 'success',
+        title: 'ลงทะเบียนสำเร็จ',
+        text: response.data.message || 'กรุณาเข้าสู่ระบบเพื่อใช้งาน',
+        showConfirmButton: false,
+        timer: 2000
+      })
+
+      // redirect ไปหน้า login
+      this.$router.push('/signin-user')
+
+    } catch (error) {
+      console.error('Registration error:', error)
+      
+      // แสดง error message
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: error.response?.data?.message || 'ไม่สามารถลงทะเบียนได้ กรุณาลองใหม่อีกครั้ง'
+      })
     }
   }
+}
 }
 </script>
 <style>

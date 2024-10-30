@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
+import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -19,6 +20,8 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true, // เปิด browser อัตโนมัติเมื่อรัน
+    host: true, // เปิดให้เข้าถึงจากภายนอกได้
+    strictPort: true, // จะ error ถ้า port ถูกใช้งานอยู่
   },
   plugins: [
     vue(),
@@ -30,7 +33,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+
     }
   }
 })

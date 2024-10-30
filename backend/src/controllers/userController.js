@@ -192,7 +192,7 @@ export const loginUser = async (req, res) => {
         const user = await userModel.getUserByEmail(email);
 
         if (!user) {
-            return res.status(404).json({ message: 'ไม่พบผู้ใช้' });
+            return res.status(404).json({ message: 'ไม่มีผู้ใช้ในระบบ' });
         }
 
         const isMatch = await userModel.verifyPassword(password, user.password);
