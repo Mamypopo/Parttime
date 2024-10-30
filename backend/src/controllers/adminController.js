@@ -256,3 +256,113 @@ export const getAdminNotifications = async (req, res) => {
 };
 
 
+export const getAdminPendingSkills = async (req, res) => {
+    try {
+        const pendingSkills = await adminModel.getAllPendingSkillsForAdmin();
+
+        if (!pendingSkills || pendingSkills.length === 0) {
+            return res.status(200).json({
+                message: 'ไม่พบทักษะที่รออนุมัติ',
+                pendingSkills: []
+            });
+        }
+
+        res.status(200).json({
+            pendingSkills
+        });
+
+    } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการดึงข้อมูลทักษะที่รออนุมัติ:', error);
+        res.status(500).json({
+            message: 'เกิดข้อผิดพลาดในการดึงข้อมูลทักษะที่รออนุมัติ'
+        });
+    }
+};
+
+
+export const updatePendingSkillStatus = async (req, res) => {
+    try {
+        const adminId = req.admin.id;
+        const skillId = parseInt(req.params.id || req.params.pendingSkillId);
+        const { action } = req.body;
+
+
+        if (!skillId) {
+            return res.status(400).json({
+                message: 'กรุณาระบุ ID'
+            });
+        }
+
+        // ตรวจสอบ action
+        if (!['approve', 'reject'].includes(action)) {
+            return res.status(400).json({
+                message: 'Action ไม่ถูกต้อง กรุณาระบุ approve หรือ reject'
+            });
+        }
+
+
+        const pendingSkill = await adminModel.getPendingSkillById(skillId);
+        if (!pendingSkill) {
+            return res.status(404).json({ message: 'ไม่พบข้อมูลทักษะที่รอดำเนินการ' });
+        }
+
+        // ดึงข้อมูล user และ admin
+        const user = await userModel.getUserById(pendingSkill.user.id);
+        const admin = await adminModel.getAdminById(adminId);
+
+        if (!req.admin || !req.admin.id) {
+            return res.status(401).json({
+                message: 'ไม่พบข้อมูลผู้ดูแลระบบ กรุณาเข้าสู่ระบบอีกครั้ง'
+            });
+        }
+        const status = action === 'approve' ? 'approved' : 'rejected';
+        // อัปเดตสถานะ
+        const updatedPendingSkill = await adminModel.updatePendingSkillStatus(skillId, status);
+        // ถ้าอนุมัติ อัพเดทสกิลของผู้ใช้
+        if (action === 'approve') {
+            const currentSkills = user.skills ? user.skills.split(',').filter(Boolean) : [];
+            if (!currentSkills.includes(pendingSkill.skill)) {
+                currentSkills.push(pendingSkill.skill);
+                await adminModel.updateUserSkills(user.id, currentSkills.join(','));
+            }
+        }
+
+        // บันทึก log
+        const logTitle = action === 'approve' ? 'Skill approved' : 'Skill rejected';
+        const logDescription = `Admin { Name: ${admin.first_name} ${admin.last_name} Email: ${admin.email} } ${action}ed skill: ${pendingSkill.skill} for User { Name: ${user.first_name} ${user.last_name} Email: ${user.email} }`;
+
+        await createLog(
+            pendingSkill.user.id,
+            adminId,
+            logTitle,
+            req.originalUrl,
+            req.method,
+            logDescription,
+            req.ip,
+            req.headers['user-agent']
+        );
+        try {
+            const notificationMessage = `Skill "${pendingSkill.skill}" has been ${action === 'approve' ? 'approved' : 'rejected'} by administrator`;
+            await notificationModel.createUserNotification(
+                pendingSkill.user.id,
+                notificationMessage
+            );
+        } catch (notificationError) {
+            console.error('Failed to create notification:', notificationError);
+        }
+
+        res.status(200).json({
+            message: `${action === 'approve' ? 'อนุมัติ' : 'ปฏิเสธ'}ทักษะเรียบร้อยแล้ว`,
+            pendingSkill: updatedPendingSkill
+        });
+
+    } catch (error) {
+        console.error('Error details:', error); // เพิ่ม log error
+        res.status(500).json({
+            message: 'เกิดข้อผิดพลาดในการอัปเดตสถานะทักษะ',
+            error: error.message
+        });
+    }
+};
+
+

@@ -183,8 +183,15 @@ export const deleteJobById = (jobId) =>
 
 
 // ฟังก์ชันสำหรับการบันทึกการสมัครงาน
-export const createJobParticipation = (userId, jobId, jobPositionId) =>
-    prisma.jobParticipation.create({
+export const createJobParticipation = async (userId, jobId, jobPositionId) => {
+    // ตรวจสอบ skills ก่อน
+    const hasMatchingSkills = await checkUserSkillsMatch(userId, jobPositionId);
+
+    if (!hasMatchingSkills) {
+        throw new Error('คุณไม่มีทักษะที่จำเป็นสำหรับตำแหน่งงานนี้');
+    }
+
+    return prisma.jobParticipation.create({
         data: {
             user_id: userId,
             jobId,
@@ -193,6 +200,7 @@ export const createJobParticipation = (userId, jobId, jobPositionId) =>
             created_at: new Date()
         }
     });
+};
 
 // ฟังก์ชันตรวจสอบการสมัครงานที่มีอยู่แล้ว
 export const findExistingJobParticipation = (userId, jobId, jobPositionId) =>
@@ -256,3 +264,32 @@ export const findJobPositionById = (jobPositionId) =>
         where: { id: jobPositionId },
         include: { job: true }
     });
+
+
+export const checkUserSkillsMatch = async (userId, jobPositionId) => {
+    // ดึงข้อมูล skills ของผู้ใช้
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { skills: true }
+    });
+
+    // ดึงข้อมูลตำแหน่งงาน
+    const jobPosition = await prisma.jobPosition.findUnique({
+        where: { id: jobPositionId },
+        select: { required_skills: true }
+    });
+
+    if (!jobPosition || !jobPosition.required_skills || jobPosition.required_skills.length === 0) {
+        return true; // ถ้าตำแหน่งงานไม่ได้ระบุ skills ที่ต้องการ ให้ผ่าน
+    }
+
+    if (!user || !user.skills || user.skills.length === 0) {
+        return false; // ถ้าผู้ใช้ไม่มี skills
+    }
+
+    const userSkills = user.skills.map(skill => skill.toLowerCase());
+    const requiredSkills = jobPosition.required_skills.map(skill => skill.toLowerCase());
+
+    // ตรวจสอบว่าผู้ใช้มี skills ที่จำเป็นทั้งหมดหรือไม่
+    return requiredSkills.every(skill => userSkills.includes(skill));
+};

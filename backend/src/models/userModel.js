@@ -45,6 +45,7 @@ export const updateUser = async (userId, userData) => {
         throw error;
     }
 };
+
 export const checkExistingUser = (email, national_id) =>
     prisma.user.findFirst({
         where: {
@@ -140,3 +141,94 @@ export const getTotalJobHistoryCount = (userId) =>
             user_id: parseInt(userId),
         },
     });
+
+
+// สร้าง pending skill ใหม่
+export const createPendingSkill = async (userId, skill) => {
+    return prisma.pendingSkill.create({
+        data: {
+            userId,  // ใช้ shorthand syntax เมื่อชื่อตัวแปรเหมือนกัน
+            skill,
+            status: 'pending'
+        }
+    });
+};
+
+
+
+// ... existing imports and code ...
+
+// เพิ่มฟังก์ชันใหม่สำหรับดึงสถิติงาน
+export const getUserJobStatistics = async (userId) => {
+    try {
+        // ดึงสถิติจาก JobParticipation
+        const stats = await prisma.jobParticipation.groupBy({
+            by: ['status'],
+            where: {
+                user_id: userId,
+                status: {
+                    in: ['successful', 'failed', 'needs improvement']
+                }
+            },
+            _count: {
+                status: true
+            }
+        });
+
+        // แปลงข้อมูลให้อยู่ในรูปแบบที่ใช้งานง่าย
+        const formattedStats = {
+            successful: 0,
+            failed: 0,
+            needs_improvement: 0
+        };
+
+        stats.forEach(stat => {
+            formattedStats[stat.status] = stat._count.status;
+        });
+
+        // คำนวณสถิติเพิ่มเติม
+        const totalJobs = Object.values(formattedStats).reduce((a, b) => a + b, 0);
+        const successRate = totalJobs > 0
+            ? ((formattedStats.successful / totalJobs) * 100).toFixed(2)
+            : 0;
+
+        return {
+            stats: formattedStats,
+            total_jobs: totalJobs,
+            success_rate: `${successRate}%`
+        };
+    } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการดึงสถิติงาน:', error);
+        throw new Error('ไม่สามารถดึงสถิติงานได้');
+    }
+};
+
+// เพิ่มฟังก์ชันสำหรับดึงสถิติงานรายเดือน
+export const getMonthlyJobStats = async (userId, year) => {
+    try {
+        const startDate = new Date(year, 0, 1); // 1 มกราคม
+        const endDate = new Date(year, 11, 31); // 31 ธันวาคม
+
+        const monthlyStats = await prisma.jobParticipation.groupBy({
+            by: ['status'],
+            where: {
+                user_id: userId,
+                status: {
+                    in: ['successful', 'failed', 'needs improvement']
+                },
+                created_at: {
+                    gte: startDate,
+                    lte: endDate
+                }
+            },
+            _count: {
+                status: true
+            }
+        });
+
+        return monthlyStats;
+    } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการดึงสถิติรายเดือน:', error);
+        throw new Error('ไม่สามารถดึงสถิติรายเดือนได้');
+    }
+};

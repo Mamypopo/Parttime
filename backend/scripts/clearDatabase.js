@@ -23,6 +23,9 @@ async function clearDatabase() {
         await prisma.notification.deleteMany();
         console.log('ล้างข้อมูล Notification เรียบร้อย');
 
+        await prisma.pendingSkill.deleteMany();
+        console.log('ล้างข้อมูล pendingSkill เรียบร้อย');
+
         // ลบ User
         await prisma.user.deleteMany();
         console.log('ล้างข้อมูล User เรียบร้อย');
@@ -31,7 +34,6 @@ async function clearDatabase() {
         await prisma.admin.deleteMany();
         console.log('ล้างข้อมูล Admin เรียบร้อย');
 
-        // เพิ่มการลบข้อมูลจากตารางอื่นๆ ตามที่มีในระบบของคุณ
 
         console.log('ล้างข้อมูลในฐานข้อมูลเรียบร้อยแล้ว');
     } catch (error) {

@@ -52,3 +52,25 @@ export const getAdminNotifications = (adminId) =>
         where: { adminId },
         orderBy: { createdAt: 'desc' }
     });
+
+
+
+export const deleteOldNotifications = async (daysOld = 30) => {
+    try {
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - daysOld);
+
+        const deletedNotifications = await prisma.notification.deleteMany({
+            where: {
+                createdAt: {
+                    lt: cutoffDate
+                }
+            }
+        });
+
+        return deletedNotifications;
+    } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการลบการแจ้งเตือนเก่า:', error);
+        throw error;
+    }
+};

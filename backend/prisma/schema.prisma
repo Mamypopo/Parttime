@@ -42,6 +42,20 @@ model User {
   JobParticipation JobParticipation[] // ความสัมพันธ์กับงานที่สมัคร
   Log              Log[]
   notifications    Notification[] // ความสัมพันธ์กับ Notification
+  pending_skills   PendingSkill[]
+}
+
+model PendingSkill {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  skill      String
+  status     String   @default("pending") // pending, approved, rejected
+  created_at DateTime @default(now()) @db.Timestamptz
+  updated_at DateTime @updatedAt @db.Timestamptz
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("pending_skills") // ชื่อตารางใน database
 }
 
 model Job {
@@ -69,6 +83,7 @@ model JobPosition {
   position_name    String // ชื่อตำแหน่งงาน
   wage             Float // ค่าแรงของตำแหน่งนี้
   required_people  Int // จำนวนคนที่ต้องการในตำแหน่งนี้
+  required_skills  String[]
   details          String // รายละเอียดงานในตำแหน่งนี้
   job_id           Int // เชื่อมกับตาราง Job
   status           String             @default("open") // เพิ่มฟิลด์ status พร้อมค่าดีฟอลต์เป็น 'open'

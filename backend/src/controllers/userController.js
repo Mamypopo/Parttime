@@ -9,6 +9,7 @@ import * as notificationModel from '../models/notificationModel.js'
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import * as adminModel from '../models/adminModel.js'
 import * as fileUploadUtils from '../utils/fileUpload.js'
 const prisma = new PrismaClient(); // สร้าง PrismaClient
 
@@ -236,8 +237,8 @@ export const updateUserProfile = async (req, res) => {
     try {
         const userId = req.user.id; // สมมติว่าเรามี middleware ที่เก็บข้อมูลผู้ใช้ใน req.user
         const {
-            prefix, first_name, last_name, gender, birth_date,
-            phone_number, line_id, skills
+            first_name, last_name,
+            phone_number, line_id
         } = req.body;
 
         // ตรวจสอบว่าผู้ใช้มีอยู่จริง
@@ -273,21 +274,16 @@ export const updateUserProfile = async (req, res) => {
         }
 
 
-        const age = birth_date ? calculateAge(birth_date) : existingUser.age;
-        const skillsString = Array.isArray(skills) ? skills.join(',') : skills;
+
 
         const updatedUser = await userModel.updateUser(userId, {
-            prefix: prefix || existingUser.prefix,
+
             first_name: first_name || existingUser.first_name,
             last_name: last_name || existingUser.last_name,
-            gender: gender || existingUser.gender,
-            birth_date: birth_date ? new Date(birth_date) : existingUser.birth_date,
-            age,
             education_certificate: newEducationCertificatePath || existingUser.education_certificate,
             phone_number: phone_number || existingUser.phone_number,
             line_id: line_id || existingUser.line_id,
             profile_image: newProfileImagePath || existingUser.profile_image,
-            skills: skillsString || existingUser.skills,
             user_documents: newUserDocumentsPaths.length ? JSON.stringify(newUserDocumentsPaths) : existingUser.user_documents,
 
         });
@@ -325,6 +321,83 @@ export const updateUserProfile = async (req, res) => {
         }
 
         res.status(400).json({ message: 'เกิดข้อผิดพลาดในการอัปเดตข้อมูลผู้ใช้ กรุณาลองใหม่อีกครั้ง' });
+    }
+};
+
+// สำหรับเพิ่มทักษะ
+export const addUserSkills = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { skills } = req.body;  // รับเป็น array ของทักษะใหม่
+
+        // ตรวจสอบว่า skills เป็น array และไม่ว่างเปล่า
+        if (!Array.isArray(skills) || skills.length === 0) {
+            return res.status(400).json({
+                message: 'กรุณาระบุทักษะที่ต้องการเพิ่ม'
+            });
+        }
+        const user = await userModel.getUserById(userId);
+
+        // ตรวจสอบการขอในรอบสัปดาห์
+        const recentRequest = await adminModel.checkWeeklySkillRequest(userId);
+        if (recentRequest) {
+            const nextAvailableDate = new Date(recentRequest.created_at); // แก้เป็น created_at
+            nextAvailableDate.setDate(nextAvailableDate.getDate() + 7);
+
+            return res.status(400).json({
+                message: 'คุณสามารถขอเพิ่มสกิลได้สัปดาห์ละ 1 ครั้งเท่านั้น',
+                nextAvailableDate: nextAvailableDate.toISOString(),
+                currentRequest: {
+                    skill: recentRequest.skill,
+                    status: recentRequest.status,
+                    requestedAt: recentRequest.created_at.toISOString() // แก้เป็น created_at
+                }
+            });
+        }
+        const existingUser = await userModel.getUserById(userId);
+        const existingSkills = existingUser.skills ? existingUser.skills.split(',') : [];
+
+
+        // กรองเฉพาะทักษะที่ยังไม่มี
+        const newSkills = skills.filter(skill =>
+            !existingSkills.includes(skill.trim())
+        );
+        if (newSkills.length === 0) {
+            return res.status(400).json({
+                message: 'ทักษะที่ระบุมีอยู่ในระบบแล้วทั้งหมด'
+            });
+        }
+
+        // สร้าง pending skills
+        const pendingSkillPromises = newSkills.map(skill =>
+            userModel.createPendingSkill(userId, skill.trim())
+        );
+
+        const createdPendingSkills = await Promise.all(pendingSkillPromises);
+
+
+        for (const skill of newSkills) {
+            await createLog(
+                userId,
+                null,
+                'Request new skill',
+                '/api/users/skills',
+                'POST',
+                `User { Name: ${user.first_name} ${user.last_name}  Email: ${user.email} } requested to add new skill: ${skill}`,
+                req.ip,
+                req.headers['user-agent']
+            );
+        }
+
+
+        res.status(200).json({
+            message: 'ส่งคำขอเพิ่มทักษะสำเร็จ กรุณารอการอนุมัติ',
+            pendingSkills: createdPendingSkills
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: 'เกิดข้อผิดพลาดในการเพิ่มทักษะ'
+        });
     }
 };
 
@@ -453,5 +526,71 @@ export const getProfileImage = (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการเข้าถึงไฟล์' });
+    }
+};
+
+
+export const getUserJobStats = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        // ตรวจสอบว่ามีผู้ใช้อยู่จริง
+        const user = await userModel.getUserById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "ไม่พบข้อมูลผู้ใช้" });
+        }
+
+        // ดึงสถิติทั้งหมด
+        const jobStats = await userModel.getUserJobStatistics(userId);
+
+        // ดึงสถิติรายเดือนของปีปัจจุบัน
+        const currentYear = new Date().getFullYear();
+        const monthlyStats = await userModel.getMonthlyJobStats(userId, currentYear);
+
+        // รวมข้อมูลทั้งหมด
+        const response = {
+            overall_stats: jobStats,
+            monthly_stats: monthlyStats,
+            user_info: {
+                name: `${user.first_name} ${user.last_name}`,
+                email: user.email
+            }
+        };
+
+        res.status(200).json(response);
+
+    } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการดึงสถิติงาน:', error);
+        res.status(500).json({
+            message: "เกิดข้อผิดพลาดในการดึงสถิติงาน กรุณาลองใหม่อีกครั้ง",
+            error: error.message
+        });
+    }
+};
+
+// เพิ่มฟังก์ชันสำหรับดึงสถิติรายเดือน
+export const getMonthlyStats = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const year = parseInt(req.query.year) || new Date().getFullYear();
+
+        const user = await userModel.getUserById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "ไม่พบข้อมูลผู้ใช้" });
+        }
+
+        const monthlyStats = await userModel.getMonthlyJobStats(userId, year);
+
+        res.status(200).json({
+            year,
+            monthly_stats: monthlyStats
+        });
+
+    } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการดึงสถิติรายเดือน:', error);
+        res.status(500).json({
+            message: "เกิดข้อผิดพลาดในการดึงสถิติรายเดือน กรุณาลองใหม่อีกครั้ง",
+            error: error.message
+        });
     }
 };

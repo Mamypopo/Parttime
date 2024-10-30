@@ -14,8 +14,8 @@ export const createNewApplicationNotification = async (jobId, userId) => {
             throw new Error('ไม่พบตำแหน่งงานที่ระบุ');
         }
 
-        const content = `มีผู้สมัครใหม่สำหรับงาน "${job.title || 'ไม่ระบุชื่องาน'}" ตำแหน่ง "${jobPosition.position_name || 'ไม่ระบุตำแหน่ง'}" `;
-
+        // const content = `มีผู้สมัครใหม่สำหรับงาน "${job.title || 'ไม่ระบุชื่องาน'}" ตำแหน่ง "${jobPosition.position_name || 'ไม่ระบุตำแหน่ง'}" `;
+        const content = `มีการสมัครงานใหม่สำหรับตำแหน่ง ${jobPosition.position_name} ในงาน "${job.title}"`;
         return notificationModel.createAdminNotification({
             userId,
             content,
