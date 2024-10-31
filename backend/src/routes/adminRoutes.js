@@ -7,7 +7,7 @@ import {
     getAdminById,
     getAdminNotifications,
     getAdminPendingSkills,
-    updatePendingSkillStatus
+    updatePendingSkillStatus, getAdminProfile
 } from '../controllers/adminController.js';
 import { authMiddleware, checkAdminRole } from '../middleware/authMiddleware.js';
 
@@ -20,6 +20,7 @@ router.post('/register-admin', registerAdmin);
 // ต้องการการยืนยันตัวตนเท่านั้น
 router.get('/pending-users', authMiddleware, getPendingUsers);
 router.get('/admin/:adminId', authMiddleware, getAdminById);
+router.get('/profile', authMiddleware, getAdminProfile)
 
 // ต้องการการยืนยันตัวตนและต้องเป็นแอดมิน
 router.post('/approve-reject-user/:userId', authMiddleware, checkAdminRole, approveUser);

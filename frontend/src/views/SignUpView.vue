@@ -15,19 +15,19 @@
 
       <!-- Register Form -->
         <div class="max-w-5xl mx-auto px-4 lg:px-8 bg-white rounded-[15px] shadow-md pt-4 mb-8">
-        <h2 class="text-2xl font-semibold text-center mb-8">Register</h2>
+        <h2 class="text-2xl font-semibold text-center mb-8 text-[#3A3A49]">Register</h2>
         
    <form @submit.prevent="register" class="space-y-6">
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3  gap-4 sm:gap-6">
     <!-- คอลัมน์ซ้าย:  -->
    <div class="space-y-4">
   <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-    <h3 class="text-base lg:text-lg font-medium text-gray-700 mb-4">Personal information</h3>
+    <h3 class="text-base lg:text-lg font-medium text-[#3A3A49] mb-4">Personal information</h3>
     <div class="space-y-4">
       <div class="grid grid-cols-7 gap-3">
         <div class="col-span-3">
-          <label class="block text-sm text-gray-600 mb-1">Prefix</label>
-          <select v-model="form.prefix" class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200">
+          <label class="block text-sm text-[#3A3A49] mb-1">Prefix</label>
+          <select v-model="form.prefix" class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200">
             <option value="" disabled selected>Select</option>
             <option value="นาย">นาย</option>
             <option value="นาง">นาง</option>
@@ -35,20 +35,20 @@
           </select>
         </div>
         <div class="col-span-4">
-          <label class="block text-sm text-gray-600 mb-1">Firstname</label>
+          <label class="block text-sm text-[#3A3A49] mb-1">Firstname</label>
           <input type="text" v-model="form.firstname" placeholder="Your firstname"
-                 class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200">
+                 class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200">
         </div>
       </div>
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Lastname</label>
+        <label class="block text-sm text-[#3A3A49] mb-1">Lastname</label>
         <input type="text" v-model="form.lastname" placeholder="Your lastname"
-               class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200">
+               class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200">
       </div>
       <div class="grid grid-cols-5 gap-3">
         <div class="col-span-2" >
-          <label class="block text-sm  text-gray-600 mb-1">Gender</label>
-          <select v-model="form.gender" class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border  border-gray-200 ">
+          <label class="block text-sm  text-[#3A3A49] mb-1">Gender</label>
+          <select v-model="form.gender" class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border   border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200">
             <option value="" disabled selected class="text-gray-300">gender</option>
             <option value="ชาย">ชาย</option>
             <option value="หญิง">หญิง</option>
@@ -56,27 +56,29 @@
         </div>
 
        <div class="col-span-3">
-  <label class="block text-sm text-gray-600 mb-1">Birthdate</label>
+  <label class="block text-sm text-[#3A3A49] mb-1">Birthdate</label>
   <div class="relative"> 
     <input 
       type="date" 
       v-model="form.birthdate"
-      class="w-full px-4 py-2 rounded-[15px] text-gray-400 bg-gray-50 border border-gray-200 date-input"
+        placeholder="dd/mm/yyyy"
+      class="w-full px-4 py-2 rounded-[15px] text-gray-400 bg-gray-50 border border-gray-200 date-input focus:outline-none focus:ring-2 focus:ring-purple-200"
     >
-    <i class="fa-regular fa-calendar absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none text-gray-500"></i>
+    
+    <i class="fa-regular fa-calendar absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none text-[#C5B4E3]"></i>
   </div>
 </div>
       </div>
        <div >
-            <label class="block text-sm text-gray-600 mb-1">National ID</label>
+            <label class="block text-sm text-[#3A3A49] mb-1">National ID</label>
             <input type="text" v-model="form.nationalId" placeholder="Your national ID"
-                   class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200">
+                   class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200">
           </div>
 
           <div >
-            <label class="block text-sm text-gray-600 mb-1">Line ID</label>
+            <label class="block text-sm text-[#3A3A49] mb-1">Line ID</label>
             <input type="text" v-model="form.lineId" placeholder="Your Line ID"
-                   class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200">
+                   class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200">
           </div>
     </div>
   </div>
@@ -86,23 +88,23 @@
     <!-- คอลัมน์กลาง: -->
     <div class="space-y-4">
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-        <h3 class="text-lg font-medium text-gray-700 mb-4">Email Password</h3>
+        <h3 class="text-lg font-medium text-[#3A3A49] mb-4">Email Password</h3>
         <div class="space-y-4"> 
           <div>
-            <label class="block text-sm text-gray-600 mb-1">Email</label>
+            <label class="block text-sm text-[#3A3A49] mb-1">Email</label>
             <input type="email" v-model="form.email" placeholder="Your email address"
-                   class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200">
+                   class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200">
           </div>
            <div>
-        <label class="block text-sm text-gray-600 mb-1">Password</label>
+        <label class="block text-sm text-[#3A3A49] mb-1">Password</label>
         <input type="password" v-model="form.password" placeholder="Your password"
-               class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200">
+               class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200">
                
       </div>
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Confirm password</label>
+        <label class="block text-sm text-[#3A3A49] mb-1">Confirm password</label>
         <input type="password" v-model="form.confirmPassword" placeholder="Confirm your password"
-               class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200"
+               class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200"
                 :class="{'border-red-300': !passwordsMatch && form.confirmPassword}">
       </div>
       <!-- <p v-if="form.confirmPassword && !passwordsMatch" 
@@ -110,9 +112,9 @@
       รหัสผ่านไม่ตรงกัน
     </p> -->
           <div>
-            <label class="block text-sm text-gray-600 mb-1">Phone number</label>
+            <label class="block text-sm text-[#3A3A49] mb-1">Phone number</label>
             <input type="tel" v-model="form.phone" placeholder="Your phone number"
-                   class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200">
+                   class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200">
           </div>
          
         </div>
@@ -123,40 +125,40 @@
     <!-- คอลัมน์ขวา:  -->
 <div class="space-y-4">
   <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-    <h3 class="text-lg font-medium text-gray-700 mb-4">Other information</h3>
+    <h3 class="text-lg font-medium text-[#3A3A49] mb-4">Other information</h3>
     <div class="space-y-4">
      
       <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="block text-sm text-gray-600 mb-1">Profile</label>
+          <label class="block text-sm text-[#3A3A49] mb-1">Profile</label>
           <button type="button" @click="$refs.profileInput.click()"
-                  class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 flex items-center gap-2 text-gray-400">
-            <i class="fa-regular fa-user"></i>
+                  class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 flex items-center gap-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-200">
+            <i class="fa-regular fa-user text-[#C5B4E3]"></i>
             <span class="truncate">{{ profileFileName || 'Upload' }}</span>
           </button>
           <input type="file" ref="profileInput" @change="handleFileChange('profilePic', $event)" class="hidden">
         </div>
         <div>
-          <label class="block text-sm text-gray-600 mb-1">Education</label>
+          <label class="block text-sm text-[#3A3A49] mb-1">Education</label>
           <button type="button" @click="$refs.educationInput.click()"
-                  class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 flex items-center gap-2 text-gray-400">
-          <i class="fa-regular fa-file"></i>
+                  class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 flex items-center gap-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-200">
+          <i class="fa-regular fa-file text-[#C5B4E3]"></i>
             <span class="truncate">{{ educationFileName || 'Upload' }}</span>
           </button>
           <input type="file" ref="educationInput" @change="handleFileChange('educationCertificate', $event)" class="hidden">
         </div>
       </div>
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Documents</label>
+        <label class="block text-sm text-[#3A3A49] mb-1">Documents</label>
         <button type="button" @click="$refs.documentsInput.click()"
-                class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 flex items-center gap-2 text-gray-400">
-            <i class="fa-regular fa-file"></i>
+                class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 flex items-center gap-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-200">
+            <i class="fa-regular fa-file text-[#C5B4E3] "></i>
           <span class="truncate">{{ documentsCount ? `${documentsCount} files` : 'Upload' }}</span>
         </button>
         <input type="file" multiple ref="documentsInput" @change="handleFileChange('documents', $event)" class="hidden">
       </div>
       <div>
-        <label class="block text-sm text-gray-600 mb-1">Skills</label>
+        <label class="block text-sm text-[#3A3A49] mb-1">Skills</label>
         <div class="bg-gray-50 p-2 rounded-[15px] border border-gray-200">
           <div class="flex flex-wrap gap-1.5">
             <label v-for="skill in availableSkills" 
@@ -167,8 +169,8 @@
               <input type="checkbox" 
                      :value="skill" 
                      v-model="form.skills"
-                     class="hidden">
-              <span class="text-sm">{{ skill }}</span>
+                     class="hidden ">
+              <span class="text-sm ">{{ skill }}</span>
             </label>
           </div>
         </div>
@@ -179,23 +181,27 @@
   </div>
 
     <!-- ฉันยอมรับ ข้อกำหนดการใช้งาน -->
-    <div class="text-sm text-gray-600 text-center mt-4">
-      <label class="flex items-center gap-3 justify-center">
-        <input type="checkbox" 
-        v-model="form.acceptTerms" 
-        class="w-6 h-6 sm:w-5 sm:h-5 rounded text-purple-500">
+<div class="text-sm text-[#3A3A49] text-center mt-4">
+  <label class="flex items-center gap-3 justify-center">
+    <input type="checkbox" 
+    v-model="form.acceptTerms" 
+    class="w-6 h-6 sm:w-5 sm:h-5 rounded text-purple-500">
     <span>
       ฉันยอมรับ <a href="#" class="text-[#CDE45F] hover:underline">ข้อกำหนดการใช้งาน</a> และ 
       <a href="#" class="text-[#CDE45F] hover:underline">นโยบายความเป็นส่วนตัว</a>
     </span>
-      </label>
-    </div>
+  </label>
+  <!-- เพิ่ม error message -->
+  <p v-if="showTermsError" class="text-red-500 text-sm mt-2">
+    กรุณายอมรับข้อกำหนดการใช้งานและนโยบายความเป็นส่วนตัว
+  </p>
+</div>
 
       <!-- ปุ่ม Submit -->
     <div class="text-center pb-9">
       <button 
         type="submit" 
-        class="px-8 py-2.5 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors disabled:opacity-50 w-full sm:w-auto"
+        class="px-8 py-2.5 bg-[#C5B3E6] text-white rounded-lg hover:bg-[#B39DDB] transition-colors disabled:opacity-50 w-full sm:w-auto"
         > 
         <span >SIGN UP</span>
       </button>
@@ -252,6 +258,7 @@ export default {
       profileFileName: '',
       educationFileName: '',
       documentsCount: 0,
+      
       // รายการ skills ที่เลือกได้
       availableSkills: [
         'JavaScript',
@@ -266,6 +273,8 @@ export default {
       ],
          loading: false,
       passwordsMatch: true, 
+      showTermsError:null
+      
     }
   },
 
@@ -321,7 +330,37 @@ export default {
 
     return true
   },
+ handleFileChange(type, event) {
+    if (!event || !event.target || !event.target.files) {
+      console.error('Invalid file event')
+      return
+    }
 
+    const files = event.target.files
+
+    switch(type) {
+      case 'profilePic':
+        if (files[0]) {
+          this.profileFileName = files[0].name
+        }
+        break
+        
+      case 'educationCertificate':
+        if (files[0]) {
+          this.educationFileName = files[0].name
+        }
+        break
+        
+      case 'documents':
+        if (files.length) {
+          this.documentsCount = files.length
+        }
+        break
+
+      default:
+        console.error('Unknown file type:', type)
+    }
+  },
   async register() {
     if (!this.validateForm()) return
 
@@ -441,5 +480,15 @@ export default {
   width: 20px;
   height: 20px;
   cursor: pointer;
+}
+.date-input::before {
+  content: attr(placeholder);
+  width: 100%;
+  color: #9CA3AF;
+}
+
+.date-input:focus::before,
+.date-input:valid::before {
+  display: none;
 }
 </style>

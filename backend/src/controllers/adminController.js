@@ -10,7 +10,6 @@ import * as notificationModel from '../models/notificationModel.js';
 export const registerAdmin = async (req, res) => {
     const { email, password, first_name, last_name, admin_secret } = req.body;
     const { ip, headers: { 'user-agent': userAgent } } = req;
-
     try {
 
         if (admin_secret !== process.env.ADMIN_SECRET) {
@@ -131,6 +130,35 @@ export const loginAdmin = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+
+export const getAdminProfile = async (req, res) => {
+    try {
+        const { id } = req.user  // เปลี่ยนเป็น id
+
+        if (!id) {
+            return res.status(400).json({
+                message: 'Admin ID not found in token'
+            })
+        }
+
+        const admin = await adminModel.findAdminById(id)
+
+        if (!admin) {
+            return res.status(404).json({
+                message: 'Admin not found'
+            })
+        }
+
+        res.json(admin)  // ข้อมูลที่ส่งกลับจะมี id แทน admin_id
+
+    } catch (error) {
+        console.error('Error in getAdminProfile:', error)
+        res.status(500).json({
+            message: 'Internal server error'
+        })
+    }
+}
 
 
 export const getAdminById = async (req, res) => {

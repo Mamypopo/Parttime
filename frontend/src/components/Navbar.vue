@@ -1,5 +1,5 @@
 <template>
-  <nav class="absolute w-full z-50 py-4">
+  <nav v-if="!isAdminRoute"  class="absolute w-full z-50 py-4">
     <div class="container mx-auto px-4 sm:px-6">
       <!-- Desktop & Mobile Navbar -->
       <div class="max-w-6xl mx-auto flex items-center justify-between rounded-lg px-4 sm:px-8 py-3 bg-white shadow-lg">
@@ -220,6 +220,8 @@
 <script>
 import { useUserStore } from '@/stores/userStore'
 import Swal from 'sweetalert2' 
+
+
 export default {
   name: 'NavBar',
   
@@ -236,6 +238,9 @@ export default {
   computed: {
     profileImageUrl() {
       return this.userStore.getUser.profile_image || this.defaultImage
+    },
+      isAdminRoute() {
+      return this.$route.path.includes('/admin') || this.$route.meta.requiresAdmin
     }
   },
 

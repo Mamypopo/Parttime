@@ -5,7 +5,7 @@
       <!-- Login Form Section -->
       <div class="w-full md:w-1/2 px-4 md:px-12 lg:px-24 flex flex-col justify-center">
         <div class="max-w-md w-full mx-auto">
-          <h1 class="text-4xl font-medium text-[#C5B3E6] mt-24 mb-2">Welcome</h1>
+          <h1 class="text-4xl font-medium text-[#C5B3E6] mt-24 mb-2">Welcome Admin</h1>
           <p class="text-gray-500 mb-8">Enter your email and password to sign in</p>
 
           <form @submit.prevent="handleSubmit" class="space-y-6">
@@ -55,7 +55,7 @@
             <!-- Sign Up Link -->
             <p class="text-center text-sm text-gray-600">
               Don't have an account? 
-              <router-link to="/signup-user" class="text-[#CDE45F] hover:underline">Sign up</router-link>
+              <router-link to="/signup-admin" class="text-[#CDE45F] hover:underline">Sign up</router-link>
             </p>
           </form>
         </div>
@@ -65,7 +65,7 @@
      <div class="hidden md:block md:w-1/2">
   <div class="signin-bg h-[75vh] rounded-[22px] relative mx-6 my-8">
     <img 
-      src="../assets/images/loginbackground.svg" 
+      src="../../assets/images/loginbackground.svg" 
       alt="Medical consultation" 
       class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-[60%] max-w-xl"
     />
@@ -88,7 +88,8 @@
 </template>
 
 <script>
-import { useUserStore } from '@/stores/userStore'
+
+import { useAdminStore } from '@/stores/adminStore'
 import axios from 'axios'
 import Swal from 'sweetalert2' 
 
@@ -96,8 +97,7 @@ import Swal from 'sweetalert2'
 const baseURL = import.meta.env.VITE_API_URL
 
 export default {
-  name: 'SignInView',
-  
+name: 'SignInAdminView',  
   data() {
     return {
       form: {
@@ -116,8 +116,8 @@ export default {
     isFormValid() {
       return this.form.email && this.form.password
     },
-    userStore() {
-      return useUserStore()
+   adminStore() {
+      return useAdminStore()
     }
   },
 
@@ -148,26 +148,25 @@ export default {
         })
         
         // 1. Login request
-        const response = await axios.post(`${baseURL}/api/users/login`, {
+        const response = await axios.post(`${baseURL}/api/admin/login-admin`, {
           email: this.form.email,
           password: this.form.password
         })
 
         // 2. เก็บ token
-        this.userStore.setToken(response.data.token)
+        this.adminStore.setToken(response.data.token)
 
 
         // แสดง success
         await Swal.fire({
           icon: 'success',
           title: 'เข้าสู่ระบบสำเร็จ',
-          text: 'ยินดีต้อนรับกลับมา',
           showConfirmButton: false,
           timer: 1500
         })
 
         // 3. Redirect
-        this.$router.push('/')
+        this.$router.push('/admin/dashboard')
 
       } catch (err) {
         // แสดง error
@@ -176,7 +175,7 @@ export default {
           title: 'เข้าสู่ระบบไม่สำเร็จ',
           text: err.response?.data?.message || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ'
         })
-        this.userStore.logout()
+        this.adminStore.logout()
       }
     },
 
@@ -195,7 +194,7 @@ export default {
 <style>
 
 .signin-bg{
-background-image: url('../assets/images/loginbackground2.svg');
+background-image: url('../../assets/images/loginbackground2.svg');
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
