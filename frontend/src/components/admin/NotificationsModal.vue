@@ -107,7 +107,7 @@ import {
   TransitionRoot,
   TransitionChild,
 } from '@headlessui/vue'
-
+import NotificationsModal from './NotificationsModal.vue'
 export default {
   components: {
     Dialog,
@@ -115,6 +115,7 @@ export default {
     DialogTitle,
     TransitionRoot,
     TransitionChild,
+    
   },
 
   props: {

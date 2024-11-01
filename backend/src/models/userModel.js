@@ -96,12 +96,6 @@ const createSelectObject = (fields) => {
 export const getTotalUsersCount = () => prisma.user.count();
 
 
-// ฟังก์ชันสำหรับดึงผู้ใช้ที่รอการอนุมัติ
-export const findPendingUsers = () =>
-    prisma.user.findMany({
-        where: { approved: false },
-    });
-
 
 //ดึงประวัติงานทั้งหมดของ user
 export const getUserJobHistory = (userId, limit = 10, offset = 0) =>

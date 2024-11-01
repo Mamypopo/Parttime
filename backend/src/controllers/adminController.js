@@ -88,7 +88,7 @@ export const loginAdmin = async (req, res) => {
         const token = jwt.sign(
             { userId: admin.id, email: admin.email, role: 'admin' },
             process.env.JWT_SECRET,
-            { expiresIn: '1d' }
+            { expiresIn: '1h' }
         );
 
 
@@ -183,7 +183,7 @@ export const getAdminById = async (req, res) => {
 // ดึงผู้ใช้ที่รอการอนุมัติ
 export const getPendingUsers = async (req, res) => {
     try {
-        const pendingUsers = await userModel.findPendingUsers();
+        const pendingUsers = await adminModel.findPendingUsers();
         res.status(200).json({ users: pendingUsers });
     } catch (error) {
         console.error('เกิดข้อผิดพลาดในการโหลดผู้ใช้ที่รอการอนุมัติ:', error);
