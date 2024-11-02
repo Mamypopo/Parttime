@@ -128,6 +128,8 @@
           <span class="text-xs mt-1">Alerts</span>
         </button>
 
+     
+
         <!-- More Menu Button -->
         <button 
           @click="showMobileMenu = !showMobileMenu" 
@@ -180,7 +182,8 @@ import NotificationsPanel from '@/components/admin/NotificationsPanel.vue'
 export default {
   name: 'AdminLayout',
   components: {
-    NotificationsPanel
+    NotificationsPanel,
+    
   },
   data() {
     return {
@@ -213,7 +216,8 @@ export default {
         { name: 'Work History', path: '/admin/work-history', icon: 'fas fa-history' },
         { name: 'My Jobs', path: '/admin/my-jobs', icon: 'fas fa-list' },
         { name: 'Create Job', path: '/admin/create-job', icon: 'fas fa-plus' }
-      ]
+      ],
+      
     }
   },
 
@@ -235,7 +239,8 @@ export default {
 
     handleLogout() {
       this.$router.push('/signin-admin')
-    }
+    },
+    
   },
 
   mounted() {

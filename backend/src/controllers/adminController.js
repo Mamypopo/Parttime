@@ -180,14 +180,91 @@ export const getAdminById = async (req, res) => {
     }
 };
 
+// // ดึงผู้ใช้ที่รอการอนุมัติ
+// export const getPendingUsers = async (req, res) => {
+//     try {
+//         const pendingUsers = await adminModel.findPendingUsers();
+//         res.status(200).json({ users: pendingUsers });
+//     } catch (error) {
+//         console.error('เกิดข้อผิดพลาดในการโหลดผู้ใช้ที่รอการอนุมัติ:', error);
+//         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการโหลดผู้ใช้ที่รอการอนุมัติ' });
+//     }
+// };
+
+
 // ดึงผู้ใช้ที่รอการอนุมัติ
 export const getPendingUsers = async (req, res) => {
     try {
-        const pendingUsers = await adminModel.findPendingUsers();
-        res.status(200).json({ users: pendingUsers });
+        const page = parseInt(req.query.page) || 1;
+        const perPage = parseInt(req.query.perPage) || 10;
+
+        const users = await adminModel.findPendingUsers(page, perPage);
+        const total = await adminModel.countUsersByStatus('pending');
+
+        res.json({
+            users,
+            pagination: {
+                page,
+                perPage,
+                total: total._count
+            }
+        });
     } catch (error) {
-        console.error('เกิดข้อผิดพลาดในการโหลดผู้ใช้ที่รอการอนุมัติ:', error);
-        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการโหลดผู้ใช้ที่รอการอนุมัติ' });
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูล' });
+    }
+};
+
+// ดึงผู้ใช้ที่อนุมัติแล้ว
+export const getApprovedUsers = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const perPage = parseInt(req.query.perPage) || 10;
+
+        const users = await adminModel.findApprovedUsers(page, perPage);
+        const total = await adminModel.countUsersByStatus('approved');
+
+        res.json({
+            users,
+            pagination: {
+                page,
+                perPage,
+                total: total._count
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูล' });
+    }
+};
+
+// ดึงผู้ใช้ที่ถูกปฏิเสธ
+export const getRejectedUsers = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const perPage = parseInt(req.query.perPage) || 10;
+
+        const users = await adminModel.findRejectedUsers(page, perPage);
+        const total = await adminModel.countUsersByStatus('rejected');
+
+        res.json({
+            users,
+            pagination: {
+                page,
+                perPage,
+                total: total._count
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูล' });
+    }
+};
+
+// ดึงสถิติจำนวนผู้ใช้แต่ละสถานะ
+export const getUserStats = async (req, res) => {
+    try {
+        const stats = await adminModel.countUsersByStatus();
+        res.json(stats);
+    } catch (error) {
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูลสถิติ' });
     }
 };
 
@@ -209,20 +286,29 @@ export const approveUser = async (req, res) => {
         if (!user || !user.email_verified) {
             return res.status(400).json({ message: "ไม่พบผู้ใช้หรืออีเมลยังไม่ได้รับการยืนยัน กรุณาตรวจสอบและลองอีกครั้ง" });
         }
-        if (user.approved) {
-            return res.status(400).json({ message: 'ผู้ใช้นี้ได้รับการอนุมัติไปแล้ว ไม่สามารถดำเนินการซ้ำได้' });
-        }
 
+        if (user.approved === "approved") {
+            return res.status(400).json({ message: 'ผู้ใช้นี้ได้รับการอนุมัติไปแล้ว' });
+        }
+        if (user.approved === "rejected" && status === "rejected") {
+            return res.status(400).json({ message: 'ผู้ใช้นี้ถูกปฏิเสธไปแล้ว' });
+        }
         // ตรวจสอบสถานะที่ส่งมาให้เป็น approved หรือ rejected
-        if (!['approved', 'rejected'].includes(status)) {
-            return res.status(400).json({ message: "ผู้ใช้นี้ได้รับการอนุมัติไปแล้ว ไม่สามารถดำเนินการซ้ำได้" });
+        if (!status || !['approved', 'rejected'].includes(status)) {
+            return res.status(400).json({
+                message: "สถานะไม่ถูกต้อง กรุณาระบุ 'approved' หรือ 'rejected'"
+            });
         }
 
-        // อัปเดตสถานะผู้ใช้ (true สำหรับ approved, false สำหรับ rejected)
-        const isApproved = status === 'approved';
-        await adminModel.updateUserApprovalStatus(userIdAsInt, isApproved);
 
-        const notificationMessage = isApproved
+
+        const updatedUser = await adminModel.updateUserApprovalStatus(userIdAsInt, status);
+        if (!updatedUser) {
+            throw new Error('ไม่สามารถอัปเดตสถานะผู้ใช้ได้');
+        }
+
+
+        const notificationMessage = status === 'approved'
             ? 'ยินดีด้วย! บัญชีของคุณได้รับการอนุมัติแล้ว คุณสามารถเข้าใช้งานระบบได้ทันที โปรดเข้าสู่ระบบเพื่อเริ่มใช้งาน'
             : 'ขออภัย บัญชีของคุณไม่ได้รับการอนุมัติในขณะนี้ โปรดติดต่อฝ่ายสนับสนุนเพื่อขอข้อมูลเพิ่มเติมหรือยื่นคำร้องใหม่';
 
@@ -231,6 +317,10 @@ export const approveUser = async (req, res) => {
 
         // ดึงข้อมูลแอดมิน
         const admin = await adminModel.findAdminById(adminId);
+        if (!admin) {
+            throw new Error('ไม่พบข้อมูลผู้ดูแลระบบ');
+        }
+
         const adminName = `${admin.first_name} ${admin.last_name}`;
         // บันทึก log พร้อมสถานะที่ได้รับ
         const logMessage = `User { Name: ${user.first_name} ${user.last_name} } Status: ${status} by Admin { Name: ${adminName} }`;
@@ -245,7 +335,13 @@ export const approveUser = async (req, res) => {
             userAgent
         );
 
-        res.status(200).json({ message: `อัปเดตสถานะผู้ใช้เป็น ${status} สำเร็จ.` });
+        res.status(200).json({
+            message: `อัปเดตสถานะผู้ใช้เป็น ${status} สำเร็จ`,
+            user: {
+                id: updatedUser.id,
+                status: updatedUser.approved
+            }
+        });
     } catch (error) {
         console.error('เกิดข้อผิดพลาดในการอนุมัติ/ปฏิเสธผู้ใช้:', error);
         await createLog(
@@ -258,7 +354,7 @@ export const approveUser = async (req, res) => {
             ip,
             userAgent
         );
-        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดำเนินการ กรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ' });
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดำเนินการ กรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ', error: error.message });
     }
 };
 

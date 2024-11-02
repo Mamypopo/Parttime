@@ -342,7 +342,7 @@ export default {
     async fetchPendingUsers() {
       this.loading = true
       try {
-        const response = await axios.get(`${this.baseURL}/api/admin/pending-users`, {
+        const response = await axios.get(`${this.baseURL}/api/admin/pending`, {
           params: {
             page: this.currentPage,
             ...this.searchFilters
@@ -375,7 +375,7 @@ export default {
 
     if (result.isConfirmed) {
       await axios.post(`${this.baseURL}/api/admin/approve-reject-user/${userId}`, {
-        status: "approved"  // เปลี่ยนจาก approved: true เป็น status: "approved"
+       status: 'approved'   // เปลี่ยนจาก approved: true เป็น status: "approved"
       });
 
       await this.fetchPendingUsers();
@@ -409,7 +409,7 @@ async handleReject(userId) {
 
     if (result.isConfirmed) {
       await axios.post(`${this.baseURL}/api/admin/approve-reject-user/${userId}`, {
-        status: "rejected"  // เปลี่ยนเป็นใช้ endpoint เดียวกับ approve และใช้ status: "rejected"
+       status: 'rejected' // เปลี่ยนเป็นใช้ endpoint เดียวกับ approve และใช้ status: "rejected"
       });
 
       await this.fetchPendingUsers();

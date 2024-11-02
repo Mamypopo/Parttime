@@ -34,6 +34,9 @@ async function clearDatabase() {
         await prisma.admin.deleteMany();
         console.log('ล้างข้อมูล Admin เรียบร้อย');
 
+        // ลบ Log
+        await prisma.log.deleteMany();
+        console.log('ล้างข้อมูล Log เรียบร้อย');
 
         console.log('ล้างข้อมูลในฐานข้อมูลเรียบร้อยแล้ว');
     } catch (error) {

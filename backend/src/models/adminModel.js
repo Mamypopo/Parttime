@@ -30,8 +30,6 @@ export const findAdminById = async (adminId) => {
 };
 
 export const getAdminById = async (id) => {
-    console.log('Getting admin with ID:', id); // เพิ่ม log
-
     if (!id) {
         throw new Error('Admin ID is required');
     }
@@ -47,7 +45,7 @@ export const getAdminById = async (id) => {
         }
     });
 
-    console.log('Found admin:', admin); // เพิ่ม log
+    // console.log('Found admin:', admin); 
     return admin;
 };
 
@@ -59,51 +57,107 @@ export const findAdminByEmail = (email) =>
     prisma.admin.findUnique({ where: { email } });
 
 
-// ฟังก์ชันสำหรับดึงผู้ใช้ที่รอการอนุมัติ
+// // ฟังก์ชันสำหรับดึงผู้ใช้ที่รอการอนุมัติ
+// export const findPendingUsers = (page = 1, perPage = 10) =>
+//     prisma.user.findMany({
+//         where: { approved: "pending" },
+//         select: {
+//             id: true,
+//             first_name: true,
+//             last_name: true,
+//             email: true,
+//             email_verified: true,
+//             created_at: true,
+//             skills: true,
+//             // ข้อมูลพื้นฐาน
+//             prefix: true,
+//             gender: true,
+//             birth_date: true,
+//             age: true,
+//             phone_number: true,
+//             national_id: true,
+//             line_id: true,
+//             profile_image: true,
+//             // เอกสาร
+//             education_certificate: true,
+//             user_documents: true
+//         },
+//         skip: (page - 1) * perPage,
+//         take: perPage,
+//         orderBy: {
+//             created_at: 'desc'
+//         }
+//     });
+
+
+
+// ฟังก์ชันพื้นฐานสำหรับดึงข้อมูลผู้ใช้
+const baseUserSelect = {
+    id: true,
+    first_name: true,
+    last_name: true,
+    email: true,
+    email_verified: true,
+    created_at: true,
+    skills: true,
+    // ข้อมูลพื้นฐาน
+    prefix: true,
+    gender: true,
+    birth_date: true,
+    age: true,
+    phone_number: true,
+    national_id: true,
+    line_id: true,
+    profile_image: true,
+    // เอกสาร
+    education_certificate: true,
+    user_documents: true,
+    approved: true // เพิ่ม field approved
+};
+
+
+// ดึงผู้ใช้ที่รอการอนุมัติ
 export const findPendingUsers = (page = 1, perPage = 10) =>
     prisma.user.findMany({
-        where: { approved: false },
-        select: {
-            id: true,
-            first_name: true,
-            last_name: true,
-            email: true,
-            email_verified: true,
-            created_at: true,
-            skills: true,
-            // ข้อมูลพื้นฐาน
-            prefix: true,
-            gender: true,
-            birth_date: true,
-            age: true,
-            phone_number: true,
-            national_id: true,
-            line_id: true,
-            profile_image: true,
-            // เอกสาร
-            education_certificate: true,
-            user_documents: true
-        },
+        where: { approved: "pending" },
+        select: baseUserSelect,
         skip: (page - 1) * perPage,
         take: perPage,
-        orderBy: {
-            created_at: 'desc'
-        }
+        orderBy: { created_at: 'desc' }
+    });
+
+// ดึงผู้ใช้ที่อนุมัติแล้ว
+export const findApprovedUsers = (page = 1, perPage = 10) =>
+    prisma.user.findMany({
+        where: { approved: "approved" },
+        select: baseUserSelect,
+        skip: (page - 1) * perPage,
+        take: perPage,
+        orderBy: { created_at: 'desc' }
+    });
+
+// ดึงผู้ใช้ที่ถูกปฏิเสธ
+export const findRejectedUsers = (page = 1, perPage = 10) =>
+    prisma.user.findMany({
+        where: { approved: "rejected" },
+        select: baseUserSelect,
+        skip: (page - 1) * perPage,
+        take: perPage,
+        orderBy: { created_at: 'desc' }
+    });
+
+// นับจำนวนผู้ใช้แต่ละสถานะ
+export const countUsersByStatus = () =>
+    prisma.user.groupBy({
+        by: ['approved'],
+        _count: true
     });
 
 
-
-export const approveUserById = (userId) =>
+export const updateUserApprovalStatus = (userId, status) =>
     prisma.user.update({
         where: { id: userId },
-        data: { approved: true }
-    });
-
-
-export const updateUserApprovalStatus = (userId, isApproved) =>
-    prisma.user.update({
-        where: { id: userId },
-        data: { approved: isApproved },
+        data: { approved: status },
     });
 
 

@@ -77,6 +77,7 @@ export const registerUser = async (req, res) => {
             profile_image: profileImagePath || undefined,  // เช็คก่อนบันทึก
             user_documents: userDocumentsPaths.length ? JSON.stringify(userDocumentsPaths) : undefined,  // เช็คก่อนบันทึก
             skills: skillsString,
+
             role: 'user',
             verification_token: verificationToken
         });
