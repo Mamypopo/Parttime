@@ -119,7 +119,7 @@ props: {
       type: Boolean,
       default: false
     },
-     isMobile: {  // เพิ่ม prop isMobile
+     isMobile: { 
       type: Boolean,
       default: false
     }

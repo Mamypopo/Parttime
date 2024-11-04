@@ -1,14 +1,13 @@
 <template>
   <div class="rounded-3xl p-4 md:p-8 min-h-screen bg-white transition-all duration-500 ease-in-out ">
-    <h1 class="text-xl md:text-2xl text-purple-400 mb-4 md:mb-6">Pending Users</h1>
+    <h1 class="text-xl md:text-2xl text-purple-400 mb-4 md:mb-6">Rejected Users</h1>
 
-    <SearchUsersBar 
+      <SearchUsersBar 
       :filters="searchFilters"
       @search="handleSearch"
       @clear="handleClear"
     />
-
-      <!-- เพิ่ม loading indicator -->
+  <!-- เพิ่ม loading indicator -->
     <div v-if="loading" class="flex justify-center items-center py-8">
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
     </div>
@@ -17,13 +16,13 @@
       ไม่พบข้อมูลผู้ใช้
     </div>
 
-    <div v-else>
+<div v-else> 
 <!-- Desktop: Table View -->
 <div class="hidden md:block overflow-x-auto transition-all duration-500 ease-in-out">
-  <table class="w-full min-w-[800px]  transition-all duration-500 ease-in-out"> <!-- กำหนดความกว้างขั้นต่ำ -->
+  <table class="w-full min-w-[800px]  transition-all duration-500 ease-in-out"> 
     <thead>
-      <tr class="text-left border-b bg-gray-50">
-            <th class="px-4 py-2 text-center ">ID</th>
+     <tr class="text-left border-b bg-gray-50">
+         <th class="px-4 py-2 text-center ">ID</th>
           <th class="px-4 py-2 text-center w-48">วันที่ลงทะเบียน</th>
           <th class="px-4 py-2 text-center">ชื่อ-นามสกุล</th>
           <th class="px-4 py-2 text-center">ทักษะ</th>
@@ -32,7 +31,7 @@
           <th class="px-4 py-2 text-center">จัดการ</th>
       </tr>
     </thead>
-<tbody>
+    <tbody>
       <tr v-for="user in formattedUsers" :key="user.id" class="border-b hover:bg-gray-50">
         <td class="px-4 py-2 text-gray-600">{{ user.id }}</td>
         <td class="px-4 py-2">{{ user.registeredDate }}</td>
@@ -46,8 +45,8 @@
             </span>
           </div>
         </td>
-        <td class="py-4 px-2 text-gray-600 break-all">{{ user.email }}</td>
-        <td class="py-4 px-2">
+        <td class="px-4 py-2 text-gray-600 break-all">{{ user.email }}</td>
+        <td class="px-4 py-2">
           <div class="flex justify-center">
             <span :class="[
               'flex items-center justify-center w-8 h-8 rounded-full',
@@ -60,8 +59,8 @@
             </span>
           </div>
         </td>
-        <td class="py-4 px-4">
-          <div class="flex justify-center gap-2">
+        <td class="px-4 py-4">
+          <div class="flex flex-col sm:flex-row justify-center gap-2">
             <button @click="showUserDetails(user)" 
                     class="bg-blue-400 text-white px-3 py-1 rounded-full hover:bg-blue-500 text-sm whitespace-nowrap">
               รายละเอียด
@@ -87,6 +86,7 @@
        :key="user.id" 
        class="bg-white rounded-lg p-4 shadow-sm space-y-3 transition-all duration-500 ease-in-out">
     <div class="flex justify-between items-center">
+      <span class="text-sm text-gray-500">ID: {{ user.id }}</span> 
       <span class="text-sm text-gray-500">วันที่ลงทะเบียน : {{ user.registeredDate }}</span>
       <span :class="[
         'flex items-center justify-center w-8 h-8 rounded-full',
@@ -101,14 +101,14 @@
     
     <div class="space-y-1">
       <h3 class="font-medium">ชื่อ : {{ user.fullName }}</h3>
-      <p class="text-sm text-gray-600 break-words ">อีเมล : {{ user.email }}</p>
+      <p class="text-sm text-gray-600  break-words ">อีเมล : {{ user.email }}</p>
     </div>
     
     <div class="flex flex-wrap gap-1.5">
 <p class="text-sm">
     ทักษะ
 </p>
-     <span v-for="skill in JSON.parse(user.skills)" 
+   <span v-for="skill in JSON.parse(user.skills)" 
                     :key="skill"
                     class="px-2.5 py-0.5 text-xs rounded-full bg-purple-100 text-purple-600 ">
                 {{ skill }}
@@ -133,7 +133,7 @@
 </div>
 
 
-  <!-- Pagination controls -->
+ <!-- Pagination controls -->
 <div v-if="!loading && formattedUsers.length > 0" class="flex justify-center mt-6 space-x-2">
   <button 
     @click="handlePrevPage" 
@@ -169,6 +169,7 @@
     <i class="fas fa-chevron-right"></i>
   </button>
 </div>
+
 
 
 
@@ -280,22 +281,23 @@ import axios from 'axios'
 import Swal from 'sweetalert2'
 import SearchUsersBar from '@/components/SearchUsersBar.vue'
 
+
 export default {
-  name: 'AdminPendingUsers',
-   components: {
+  name: 'AdminRejectedUsers',
+  components: {
     SearchUsersBar
   },
   data() {
     return {
-    baseURL: import.meta.env.VITE_API_URL , 
+    baseURL: import.meta.env.VITE_API_URL ,
       formattedUsers: [], // เก็บข้อมูลที่จัดรูปแบบแล้ว
       loading: false,
         selectedUser: null,
-          showModal: false,
-      currentPage: 1,
-       perPage: 10,
+     currentPage: 1,
+      showModal: false,
+    perPage: 10,
     totalItems: 0,
-     searchFilters: {
+       searchFilters: {
       userId: '',
       idCard: '',
       name: '', 
@@ -311,6 +313,7 @@ export default {
     return this.currentPage < this.totalPages
   }
   },
+
   methods: {
  formatUserData(user) {
       return {
@@ -334,16 +337,16 @@ export default {
       }
     },
 
-    async fetchPendingUsers() {
+    async fetchRejectedUsers() {
       this.loading = true
       try {
-        const params = {
+      const params = {
             page: this.currentPage,
             limit: this.perPage,
             offset: (this.currentPage - 1) * this.perPage
         }
 
-   
+    
     if (this.searchFilters.userId.trim()) {
       params.userId = this.searchFilters.userId.trim()
     }
@@ -353,10 +356,10 @@ export default {
     if (this.searchFilters.idCard.trim()) {
       params.idCard = this.searchFilters.idCard.trim()
     }
-        const response = await axios.get(`${this.baseURL}/api/admin/pending`, {
-         params: params 
+        const response = await axios.get(`${this.baseURL}/api/admin/rejected`, {
+           params: params 
         })
-        if (response.data) {
+       if (response.data) {
       this.formattedUsers = response.data.users
         .map(this.formatUserData)
         .filter(user => user !== null)
@@ -373,14 +376,14 @@ export default {
           text: 'ไม่สามารถดึงข้อมูลผู้ใช้ได้'
         })
            this.formattedUsers = []
-            this.totalItems = 0
+    this.totalItems = 0
       } finally {
         this.loading = false
       }
     },
    async handleApprove(userId) {
   try {
-    const result = await Swal.fire({
+   const result = await Swal.fire({
       title: 'ยืนยันการอนุมัติ',
       text: 'คุณต้องการอนุมัติผู้ใช้นี้ใช่หรือไม่?',
       icon: 'question',
@@ -391,17 +394,18 @@ export default {
 
     if (result.isConfirmed) {
       await axios.post(`${this.baseURL}/api/admin/approve-reject-user/${userId}`, {
-       status: 'approved'   
+       status: 'approved'  
       });
 
-      await this.fetchPendingUsers();
-      Swal.fire({
+      await this.fetchRejectedUsers();
+
+      await Swal.fire({
         icon: 'success',
         title: 'สำเร็จ',
-        text: 'อนุมัติผู้ใช้เรียบร้อยแล้ว'
-      });
+      text: 'อนุมัติผู้ใช้เรียบร้อยแล้ว'
+       });
     }
-  } catch (error) {
+   } catch (error) {
     console.error('Error:', error);
     Swal.fire({
       icon: 'error',
@@ -428,7 +432,7 @@ async handleReject(userId) {
        status: 'rejected'
       });
 
-      await this.fetchPendingUsers();
+      await this.fetchRejectedUsers();
       Swal.fire({
         icon: 'success',
         title: 'สำเร็จ',
@@ -457,30 +461,31 @@ async handleReject(userId) {
      handleSearch(filters) {
       this.searchFilters = { ...filters }
       this.currentPage = 1
-      this.fetchPendingUsers()
+      this.fetchRejectedUsers()
     },
-   handleClear() {
+
+    handleClear() {
       this.searchFilters = {
         userId: '',
         name: '',
         idCard: ''
       }
       this.currentPage = 1
-      this.fetchPendingUsers()
+      this.fetchRejectedUsers()
     }, 
-
 
      handlePrevPage() {
     if (this.currentPage > 1) {
       this.currentPage--
-      this.fetchPendingUsers()
+      this.fetchRejectedUsers()
       window.scrollTo(0, 0)
     }
   },
-    handleNextPage() {
+
+ handleNextPage() {
   if (this.currentPage < this.totalPages) {
     this.currentPage++
-    this.fetchPendingUsers() 
+    this.fetchRejectedUsers() // แก้จาก fetchUsers เป็น fetchRejectedUsers
     window.scrollTo(0, 0)
   }
 },
@@ -503,7 +508,7 @@ async handleReject(userId) {
   },
 
   mounted() {
-    this.fetchPendingUsers()
+    this.fetchRejectedUsers()
   },
    beforeUnmount() {
     this.selectedUser = null;

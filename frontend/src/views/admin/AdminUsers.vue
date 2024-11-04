@@ -1,14 +1,13 @@
 <template>
   <div class="rounded-3xl p-4 md:p-8 min-h-screen bg-white transition-all duration-500 ease-in-out ">
-    <h1 class="text-xl md:text-2xl text-purple-400 mb-4 md:mb-6">Pending Users</h1>
+    <h1 class="text-xl md:text-2xl text-purple-400 mb-4 md:mb-6">Users</h1>
 
-    <SearchUsersBar 
+     <SearchUsersBar 
       :filters="searchFilters"
       @search="handleSearch"
       @clear="handleClear"
     />
-
-      <!-- เพิ่ม loading indicator -->
+  <!-- เพิ่ม loading indicator -->
     <div v-if="loading" class="flex justify-center items-center py-8">
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
     </div>
@@ -17,13 +16,13 @@
       ไม่พบข้อมูลผู้ใช้
     </div>
 
-    <div v-else>
+<div v-else> 
 <!-- Desktop: Table View -->
 <div class="hidden md:block overflow-x-auto transition-all duration-500 ease-in-out">
   <table class="w-full min-w-[800px]  transition-all duration-500 ease-in-out"> <!-- กำหนดความกว้างขั้นต่ำ -->
     <thead>
       <tr class="text-left border-b bg-gray-50">
-            <th class="px-4 py-2 text-center ">ID</th>
+          <th class="px-4 py-2 text-center ">ID</th>
           <th class="px-4 py-2 text-center w-48">วันที่ลงทะเบียน</th>
           <th class="px-4 py-2 text-center">ชื่อ-นามสกุล</th>
           <th class="px-4 py-2 text-center">ทักษะ</th>
@@ -32,8 +31,10 @@
           <th class="px-4 py-2 text-center">จัดการ</th>
       </tr>
     </thead>
-<tbody>
-      <tr v-for="user in formattedUsers" :key="user.id" class="border-b hover:bg-gray-50">
+    <tbody>
+      <tr v-for="user in formattedUsers" 
+          :key="user.id" 
+          class="border-b hover:bg-gray-50 transition-colors">
         <td class="px-4 py-2 text-gray-600">{{ user.id }}</td>
         <td class="px-4 py-2">{{ user.registeredDate }}</td>
         <td class="px-4 py-2 ">{{ user.fullName }}</td>
@@ -46,8 +47,8 @@
             </span>
           </div>
         </td>
-        <td class="py-4 px-2 text-gray-600 break-all">{{ user.email }}</td>
-        <td class="py-4 px-2">
+        <td class="px-4 py-2 text-gray-600 break-all">{{ user.email }}</td>
+        <td class="px-4 py-2">
           <div class="flex justify-center">
             <span :class="[
               'flex items-center justify-center w-8 h-8 rounded-full',
@@ -60,7 +61,7 @@
             </span>
           </div>
         </td>
-        <td class="py-4 px-4">
+        <td class="px-4 py-4">
           <div class="flex justify-center gap-2">
             <button @click="showUserDetails(user)" 
                     class="bg-blue-400 text-white px-3 py-1 rounded-full hover:bg-blue-500 text-sm whitespace-nowrap">
@@ -68,11 +69,7 @@
             </button>
             <button @click="handleApprove(user.id)" 
                     class="bg-green-400 text-white px-3 py-1 rounded-full hover:bg-green-500 text-sm whitespace-nowrap">
-              อนุมัติ
-            </button>
-            <button @click="handleReject(user.id)"
-                    class="bg-red-400 text-white px-3 py-1 rounded-full hover:bg-red-500 text-sm whitespace-nowrap">
-              ไม่อนุมัติ
+              ดูประวัติ
             </button>
           </div>
         </td>
@@ -80,13 +77,14 @@
     </tbody>
   </table>
 </div>
- </div>
+
 <!-- Mobile: Card View -->
 <div class="md:hidden space-y-4  p-1  transition-all duration-500 ease-in-out">
   <div v-for="user in formattedUsers" 
        :key="user.id" 
        class="bg-white rounded-lg p-4 shadow-sm space-y-3 transition-all duration-500 ease-in-out">
     <div class="flex justify-between items-center">
+     <span class="text-sm text-gray-500">ID: {{ user.id }}</span> 
       <span class="text-sm text-gray-500">วันที่ลงทะเบียน : {{ user.registeredDate }}</span>
       <span :class="[
         'flex items-center justify-center w-8 h-8 rounded-full',
@@ -108,7 +106,7 @@
 <p class="text-sm">
     ทักษะ
 </p>
-     <span v-for="skill in JSON.parse(user.skills)" 
+   <span v-for="skill in JSON.parse(user.skills)" 
                     :key="skill"
                     class="px-2.5 py-0.5 text-xs rounded-full bg-purple-100 text-purple-600 ">
                 {{ skill }}
@@ -122,17 +120,13 @@
       </button>
       <button @click="handleApprove(user.id)" 
               class="w-full bg-green-400 text-white px-3 py-1.5 rounded-full hover:bg-green-500 text-sm">
-        อนุมัติ
+        ดูประวัติการทำงาน
       </button>
-      <button @click="handleReject(user.id)"
-              class="w-full bg-red-400 text-white px-3 py-1.5 rounded-full hover:bg-red-500 text-sm">
-        ไม่อนุมัติ
-      </button>
+      
     </div>
   </div>
 </div>
-
-
+</div>
   <!-- Pagination controls -->
 <div v-if="!loading && formattedUsers.length > 0" class="flex justify-center mt-6 space-x-2">
   <button 
@@ -277,25 +271,24 @@
 
 <script>
 import axios from 'axios'
-import Swal from 'sweetalert2'
 import SearchUsersBar from '@/components/SearchUsersBar.vue'
 
 export default {
-  name: 'AdminPendingUsers',
+  name: 'AdminAllUsers',
    components: {
     SearchUsersBar
   },
   data() {
     return {
-    baseURL: import.meta.env.VITE_API_URL , 
-      formattedUsers: [], // เก็บข้อมูลที่จัดรูปแบบแล้ว
+      formattedUsers: [],
       loading: false,
-        selectedUser: null,
-          showModal: false,
       currentPage: 1,
-       perPage: 10,
+    perPage: 10,
     totalItems: 0,
-     searchFilters: {
+      selectedUser: null,
+      showModal: false,
+      baseURL: import.meta.env.VITE_API_URL,
+       searchFilters: {
       userId: '',
       idCard: '',
       name: '', 
@@ -303,148 +296,77 @@ export default {
     }
   },
 
-  computed: {
-    totalPages() {
-    return Math.ceil(this.totalItems / this.perPage)
+  created() {
+    this.fetchUsers()
+  },
+computed: {
+   totalPages() {
+    return Math.max(1, Math.ceil(this.totalItems / this.perPage))
   },
   hasMorePages() {
     return this.currentPage < this.totalPages
   }
-  },
+},
   methods: {
- formatUserData(user) {
+    formatUserData(user) {
+      if (!user) return null;
+      
       return {
-        id: user.id,
-        fullName: `${user.prefix || ''} ${user.first_name} ${user.last_name}`.trim(),
-        email: user.email,
-        phoneNumber: user.phone_number || '-',
-        idCardNumber: user.national_id || '-',
-        lineId: user.line_id || '-',
-        isVerified: user.email_verified,
-        registeredDate: this.formatDate(user.created_at),
-        skills: user.skills ? user.skills.split(',') : [],
-        // ข้อมูลส่วนตัว
-        gender: user.gender || '-',
-        birthDate: user.birth_date ? this.formatDate(user.birth_date) : '-',
-        age: user.age || '0',
-        profileImage: user.profile_image,
-        // เอกสาร
-        educationCertificate: user.education_certificate,
+        id: user.id || '',
+        fullName: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+        email: user.email || '',
+        isVerified: user.email_verified || false,
+        registeredDate: user.created_at ? this.formatDate(user.created_at) : '-',
+  skills: user.skills || '[]',
+        profileImage: user.profile_image || '',
+        educationCertificate: user.education_certificate || '',
         documents: user.user_documents || '-'
       }
     },
 
-    async fetchPendingUsers() {
+    async fetchUsers() {
       this.loading = true
       try {
-        const params = {
-            page: this.currentPage,
-            limit: this.perPage,
-            offset: (this.currentPage - 1) * this.perPage
-        }
+       const params = {
+        page: this.currentPage,
+        limit: this.perPage,
+        offset: (this.currentPage - 1) * this.perPage
+      }
 
    
-    if (this.searchFilters.userId.trim()) {
-      params.userId = this.searchFilters.userId.trim()
-    }
-    if (this.searchFilters.name.trim()) {
-      params.name = this.searchFilters.name.trim()
-    }
-    if (this.searchFilters.idCard.trim()) {
-      params.idCard = this.searchFilters.idCard.trim()
-    }
-        const response = await axios.get(`${this.baseURL}/api/admin/pending`, {
-         params: params 
+      if (this.searchFilters.userId.trim()) {
+        params.userId = this.searchFilters.userId.trim()
+      }
+      if (this.searchFilters.name.trim()) {
+        params.name = this.searchFilters.name.trim()
+      }
+      if (this.searchFilters.idCard.trim()) {
+        params.idCard = this.searchFilters.idCard.trim()
+      }
+      
+        const response = await axios.get(`${this.baseURL}/api/admin/approved`, {
+          params: params 
+    
         })
-        if (response.data) {
+
+
+   
+  
+    if (response.data) {
       this.formattedUsers = response.data.users
         .map(this.formatUserData)
         .filter(user => user !== null)
       
-      if (response.data.pagination) {
-        this.totalItems = parseInt(response.data.pagination.total)
-      }
+      this.totalItems = response.data.pagination?.total || 0
     }
       } catch (error) {
-        console.error('Error:', error)
-        Swal.fire({
-          icon: 'error',
-          title: 'เกิดข้อผิดพลาด',
-          text: 'ไม่สามารถดึงข้อมูลผู้ใช้ได้'
-        })
-           this.formattedUsers = []
-            this.totalItems = 0
+ console.error('Error fetching users:', error)    
+ this.formattedUsers = []
+      this.totalItems = 0
       } finally {
         this.loading = false
       }
     },
-   async handleApprove(userId) {
-  try {
-    const result = await Swal.fire({
-      title: 'ยืนยันการอนุมัติ',
-      text: 'คุณต้องการอนุมัติผู้ใช้นี้ใช่หรือไม่?',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'ยืนยัน',
-      cancelButtonText: 'ยกเลิก'
-    });
-
-    if (result.isConfirmed) {
-      await axios.post(`${this.baseURL}/api/admin/approve-reject-user/${userId}`, {
-       status: 'approved'   
-      });
-
-      await this.fetchPendingUsers();
-      Swal.fire({
-        icon: 'success',
-        title: 'สำเร็จ',
-        text: 'อนุมัติผู้ใช้เรียบร้อยแล้ว'
-      });
-    }
-  } catch (error) {
-    console.error('Error:', error);
-    Swal.fire({
-      icon: 'error',
-      title: 'เกิดข้อผิดพลาด',
-      text: 'ไม่สามารถอนุมัติผู้ใช้ได้'
-    });
-  }
-},
-
-async handleReject(userId) {
-  try {
-    const result = await Swal.fire({
-      title: 'ยืนยันการไม่อนุมัติ',
-      text: 'คุณต้องการไม่อนุมัติผู้ใช้นี้ใช่หรือไม่?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'ยืนยัน',
-      cancelButtonText: 'ยกเลิก',
-      confirmButtonColor: '#ef4444'
-    });
-
-    if (result.isConfirmed) {
-      await axios.post(`${this.baseURL}/api/admin/approve-reject-user/${userId}`, {
-       status: 'rejected'
-      });
-
-      await this.fetchPendingUsers();
-      Swal.fire({
-        icon: 'success',
-        title: 'สำเร็จ',
-        text: 'ไม่อนุมัติผู้ใช้เรียบร้อยแล้ว'
-      });
-    }
-  } catch (error) {
-    console.error('Error:', error);
-    Swal.fire({
-      icon: 'error',
-      title: 'เกิดข้อผิดพลาด',
-      text: 'ไม่สามารถดำเนินการได้'
-    });
-  }
-},
-   
 
     formatDate(dateString) {
       return new Date(dateString).toLocaleDateString('th-TH', {
@@ -454,60 +376,53 @@ async handleReject(userId) {
       })
     },
 
-     handleSearch(filters) {
+    showUserDetails(user) {
+      this.selectedUser = user
+      this.showModal = true
+    },
+
+    closeModal() {
+      this.showModal = false
+      this.selectedUser = null
+    },
+
+
+    getDocumentUrl(documentPath) {
+      return `${this.baseURL}/uploads/documents/${documentPath}`
+    },
+
+  
+    handleSearch(filters) {
       this.searchFilters = { ...filters }
       this.currentPage = 1
-      this.fetchPendingUsers()
+      this.fetchUsers()
     },
-   handleClear() {
+
+    handleClear() {
       this.searchFilters = {
         userId: '',
         name: '',
         idCard: ''
       }
       this.currentPage = 1
-      this.fetchPendingUsers()
-    }, 
-
-
-     handlePrevPage() {
+      this.fetchUsers()
+    },  // เพิ่ม comma ตรงนี้
+ handlePrevPage() {
     if (this.currentPage > 1) {
       this.currentPage--
-      this.fetchPendingUsers()
+      this.fetchUsers()
       window.scrollTo(0, 0)
     }
   },
-    handleNextPage() {
-  if (this.currentPage < this.totalPages) {
-    this.currentPage++
-    this.fetchPendingUsers() 
-    window.scrollTo(0, 0)
+
+  handleNextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++
+      this.fetchUsers()
+      window.scrollTo(0, 0)
+    }
   }
-},
-  showUserDetails(user) {
-      if (user) { 
-        this.selectedUser = { ...user }; 
-        this.showModal = true;
-      }
-    },
-
-     getDocumentUrl(documentPath) {
-    const cleanPath = documentPath.replace(/[[\]"]/g, '');
-    return `${this.baseURL}/uploads/documents/${cleanPath}`;
-    },
-
-    closeModal() {
-      this.showModal = false;
-      this.selectedUser = null; 
-    },
   },
-
-  mounted() {
-    this.fetchPendingUsers()
-  },
-   beforeUnmount() {
-    this.selectedUser = null;
-    this.showModal = false;
-  }
 }
+
 </script>

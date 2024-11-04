@@ -144,8 +144,6 @@ export default {
         admin_secret: this.form.secretKey
       };
 
-      console.log('API URL:', `${baseURL}/api/admin/register-admin`);
-      console.log('Sending payload:', payload);
 
       const response = await axios.post(
         `${baseURL}/api/admin/register-admin`,

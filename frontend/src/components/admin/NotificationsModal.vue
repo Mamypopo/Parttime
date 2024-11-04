@@ -1,6 +1,6 @@
 <template>
   <TransitionRoot appear :show="isOpen" as="template">
-    <Dialog as="div" @close="closeModal" class="relative z-50">
+    <HeadlessDialog as="div" @close="closeModal" class="relative z-50">
       <!-- Backdrop -->
       <TransitionChild
         enter="duration-300 ease-out"
@@ -24,12 +24,12 @@
             leave-from="opacity-100 scale-100"
             leave-to="opacity-0 scale-95"
           >
-            <DialogPanel class="w-full max-w-2xl bg-white rounded-xl shadow-xl">
+            <HeadlessDialogPanel class="w-full max-w-2xl bg-white rounded-xl shadow-xl">
               <!-- Header -->
               <div class="flex justify-between items-center p-4 border-b">
-                <DialogTitle class="text-lg font-semibold">
+                <HeadlessDialogTitle class="text-lg font-semibold">
                   All Notifications
-                </DialogTitle>
+                </HeadlessDialogTitle>
                 <div class="flex items-center gap-4">
                   <button 
                     v-if="hasUnread"
@@ -91,31 +91,32 @@
                   </div>
                 </div>
               </div>
-            </DialogPanel>
+            </HeadlessDialogPanel>
           </TransitionChild>
         </div>
       </div>
-    </Dialog>
+    </HeadlessDialog>
   </TransitionRoot>
 </template>
 
 <script>
 import {
-  Dialog,
-  DialogPanel,
-  DialogTitle,
+  Dialog as HeadlessDialog,
+  DialogPanel as HeadlessDialogPanel,
+  DialogTitle as HeadlessDialogTitle,
   TransitionRoot,
   TransitionChild,
 } from '@headlessui/vue'
+
+
 import NotificationsModal from './NotificationsModal.vue'
 export default {
-  components: {
-    Dialog,
-    DialogPanel,
-    DialogTitle,
+components: {
+   HeadlessDialog,
+    HeadlessDialogPanel, 
+    HeadlessDialogTitle,
     TransitionRoot,
     TransitionChild,
-    
   },
 
   props: {

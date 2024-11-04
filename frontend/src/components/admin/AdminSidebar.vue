@@ -1,5 +1,6 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-gray-50">
+  <div class="flex flex-col min-h-screen bg-gray-50" >
+   
     <!-- Desktop/Tablet Sidebar with Transition -->
     <Transition
        enter-active-class="transition-all duration-500 ease-in-out"
@@ -10,15 +11,16 @@
   leave-to-class="opacity-0 transform -translate-x-full"
     >
       <div v-show="!isMobile" 
-        class="transition-all duration-500 ease-in-out h-screen fixed bg-white border-r" 
+        class="transition-all duration-500 ease-in-out h-screen fixed bg-white border-r  " 
         :class="[isCollapsed ? 'w-16' : 'w-64']"
       >
         <!-- Header -->
-        <div class="flex items-center p-4" :class="[isCollapsed ? 'justify-center' : 'justify-between']">
+        <div class="flex items-center p-4 " :class="[isCollapsed ? 'justify-center' : 'justify-between']">
           <div class="flex items-center" :class="[isCollapsed ? 'justify-center' : 'gap-2']">
             <img src="@/assets/images/logosemed.svg" alt="Admin" class="w-8 h-8" />
             <h1 v-if="!isCollapsed" class="text-lg font-medium">Admin dashboard</h1>
           </div>
+          
           <!-- Toggle Sidebar Button -->
           <button v-if="!isCollapsed && !isTablet" 
             @click="toggleSidebar"
@@ -30,7 +32,7 @@
         </div>
 
         <!-- Navigation Sidebar -->
-        <nav class="px-2 py-2">
+        <nav class="px-2 py-2 bg-">
           <!-- Main Menu -->
           <router-link 
             v-for="(item, index) in mainMenuItems" 
@@ -43,8 +45,9 @@
             <i :class="['text-gray-400', item.icon]"></i>
             <span v-if="!isCollapsed">{{ item.name }}</span>
           </router-link>
-          
+
           <NotificationsPanel :is-collapsed="isCollapsed" />
+        
 
           <!-- Jobs Section -->
           <div class="mt-4 pt-4 border-t">
@@ -104,68 +107,135 @@
   </button>
 </Transition>
 
-    <!-- Mobile Bottom Navigation -->
-    <nav v-if="isMobile" class="fixed bottom-0 left-0 right-0 bg-white border-t px-4 py-2">
-      <div class="flex justify-around items-center">
-        <router-link 
-          v-for="item in mobileMainItems" 
-          :key="item.path"
-          :to="item.path"
-          class="flex flex-col items-center p-2"
-        >
-          <i :class="['text-xl text-gray-400', item.icon]"></i>
-          <span class="text-xs mt-1">{{ item.name }}</span>
-        </router-link>
-        
-        <!-- Mobile Notifications -->
-        <button class="flex flex-col items-center p-2 relative">
-          <i class="fas fa-bell text-xl text-gray-400"></i>
-          <span v-if="notificationCount" 
-            class="absolute top-1 right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full"
-          >
-            {{ notificationCount }}
-          </span>
-          <span class="text-xs mt-1">Alerts</span>
-        </button>
+ <!-- Mobile Bottom Navigation -->
+<nav v-if="isMobile" class="fixed bottom-0 left-0 right-0 bg-white border-t px-4 py-2">
+  <div class="flex justify-around items-center">
+    <template v-for="item in mobileMainItems" :key="item.name">
+      <button
+        class="flex flex-col items-center p-2"
+        @click="handleMobileMenuClick(item)"
+      >
+        <i :class="['text-xl text-gray-400', item.icon]"></i>
+        <span class="text-xs mt-1">{{ item.name }}</span>
+      </button>
+    </template>
+  </div>
 
-     
-
-        <!-- More Menu Button -->
-        <button 
-          @click="showMobileMenu = !showMobileMenu" 
-          class="flex flex-col items-center p-2"
-        >
-          <i class="fas fa-ellipsis-h text-xl text-gray-400"></i>
-          <span class="text-xs mt-1">More</span>
+  <!-- Users Submenu -->
+  <Transition
+    enter-active-class="transition-all duration-300 ease-out"
+    enter-from-class="transform translate-y-full"
+    enter-to-class="transform translate-y-0"
+    leave-active-class="transition-all duration-300 ease-in"
+    leave-from-class="transform translate-y-0"
+    leave-to-class="transform translate-y-full"
+  >
+    <div 
+      v-show="showUserSubmenu" 
+      class="absolute bottom-full left-0 right-0 bg-white border-t shadow-lg p-4"
+    >
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xs font-semibold text-gray-500">User Management</h3>
+        <button @click="showUserSubmenu = false" class="text-gray-400">
+          <i class="fas fa-times"></i>
         </button>
       </div>
-
-      <!-- More Menu Dropdown with Transition -->
-      <Transition
-        enter-active-class="transition-all duration-300 ease-out"
-        enter-from-class="transform translate-y-full"
-        enter-to-class="transform translate-y-0"
-        leave-active-class="transition-all duration-300 ease-in"
-        leave-from-class="transform translate-y-0"
-        leave-to-class="transform translate-y-full"
+      
+      <router-link 
+        v-for="item in mobileMainItems.find(i => i.name === 'Users')?.submenu.items"
+        :key="item.path"
+        :to="item.path"
+        class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg"
+        @click="showUserSubmenu = false"
       >
-        <div 
-          v-show="showMobileMenu" 
-          class="absolute bottom-full left-0 right-0 bg-white border-t shadow-lg p-4"
-        >
-          <router-link 
-            v-for="item in mobileMoreItems" 
-            :key="item.path"
-            :to="item.path"
-            class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg"
-            @click="showMobileMenu = false"
-          >
-            <i :class="['text-gray-400', item.icon]"></i>
-            <span>{{ item.name }}</span>
-          </router-link>
-        </div>
-      </Transition>
-    </nav>
+        <i :class="['text-gray-400', item.icon]"></i>
+        <span>{{ item.name }}</span>
+      </router-link>
+    </div>
+  </Transition>
+
+  <!-- Jobs Submenu -->
+  <Transition
+    enter-active-class="transition-all duration-300 ease-out"
+    enter-from-class="transform translate-y-full"
+    enter-to-class="transform translate-y-0"
+    leave-active-class="transition-all duration-300 ease-in"
+    leave-from-class="transform translate-y-0"
+    leave-to-class="transform translate-y-full"
+  >
+    <div 
+      v-show="showJobSubmenu" 
+      class="absolute bottom-full left-0 right-0 bg-white border-t shadow-lg p-4"
+    >
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xs font-semibold text-gray-500">Job Management</h3>
+        <button @click="showJobSubmenu = false" class="text-gray-400">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <router-link 
+        v-for="item in mobileMainItems.find(i => i.name === 'Jobs')?.submenu.items"
+        :key="item.path"
+        :to="item.path"
+        class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg"
+        @click="showJobSubmenu = false"
+      >
+        <i :class="['text-gray-400', item.icon]"></i>
+        <span>{{ item.name }}</span>
+      </router-link>
+    </div>
+  </Transition>
+
+  <!-- Notifications Submenu -->
+<MobileNotifications
+  v-model="showNotificationSubmenu"
+  :notifications="notifications"
+  @close="showAllNotifications = false"
+/>
+
+<!-- More Submenu -->
+<Transition
+  enter-active-class="transition-all duration-300 ease-out"
+  enter-from-class="transform translate-y-full"
+  enter-to-class="transform translate-y-0"
+  leave-active-class="transition-all duration-300 ease-in"
+  leave-from-class="transform translate-y-0"
+  leave-to-class="transform translate-y-full"
+>
+  <div 
+    v-show="showMoreSubmenu" 
+    class="absolute bottom-full left-0 right-0 bg-white border-t shadow-lg p-4"
+  >
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xs font-semibold text-gray-500">More Options</h3>
+      <button @click="showMoreSubmenu = false" class="text-gray-400">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <template v-for="item in mobileMainItems.find(i => i.name === 'More')?.submenu.items" :key="item.name">
+      <router-link 
+        v-if="!item.action"
+        :to="item.path"
+        class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg"
+        @click="showMoreSubmenu = false"
+      >
+        <i :class="['text-gray-400', item.icon]"></i>
+        <span>{{ item.name }}</span>
+      </router-link>
+      <button
+        v-else
+        class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg"
+        @click="handleMoreAction(item.action)"
+      >
+        <i :class="['text-gray-400', item.icon]"></i>
+        <span>{{ item.name }}</span>
+      </button>
+    </template>
+  </div>
+</Transition>
+</nav>
 
     <!-- Main Content -->
     <div class="flex-1" :class="[
@@ -178,27 +248,40 @@
 
 <script>
 import NotificationsPanel from '@/components/admin/NotificationsPanel.vue'
+import MobileNotifications from '@/components/admin/MobileNotifications.vue'
 
+import { useAdminStore } from '@/stores/adminStore';
+import Swal from 'sweetalert2';
 export default {
   name: 'AdminLayout',
   components: {
     NotificationsPanel,
+    MobileNotifications
     
   },
   data() {
     return {
+      adminStore: useAdminStore(),
+         isDarkMode: false,
       isCollapsed: false,
       isMobile: false,
       isTablet: false,
       showMobileMenu: false,
       notificationCount: 2,
+      showUserSubmenu: false,
+      showJobSubmenu: false,
+      showNotificationSubmenu: false,
+      showAllNotifications: false,
+      showMoreSubmenu: false,
       mainMenuItems: [
         { name: 'Home', path: '/admin/dashboard', icon: 'fas fa-home' },
-        { name: 'Users', path: '/admin/users', icon: 'fas fa-users' },
+        { name: 'Users', path: '/admin/alluser', icon: 'fas fa-users' },
         { name: 'Pending Users', path: '/admin/pending-users', icon: 'fas fa-user-clock' },
+        { name: 'Rejected Users', path: '/admin/reject-user', icon: 'fa-solid fa-user-xmark' },
         { name: 'User Add Skills Pending', path: '/admin/skills-pending', icon: 'fas fa-tasks' },
         { name: 'User Work History', path: '/admin/work-history', icon: 'fas fa-history' }
       ],
+      
       jobMenuItems: [
         { name: 'Jobs', path: '/admin/jobs', icon: 'fas fa-briefcase', indent: false },
         { name: 'My Jobs', path: '/admin/my-jobs', icon: 'fas fa-list', indent: true },
@@ -206,21 +289,68 @@ export default {
       ],
       mobileMainItems: [
         { name: 'Home', path: '/admin', icon: 'fas fa-home' },
-        { name: 'Users', path: '/admin/users', icon: 'fas fa-users' },
-        { name: 'Jobs', path: '/admin/jobs', icon: 'fas fa-briefcase' },
-        { name: 'Profile', path: '/admin/profile', icon: 'fas fa-user' }
-      ],
-      mobileMoreItems: [
-        { name: 'Pending Users', path: '/admin/pending-users', icon: 'fas fa-user-clock' },
-        { name: 'Skills Pending', path: '/admin/skills-pending', icon: 'fas fa-tasks' },
-        { name: 'Work History', path: '/admin/work-history', icon: 'fas fa-history' },
-        { name: 'My Jobs', path: '/admin/my-jobs', icon: 'fas fa-list' },
-        { name: 'Create Job', path: '/admin/create-job', icon: 'fas fa-plus' }
-      ],
-      
+        { 
+          name: 'Users', 
+          icon: 'fas fa-users',
+          hasSubmenu: true, 
+          submenu: {
+            title: 'User Management',
+            items: [
+              { name: 'All Users', path: '/admin/alluser', icon: 'fas fa-users' },
+              { name: 'Pending Users', path: '/admin/pending-users', icon: 'fas fa-user-clock' },
+              { name: 'Rejected Users', path: '/admin/reject-user', icon: 'fa-solid fa-user-xmark' },
+              { name: 'Work History', path: '/admin/work-history', icon: 'fas fa-history' },
+              { name: 'Skills Pending', path: '/admin/skills-pending', icon: 'fas fa-tasks' },
+            ]
+          }
+        },
+        { 
+          name: 'Jobs', 
+          icon: 'fas fa-briefcase',
+          hasSubmenu: true,
+          submenu: {
+            title: 'Job Management',
+            items: [
+              { name: 'All Jobs', path: '/admin/jobs', icon: 'fas fa-briefcase' },
+              { name: 'My Jobs', path: '/admin/my-jobs', icon: 'fas fa-list' },
+              { name: 'Create Job', path: '/admin/create-job', icon: 'fas fa-plus' }
+            ]
+          }
+        },
+         { 
+          name: 'Notifications', 
+          icon: 'fas fa-bell',
+          hasSubmenu: true,
+          submenu: {
+            title: 'Notifications',
+            items: [
+              { name: 'All Notifications', path: '/admin/notifications', icon: 'fas fa-bell' },
+              { name: 'Unread', path: '/admin/notifications/unread', icon: 'fas fa-envelope' },
+            ]
+          }
+        },
+          { 
+          name: 'More', 
+          icon: 'fas fa-ellipsis-h',
+          hasSubmenu: true,
+          submenu: {
+            title: 'More Options',
+            items: [
+              { name: 'Settings', path: '/admin/settings', icon: 'fas fa-cog' },
+              { name: 'Profile', path: '/admin/profile', icon: 'fas fa-user' },
+              { name: 'Help', path: '/admin/help', icon: 'fas fa-question-circle' },
+              { name: 'Logout', icon: 'fas fa-sign-out-alt', action: 'logout' }
+            ]
+          }
+        },
+      ],   
     }
   },
-
+ computed: {
+    notifications() {
+      return this.adminStore.notifications
+    }
+  },
   methods: {
     handleResize() {
       const width = window.innerWidth
@@ -232,25 +362,106 @@ export default {
         this.isCollapsed = true
       }
     },
+  handleMobileMenuClick(item) {
+    if (!item.hasSubmenu) {
+      this.$router.push(item.path)
+      return
+    }
 
+    // ปิดเมนูทั้งหมด
+    this.showUserSubmenu = false
+    this.showJobSubmenu = false
+    this.showNotificationSubmenu = false
+    this.showMoreSubmenu = false
+
+    // เปิดเมนูที่เลือก
+    switch(item.name) {
+      case 'Users':
+        this.showUserSubmenu = true
+        break
+      case 'Jobs':
+        this.showJobSubmenu = true
+        break
+      case 'Notifications':
+        this.showNotificationSubmenu = true
+        break
+      case 'More':
+        this.showMoreSubmenu = true
+        break
+    }
+  },
+    async handleMoreAction(action) {
+    switch(action) {
+      case 'logout':
+        await this.handleLogout()
+        break
+      // เพิ่ม actions อื่นๆ ในอนาคต
+    }
+    this.showMoreSubmenu = false
+  },
     toggleSidebar() {
       this.isCollapsed = !this.isCollapsed
     },
+   async handleLogout() {
+    try {
+      // แสดง loading
+      Swal.fire({
+        title: 'Logging out...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading()
+        }
+      })
 
-    handleLogout() {
+      await this.adminStore.logout()
+      
+      // แสดง success
+      await Swal.fire({
+        icon: 'success',
+        title: 'Logged out successfully!',
+        showConfirmButton: false,
+        timer: 1500
+      })
+
       this.$router.push('/signin-admin')
+    } catch (error) {
+      console.error('Logout error:', error)
+      
+      // แสดง error
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Something went wrong! Please try again.'
+      })
+    }
+  },
+  toggleDarkMode() {
+      this.isDarkMode = !this.isDarkMode;
+      if (this.isDarkMode) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark'); // บันทึกโหมดกลางคืน
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light'); // บันทึกโหมดกลางวัน
+      }
     },
-    
   },
 
   mounted() {
     window.addEventListener('resize', this.handleResize)
     this.handleResize()
+
+     this.isDarkMode = localStorage.getItem('theme') === 'dark';
+    if (this.isDarkMode) {
+      document.documentElement.classList.add('dark');
+    }
   },
 
   beforeUnmount() {
     window.removeEventListener('resize', this.handleResize)
-  }
+  },
+  
+  
 }
 </script>
 

@@ -14,7 +14,7 @@ import SignUpView from '@/views/SignUpView.vue'
 
 import SignUpAdminView from '@/views/admin/SignUpAdminView.vue'
 import SignInAdminView from '@/views/admin/SignInAdminView.vue'
-import AdminPendingUsers from '@/views/admin/AdminPendingUsers.vue'
+import AdminRejectedUsers from '@/views/admin/AdminRejectedUsers.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -51,7 +51,7 @@ const router = createRouter({
       meta: { requiresAdmin: true },
       children: [
         {
-          path: 'dashboard',  // /admin
+          path: 'dashboard',
           name: 'AdminDashboard',
           component: () => import('@/views/admin/AdminDashboardView.vue'),
           meta: { requiresAdmin: true }
@@ -61,16 +61,31 @@ const router = createRouter({
           name: 'AdminPendingUsers',
           component: () => import('@/views/admin/AdminPendingUsers.vue'),
           meta: { requiresAdmin: true }
-        }
+        },
+        {
+          path: 'reject-user',
+          name: 'AdminRejectedUsers',
+          component: () => import('@/views/admin/AdminRejectedUsers.vue'),
+          meta: { requiresAdmin: true }
+        },
+        {
+          path: 'alluser',
+          name: 'AdminAllUsers',
+          component: () => import('@/views/admin/AdminUsers.vue'),
+          meta: { requiresAdmin: true }
+        },
+
+        /// Jobs 
+        {
+          path: 'create-job',
+          name: 'CreateJob',
+          component: () => import('@/views/admin/Jobs/CreateJob.vue'),
+          meta: { requiresAdmin: true }
+        },
       ]
     },
 
-    // {
-    //   path: '/admin/users',
-    //   name: 'AdminUsers',
-    //   component: AdminUsers,
-    //   meta: { requiresAdmin: true }
-    // },
+
 
     // {
     //   path: '/admin/skills-pending',

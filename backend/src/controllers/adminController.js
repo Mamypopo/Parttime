@@ -180,36 +180,36 @@ export const getAdminById = async (req, res) => {
     }
 };
 
-// // ดึงผู้ใช้ที่รอการอนุมัติ
-// export const getPendingUsers = async (req, res) => {
-//     try {
-//         const pendingUsers = await adminModel.findPendingUsers();
-//         res.status(200).json({ users: pendingUsers });
-//     } catch (error) {
-//         console.error('เกิดข้อผิดพลาดในการโหลดผู้ใช้ที่รอการอนุมัติ:', error);
-//         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการโหลดผู้ใช้ที่รอการอนุมัติ' });
-//     }
-// };
 
 
 // ดึงผู้ใช้ที่รอการอนุมัติ
 export const getPendingUsers = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const perPage = parseInt(req.query.perPage) || 10;
+        const page = parseInt(req.query.page) || 1
+        const limit = parseInt(req.query.limit) || 10
+        const offset = (page - 1) * limit
 
-        const users = await adminModel.findPendingUsers(page, perPage);
-        const total = await adminModel.countUsersByStatus('pending');
+        // รับค่าการค้นหาจาก query parameters
+        const searchParams = {
+            userId: req.query.userId,
+            idCard: req.query.idCard,
+            name: req.query.name
+        }
+
+        // ส่ง searchParams ไปยัง Model
+        const users = await adminModel.findPendingUsers(limit, offset, searchParams)
+        const total = await adminModel.countUsersPending(searchParams)
 
         res.json({
             users,
             pagination: {
+                total,
                 page,
-                perPage,
-                total: total._count
+                limit
             }
-        });
+        })
     } catch (error) {
+        console.error('Controller Error:', error)
         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูล' });
     }
 };
@@ -217,21 +217,31 @@ export const getPendingUsers = async (req, res) => {
 // ดึงผู้ใช้ที่อนุมัติแล้ว
 export const getApprovedUsers = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const perPage = parseInt(req.query.perPage) || 10;
+        const page = parseInt(req.query.page) || 1
+        const limit = parseInt(req.query.limit) || 10
+        const offset = (page - 1) * limit
 
-        const users = await adminModel.findApprovedUsers(page, perPage);
-        const total = await adminModel.countUsersByStatus('approved');
+        // รับค่าการค้นหาจาก query parameters
+        const searchParams = {
+            userId: req.query.userId,
+            idCard: req.query.idCard,
+            name: req.query.name
+        }
+
+        // ส่ง searchParams ไปยัง Model
+        const users = await adminModel.findApprovedUsers(limit, offset, searchParams)
+        const total = await adminModel.countUsersApproved(searchParams)
 
         res.json({
             users,
             pagination: {
+                total,
                 page,
-                perPage,
-                total: total._count
+                limit
             }
-        });
+        })
     } catch (error) {
+        console.error('Controller Error:', error)
         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูล' });
     }
 };
@@ -239,21 +249,31 @@ export const getApprovedUsers = async (req, res) => {
 // ดึงผู้ใช้ที่ถูกปฏิเสธ
 export const getRejectedUsers = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1;
-        const perPage = parseInt(req.query.perPage) || 10;
+        const page = parseInt(req.query.page) || 1
+        const limit = parseInt(req.query.limit) || 10
+        const offset = (page - 1) * limit
 
-        const users = await adminModel.findRejectedUsers(page, perPage);
-        const total = await adminModel.countUsersByStatus('rejected');
+        // รับค่าการค้นหาจาก query parameters
+        const searchParams = {
+            userId: req.query.userId,
+            idCard: req.query.idCard,
+            name: req.query.name
+        }
+
+        // ส่ง searchParams ไปยัง Model
+        const users = await adminModel.findRejectedUsers(limit, offset, searchParams)
+        const total = await adminModel.countUsersRejected(searchParams)
 
         res.json({
             users,
             pagination: {
+                total,
                 page,
-                perPage,
-                total: total._count
+                limit
             }
-        });
+        })
     } catch (error) {
+        console.error('Controller Error:', error)
         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูล' });
     }
 };

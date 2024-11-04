@@ -117,34 +117,369 @@ const baseUserSelect = {
 
 
 // ดึงผู้ใช้ที่รอการอนุมัติ
-export const findPendingUsers = (page = 1, perPage = 10) =>
-    prisma.user.findMany({
-        where: { approved: "pending" },
+export const findPendingUsers = (limit = 10, offset = 0, searchParams = {}) => {
+    const whereClause = {
+        approved: "pending"
+    }
+
+    // เพิ่มเงื่อนไขการค้นหา
+    if (searchParams.userId) {
+        whereClause.id = parseInt(searchParams.userId)
+    }
+
+    if (searchParams.idCard) {
+        whereClause.national_id = {
+            contains: searchParams.idCard,
+            mode: 'insensitive'
+        }
+    }
+
+    if (searchParams.name) {
+        const searchTerms = searchParams.name.trim().split(/\s+/)
+
+        if (searchTerms.length > 1) {
+            whereClause.AND = [
+                {
+                    first_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    last_name: {
+                        contains: searchTerms[1],
+                        mode: 'insensitive'
+                    }
+                }
+            ]
+        } else {
+            whereClause.OR = [
+                {
+                    first_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    last_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                }
+            ]
+        }
+    }
+
+    return prisma.user.findMany({
+        where: whereClause,
         select: baseUserSelect,
-        skip: (page - 1) * perPage,
-        take: perPage,
+        take: parseInt(limit),
+        skip: parseInt(offset),
         orderBy: { created_at: 'desc' }
     });
+}
+
+export const countUsersPending = (searchParams = {}) => {
+    const whereClause = {
+        approved: "pending"
+    }
+
+    if (searchParams.userId) {
+        whereClause.id = parseInt(searchParams.userId)
+    }
+
+    if (searchParams.idCard) {
+        whereClause.national_id = {
+            contains: searchParams.idCard,
+            mode: 'insensitive'
+        }
+    }
+
+    if (searchParams.name) {
+        const searchTerms = searchParams.name.trim().split(/\s+/)
+
+        if (searchTerms.length > 1) {
+            whereClause.AND = [
+                {
+                    first_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    last_name: {
+                        contains: searchTerms[1],
+                        mode: 'insensitive'
+                    }
+                }
+            ]
+        } else {
+            whereClause.OR = [
+                {
+                    first_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    last_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                }
+            ]
+        }
+    }
+
+    return prisma.user.count({
+        where: whereClause
+    });
+}
 
 // ดึงผู้ใช้ที่อนุมัติแล้ว
-export const findApprovedUsers = (page = 1, perPage = 10) =>
-    prisma.user.findMany({
-        where: { approved: "approved" },
-        select: baseUserSelect,
-        skip: (page - 1) * perPage,
-        take: perPage,
-        orderBy: { created_at: 'desc' }
-    });
+export const findApprovedUsers = (limit = 10, offset = 0, searchParams = {}) => {
+    const whereClause = {
+        approved: "approved"
+    }
 
-// ดึงผู้ใช้ที่ถูกปฏิเสธ
-export const findRejectedUsers = (page = 1, perPage = 10) =>
-    prisma.user.findMany({
-        where: { approved: "rejected" },
+    // เพิ่มเงื่อนไขการค้นหา
+    if (searchParams.userId) {
+        whereClause.id = parseInt(searchParams.userId)
+    }
+    if (searchParams.idCard) {
+        whereClause.national_id = {
+            contains: searchParams.idCard,
+            mode: 'insensitive'
+        }
+    }
+
+    // ค้นหาชื่อ-นามสกุล
+    if (searchParams.name) {
+        // แยกคำค้นหาด้วย space
+        const searchTerms = searchParams.name.trim().split(/\s+/)
+
+        if (searchTerms.length > 1) {
+            // ถ้ามีการเว้นวรรค จะค้นหาทั้งชื่อและนามสกุล
+            whereClause.AND = [
+                {
+                    first_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    last_name: {
+                        contains: searchTerms[1],
+                        mode: 'insensitive'
+                    }
+                }
+            ]
+        } else {
+            // ถ้ามีคำเดียว จะค้นหาในชื่อหรือนามสกุล
+            whereClause.OR = [
+                {
+                    first_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    last_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                }
+            ]
+        }
+    }
+
+    return prisma.user.findMany({
+        where: whereClause,
         select: baseUserSelect,
-        skip: (page - 1) * perPage,
-        take: perPage,
+        take: parseInt(limit),
+        skip: parseInt(offset),
         orderBy: { created_at: 'desc' }
     });
+}
+
+export const countUsersApproved = (searchParams = {}) => {
+    const whereClause = {
+        approved: "approved"
+    }
+    if (searchParams.userId) {
+        whereClause.id = parseInt(searchParams.userId)
+    }
+
+    if (searchParams.idCard) {
+        whereClause.national_id = {
+            contains: searchParams.idCard
+        }
+    }
+
+    if (searchParams.name) {
+        const searchTerms = searchParams.name.trim().split(/\s+/)
+
+        if (searchTerms.length > 1) {
+            whereClause.AND = [
+                {
+                    first_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    last_name: {
+                        contains: searchTerms[1],
+                        mode: 'insensitive'
+                    }
+                }
+            ]
+        } else {
+            whereClause.OR = [
+                {
+                    first_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    last_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                }
+            ]
+        }
+    }
+
+    return prisma.user.count({
+        where: whereClause
+    });
+}
+// ดึงผู้ใช้ที่ถูกปฏิเสธ
+export const findRejectedUsers = (limit = 10, offset = 0, searchParams = {}) => {
+    const whereClause = {
+        approved: "rejected"
+    }
+
+    // เพิ่มเงื่อนไขการค้นหา
+    if (searchParams.userId) {
+        whereClause.id = parseInt(searchParams.userId)
+    }
+
+    if (searchParams.idCard) {
+        whereClause.national_id = {
+            contains: searchParams.idCard,
+            mode: 'insensitive'  // เพิ่ม mode insensitive
+        }
+    }
+
+    // ค้นหาชื่อ-นามสกุล
+    if (searchParams.name) {
+        // แยกคำค้นหาด้วย space
+        const searchTerms = searchParams.name.trim().split(/\s+/)
+
+        if (searchTerms.length > 1) {
+            // ถ้ามีการเว้นวรรค จะค้นหาทั้งชื่อและนามสกุล
+            whereClause.AND = [
+                {
+                    first_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    last_name: {
+                        contains: searchTerms[1],
+                        mode: 'insensitive'
+                    }
+                }
+            ]
+        } else {
+            // ถ้ามีคำเดียว จะค้นหาในชื่อหรือนามสกุล
+            whereClause.OR = [
+                {
+                    first_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    last_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                }
+            ]
+        }
+    }
+
+    return prisma.user.findMany({
+        where: whereClause,
+        select: baseUserSelect,
+        take: parseInt(limit),
+        skip: parseInt(offset),
+        orderBy: { created_at: 'desc' }
+    });
+}
+
+
+export const countUsersRejected = (searchParams = {}) => {
+    const whereClause = {
+        approved: "rejected"
+    }
+
+    if (searchParams.userId) {
+        whereClause.id = parseInt(searchParams.userId)
+    }
+
+    if (searchParams.idCard) {
+        whereClause.national_id = {
+            contains: searchParams.idCard
+        }
+    }
+
+    if (searchParams.name) {
+        const searchTerms = searchParams.name.trim().split(/\s+/)
+
+        if (searchTerms.length > 1) {
+            whereClause.AND = [
+                {
+                    first_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    last_name: {
+                        contains: searchTerms[1],
+                        mode: 'insensitive'
+                    }
+                }
+            ]
+        } else {
+            whereClause.OR = [
+                {
+                    first_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    last_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                }
+            ]
+        }
+    }
+
+    return prisma.user.count({
+        where: whereClause
+    });
+}
+
 
 // นับจำนวนผู้ใช้แต่ละสถานะ
 export const countUsersByStatus = () =>
@@ -152,6 +487,7 @@ export const countUsersByStatus = () =>
         by: ['approved'],
         _count: true
     });
+
 
 
 export const updateUserApprovalStatus = (userId, status) =>
@@ -248,3 +584,5 @@ export const checkWeeklySkillRequest = async (userId) => {
 
     return recentRequest;
 };
+
+
