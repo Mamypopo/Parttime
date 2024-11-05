@@ -6,7 +6,7 @@ import { createLog } from '../models/logModel.js';
 import * as notificationModel from '../models/notificationModel.js';
 
 
-
+// register admin
 export const registerAdmin = async (req, res) => {
     const { email, password, first_name, last_name, admin_secret } = req.body;
     const { ip, headers: { 'user-agent': userAgent } } = req;
@@ -68,6 +68,7 @@ export const registerAdmin = async (req, res) => {
     }
 };
 
+// login admin
 export const loginAdmin = async (req, res) => {
     const { email, password } = req.body;
     const { ip, headers: { 'user-agent': userAgent } } = req;
@@ -88,7 +89,7 @@ export const loginAdmin = async (req, res) => {
         const token = jwt.sign(
             { userId: admin.id, email: admin.email, role: 'admin' },
             process.env.JWT_SECRET,
-            { expiresIn: '1h' }
+            { expiresIn: '24h' }
         );
 
 
@@ -131,10 +132,10 @@ export const loginAdmin = async (req, res) => {
     }
 };
 
-
+// getprofile admin 
 export const getAdminProfile = async (req, res) => {
     try {
-        const { id } = req.user  // เปลี่ยนเป็น id
+        const { id } = req.user
 
         if (!id) {
             return res.status(400).json({
@@ -150,7 +151,7 @@ export const getAdminProfile = async (req, res) => {
             })
         }
 
-        res.json(admin)  // ข้อมูลที่ส่งกลับจะมี id แทน admin_id
+        res.json(admin)
 
     } catch (error) {
         console.error('Error in getAdminProfile:', error)
@@ -160,7 +161,7 @@ export const getAdminProfile = async (req, res) => {
     }
 }
 
-
+// getadmin ตาม id
 export const getAdminById = async (req, res) => {
     const { adminId } = req.params;
     try {
@@ -278,6 +279,7 @@ export const getRejectedUsers = async (req, res) => {
     }
 };
 
+
 // ดึงสถิติจำนวนผู้ใช้แต่ละสถานะ
 export const getUserStats = async (req, res) => {
     try {
@@ -288,7 +290,7 @@ export const getUserStats = async (req, res) => {
     }
 };
 
-
+// อนุมัติผู้ใช้งาน
 export const approveUser = async (req, res) => {
     const { status } = req.body;
     const { userId } = req.params;
@@ -300,12 +302,17 @@ export const approveUser = async (req, res) => {
         // แปลง userId เป็นตัวเลข
         const userIdAsInt = Number(userId);
 
-        // ตรวจสอบว่าผู้ใช้มีอยู่จริงและได้รับการยืนยันอีเมลแล้วหรือไม่
+        // ตรวจสอบว่าผู้ใช้
         const user = await userModel.getUserById(userIdAsInt);
 
-        if (!user || !user.email_verified) {
-            return res.status(400).json({ message: "ไม่พบผู้ใช้หรืออีเมลยังไม่ได้รับการยืนยัน กรุณาตรวจสอบและลองอีกครั้ง" });
+        if (!user) {
+            return res.status(400).json({ message: "ไม่พบผู้ใช้ กรุณาตรวจสอบและลองอีกครั้ง" });
         }
+
+        // if (!user.email_verified) {
+        //     return res.status(400).json({ message: "ผู้ใช้ต้องยืนยันอีเมลก่อนที่จะสามารถอนุมัติได้" });
+        // }
+
 
         if (user.approved === "approved") {
             return res.status(400).json({ message: 'ผู้ใช้นี้ได้รับการอนุมัติไปแล้ว' });
@@ -378,27 +385,8 @@ export const approveUser = async (req, res) => {
     }
 };
 
-export const getAdminNotifications = async (req, res) => {
 
-    try {
-        if (!req.user?.id) {
-            return res.status(400).json({ message: 'ไม่พบรหัสแอดมิน' });
-        }
-        const adminId = parseInt(req.user.id, 10);
-
-        const admin = await adminModel.findAdminById(adminId);
-        if (!admin) {
-            return res.status(404).json({ message: 'ไม่พบข้อมูลแอดมิน' });
-        }
-
-        const notifications = await notificationModel.getAdminNotifications(adminId);
-        res.status(200).json({ notifications });
-    } catch (error) {
-        console.error('เกิดข้อผิดพลาดในการดึงการแจ้งเตือนของแอดมิน:', error);
-        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงการแจ้งเตือน' });
-    }
-};
-
+// admin pending skill
 
 export const getAdminPendingSkills = async (req, res) => {
     try {
@@ -510,3 +498,53 @@ export const updatePendingSkillStatus = async (req, res) => {
 };
 
 
+// notification adimin
+export const getAdminNotifications = async (req, res) => {
+
+    try {
+        if (!req.user?.id) {
+            return res.status(400).json({ message: 'ไม่พบรหัสแอดมิน' });
+        }
+        const adminId = parseInt(req.user.id, 10);
+
+        const admin = await adminModel.findAdminById(adminId);
+        if (!admin) {
+            return res.status(404).json({ message: 'ไม่พบข้อมูลแอดมิน' });
+        }
+
+        const notifications = await notificationModel.getAdminNotifications(adminId);
+
+
+        res.status(200).json({
+            notifications: notifications || [],
+            message: notifications?.length ? undefined : 'ไม่พบการแจ้งเตือน'
+        });
+    } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการดึงการแจ้งเตือนของแอดมิน:', error);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงการแจ้งเตือน' });
+    }
+};
+
+export const markNotificationAsRead = async (req, res) => {
+    try {
+        const notificationId = parseInt(req.params.id, 10);
+        const adminId = req.user.id;
+
+        await notificationModel.markAsRead(notificationId, adminId);
+        res.status(200).json({ message: 'อัพเดทสถานะการอ่านเรียบร้อย' });
+    } catch (error) {
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการอัพเดทสถานะการอ่าน' });
+    }
+};
+
+
+export const markAllNotificationsAsRead = async (req, res) => {
+    try {
+        const adminId = req.user.id;
+
+        await notificationModel.markAllAsRead(adminId);
+        res.status(200).json({ message: 'อัพเดทสถานะการอ่านทั้งหมดเรียบร้อย' });
+    } catch (error) {
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการอัพเดทสถานะการอ่าน' });
+    }
+};

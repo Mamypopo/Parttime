@@ -6,7 +6,7 @@ import { createLog } from '../models/logModel.js';
 export const startNotificationCleanup = () => {
     cron.schedule('0 0 * * *', async () => {
         try {
-            const daysToKeep = 30; // เก็บการแจ้งเตือน 30 วัน
+            const daysToKeep = 3; // เก็บการแจ้งเตือน ... วัน
             const result = await notificationModel.deleteOldNotifications(daysToKeep);
 
             // บันทึก log

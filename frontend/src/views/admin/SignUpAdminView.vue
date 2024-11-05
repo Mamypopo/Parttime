@@ -107,10 +107,10 @@
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
-const baseURL = import.meta.env.VITE_API_URL
 export default {
   data() {
     return {
+        baseURL: import.meta.env.VITE_API_URL,
       form: {
         email: '',
         password: '',
@@ -146,7 +146,7 @@ export default {
 
 
       const response = await axios.post(
-        `${baseURL}/api/admin/register-admin`,
+        `${this.baseURL}/api/admin/register-admin`,
         payload,
         {
           headers: {

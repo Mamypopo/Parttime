@@ -10,7 +10,9 @@ import {
     updatePendingSkillStatus,
     getAdminProfile,
     getApprovedUsers,
-    getRejectedUsers
+    getRejectedUsers,
+    markNotificationAsRead,
+    markAllNotificationsAsRead
 } from '../controllers/adminController.js';
 import { authMiddleware, checkAdminRole } from '../middleware/authMiddleware.js';
 
@@ -31,6 +33,8 @@ router.get('/profile', authMiddleware, getAdminProfile)
 // ต้องการการยืนยันตัวตนและต้องเป็นแอดมิน
 router.post('/approve-reject-user/:userId', authMiddleware, checkAdminRole, approveUser);
 router.get('/notifications', authMiddleware, checkAdminRole, getAdminNotifications);
+router.patch('/notifications/:id/read', authMiddleware, checkAdminRole, markNotificationAsRead);
+router.patch('/notifications/mark-all-read', authMiddleware, checkAdminRole, markAllNotificationsAsRead);
 router.get('/pending-skills', authMiddleware, checkAdminRole, getAdminPendingSkills);
 router.put('/pending-skills/:pendingSkillId', authMiddleware, checkAdminRole, updatePendingSkillStatus);
 export default router;

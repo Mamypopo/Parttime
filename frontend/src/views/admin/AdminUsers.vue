@@ -19,7 +19,7 @@
 <div v-else> 
 <!-- Desktop: Table View -->
 <div class="hidden md:block overflow-x-auto transition-all duration-500 ease-in-out">
-  <table class="w-full min-w-[800px]  transition-all duration-500 ease-in-out"> <!-- กำหนดความกว้างขั้นต่ำ -->
+  <table class="w-full min-w-[800px]  transition-all duration-500 ease-in-out "> <!-- กำหนดความกว้างขั้นต่ำ -->
     <thead>
       <tr class="text-left border-b bg-gray-50">
           <th class="px-4 py-2 text-center ">ID</th>

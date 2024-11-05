@@ -12,7 +12,7 @@
           <input 
             v-model="form.title"
             type="text"
-  class="w-full px-3 sm:px-4 py-2 border rounded-lg"           
+  class="w-full px-3 sm:px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"           
    placeholder="title job"
           />
         </div>
@@ -23,18 +23,19 @@
       <input 
         v-model="form.startDate"
         type="time"
-        class="flex-1 px-3 sm:px-4 py-2 border rounded-lg"
+        class="flex-1 px-3 sm:px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
       />
       <input 
         v-model="form.endDate"
         type="time"
-        class="flex-1 px-3 sm:px-4 py-2 border rounded-lg"
+        class="flex-1 px-3 sm:px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
       />
       <div class="relative">
         <input 
           v-model="form.date"
           type="date"
-          class="w-full sm:w-[140px] px-3 sm:px-4 py-2 border rounded-lg text-gray-400 border-gray-200 bg-purple-50"
+          class="w-full sm:w-[140px] px-3 sm:px-4 py-2 border rounded-lg text-gray-400 border-gray-200 bg-purple-50 
+          focus:outline-none focus:ring-2 focus:ring-purple-200"
         />
       </div>
     </div>
@@ -47,7 +48,7 @@
           <textarea
             v-model="form.details"
             rows="4"
-            class="w-full px-3 sm:px-4 py-2 border rounded-lg"
+            class="w-full px-3 sm:px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
             placeholder="details"
           ></textarea>
         </div>
@@ -58,7 +59,7 @@
           <input 
             v-model="form.location"
             type="text"
-            class="w-full px-3 sm:px-4 py-2 border rounded-lg"
+            class="w-full px-3 sm:px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
             placeholder="location"
           />
         </div>
@@ -68,12 +69,13 @@
       <div class="col-span-7">
         <!-- Positions Header -->
         <div class="flex items-center gap-2 mb-4">
-          <label class="text-sm font-medium text-gray-700">Positions :</label>
+          <label class="text-sm font-medium text-gray-700">ตำแหน่งงาน :</label>
            <button 
-    @click="showPositionModal = true"
-            class="px-3 py-1 bg-purple-200 rounded-lg text-sm flex items-center gap-1"
+             @click="showPositionModal = true"
+             type="button"  
+             class="px-3 py-1 bg-purple-200 rounded-lg text-sm flex items-center gap-1"
   >
-    Add <i class="fas fa-plus"></i>
+    เพิ่มตำแหน่ง <i class="fas fa-plus"></i>
   </button>
    <!-- Position Modal -->
   <CreatePositionModal
@@ -102,13 +104,15 @@
               </div>
               <div class="flex gap-3 text-xs">
                 <button 
-                  @click="deletePosition(position.id)"
+                    @click.prevent="deletePosition(position.id)"
+                   type="button" 
                   class="text-red-400 hover:text-red-500 flex items-center gap-1"
                 >
                   <i class="fas fa-trash"></i> DELETE
                 </button>
                 <button 
-                  @click="editPosition(position)"
+                 @click.prevent="editPosition(position)"
+                   type="button" 
                   class="text-gray-400 hover:text-gray-500 flex items-center gap-1"
                 >
                   <i class="fas fa-edit"></i> EDIT
@@ -124,9 +128,16 @@
     <div class="mt-6 sm:mt-8">
       <button
         type="submit"
+         :disabled="positions.length === 0"
         class="w-full py-2 sm:py-3 bg-purple-300 text-white rounded-lg hover:bg-purple-400 transition-colors"
+        :class="[
+      positions.length === 0 
+        ? 'bg-gray-300 cursor-not-allowed' 
+        : 'bg-purple-300 hover:bg-purple-400'
+    ]"
       >
-        Create
+         {{ positions.length === 0 ? 'กรุณาเพิ่มตำแหน่งงานอย่างน้อย 1 ตำแหน่ง' : 'สร้างงาน' }}
+     
       </button>
     </div>
     </form>
@@ -137,7 +148,7 @@
 import CreatePositionModal from '@/components/admin/Jobs/CreatePositionModal.vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
-
+import { useAdminStore } from '@/stores/adminStore';
 export default {
   name: 'CreateJob',
 components: {
@@ -146,7 +157,7 @@ components: {
   },
   data() {
     return {
-          baseURL: import.meta.env.VITE_API_URL , 
+      baseURL: import.meta.env.VITE_API_URL , 
       form: {
         title: '',
         startDate: '',
@@ -155,9 +166,9 @@ components: {
         details: '',
         location: ''
       },
-      positions: [], // จะมาจาก API
+      positions: [], 
       editingPosition: null,
-      selectedSkills: [], // จะมาจาก API
+      selectedSkills: [],
       showPositionModal: false,
     }
   },
@@ -171,7 +182,7 @@ created() {
   methods: {
      addPosition(position) {
       if (this.editingPosition) {
-        // กรณีแก้ไข
+      
         const index = this.positions.findIndex(p => p.id === position.id)
         if (index !== -1) {
           this.positions[index] = {
@@ -193,12 +204,27 @@ created() {
       }
       this.closeModal()
     },
-    deletePosition(id) {
-      // ใช้ confirm เพื่อให้ผู้ใช้ยืนยันการลบ
-      if (confirm('คุณแน่ใจหรือไม่ที่จะลบตำแหน่งงานนี้?')) {
-        this.positions = this.positions.filter(p => p.id !== id)
-      }
-    },
+  async deletePosition(id) {
+  const result = await Swal.fire({
+    title: 'ยืนยันการลบตำแหน่ง',
+    text: 'คุณแน่ใจหรือไม่ที่จะลบตำแหน่งงานนี้?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'ลบ',
+    cancelButtonText: 'ยกเลิก',
+    confirmButtonColor: '#d33',
+  });
+
+  if (result.isConfirmed) {
+    this.positions = this.positions.filter(p => p.id !== id);
+    Swal.fire({
+      icon: 'success',
+      title: 'ลบตำแหน่งสำเร็จ',
+      showConfirmButton: false,
+      timer: 1500
+    });
+  }
+},
       editPosition(position) {
       this.editingPosition = {
         id: position.id,
@@ -209,32 +235,44 @@ created() {
       }
       this.showPositionModal = true
     },
-    //   handleEdit(position) {
-    //   // ดึงข้อมูลเก่ามาใส่ในฟอร์ม
-    //   this.form = {
-    //     title: this.form.title, // คงค่าเดิมของ title ไว้
-    //     date: this.form.date,   // คงค่าเดิมของ date ไว้
-    //     details: this.form.details,
-    //     location: this.form.location,
-    //   }
-    //   this.editingPosition = { ...position }
-    //   this.showPositionModal = true
-    // },
+  
     async handleSubmit() {
       try {
-        const token = localStorage.getItem('admin_token')
-        
-        // log เพื่อตรวจสอบ
-        console.log('Current token:', token)
 
-        if (!token) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'กรุณาเข้าสู่ระบบใหม่'
-          })
-          return
-        }
+            if (this.positions.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'ไม่สามารถสร้างงานได้',
+        text: 'กรุณาเพิ่มตำแหน่งงานอย่างน้อย 1 ตำแหน่ง'
+      });
+      return;
+    }
+
+    if (!this.form.title || !this.form.date || !this.form.startDate || 
+        !this.form.endDate || !this.form.location) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'ข้อมูลไม่ครบถ้วน',
+        text: 'กรุณากรอกข้อมูลให้ครบทุกช่อง'
+      });
+      return;
+    }
+        const adminStore = useAdminStore();
+        const token = adminStore.token; 
+
+  
+    const result = await Swal.fire({
+      title: 'ยืนยันการสร้างงาน',
+      text: 'คุณต้องการสร้างงานนี้ใช่หรือไม่?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'ยืนยัน',
+      cancelButtonText: 'ยกเลิก'
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
         const jobData = {
           title: this.form.title,
           work_date: this.form.date,
@@ -252,23 +290,22 @@ created() {
         const response = await axios.post(`${this.baseURL}/api/jobs/create`, jobData, {
           headers: {
             'Content-Type': 'application/json',
-            // เพิ่ม Authorization header ถ้าจำเป็น
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+             'Authorization': `Bearer ${token}` 
           }
         })
-if (response.status === 201) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          text: 'สร้างงานสำเร็จ'
-        })
+
+    if (response.status === 201) {
+      await Swal.fire({
+        icon: 'success',
+        title: 'สร้างงานสำเร็จ',
+        text: 'งานถูกสร้างเรียบร้อยแล้ว'
+      });
         
         this.resetForm()
         this.positions = []
       }
       } catch (error) {
         console.error('Error creating job:', error)
-        // แสดง error notification
         Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -284,13 +321,7 @@ if (response.status === 201) {
       dateObj.setMinutes(minutes)
       return dateObj.toISOString()
     },
-    //   handleSubmit() {
-    //   // ... existing submit logic ...
-      
-    //   // หลังจากบันทึกเสร็จ reset editingPosition
-    //   this.editingPosition = null
-    //   this.showPositionModal = false
-    // },
+    
        resetForm() {
       this.form = {
         title: '',
@@ -304,7 +335,7 @@ if (response.status === 201) {
     },
     closeModal() {
       this.showPositionModal = false
-      this.editingPosition = null // reset editing position
+      this.editingPosition = null 
     },
   }
 }

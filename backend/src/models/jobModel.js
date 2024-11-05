@@ -276,7 +276,7 @@ export const checkUserSkillsMatch = async (userId, jobPositionId) => {
     // ดึงข้อมูลตำแหน่งงาน
     const jobPosition = await prisma.jobPosition.findUnique({
         where: { id: jobPositionId },
-        select: { required_skills: true }
+        select: { position_name: true }
     });
 
     if (!jobPosition || !jobPosition.required_skills || jobPosition.required_skills.length === 0) {
@@ -288,8 +288,7 @@ export const checkUserSkillsMatch = async (userId, jobPositionId) => {
     }
 
     const userSkills = user.skills.map(skill => skill.toLowerCase());
-    const requiredSkills = jobPosition.required_skills.map(skill => skill.toLowerCase());
-
+    const positionName = jobPosition.position_name.toLowerCase();
     // ตรวจสอบว่าผู้ใช้มี skills ที่จำเป็นทั้งหมดหรือไม่
-    return requiredSkills.every(skill => userSkills.includes(skill));
+    return userSkills.some(skill => positionName.includes(skill));
 };

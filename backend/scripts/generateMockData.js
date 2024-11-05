@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-const USERS_TO_CREATE = 1000;
+const USERS_TO_CREATE = 500;
 const ADMINS_TO_CREATE = 10;
 const JOBS_TO_CREATE = 100;
 

@@ -14,15 +14,15 @@
     >
       <!-- Header -->
       <div class="flex justify-between items-center p-4 border-b">
-        <h3 class="text-sm font-semibold text-gray-700">การแจ้งเตือน</h3>
+        <h3 class="text-sm font-semibold text-[#EA6B6B]">การแจ้งเตือน</h3>
         <div class="flex items-center gap-3">
           <button 
-            class="text-sm text-blue-500 hover:text-blue-600"
+            class="text-sm text-[#6ED7D1] hover:text-[#4bb3af]"
             @click="markAllAsRead"
           >
             อ่านทั้งหมด
           </button>
-          <button @click="$emit('update:modelValue', false)" class="text-gray-400">
+          <button @click="$emit('update:modelValue', false)" class="text-[#3A3A49] hover:text-[#2b2b4d]">
             <i class="fas fa-times"></i>
           </button>
         </div>
@@ -30,61 +30,60 @@
 
       <!-- Notifications List -->
       <div class="max-h-[60vh] overflow-y-auto">
-        <div v-if="notifications.length === 0" class="p-4 text-center text-gray-500">
+        <div v-if="notifications.length === 0" class="p-4 text-center text-[#3A3A49]">
           ไม่มีการแจ้งเตือนใหม่
         </div>
         
         <template v-else>
-          <router-link
-            v-for="notification in notifications"
-            :key="notification.id"
-            :to="notification.link"
-            class="block border-b last:border-b-0"
-            @click="handleSelect"
-          >
-            <div class="flex items-start gap-3 p-4 hover:bg-gray-50" 
-                 :class="{ 'bg-blue-50': !notification.read }">
-              <!-- Icon -->
-              <div :class="[
-                'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
-                getTypeClass(notification.type)
-              ]">
-                <i :class="getTypeIcon(notification.type)"></i>
-              </div>
+      <div
+        v-for="notification in notifications"
+        :key="notification.id"
+        class="block border-b last:border-b-0"
+        @click="handleSelect(notification)"
+      >
+        <div class="flex items-start gap-3 p-4 hover:bg-gray-50" 
+             :class="{ 'bg-blue-50': !notification.read }">
+          <!-- Icon -->
+          <div :class="[
+            'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
+            getTypeClass(notification.type)
+          ]">
+            <i :class="getTypeIcon(notification.type)"></i>
+          </div>
 
-              <!-- Content -->
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 mb-0.5">
-                  {{ notification.title }}
-                </p>
-                <p class="text-sm text-gray-600 line-clamp-2">
-                  {{ notification.message }}
-                </p>
-                <p class="text-xs text-gray-500 mt-1">
-                  {{ formatTime(notification.created_at) }}
-                </p>
-              </div>
+          <!-- Content -->
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-gray-900 mb-0.5">
+              {{ notification.title }}
+            </p>
+            <p class="text-sm text-gray-600 line-clamp-2">
+              {{ notification.message }}
+            </p>
+            <p class="text-xs text-gray-500 mt-1">
+              {{ formatTime(notification.created_at) }}
+            </p>
+          </div>
 
-              <!-- Unread Indicator -->
-              <div v-if="!notification.read" 
-                   class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0">
-              </div>
-            </div>
-          </router-link>
-        </template>
+          <!-- Unread Indicator -->
+          <div v-if="!notification.read" 
+               class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0">
+          </div>
+        </div>
+      </div>
+    </template>
       </div>
 
       <!-- Footer -->
       <div class="p-3 border-t bg-gray-50">
         <button 
           to="/admin/notifications"
-          class="block text-center text-sm text-blue-500 hover:text-blue-600"
+          class="block text-center text-sm text-gray-500 hover:text-gray-600"
           @click="openAllNotifications"
         >
           ดูการแจ้งเตือนทั้งหมด
         </button>
 
-     <MobileNotificationsModal
+    <MobileNotificationsModal
     :is-open="showAllNotifications"
     :notifications="notifications"
     @close="showAllNotifications = false"
@@ -104,20 +103,45 @@ export default {
   components: {
     MobileNotificationsModal
   },
-  props: {
-    modelValue: Boolean,
-    notifications: {
-      type: Array,
-      default: () => []
-    }
+  
+props: {
+    modelValue: Boolean
   },
-
   emits: ['update:modelValue'],
 
   data() {
     return {
       adminStore: useAdminStore(),
-        showAllNotifications: false
+        showAllNotifications: false,
+        notifications: [  // จัดการข้อมูลเองในนี้
+        {
+          id: 1,
+          type: 'user',
+          title: 'มีผู้ใช้งานลงทะเบียนใหม่',
+          message: 'คุณ John Doe ขอการอนุมัติ',
+          created_at: new Date(),
+          read: false,
+         
+        },
+        {
+          id: 2,
+          type: 'skill',
+          title: 'ต้องการการตรวจสอบทักษะ',
+          message: 'คุณ Jane Smith เพิ่มทักษะใหม่เพื่อรอการตรวจสอบ',
+          created_at: new Date(Date.now() - 10 * 60000),
+          read: false,
+        
+        },
+        {
+          id: 3,
+          type: 'job',
+          title: 'มีการสมัครงานใหม่',
+          message: 'มีผู้สมัครตำแหน่ง Frontend Developer',
+          created_at: new Date(Date.now() - 60 * 60000),
+          read: false,
+        
+        }
+      ]
     }
   },
 
@@ -151,18 +175,19 @@ export default {
         minute: '2-digit'
       })
     },
-
-    async markAllAsRead() {
-      try {
-        await this.adminStore.markAllNotificationsAsRead()
-      } catch (error) {
-        console.error('Error marking notifications as read:', error)
-      }
+handleNotificationClick(notification) {
+      notification.read = true
+    },
+    markAllAsRead() {
+      this.notifications.forEach(n => n.read = true)
     },
 
-     openAllNotifications() {
+ handleSelect(notification) {
+      this.handleNotificationClick(notification)
+      // this.$emit('update:modelValue', false) // ปิด dropdown เมื่อคลิก
+    },
+   openAllNotifications() {
       this.showAllNotifications = true
-      // ปิด notifications submenu
       this.$emit('update:modelValue', false)
     }
   }

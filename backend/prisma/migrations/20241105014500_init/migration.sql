@@ -17,12 +17,25 @@ CREATE TABLE "User" (
     "skills" TEXT NOT NULL,
     "email_verified" BOOLEAN NOT NULL DEFAULT false,
     "verification_token" TEXT,
-    "approved" BOOLEAN NOT NULL DEFAULT false,
+    "approved" TEXT NOT NULL DEFAULT 'pending',
     "role" TEXT NOT NULL DEFAULT 'user',
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ NOT NULL,
+    "user_documents" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "pending_skills" (
+    "id" SERIAL NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "skill" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'pending',
+    "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ NOT NULL,
+
+    CONSTRAINT "pending_skills_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -117,10 +130,16 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 CREATE UNIQUE INDEX "User_national_id_key" ON "User"("national_id");
 
 -- CreateIndex
+CREATE INDEX "pending_skills_userId_idx" ON "pending_skills"("userId");
+
+-- CreateIndex
 CREATE INDEX "Job_work_date_location_title_idx" ON "Job"("work_date", "location", "title");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Admin_email_key" ON "Admin"("email");
+
+-- AddForeignKey
+ALTER TABLE "pending_skills" ADD CONSTRAINT "pending_skills_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Job" ADD CONSTRAINT "Job_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "Admin"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

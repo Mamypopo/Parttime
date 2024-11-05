@@ -1,5 +1,6 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-gray-50" >
+  <!-- พื้นทีหน้าหลัก -->
+  <div class="flex flex-col min-h-screen bg-[#F2F5FF]" >
    
     <!-- Desktop/Tablet Sidebar with Transition -->
     <Transition
@@ -11,14 +12,14 @@
   leave-to-class="opacity-0 transform -translate-x-full"
     >
       <div v-show="!isMobile" 
-        class="transition-all duration-500 ease-in-out h-screen fixed bg-white border-r  " 
-        :class="[isCollapsed ? 'w-16' : 'w-64']"
+        class="transition-all duration-500 ease-in-out h-screen fixed  bg-white border-r drop-shadow-md " 
+        :class="[isCollapsed ? 'w-16' : 'w-70']"
       >
         <!-- Header -->
         <div class="flex items-center p-4 " :class="[isCollapsed ? 'justify-center' : 'justify-between']">
           <div class="flex items-center" :class="[isCollapsed ? 'justify-center' : 'gap-2']">
             <img src="@/assets/images/logosemed.svg" alt="Admin" class="w-8 h-8" />
-            <h1 v-if="!isCollapsed" class="text-lg font-medium">Admin dashboard</h1>
+            <h1 v-if="!isCollapsed" class="text-lg font-semibold text-[#4D4D4D]">Admin dashboard</h1>
           </div>
           
           <!-- Toggle Sidebar Button -->
@@ -32,21 +33,21 @@
         </div>
 
         <!-- Navigation Sidebar -->
-        <nav class="px-2 py-2 bg-">
+        <nav class="px-2 py-2 mt-8 bg-white">
           <!-- Main Menu -->
           <router-link 
             v-for="(item, index) in mainMenuItems" 
             :key="index"
             :to="item.path"
-            class="flex items-center mb-1 px-4 py-2 hover:bg-gray-100 rounded-lg"
+            class="flex items-center mb-1 px-4 py-2 hover:bg-[#5D5FEF] hover:bg-opacity-5 rounded-lg font-semibold text-[#4D4D4D]"
             :class="[isCollapsed ? 'justify-center' : 'gap-3']"
             :title="isCollapsed ? item.name : ''"
           >
-            <i :class="['text-gray-400', item.icon]"></i>
+            <i :class="['text-[#A8E6E2] text-xl', item.icon]"></i>
             <span v-if="!isCollapsed">{{ item.name }}</span>
           </router-link>
 
-          <NotificationsPanel :is-collapsed="isCollapsed" />
+          <NotificationsPanel :is-collapsed="isCollapsed " />
         
 
           <!-- Jobs Section -->
@@ -55,37 +56,39 @@
               v-for="(item, index) in jobMenuItems" 
               :key="index"
               :to="item.path"
-              class="flex items-center mb-1 px-4 py-2 hover:bg-gray-100 rounded-lg"
+              class="flex items-center mb-1 px-4 py-2 hover:bg-gray-100 rounded-lg font-semibold text-[#4D4D4D]"
               :class="[
                 isCollapsed ? 'justify-center' : 'gap-3',
-                !isCollapsed && item.indent ? 'ml-4' : ''
+                !isCollapsed && item.indent ? '' : ''
               ]"
               :title="isCollapsed ? item.name : ''"
             >
-              <i :class="['text-gray-400', item.icon]"></i>
+              <i :class="['text-[#A8E6E2] text-xl', item.icon]"></i>
               <span v-if="!isCollapsed">{{ item.name }}</span>
             </router-link>
           </div>
         </nav>
 
         <!-- Admin Profile -->
-        <div class="absolute bottom-0 left-0 bg-emerald-100 p-4 transition-all duration-300"
-          :class="[isCollapsed ? 'w-16' : 'w-64']"
-        >
-          <div v-if="!isCollapsed" class="flex items-center gap-2 mb-3">
-            <img src="@/assets/images/logosemed.svg" alt="Admin" class="w-10 h-10 rounded-full" />
-            <div>
-              <div class="font-medium">Lorem ipsum</div>
-              <div class="text-sm text-gray-600">Loremipsum@gmail.com</div>
-            </div>
-          </div>
-          <div v-else class="flex justify-center">
-            <img src="@/assets/images/logosemed.svg" alt="Admin" class="w-10 h-10 rounded-full" />
-          </div>
-          <button v-if="!isCollapsed" @click="handleLogout" class="w-full mt-3 py-2 bg-white rounded-lg hover:bg-gray-50">
-            Logout
-          </button>
-        </div>
+       <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-[#bbe4e1] to-[#B3E5FC] p-8 transition-all duration-300 h-[200px]" 
+  :class="[isCollapsed ? 'w-16' : 'w-70']"
+>
+  <div class="flex flex-col items-center">
+    <img src="@/assets/images/logosemed.svg" alt="Admin" class="w-10 h-10 rounded-full mb-3" />
+    
+    <div v-if="!isCollapsed" class="text-center">
+      <div class="font-semibold truncate max-w-[150px]">Lorem ipsum</div>
+      <div class="text-semibold text-[#4D4D4D] truncate max-w-[150px]">Loremipsum@gmail.com</div>
+    </div>
+    
+    <button v-if="!isCollapsed" @click="handleLogout" 
+      class="w-full mt-3 py-2  bg-white rounded-lg hover:bg-gray-50 flex items-center justify-center gap-2"
+    >
+      <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      Logout
+    </button>
+  </div>
+</div>
       </div>
     </Transition>
 
@@ -108,14 +111,14 @@
 </Transition>
 
  <!-- Mobile Bottom Navigation -->
-<nav v-if="isMobile" class="fixed bottom-0 left-0 right-0 bg-white border-t px-4 py-2">
+<nav v-if="isMobile" class="fixed bottom-0 left-0 right-0 bg-white border-t px-4 py-2 ">
   <div class="flex justify-around items-center">
     <template v-for="item in mobileMainItems" :key="item.name">
       <button
-        class="flex flex-col items-center p-2"
+        class="flex flex-col items-center p-2  text-[#3A3A49]"
         @click="handleMobileMenuClick(item)"
       >
-        <i :class="['text-xl text-gray-400', item.icon]"></i>
+        <i :class="['text-xl text-[#3A3A49]', item.icon]"></i>
         <span class="text-xs mt-1">{{ item.name }}</span>
       </button>
     </template>
@@ -145,10 +148,10 @@
         v-for="item in mobileMainItems.find(i => i.name === 'Users')?.submenu.items"
         :key="item.path"
         :to="item.path"
-        class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg"
+        class="flex items-center gap-3 px-4 py-3 hover:bg-[#5D5FEF] hover:bg-opacity-5 rounded-lg  font-semibold text-[#4D4D4D]"
         @click="showUserSubmenu = false"
       >
-        <i :class="['text-gray-400', item.icon]"></i>
+        <i :class="['text-[#A8E6E2] text-xl', item.icon]"></i>
         <span>{{ item.name }}</span>
       </router-link>
     </div>
@@ -165,7 +168,7 @@
   >
     <div 
       v-show="showJobSubmenu" 
-      class="absolute bottom-full left-0 right-0 bg-white border-t shadow-lg p-4"
+      class="absolute bottom-full left-0 right-0 bg-white border-t shadow-lg p-4 "
     >
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-xs font-semibold text-gray-500">Job Management</h3>
@@ -178,10 +181,10 @@
         v-for="item in mobileMainItems.find(i => i.name === 'Jobs')?.submenu.items"
         :key="item.path"
         :to="item.path"
-        class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg"
+        class="flex items-center gap-3 px-4 py-3 hover:bg-[#5D5FEF] hover:bg-opacity-5 rounded-lg font-semibold text-[#4D4D4D]"
         @click="showJobSubmenu = false"
       >
-        <i :class="['text-gray-400', item.icon]"></i>
+        <i :class="['text-[#A8E6E2] text-xl', item.icon]"></i>
         <span>{{ item.name }}</span>
       </router-link>
     </div>
@@ -190,7 +193,6 @@
   <!-- Notifications Submenu -->
 <MobileNotifications
   v-model="showNotificationSubmenu"
-  :notifications="notifications"
   @close="showAllNotifications = false"
 />
 
@@ -218,18 +220,18 @@
       <router-link 
         v-if="!item.action"
         :to="item.path"
-        class="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg"
+        class="flex items-center gap-3 px-4 py-3 hover:bg-[#5D5FEF] hover:bg-opacity-5 rounded-lg font-semibold text-[#4D4D4D]"
         @click="showMoreSubmenu = false"
       >
-        <i :class="['text-gray-400', item.icon]"></i>
+        <i :class="['text-[#A8E6E2] text-xl', item.icon]"></i>
         <span>{{ item.name }}</span>
       </router-link>
       <button
         v-else
-        class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-lg"
+        class="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#5D5FEF] hover:bg-opacity-5 rounded-lg font-semibold text-[#4D4D4D]"
         @click="handleMoreAction(item.action)"
       >
-        <i :class="['text-gray-400', item.icon]"></i>
+        <i :class="['text-[#A8E6E2] text-xl', item.icon]"></i>
         <span>{{ item.name }}</span>
       </button>
     </template>
@@ -274,33 +276,34 @@ export default {
       showAllNotifications: false,
       showMoreSubmenu: false,
       mainMenuItems: [
-        { name: 'Home', path: '/admin/dashboard', icon: 'fas fa-home' },
-        { name: 'Users', path: '/admin/alluser', icon: 'fas fa-users' },
-        { name: 'Pending Users', path: '/admin/pending-users', icon: 'fas fa-user-clock' },
-        { name: 'Rejected Users', path: '/admin/reject-user', icon: 'fa-solid fa-user-xmark' },
-        { name: 'User Add Skills Pending', path: '/admin/skills-pending', icon: 'fas fa-tasks' },
-        { name: 'User Work History', path: '/admin/work-history', icon: 'fas fa-history' }
+        { name: 'หน้าหลัก', path: '/admin/dashboard', icon: 'fas fa-home' },
+        { name: 'ผู้ใช้', path: '/admin/alluser', icon: 'fas fa-users' },
+        { name: 'ผู้ใช้งาน รออนุมัติ', path: '/admin/pending-users', icon: 'fas fa-user-clock' },
+        { name: 'ผู้ใช้งาน ถูกปฏิเสธ', path: '/admin/reject-user', icon: 'fa-solid fa-user-xmark' },
+        { name: 'ผู้ใช้งาน ขอเพิ่มทักษะ', path: '/', icon: 'fas fa-tasks' },
+        { name: 'ประวัติผู้ใช้งาน', path: '/', icon: 'fas fa-history' }
       ],
       
       jobMenuItems: [
-        { name: 'Jobs', path: '/admin/jobs', icon: 'fas fa-briefcase', indent: false },
-        { name: 'My Jobs', path: '/admin/my-jobs', icon: 'fas fa-list', indent: true },
-        { name: 'Create Job', path: '/admin/create-job', icon: 'fas fa-plus', indent: true }
+        { name: 'งาน', path: '/', icon: 'fas fa-briefcase', indent: false },
+        { name: 'สร้างงาน', path: '/admin/create-job', icon: 'fas fa-plus', indent: true },
+        { name: 'งานของฉัน', path: '/', icon: 'fas fa-list', indent: true }
       ],
+
       mobileMainItems: [
-        { name: 'Home', path: '/admin', icon: 'fas fa-home' },
+        { name: 'หน้าหลัก', path: '/admin', icon: 'fas fa-home' },
         { 
-          name: 'Users', 
+          name: 'ผู้ใช้งาน', 
           icon: 'fas fa-users',
           hasSubmenu: true, 
           submenu: {
             title: 'User Management',
             items: [
-              { name: 'All Users', path: '/admin/alluser', icon: 'fas fa-users' },
-              { name: 'Pending Users', path: '/admin/pending-users', icon: 'fas fa-user-clock' },
-              { name: 'Rejected Users', path: '/admin/reject-user', icon: 'fa-solid fa-user-xmark' },
-              { name: 'Work History', path: '/admin/work-history', icon: 'fas fa-history' },
-              { name: 'Skills Pending', path: '/admin/skills-pending', icon: 'fas fa-tasks' },
+              { name: 'ผู้ใช้งานทั้งหมด', path: '/admin/alluser', icon: 'fas fa-users' },
+              { name: 'ผู้ใช้งาน รออนุมัติ', path: '/admin/pending-users', icon: 'fas fa-user-clock' },
+              { name: 'ผู้ใช้งาน ถูกปฏิเสธ', path: '/admin/reject-user', icon: 'fa-solid fa-user-xmark' },
+              { name: 'ประวัติผู้ใช้งาน', path: '/admin/work-history', icon: 'fas fa-history' },
+              { name: 'ผู้ใช้งาน ขอเพิ่มทักษะ', path: '/admin/skills-pending', icon: 'fas fa-tasks' },
             ]
           }
         },
@@ -467,15 +470,7 @@ export default {
 
 <style scoped>
 .router-link-active {
-  @apply text-blue-500;
-}
-
-.router-link-active i {
-  @apply text-blue-500;
-}
-
-nav {
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  @apply bg-[#5D5FEF]/10;
 }
 
 @keyframes bell-shake {

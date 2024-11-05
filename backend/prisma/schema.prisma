@@ -83,7 +83,6 @@ model JobPosition {
   position_name    String // ชื่อตำแหน่งงาน
   wage             Float // ค่าแรงของตำแหน่งนี้
   required_people  Int // จำนวนคนที่ต้องการในตำแหน่งนี้
-  required_skills  String[]
   details          String // รายละเอียดงานในตำแหน่งนี้
   job_id           Int // เชื่อมกับตาราง Job
   status           String             @default("open") // เพิ่มฟิลด์ status พร้อมค่าดีฟอลต์เป็น 'open'
@@ -144,4 +143,5 @@ model Notification {
   userId    Int?
   job       Job?     @relation(fields: [jobId], references: [id])
   jobId     Int?
+  read      Boolean  @default(false) // เพิ่ม field นี้
 }

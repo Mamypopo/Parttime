@@ -74,3 +74,25 @@ export const deleteOldNotifications = async (daysOld = 30) => {
         throw error;
     }
 };
+
+
+export const markAsRead = (notificationId, adminId) =>
+    prisma.notification.updateMany({
+        where: {
+            id: notificationId,
+            adminId
+        },
+        data: {
+            read: true
+        }
+    });
+
+export const markAllAsRead = (adminId) =>
+    prisma.notification.updateMany({
+        where: {
+            adminId
+        },
+        data: {
+            read: true
+        }
+    });

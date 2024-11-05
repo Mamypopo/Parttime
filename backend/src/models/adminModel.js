@@ -57,39 +57,6 @@ export const findAdminByEmail = (email) =>
     prisma.admin.findUnique({ where: { email } });
 
 
-// // ฟังก์ชันสำหรับดึงผู้ใช้ที่รอการอนุมัติ
-// export const findPendingUsers = (page = 1, perPage = 10) =>
-//     prisma.user.findMany({
-//         where: { approved: "pending" },
-//         select: {
-//             id: true,
-//             first_name: true,
-//             last_name: true,
-//             email: true,
-//             email_verified: true,
-//             created_at: true,
-//             skills: true,
-//             // ข้อมูลพื้นฐาน
-//             prefix: true,
-//             gender: true,
-//             birth_date: true,
-//             age: true,
-//             phone_number: true,
-//             national_id: true,
-//             line_id: true,
-//             profile_image: true,
-//             // เอกสาร
-//             education_certificate: true,
-//             user_documents: true
-//         },
-//         skip: (page - 1) * perPage,
-//         take: perPage,
-//         orderBy: {
-//             created_at: 'desc'
-//         }
-//     });
-
-
 
 // ฟังก์ชันพื้นฐานสำหรับดึงข้อมูลผู้ใช้
 const baseUserSelect = {

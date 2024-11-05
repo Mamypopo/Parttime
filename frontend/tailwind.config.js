@@ -8,7 +8,11 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Nunito', 'sans-serif'], // ตั้งเป็น default font
+        sans: [
+          '"Noto Sans Thai"',
+          '"Nunito"',
+        ],
+
       },
       colors: {
         'custom-yellow': '#CDE45F',

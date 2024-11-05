@@ -2,16 +2,18 @@
      <div class="w-full relative">
   <HeadlessMenu  v-if="!isMobile" as="div" class="w-full">
      <HeadlessMenuButton 
-        class="w-full flex items-center px-4 py-2 hover:bg-gray-100 rounded-lg"
+        class="w-full flex items-center px-4 py-2 hover:bg-[#5D5FEF] hover:bg-opacity-5 
+        rounded-lg font-semibold text-[#4D4D4D] transition-colors duration-200  "
         :class="[isCollapsed ? 'justify-center' : 'gap-3']"
+        
       >
-        <div class="w-6 text-center">
-          <i class="fas fa-bell text-gray-400"></i>
+        <div class="w-4 text-center ">
+          <i class="fas fa-bell text-xl text-[#A8E6E2]"></i>
         </div>
-        <span v-if="!isCollapsed">Notifications</span>
+        <span v-if="!isCollapsed" class="font-semibold ml-1 text-[#3A3A49] ">การแจ้งเตือน</span>
         <span 
           v-if="notificationCount" 
-          class="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full"
+          class="text-xs bg-[#f76363] text-white px-2 py-0.5 rounded-full animate-pulse "
           :class="[isCollapsed ? 'absolute -top-1 -right-1' : 'ml-auto']"
         >
           {{ notificationCount }}
@@ -26,54 +28,91 @@
       leave-from-class="transform scale-100 opacity-100"
       leave-to-class="transform scale-95 opacity-0"
     >
-      <HeadlessMenuItems class="absolute left-0 mt-1 w-80 bg-white rounded-lg shadow-lg border z-50 origin-top-left">
-        <div class="flex justify-between items-center px-4 py-2 border-b">
-          <h3 class="font-medium">Notifications</h3>
+      <HeadlessMenuItems 
+       v-if="!isModalOpen" 
+      class="absolute  left-0 mt-1 w-80 bg-white rounded-lg shadow-lg border z-50 origin-top-left overflow-hidden" 
+      :class="{
+        'left-full ml-2 top-0': isCollapsed,  // ถ้า sidebar หดจะแสดงทางขวา
+        'right-0 top-full mt-2': !isCollapsed // ถ้า sidebar ขยายจะแสดงด้านล่าง
+      }"  style="width: 320px; max-height: 480px; overflow-y: auto;" 
+      >
+        <div class="flex justify-between items-center px-4 py-2  bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] border-b">
+          <h3 class="font-medium text-[#EA6B6B]">การแจ้งเตือน</h3>
           <button 
             v-if="notifications.length > 0"
             @click="markAllAsRead"
-            class="text-sm text-blue-500 hover:text-blue-600"
+            class="text-sm text-[#6ED7D1] hover:text-[#4bb3af]  transition-colors duration-200"
           >
-            Mark all as read
+         <span class="flex items-center gap-2">
+                <i class="fas fa-check-double"></i>
+                อ่านทั้งหมด
+              </span>
           </button>
+          
         </div>
 
-        <div class="max-h-[320px] overflow-y-auto">
-          <HeadlessMenuItem v-for="notification in notifications" 
-            :key="notification.id" 
-            v-slot="{ active }"
-          >
-            <div
-              :class="[
-                'px-4 py-3 cursor-pointer',
-                active ? 'bg-gray-50' : '',
-                !notification.read ? 'bg-blue-50' : ''
-              ]"
-              @click="handleNotificationClick(notification)"
+
+
+          <!-- Notifications List -->
+            <div class="max-h-[320px] overflow-y-auto">
+            <HeadlessMenuItem v-for="notification in notifications" 
+              :key="notification.id" 
+              v-slot="{ active }"
             >
-              <p class="text-sm font-medium" :class="!notification.read ? 'text-blue-600' : 'text-gray-900'">
-                {{ notification.title }}
-              </p>
-              <p class="text-sm text-gray-500">{{ notification.message }}</p>
-              <p class="text-xs text-gray-400 mt-1">{{ notification.time }}</p>
-              <!-- Unread Indicator -->
-              <div v-if="!notification.read" class="absolute right-4">
-                <div class="h-2 w-2 rounded-full bg-blue-600"></div>
+              <div
+                class="px-4 py-3 cursor-pointer transition-colors duration-200 border-b last:border-b-0"
+                :class="[
+                  active ? 'bg-[#5D5FEF]/5' : '',
+                  !notification.read ? 'bg-[#5D5FEF]/10' : ''
+                ]"
+                @click="handleNotificationClick(notification)"
+              >
+                <div class="flex items-start gap-3">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-full" 
+                    :class="getIconClass(notification.type)"
+                  >
+                    <i :class="getIcon(notification.type)"></i>
+                  </span>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium" 
+                       :class="!notification.read ? 'text-[#CDE45F]' : 'text-[#888888]'">
+                      {{ notification.message }}
+                    </p>
+                    <p class="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                      <i class="far fa-clock"></i>
+                      {{ formatTime(notification.created_at) }}
+                    </p>
+                  </div>
+                  <div v-if="!notification.read" class="flex-shrink-0">
+                    <div class="h-2 w-2 rounded-full bg-[#EA6B6B] animate-ping"></div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </HeadlessMenuItem>
-        </div>
+            </HeadlessMenuItem>
 
-        <div class="px-4 py-2 border-t">
-          <button 
-            class="w-full text-center text-sm text-gray-500 hover:text-gray-700"
-            @click="openModal"
-          >
-            View all notifications
-          </button>
-        </div>
-      </HeadlessMenuItems>    
+            <!-- Empty State -->
+            <div v-if="notifications.length === 0" 
+                 class="p-8 text-center text-[#3A3A49] flex flex-col items-center gap-3">
+              <i class="fas fa-bell-slash text-3xl text-[#EABF71]"></i>
+              <p>ไม่มีการแจ้งเตือน</p>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="px-4 py-2 border-t bg-gray-50">
+            <button 
+              class="w-full text-center text-sm text-[#3A3A49] hover:text-[#5D5FEF] transition-colors duration-200"
+              @click="openModal"
+            >
+            <p class="text-[#EA6B6B]">
+              ดูการแจ้งเตือนทั้งหมด
+            </p> 
+            </button>
+          </div>
+        </HeadlessMenuItems>     
     </transition>
+
+    
     <!-- Mobile Version -->
     <div v-if="isMobile" class="flex flex-col items-center p-2 relative">
       <button 
@@ -96,6 +135,7 @@
       :is-open="isModalOpen"
       @close="closeModal"
       :notifications="notifications"
+      @notification-read="handleNotificationRead"
       @mark-all-read="markAllAsRead"
     />
   </HeadlessMenu>
@@ -105,6 +145,7 @@
 <script>
 import { Menu as HeadlessMenu, MenuButton as HeadlessMenuButton, MenuItems as HeadlessMenuItems, MenuItem as HeadlessMenuItem } from '@headlessui/vue'
 import NotificationsModal from './NotificationsModal.vue'
+import { useNotificationStore } from '@/stores/notificationStore'
 
 export default {
   components: {
@@ -124,51 +165,62 @@ props: {
       default: false
     }
   },
+
+  setup() {
+    const notificationStore = useNotificationStore()
+    return { notificationStore }
+  },
   data() {
     return {
       isModalOpen: false,
-      notificationCount: 3,
-      notifications: [
-        {
-          id: 1,
-          type: 'user',
-          title: 'New User Registration',
-          message: 'John Doe has requested approval',
-          time: '5 minutes ago',
-          read: false
-        },
-        {
-          id: 2,
-          type: 'skill',
-          title: 'Skill Verification Required',
-          message: 'Jane Smith added new skills for review',
-          time: '10 minutes ago',
-          read: false
-        },
-        {
-          id: 3,
-          type: 'job',
-          title: 'New Job Application',
-          message: 'You have a new applicant for Frontend Developer position',
-          time: '1 hour ago',
-          read: false
-        }
-      ]
+       isMenuOpen: false,
+      currentFilter: 'all'
     }
+  },
+ computed: {
+    notifications() {
+      return this.notificationStore.sortedNotifications
+    },
+
+    notificationCount() {
+      return this.notificationStore.unreadCount
+    },
+
+    hasUnread() {
+      return this.notificationStore.hasUnread
+    }
+  },
+
+  async created() {
+    await this.notificationStore.fetchNotifications()
   },
 
   methods: {
     openModal() {
-      this.isModalOpen = true
+      this.isModalOpen = true,
+       this.isMenuOpen = false 
     },
 
     closeModal() {
       this.isModalOpen = false
     },
 
+    
+    handleNotificationClick(notification) {
+      this.notificationStore.markAsRead(notification.id)
+    },
+
+    handleNotificationRead(notificationId) {
+      this.notificationStore.markAsRead(notificationId)
+    },
+
+    markAllAsRead() {
+      this.notificationStore.markAllAsRead()
+    },
+
     getIconClass(type) {
       const classes = {
-        user: 'bg-blue-100 text-blue-600',
+        user: 'text-[#CDE45F]',
         skill: 'bg-green-100 text-green-600',
         job: 'bg-purple-100 text-purple-600',
         default: 'bg-gray-100 text-gray-600'
@@ -181,27 +233,67 @@ props: {
         user: 'fas fa-user-clock',
         skill: 'fas fa-tasks',
         job: 'fas fa-briefcase',
-        default: 'fas fa-bell'
+        default: 'fas fa-bell text-[#EABF71]'
       }
       return icons[type] || icons.default
     },
+     formatTime(date) {
+    if (!date) return 'ไม่ระบุเวลา'
+    
+    try {
+      const dateObj = new Date(date)
+      if (isNaN(dateObj.getTime())) {
+        return 'ไม่ระบุเวลา'
+      }
 
-    handleNotificationClick(notification) {
-      notification.read = true
-      this.notificationCount = this.notifications.filter(n => !n.read).length
-      // เพิ่มโค้ดจัดการเมื่อคลิกที่การแจ้งเตือน เช่น นำทางไปหน้าที่เกี่ยวข้อง
-    },
+      return new Intl.DateTimeFormat('th-TH', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }).format(dateObj)
+    } catch (error) {
+      console.error('Error formatting date:', error)
+      return 'ไม่ระบุเวลา'
+    }
+     },
+       closeMenu() {
+    this.isMenuOpen = false
+  },
+  
+ 
 
-    markAllAsRead() {
-      this.notifications.forEach(n => n.read = true)
-      this.notificationCount = 0
-    },
-
-    viewAllNotifications() {
-      // นำทางไปหน้าแสดงการแจ้งเตือนทั้งหมด
-      console.log('View all notifications')
-      this.openModal()
+  },
+  watch: {
+  isModalOpen(newValue) {
+    if (newValue) {
+      this.closeMenu()
     }
   }
+},
 }
 </script>
+
+
+<style scoped>
+.max-h-\[320px\] {
+  scrollbar-width: thin;
+  scrollbar-color: #C5B4E3 #f3f4f6;
+}
+
+.max-h-\[320px\]::-webkit-scrollbar {
+  width: 6px;
+}
+
+.max-h-\[320px\]::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+.max-h-\[320px\]::-webkit-scrollbar-thumb {
+  background-color: #C5B4E3;
+  border-radius: 20px;
+  border: 2px solid #f3f4f6;
+}
+</style>

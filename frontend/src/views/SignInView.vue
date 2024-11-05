@@ -138,7 +138,7 @@ export default {
       if (!this.validateForm()) return
 
       try {
-        // แสดง loading
+      
         Swal.fire({
           title: 'กำลังเข้าสู่ระบบ...',
           allowOutsideClick: false,
@@ -147,17 +147,17 @@ export default {
           }
         })
         
-        // 1. Login request
+      
         const response = await axios.post(`${baseURL}/api/users/login`, {
           email: this.form.email,
           password: this.form.password
         })
 
-        // 2. เก็บ token
+     
         this.userStore.setToken(response.data.token)
 
 
-        // แสดง success
+    
         await Swal.fire({
           icon: 'success',
           title: 'เข้าสู่ระบบสำเร็จ',
@@ -166,11 +166,11 @@ export default {
           timer: 1500
         })
 
-        // 3. Redirect
+      
         this.$router.push('/')
 
       } catch (err) {
-        // แสดง error
+    
         Swal.fire({
           icon: 'error',
           title: 'เข้าสู่ระบบไม่สำเร็จ',

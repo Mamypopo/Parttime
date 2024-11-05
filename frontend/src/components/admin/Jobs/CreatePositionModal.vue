@@ -14,7 +14,7 @@
       </TransitionChild>
 
       <!-- Modal Container -->
-      <div class="fixed inset-0 overflow-y-auto">
+      <div class="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-3 sm:p-4">
           <TransitionChild
             enter="duration-300 ease-out"
@@ -24,26 +24,26 @@
             leave-from="opacity-100 scale-100"
             leave-to="opacity-0 scale-95"
           >
-            <HeadlessDialogPanel class="w-full max-w-md bg-white rounded-lg p-4 sm:p-6">
+            <HeadlessDialogPanel class="w-full max-w-3xl bg-white rounded-lg p-4 sm:p-6">
               <HeadlessDialogTitle class="text-lg sm:text-xl text-center text-cyan-400 mb-4 sm:mb-6">
-                {{ editingPosition ? 'Edit Job Position' : 'Create Job Position' }}
+                {{ editingPosition ? 'Edit Job Position' : 'เพิ่มตำแหน่งงาน' }}
+                
               </HeadlessDialogTitle>
 
               <form @submit.prevent="handleSubmit" class="space-y-4">
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                   <!-- Position -->
                   <div class="relative">
-                    <label class="block text-sm mb-1">Position</label>
-                    <div class="relative">
-                      <input
-                        type="text"
-                        v-model="form.position"
-                        class="w-full px-3 py-2 border rounded-lg pr-8"
-                        readonly
-                        @click="togglePositionList"
-                      />
-                      <i class="fas fa-chevron-down absolute right-3 top-3 text-gray-400"></i>
-                    </div>
+                    <label class="block  text-sm mb-1">ตำแหน่ง</label>
+  <div class="relative">
+    <input
+      type="text"
+      v-model="form.position"
+      class="w-full px-3 py-2 border rounded-lg pr-8 focus:outline-none focus:ring-2 focus:ring-purple-200"
+      placeholder="ตำแหน่งงาน"
+    />
+    <i class="fas fa-user-tie absolute right-3 top-3 text-gray-400"></i>
+  </div>
                     
                     <!-- Position List Dropdown -->
                     <div v-if="showPositionList" 
@@ -53,7 +53,7 @@
                           v-for="pos in positions"
                           :key="pos"
                           type="button"
-                          class="block w-full text-left px-3 py-2 hover:bg-gray-200 rounded text-sm"
+                          class="block w-full text-left px-3 py-2 hover:bg-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
                           @click="selectPosition(pos)"
                         >
                           {{ pos }}
@@ -64,36 +64,47 @@
 
                   <!-- Wage -->
                   <div>
-                    <label class="block text-sm mb-1">Wage</label>
-                    <input
+                    <label class="block text-sm mb-1">ค่าแรง</label>
+                    <div class="relative">
+                        <input
                       type="number"
                       v-model="form.wage"
-                      class="w-full px-3 py-2 border rounded-lg"
-                      placeholder="wage"
+                      class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                      placeholder="ค่าแรง"
                     />
+                     <i class="fa-solid fa-baht-sign absolute right-3 top-3 text-gray-400"></i>
+                    </div>
+                  
                   </div>
 
                   <!-- Required people -->
                   <div>
-                    <label class="block text-sm mb-1">Required people</label>
-                    <input
-                      type="number"
-                      v-model="form.requiredPeople"
-                      class="w-full px-3 py-2 border rounded-lg"
-                      placeholder="required people"
-                    />
+                    <label class="block text-sm mb-1">จำนวนคน</label>
+  <div class="relative">
+    <input
+      type="number"
+      v-model="form.requiredPeople"
+      class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+      placeholder="จำนวนคนที่ต้องการ"
+    />
+    <i class="fas fa-users absolute right-3 top-3 text-gray-400"></i>
+  </div>
                   </div>
                 </div>
 
                 <!-- Detail -->
                 <div class="mt-4 sm:mt-6">
-                  <label class="block text-sm mb-1">Detail</label>
-                  <textarea
+                  <label class="block text-sm mb-1">รายละเอียด</label>
+                  <div class="relative">
+                       <textarea
                     v-model="form.detail"
                     rows="4"
-                    class="w-full px-3 py-2 border rounded-lg resize-none"
-                    placeholder="detail"
+                    class="w-full px-3 py-2 pl-10 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-200"
+                    placeholder="รายละเอียด"
                   ></textarea>
+                   <i class="fas fa-clipboard-list absolute left-3 top-3 text-gray-400"></i>
+                  </div>
+               
                 </div>
 
                 <!-- Submit Button -->
@@ -154,6 +165,7 @@ export default {
         detail: ''
       },
       positions: [
+        
         'X-ray',
         'Nurse',
         'Medic',
@@ -220,3 +232,16 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+/* ซ่อน spinner arrows จาก input type number */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+}
+</style>

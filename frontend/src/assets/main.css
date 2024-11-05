@@ -5,9 +5,9 @@
 
 @layer base {
   html {
-    font-family: 'Nunito', sans-serif;
     overflow-y: scroll;
     scrollbar-width: none;
+    @apply text-[#3A3A49];
     /* Firefox */
     -ms-overflow-style: none;
     /* IE and Edge */

@@ -60,9 +60,45 @@
               </div>
 
               <!-- Notifications List -->
-              <div class="overflow-y-auto" style="height: calc(100vh - 120px)">
-                <!-- ... ส่วนเนื้อหาเหมือนเดิม ... -->
-              </div>
+            <div class="overflow-y-auto" style="height: calc(100vh - 120px)">
+    <div
+      v-for="notification in filteredNotifications"
+      :key="notification.id"
+      class="block border-b last:border-b-0"
+      @click="handleSelect(notification)"
+    >
+      <div class="flex items-start gap-3 p-4 hover:bg-gray-50" 
+           :class="{ 'bg-blue-50': !notification.read }">
+        <!-- Icon -->
+        <div :class="[
+          'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
+          getTypeClass(notification.type)
+        ]">
+          <i :class="getTypeIcon(notification.type)"></i>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium" 
+            :class="notification.read ? 'text-[#3A3A49]' : 'text-[#EABF71]'">
+            {{ notification.title }}
+          </p>
+          <p class="text-sm" 
+            :class="notification.read ? 'text-gray-500' : 'text-gray-700'">
+            {{ notification.message }}
+          </p>
+          <p class="text-xs text-gray-400 mt-1">
+            {{ formatTime(notification.created_at) }}
+          </p>
+        </div>
+
+        <!-- Unread Indicator -->
+        <div v-if="!notification.read" 
+             class="w-2 h-2 rounded-full bg-[#CDE45F]">
+        </div>
+      </div>
+    </div>
+  </div>
             </HeadlessDialogPanel>
           </TransitionChild>
         </div>
@@ -80,6 +116,7 @@ import {
   TransitionChild,
 } from '@headlessui/vue'
 import { useAdminStore } from '@/stores/adminStore'
+
 export default {
   components: {
    HeadlessDialog,
@@ -114,9 +151,6 @@ export default {
   },
 
   computed: {
-      adminStore() {
-      return useAdminStore() 
-    },
     hasUnread() {
       return this.notifications?.some(n => !n.read) || false
     },
@@ -161,7 +195,14 @@ export default {
     closeModal() {
       this.$emit('close')
     },
+   handleSelect(notification) {
+      this.handleNotificationClick(notification)
+    },
 
+   handleNotificationClick(notification) {
+      notification.read = true
+    },
+    
     async markAllAsRead() {
       try {
         await this.adminStore.markAllNotificationsAsRead()

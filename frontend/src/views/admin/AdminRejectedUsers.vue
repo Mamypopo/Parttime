@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-3xl p-4 md:p-8 min-h-screen bg-white transition-all duration-500 ease-in-out ">
+  <div class="rounded-3xl p-4 md:p-8  min-h-screen bg-white transition-all duration-500 ease-in-out ">
     <h1 class="text-xl md:text-2xl text-purple-400 mb-4 md:mb-6">Rejected Users</h1>
 
       <SearchUsersBar 
