@@ -33,7 +33,7 @@ export const useNotificationStore = defineStore('notification', {
                 })
 
 
-                // แก้ไขการ check และ map data
+                //  check และ map data
                 if (response.data?.notifications && Array.isArray(response.data.notifications)) {
                     this.notifications = response.data.notifications.map(n => ({
                         id: n.id,
@@ -42,7 +42,8 @@ export const useNotificationStore = defineStore('notification', {
                         read: n.read || false,
                         jobId: n.jobId,
                         userId: n.userId,
-                        adminId: n.adminId
+                        adminId: n.adminId,
+                        type: n.type || 'notification'
                     }))
                 } else if (Array.isArray(response.data)) {
                     // กรณีที่ response.data เป็น array โดยตรง

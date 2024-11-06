@@ -143,5 +143,6 @@ model Notification {
   userId    Int?
   job       Job?     @relation(fields: [jobId], references: [id])
   jobId     Int?
-  read      Boolean  @default(false) // เพิ่ม field นี้
+  read      Boolean  @default(false)
+  type      String   @default("notification")
 }

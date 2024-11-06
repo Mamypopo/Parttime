@@ -29,18 +29,96 @@ export const createJob = async (jobData, adminId) => {
 };
 
 
-// // ฟังก์ชันสำหรับดึงงานทั้งหมด
-// export const getAllJobs = () =>
-//     prisma.job.findMany({
-//         include: { JobPositions: true }
-//     });
-
 // ฟังก์ชันสำหรับดึงงานทั้งหมด
-export const getAllJobs = async (page = 1, pageSize = 20) => {
+// export const getAllJobs = async (page = 1, pageSize = 20) => {
+//     const skip = (page - 1) * pageSize;
+//     return prisma.job.findMany({
+//         skip,
+//         take: pageSize,
+//         select: {
+//             id: true,
+//             title: true,
+//             work_date: true,
+//             location: true,
+//             start_time: true,
+//             end_time: true,
+//             completed: true,
+//             JobPositions: {
+//                 select: {
+//                     id: true,
+//                     position_name: true,
+//                     wage: true,
+//                     required_people: true,
+//                     status: true
+//                 }
+//             }
+//         },
+//         orderBy: { work_date: 'desc' }
+//     });
+// };
+
+export const getAllJobs = async (page = 1, pageSize = 20, filters = {}) => {
     const skip = (page - 1) * pageSize;
+
+    // สร้าง where clause สำหรับ filters
+    const where = {
+        AND: []
+    };
+
+    if (filters.title) {
+        where.AND.push({
+            title: { contains: filters.title, mode: 'insensitive' }
+        });
+    }
+
+    if (filters.location) {
+        where.AND.push({
+            location: { contains: filters.location, mode: 'insensitive' }
+        });
+    }
+
+    if (filters.dateFrom || filters.dateTo) {
+        where.AND.push({
+            work_date: {
+                gte: filters.dateFrom ? new Date(filters.dateFrom) : undefined,
+                lte: filters.dateTo ? new Date(filters.dateTo) : undefined
+            }
+        });
+    }
+
+    if (filters.status !== undefined) {
+        where.AND.push({
+            completed: filters.status === 'completed'
+        });
+    }
+
+    if (filters.position) {
+        where.AND.push({
+            JobPositions: {
+                some: {
+                    position_name: { contains: filters.position, mode: 'insensitive' }
+                }
+            }
+        });
+    }
+
+    if (filters.minWage || filters.maxWage) {
+        where.AND.push({
+            JobPositions: {
+                some: {
+                    wage: {
+                        gte: filters.minWage || 0,
+                        lte: filters.maxWage || 999999
+                    }
+                }
+            }
+        });
+    }
+
     return prisma.job.findMany({
         skip,
         take: pageSize,
+        where: where.AND.length > 0 ? where : undefined,
         select: {
             id: true,
             title: true,
@@ -49,30 +127,102 @@ export const getAllJobs = async (page = 1, pageSize = 20) => {
             start_time: true,
             end_time: true,
             completed: true,
+            details: true,
+            created_by: true,
+            created_at: true,
+            creator: {
+                select: {
+                    id: true,
+                    first_name: true,
+                    last_name: true
+                }
+            },
             JobPositions: {
                 select: {
                     id: true,
                     position_name: true,
                     wage: true,
+                    details: true,
                     required_people: true,
                     status: true
                 }
             }
         },
-        orderBy: { work_date: 'desc' }
+        orderBy: [
+            { created_at: 'desc' },
+            { work_date: 'desc' }
+        ]
     });
 };
 
+// เพิ่มฟังก์ชันสำหรับนับจำนวนงานทั้งหมดที่ตรงกับ filters
+export const getJobsCount = async (filters = {}) => {
+    const where = {};
 
-// // ฟังก์ชันสำหรับดึงงานตาม ID
-// export const getJobById = (jobId) =>
-//     prisma.job.findUnique({
-//         where: { id: jobId },
-//         include: {
-//             JobPositions: true,
-//             creator: true
-//         }
-//     });
+    // เพิ่มเงื่อนไขการค้นหาตาม filters
+    if (filters.id) {
+        where.id = filters.id;
+    }
+
+    if (filters.title) {
+        where.title = {
+            contains: filters.title,
+            mode: 'insensitive'
+        };
+    }
+
+    if (filters.work_date) {
+        where.work_date = filters.work_date;
+    }
+
+    if (filters.location) {
+        where.location = {
+            contains: filters.location,
+            mode: 'insensitive'
+        };
+    }
+
+    if (filters.start_time) {
+        where.start_time = filters.start_time;
+    }
+
+    if (filters.end_time) {
+        where.end_time = filters.end_time;
+    }
+
+    if (filters.completed !== undefined) {
+        where.completed = filters.completed;
+    }
+
+    // ค้นหาใน JobPositions
+    if (filters.position_name || filters.wage || filters.required_people || filters.status) {
+        where.JobPositions = {
+            some: {} // ใช้ some เพื่อค้นหาใน relation
+        };
+
+        if (filters.position_name) {
+            where.JobPositions.some.position_name = {
+                contains: filters.position_name,
+                mode: 'insensitive'
+            };
+        }
+
+        if (filters.wage) {
+            where.JobPositions.some.wage = filters.wage;
+        }
+
+        if (filters.required_people) {
+            where.JobPositions.some.required_people = filters.required_people;
+        }
+
+        if (filters.status) {
+            where.JobPositions.some.status = filters.status;
+        }
+    }
+
+    return prisma.job.count({ where });
+};
+
 
 export const getJobByIdforUpdate = (jobId) =>
     prisma.job.findUnique({

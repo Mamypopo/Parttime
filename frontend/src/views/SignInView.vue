@@ -12,72 +12,73 @@
             <!-- Email Input -->
             <div>
               <label class="block text-sm text-gray-600 mb-1">Email</label>
-              <input 
-                type="email" 
+              <input
+                type="email"
                 v-model="form.email"
                 placeholder="Your email address"
                 class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200"
-                 :class="{ 'border-red-500': hasError }"
+                :class="{ 'border-red-500': hasError }"
                 required
-              >
+              />
             </div>
 
             <!-- Password Input -->
             <div>
               <label class="block text-sm text-gray-600 mb-1">Password</label>
-              <input 
-                type="password" 
+              <input
+                type="password"
                 v-model="form.password"
                 placeholder="Your password"
                 class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200"
-                  :class="{ 'border-red-500': hasError }"
+                :class="{ 'border-red-500': hasError }"
                 required
-              >
+              />
             </div>
-  <!-- Error Message -->
+            <!-- Error Message -->
             <div v-if="error" class="text-red-500 text-sm text-center">
               {{ error }}
             </div>
 
-           
-
             <!-- Sign In Button -->
-            <button 
+            <button
               type="submit"
-              class="w-full py-2.5 bg-[#C5B3E6] text-white rounded-lg hover:bg-[#B39DDB] transition-colors"
-               :disabled="isLoading || !isFormValid"
+              class="w-full py-2.5 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] text-white rounded-lg hover:bg-[#B39DDB] transition-colors"
+              :disabled="isLoading || !isFormValid"
             >
-             <span v-if="isLoading">กำลังเข้าสู่ระบบ...</span>
-                          <span v-else>เข้าสู่ระบบ</span>
-
+              <span v-if="isLoading">กำลังเข้าสู่ระบบ...</span>
+              <span v-else>เข้าสู่ระบบ</span>
             </button>
 
             <!-- Sign Up Link -->
             <p class="text-center text-sm text-gray-600">
-              Don't have an account? 
-              <router-link to="/signup-user" class="text-[#CDE45F] hover:underline">Sign up</router-link>
+              Don't have an account?
+              <router-link to="/signup-user" class="text-[#CDE45F] hover:underline"
+                >Sign up</router-link
+              >
             </p>
           </form>
         </div>
       </div>
 
       <!-- Image Section -->
-     <div class="hidden md:block md:w-1/2">
-  <div class="signin-bg h-[75vh] rounded-[22px] relative mx-6 my-8">
-    <img 
-      src="../assets/images/loginbackground.svg" 
-      alt="Medical consultation" 
-      class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-[60%] max-w-xl"
-    />
-  </div>
-</div>
-      
+      <div class="hidden md:block md:w-1/2">
+        <div class="signin-bg h-[75vh] rounded-[22px] relative mx-6 my-8">
+          <img
+            src="../assets/images/loginbackground.svg"
+            alt="Medical consultation"
+            class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-[60%] max-w-xl"
+          />
+        </div>
+      </div>
     </div>
 
     <!-- Footer -->
     <div class="py-4 px-4 md:px-12">
       <div class="flex flex-wrap gap-4 text-sm text-gray-500">
-        <span>Lorem ipsum dolor sit <span class="text-[#CDE45F]">Lorem ipsum</span> & <span class="text-[#CDE45F]">Something</span> Lorem ipsum</span>
+        <span
+          >Lorem ipsum dolor sit <span class="text-[#CDE45F]">Lorem ipsum</span> &
+          <span class="text-[#CDE45F]">Something</span> Lorem ipsum</span
+        >
         <div class="flex gap-8 ml-auto">
           <span>Lorem ipsum</span>
           <span>Lorem ipsum</span>
@@ -90,14 +91,13 @@
 <script>
 import { useUserStore } from '@/stores/userStore'
 import axios from 'axios'
-import Swal from 'sweetalert2' 
-
+import Swal from 'sweetalert2'
 
 const baseURL = import.meta.env.VITE_API_URL
 
 export default {
   name: 'SignInView',
-  
+
   data() {
     return {
       form: {
@@ -138,7 +138,6 @@ export default {
       if (!this.validateForm()) return
 
       try {
-      
         Swal.fire({
           title: 'กำลังเข้าสู่ระบบ...',
           allowOutsideClick: false,
@@ -146,18 +145,14 @@ export default {
             Swal.showLoading()
           }
         })
-        
-      
+
         const response = await axios.post(`${baseURL}/api/users/login`, {
           email: this.form.email,
           password: this.form.password
         })
 
-     
         this.userStore.setToken(response.data.token)
 
-
-    
         await Swal.fire({
           icon: 'success',
           title: 'เข้าสู่ระบบสำเร็จ',
@@ -166,11 +161,8 @@ export default {
           timer: 1500
         })
 
-      
         this.$router.push('/')
-
       } catch (err) {
-    
         Swal.fire({
           icon: 'error',
           title: 'เข้าสู่ระบบไม่สำเร็จ',
@@ -193,13 +185,10 @@ export default {
 }
 </script>
 <style>
-
-.signin-bg{
-background-image: url('../assets/images/loginbackground2.svg');
+.signin-bg {
+  background-image: url('../assets/images/loginbackground2.svg');
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
-  
 }
-
 </style>

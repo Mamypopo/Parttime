@@ -10,7 +10,7 @@ export const createUserNotification = (userId, message) =>
     });
 
 
-export const createAdminNotification = async ({ userId, content, jobId, adminId }) => {
+export const createAdminNotification = async ({ userId, content, jobId, adminId, type }) => {
     if (!adminId) {
         throw new Error('ต้องระบุ adminId สำหรับการสร้างการแจ้งเตือนสำหรับแอดมิน');
     }
@@ -26,6 +26,7 @@ export const createAdminNotification = async ({ userId, content, jobId, adminId 
                 adminId,
                 message: content,
                 jobId,
+                type: type || 'notification',
                 createdAt: new Date()
             }
         });
