@@ -131,7 +131,7 @@
       <!-- Add Modal -->
       <NotificationsModal
         :is-open="isModalOpen"
-        @close="closeModal"
+        @close="isModalOpen = false"
         :notifications="notifications"
         @notification-read="handleNotificationRead"
         @mark-all-read="markAllAsRead"
@@ -260,6 +260,7 @@ export default {
         return 'ไม่ระบุเวลา'
       }
     },
+
     closeMenu() {
       this.isMenuOpen = false
     }

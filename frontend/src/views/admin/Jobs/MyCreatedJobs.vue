@@ -7,7 +7,7 @@
       <!-- Header -->
       <div class="p-6 border-b">
         <div class="flex justify-between items-center">
-          <h2 class="text-xl font-semibold text-gray-800">งานทั้งหมดในระบบ</h2>
+          <h2 class="text-xl font-semibold text-gray-800">งานที่ฉันสร้าง</h2>
         </div>
       </div>
 
@@ -30,7 +30,6 @@
           <thead class="bg-gray-50 border-b">
             <tr>
               <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">Job ID</th>
-              <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">ADMIN</th>
               <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">ชื่องาน</th>
               <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">สถานที่</th>
               <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">วันที่ทำงาน</th>
@@ -38,15 +37,12 @@
               <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">ตำแหน่ง</th>
               <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">ค่าจ้างรวม</th>
               <th class="px-6 py-4 text-center text-sm font-medium text-gray-500">สถานะ</th>
-              <th class="px-6 py-4 text-center text-sm font-medium text-gray-500">รายละเอียด</th>
+              <th class="px-6 py-4 text-center text-sm font-medium text-gray-500">จัดการ</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
             <tr v-for="job in jobs" :key="job.id" class="hover:bg-gray-50">
               <td class="px-6 py-4 text-gray-900">{{ job.id }}</td>
-              <td class="px-6 py-4 text-gray-600">
-                {{ job.creator?.first_name || `Admin ${job.created_by}` }}
-              </td>
               <td class="px-6 py-4 text-gray-900">{{ job.title }}</td>
               <td class="px-6 py-4 text-gray-600">{{ job.location }}</td>
               <td class="px-6 py-4 text-gray-600">{{ formatDate(job.work_date) }}</td>
@@ -66,6 +62,7 @@
                   </span>
                 </div>
               </td>
+
               <td class="px-4 py-2">
                 <span class="text-[#6ED7D1] font-medium">
                   {{ calculateTotalWage(job) }}
@@ -86,10 +83,22 @@
               </td>
 
               <!-- Actions -->
-              <td class="px-6 py-4 text-center">
-                <div class="flex justify-center space-x-2">
-                  <button @click="openModal(job)" class="text-[#7BC4C4] hover:text-[#5DA3A3]">
+              <td class="px-6 py-4">
+                <div class="flex justify-center space-x-2 gap-3">
+                  <button @click="viewJobDetails(job)" class="text-[#7BC4C4] hover:text-[#5DA3A3]">
                     <i class="fas fa-eye"></i>
+                  </button>
+                  <button
+                    @click="handleOpenEditModal(job)"
+                    class="text-[#81E2C4] hover:text-[#5DC4A7]"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button
+                    @click="confirmDelete(job)"
+                    class="text-[#E98585] hover:text-[#da7171] transition-colors"
+                  >
+                    <i class="fas fa-trash-alt"></i>
                   </button>
                 </div>
               </td>
@@ -98,101 +107,94 @@
         </table>
       </div>
 
-      <!-- เพิ่ม Modal Component -->
-      <JobDetailModal :is-open="isModalOpen" :job="selectedJob || {}" @close="closeModal" />
-
-      <!-- Pagination controls -->
+      <!-- Pagination -->
       <div
         v-if="!loading && jobs.length > 0"
         class="flex justify-center items-center mt-6 space-x-2 pb-4"
       >
-        <!-- ปุ่มย้อนกลับ -->
         <button
-          @click="handlePrevPage"
+          @click="changePage(currentPage - 1)"
           :disabled="currentPage <= 1"
           class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
           :class="[
             currentPage <= 1
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-white text-purple-600 hover:bg-purple-50 border border-purple-200'
+              : 'bg-white text-[#C5B4E3] hover:bg-purple-50 border border-purple-200'
           ]"
         >
           <i class="fas fa-chevron-left text-sm"></i>
         </button>
 
-        <!-- หน้าปัจจุบัน -->
-        <button
-          class="w-8 h-8 flex items-center justify-center rounded-lg bg-purple-400 text-white"
-        >
+        <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#C5B4E3] text-white">
           {{ currentPage }}
         </button>
 
-        <!-- จำนวนหน้าทั้งหมด -->
         <span class="text-gray-600"> of {{ totalPages }} </span>
 
-        <!-- ปุ่มถัดไป -->
         <button
-          @click="handleNextPage"
+          @click="changePage(currentPage + 1)"
           :disabled="currentPage >= totalPages"
           class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
           :class="[
             currentPage >= totalPages
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-white text-purple-600 hover:bg-purple-50 border border-purple-200'
+              : 'bg-white text-[#C5B4E3] hover:bg-purple-50 border border-purple-200'
           ]"
         >
           <i class="fas fa-chevron-right text-sm"></i>
         </button>
       </div>
+
+      <!-- Modals รายละเอียด -->
+      <JobDetailsModal :is-open="showDetailsModal" :job="selectedJob" @close="closeDetailsModal" />
+
+      <!-- Modal แก้ไขงาน -->
+      <EditJobModal
+        v-if="showEditModal"
+        :show="showEditModal"
+        :job="selectedJob"
+        @close="handleCloseModal"
+        @submit="handleEditJob"
+      />
     </div>
   </div>
 </template>
 
 <script>
 import JobSearch from '@/components/JobSearch.vue'
-import JobDetailModal from '@/components/admin/jobs/JobDetailModal.vue'
-
+import JobDetailsModal from '@/components/admin/jobs/JobDetailModal.vue'
+import EditJobModal from '@/components/admin/Jobs/EditJobModal.vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 
 export default {
-  name: 'JobList',
+  name: 'MyCreatedJobs',
+
   components: {
     JobSearch,
-    JobDetailModal
+    JobDetailsModal,
+    EditJobModal
   },
-  props: {
-    isOpen: {
-      type: Boolean,
-      default: false
-    },
-    job: {
-      type: Object,
-      default: () => ({
-        title: '',
-        location: '',
-        work_date: null,
-        start_time: null,
-        end_time: null,
-        details: '',
-        completed: false,
-        JobPositions: []
-      })
-    }
-  },
+
   data() {
     return {
       baseURL: import.meta.env.VITE_API_URL,
       jobs: [],
-      loading: false,
       currentPage: 1,
       totalPages: 1,
-      pageSize: 10,
       filters: {},
-      isModalOpen: false,
-      selectedJob: null
+      loading: false,
+      selectedJob: null,
+      showDetailsModal: false,
+      showEditModal: false,
+      jobToDelete: null
     }
   },
+
+  mounted() {
+    this.fetchJobs()
+  },
+
   methods: {
     async fetchJobs() {
       try {
@@ -202,22 +204,76 @@ export default {
           pageSize: this.pageSize,
           ...this.filters
         }
-        const response = await axios.get(`${this.baseURL}/api/jobs`, {
+        const response = await axios.get(`${this.baseURL}/api/jobs/my-created-jobs`, {
           params
         })
-        if (response?.data) {
-          this.jobs = response.data.jobs
-          this.totalPages = response.data.totalPages
-        }
+        this.jobs = response.data.jobs
+        this.totalPages = response.data.totalPages
       } catch (error) {
+        this.$toast.error('ไม่สามารถดึงข้อมูลงานได้')
         console.error('Error fetching jobs:', error)
+      } finally {
+        this.loading = false
+      }
+    },
+
+    confirmDelete(job) {
+      Swal.fire({
+        title: 'ยืนยันการลบงาน',
+        text: `คุณต้องการลบงาน "${job.title}" ใช่หรือไม่?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#EA6B6B',
+        cancelButtonColor: '#B5B5C3',
+        confirmButtonText: 'ลบ',
+        cancelButtonText: 'ยกเลิก'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            await axios.delete(`${this.baseURL}/api/jobs/delete-job/${job.id}`)
+            Swal.fire({
+              title: 'ลบงานสำเร็จ',
+              icon: 'success',
+              timer: 1500,
+              showConfirmButton: false
+            })
+            this.fetchJobs()
+          } catch (error) {
+            console.error('Error deleting job:', error)
+            Swal.fire({
+              title: 'เกิดข้อผิดพลาด',
+              text: 'ไม่สามารถลบงานได้',
+              icon: 'error'
+            })
+          }
+        }
+      })
+    },
+
+    async handleEditJob(jobData) {
+      try {
+        const response = await axios.put(`${this.baseURL}/api/jobs/editJob/${jobData.id}`, jobData)
+
+        const index = this.jobs.findIndex((job) => job.id === jobData.id)
+        if (index !== -1) {
+          this.jobs[index] = response.data.job
+        }
+
+        this.handleCloseModal()
+        Swal.fire({
+          icon: 'success',
+          title: 'แก้ไขงานสำเร็จ',
+          showConfirmButton: false,
+          timer: 1500
+        })
+      } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการแก้ไขงาน:', error)
         Swal.fire({
           icon: 'error',
           title: 'เกิดข้อผิดพลาด',
-          text: 'ไม่สามารถดึงข้อมูลงานได้'
+          text: error.response?.data?.message || 'ไม่สามารถแก้ไขงานได้',
+          confirmButtonText: 'ตกลง'
         })
-      } finally {
-        this.loading = false
       }
     },
 
@@ -233,22 +289,38 @@ export default {
       this.fetchJobs()
     },
 
-    handlePrevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--
-        this.fetchJobs()
-      }
-    },
-    handleNextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++
+    changePage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page
         this.fetchJobs()
       }
     },
 
-    // สำหรับวันที่
+    viewJobDetails(job) {
+      this.selectedJob = job
+      this.showDetailsModal = true
+    },
+
+    closeDetailsModal() {
+      this.selectedJob = null
+      this.showDetailsModal = false
+    },
+
+    closeDeleteModal() {
+      this.jobToDelete = null
+      this.showDeleteModal = false
+    },
+    handleOpenEditModal(job) {
+      this.selectedJob = { ...job }
+      this.showEditModal = true
+    },
+
+    handleCloseModal() {
+      this.showEditModal = false
+      this.selectedJob = null
+    },
+
     formatDate(date) {
-      if (!date) return '-'
       return new Date(date).toLocaleDateString('th-TH', {
         year: 'numeric',
         month: 'long',
@@ -256,17 +328,14 @@ export default {
       })
     },
 
-    // สำหรับเวลา
     formatTime(time) {
-      if (!time) return '-'
-      const date = new Date(time)
-      return date.toLocaleTimeString('th-TH', {
+      return new Date(time).toLocaleTimeString('th-TH', {
         hour: '2-digit',
         minute: '2-digit',
-        hour12: false // ใช้ระบบ 24 ชั่วโมง
+        hour12: false
       })
     },
-    // คำนวณรายจ่ายต่องานทั้งหมด total
+
     calculateTotalWage(job) {
       if (!job.JobPositions || job.JobPositions.length === 0) return 0
 
@@ -278,34 +347,12 @@ export default {
       }, 0)
 
       return total.toLocaleString('th-TH')
-    },
-    openModal(job) {
-      this.selectedJob = job
-      this.isModalOpen = true
-    },
-    closeModal() {
-      this.isModalOpen = false
-      this.selectedJob = null
-    }
-  },
-  created() {
-    this.fetchJobs()
-  },
-  watch: {
-    // ดักการเปลี่ยนแปลงของ filters หรือ search params อื่นๆ
-    '$route.query': {
-      handler() {
-        this.currentPage = 1 // reset page
-        this.fetchJobs()
-      },
-      deep: true
     }
   }
 }
 </script>
 
 <style scoped>
-/* Optional: Add custom scrollbar styling */
 .overflow-x-auto::-webkit-scrollbar {
   height: 8px;
 }

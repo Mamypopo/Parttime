@@ -14,7 +14,6 @@ import SignUpView from '@/views/SignUpView.vue'
 
 import SignUpAdminView from '@/views/admin/SignUpAdminView.vue'
 import SignInAdminView from '@/views/admin/SignInAdminView.vue'
-import AdminRejectedUsers from '@/views/admin/AdminRejectedUsers.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -86,6 +85,12 @@ const router = createRouter({
           path: 'job-List',
           name: 'JobList',
           component: () => import('@/views/admin/Jobs/JobList.vue'),
+          meta: { requiresAdmin: true }
+        },
+        {
+          path: 'my-create-jobs',
+          name: 'MyCreatedJobs',
+          component: () => import('@/views/admin/Jobs/MyCreatedJobs.vue'),
           meta: { requiresAdmin: true }
         },
       ]

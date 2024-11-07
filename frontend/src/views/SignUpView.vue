@@ -339,15 +339,13 @@ export default {
 
       // รายการ skills ที่เลือกได้
       availableSkills: [
-        'JavaScript',
-        'Node.js',
-        'Vue.js',
-        'React',
-        'Python',
-        'HTML',
-        'PHP',
-        'Java'
-        // เพิ่ม skills อื่นๆ ตามต้องการ
+        'X-ray',
+        'Nurse',
+        'Medic',
+        'Register',
+        'Ear exam',
+        'Blood test',
+        'Blowing lungs'
       ],
       loading: false,
       passwordsMatch: true,

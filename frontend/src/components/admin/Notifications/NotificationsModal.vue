@@ -1,6 +1,6 @@
 <template>
   <TransitionRoot appear :show="isOpen" as="template">
-    <HeadlessDialog as="div" @close="closeModal" class="relative z-50">
+    <HeadlessDialog as="div" class="relative z-50">
       <!-- Backdrop -->
       <TransitionChild
         enter="duration-300 ease-out"
@@ -10,7 +10,7 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-black/25" />
+        <div class="fixed inset-0 bg-black/25" @click.self="closeModal" />
       </TransitionChild>
 
       <!-- Modal Container -->
@@ -26,6 +26,7 @@
           >
             <HeadlessDialogPanel
               class="w-full max-w-4xl bg-white rounded-xl shadow-xl overflow-hidden"
+              @click.stop
             >
               <!-- Header -->
               <div
@@ -47,9 +48,9 @@
                   </button>
                   <button
                     @click="closeModal"
-                    class="text-[#3A3A49] hover:text-[#2b2b4d] transition-colors duration-200"
+                    class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
                   >
-                    <i class="fas fa-times"></i>
+                    <i class="fas fa-times text-xl"></i>
                   </button>
                 </div>
               </div>
@@ -252,9 +253,12 @@ export default {
       }
     },
     closeModal() {
+      this.isModalOpen = false
       this.$emit('close')
     },
-
+    closeMenu() {
+      this.isMenuOpen = false
+    },
     markAllAsRead() {
       this.notificationStore.markAllAsRead()
     },
@@ -263,7 +267,6 @@ export default {
     },
     handleNotificationClick(notification) {
       this.notificationStore.markAsRead(notification.id)
-      notification.read = true
     }
   }
 }

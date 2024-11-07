@@ -326,7 +326,7 @@ export default {
       jobMenuItems: [
         { name: 'งาน', path: '/admin/job-List', icon: 'fas fa-briefcase', indent: false },
         { name: 'สร้างงาน', path: '/admin/create-job', icon: 'fas fa-plus', indent: true },
-        { name: 'งานของฉัน', path: '/', icon: 'fas fa-list', indent: true }
+        { name: 'งานของฉัน', path: '/admin/my-create-jobs', icon: 'fas fa-list', indent: true }
       ],
 
       mobileMainItems: [
@@ -366,7 +366,7 @@ export default {
             title: 'จัดการงาน',
             items: [
               { name: 'งานทั้งหมด', path: '/admin/job-List', icon: 'fas fa-briefcase' },
-              { name: 'งานของฉัน', path: '/admin/my-jobs', icon: 'fas fa-list' },
+              { name: 'งานของฉัน', path: '/admin/my-create-jobs', icon: 'fas fa-list' },
               { name: 'สร้างงาน', path: '/admin/create-job', icon: 'fas fa-plus' }
             ]
           }

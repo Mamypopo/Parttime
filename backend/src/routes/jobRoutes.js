@@ -6,7 +6,8 @@ import {
     approveJobParticipation,
     markJobAsCompleted,
     deleteJob,
-    editJob
+    editJob,
+    getMyCreatedJobs
 } from '../controllers/jobController.js';
 import { authMiddleware, checkAdminRole } from '../middleware/authMiddleware.js';
 
@@ -23,8 +24,9 @@ router.put('/mark-complete', markJobAsCompleted);
 
 // เส้นทางสำหรับแอดมิน
 router.post('/create', checkAdminRole, createJob);
+router.get('/my-created-jobs', checkAdminRole, getMyCreatedJobs);
 router.put('/approve/:id', checkAdminRole, approveJobParticipation);
-router.delete('/:jobId', checkAdminRole, deleteJob);
+router.delete('/delete-job/:jobId', checkAdminRole, deleteJob);
 router.put('/editJob/:jobId', checkAdminRole, editJob);
 
 export default router;

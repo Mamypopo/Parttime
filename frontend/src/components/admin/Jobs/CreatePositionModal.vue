@@ -140,6 +140,7 @@ import {
   TransitionChild
 } from '@headlessui/vue'
 
+import Swal from 'sweetalert2'
 export default {
   name: 'CreatePositionModal',
 
@@ -200,6 +201,16 @@ export default {
       }
     }
   },
+  computed: {
+    isFormValid() {
+      return (
+        this.form.position.trim() !== '' &&
+        this.form.wage > 0 &&
+        this.form.requiredPeople > 0 &&
+        this.form.detail.trim() !== ''
+      )
+    }
+  },
   methods: {
     togglePositionList() {
       this.showPositionList = !this.showPositionList
@@ -220,12 +231,20 @@ export default {
       }
     },
     handleBlur() {
-      // ใช้ window.setTimeout แทน
       window.setTimeout(() => {
         this.showPositionList = false
       }, 200)
     },
     handleSubmit() {
+      if (!this.isFormValid) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
+          text: 'กรุณากรอกตำแหน่ง, ค่าแรง, จำนวนคน และรายละเอียดให้ครบถ้วน',
+          confirmButtonText: 'ตกลง'
+        })
+        return
+      }
       const formData = {
         ...this.form,
         id: this.editingPosition?.id // ส่ง id ไปด้วยถ้าเป็นการแก้ไข

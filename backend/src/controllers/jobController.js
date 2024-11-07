@@ -57,28 +57,6 @@ export const createJob = async (req, res) => {
 };
 
 
-// ฟังก์ชันสำหรับดึงงานทั้งหมด
-// export const getAllJobs = [
-//     cacheMiddleware(300), // cache นาน 5 นาที
-//     async (req, res) => {
-//         try {
-//             const page = parseInt(req.query.page) || 1;
-//             const pageSize = parseInt(req.query.pageSize) || 20;
-
-//             const jobs = await jobModel.getAllJobs(page, pageSize);
-
-//             if (!jobs || jobs.length === 0) {
-//                 return res.status(404).json({ message: 'ไม่พบงานในระบบ' });
-//             }
-
-//             return res.status(200).json({ jobs, page, pageSize, totalJobs: jobs.length });
-//         } catch (error) {
-//             console.error('เกิดข้อผิดพลาดในการดึงข้อมูลงาน:', error);
-//             return res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูลงาน", error: error.message || 'Unknown error' });
-//         }
-//     }
-// ];
-
 export const getAllJobs = [
     async (req, res) => {
         try {
@@ -87,6 +65,7 @@ export const getAllJobs = [
 
             // เพิ่ม query parameters สำหรับการค้นหา
             const filters = {
+                id: req.query.id,
                 title: req.query.title,
                 location: req.query.location,
                 dateFrom: req.query.dateFrom,
@@ -134,6 +113,44 @@ export const getJobById = async (req, res) => {
     }
 };
 
+// ฟังก์ชันดึงงานที่แอดมินสร้าง
+export const getMyCreatedJobs = async (req, res) => {
+    try {
+        const adminId = req.user.id;
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 10;
+
+        // เพิ่ม query parameters สำหรับการค้นหา
+        const filters = {
+            title: req.query.title,
+            location: req.query.location,
+            dateFrom: req.query.dateFrom,
+            dateTo: req.query.dateTo,
+            status: req.query.status,
+            minWage: req.query.minWage ? parseInt(req.query.minWage) : undefined,
+            maxWage: req.query.maxWage ? parseInt(req.query.maxWage) : undefined,
+            position: req.query.position,
+            createdBy: adminId // เพิ่ม filter ตาม adminId
+        };
+
+        const jobs = await jobModel.getMyCreatedJobs(page, pageSize, filters);
+        const totalCount = await jobModel.getMyCreatedJobsCount(adminId, filters);
+
+        return res.status(200).json({
+            jobs,
+            page,
+            pageSize,
+            totalPages: Math.ceil(totalCount / pageSize),
+            totalCount
+        });
+    } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการดึงข้อมูลงานที่สร้าง:', error);
+        return res.status(500).json({
+            message: "เกิดข้อผิดพลาดในการดึงข้อมูลงาน",
+            error: error.message
+        });
+    }
+};
 // ฟังก์ชันสำหรับอัปเดตงาน
 export const editJob = async (req, res) => {
     const { jobId } = req.params;

@@ -175,19 +175,17 @@
           :class="[
             currentPage <= 1
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-purple-100 text-purple-600 hover:bg-purple-200'
+              : 'bg-purple-100 text-[#C5B4E3] hover:bg-purple-200'
           ]"
         >
           <i class="fas fa-chevron-left"></i>
         </button>
 
-        <button class="px-3 py-1 rounded-lg bg-purple-400 text-white">
+        <button class="px-3 py-1 rounded-lg bg-[#C5B4E3] text-white">
           {{ currentPage }}
         </button>
 
-        <span class="px-3 py-1 rounded-lg bg-purple-100 text-purple-600">
-          of {{ totalPages }}
-        </span>
+        <span class="px-3 py-1 rounded-lg bg-purple-100 text-[#C5B4E3]"> of {{ totalPages }} </span>
 
         <button
           @click="handleNextPage"

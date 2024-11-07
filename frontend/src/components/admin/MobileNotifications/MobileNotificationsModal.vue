@@ -10,7 +10,7 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-black/25" />
+        <div class="fixed inset-0 bg-black/25" @click="closeModal" />
       </TransitionChild>
 
       <!-- Modal Container -->
@@ -43,8 +43,11 @@
                       อ่านทั้งหมด
                     </span>
                   </button>
-                  <button @click="closeModal" class="text-[#3A3A49] hover:text-[#2b2b4d]">
-                    <i class="fas fa-times"></i>
+                  <button
+                    @click="closeModal"
+                    class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
+                  >
+                    <i class="fas fa-times text-xl"></i>
                   </button>
                 </div>
               </div>
@@ -85,7 +88,7 @@
                   :key="notification.id"
                   class="p-4 hover:bg-[#5D5FEF]/5 border-b last:border-b-0 transition-colors duration-200"
                   :class="!notification.read ? 'bg-[#5D5FEF]/10' : ''"
-                  @click="handleNotificationClick(notification)"
+                  @click="handleSelect(notification)"
                 >
                   <div class="flex items-start gap-3">
                     <span
@@ -185,14 +188,13 @@ export default {
       this.$emit('close')
     },
 
-    async handleNotificationClick(notification) {
+    async handleSelect(notification) {
       try {
         await this.notificationStore.markAsRead(notification.id)
       } catch (error) {
-        console.error('Error marking notification as read:', error)
+        console.error('Error marking as read:', error)
       }
     },
-
     async markAllAsRead() {
       try {
         await this.notificationStore.markAllAsRead()
@@ -200,7 +202,6 @@ export default {
         console.error('Error marking all as read:', error)
       }
     },
-
     getIconClass(type) {
       const classes = {
         // user: 'text-[#CDE45F]',
