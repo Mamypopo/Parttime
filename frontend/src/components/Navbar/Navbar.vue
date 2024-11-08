@@ -1,9 +1,9 @@
 <template>
-  <nav v-if="!isAdminRoute" class="absolute w-full z-50 py-4">
+  <nav v-if="!isAdminRoute" class="absolute w-full z-[999] py-4">
     <div class="container mx-auto px-4 sm:px-6">
       <!-- Desktop & Mobile Navbar -->
       <div
-        class="max-w-6xl mx-auto flex items-center justify-between rounded-lg px-4 sm:px-8 py-3 bg-white shadow-lg"
+        class="max-w-6xl mx-auto flex items-center justify-between rounded-lg px-4 sm:px-8 py-3 bg-white bg-opacity-100 shadow-lg"
       >
         <!-- Logo -->
         <div class="flex items-center">

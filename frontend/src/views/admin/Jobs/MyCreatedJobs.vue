@@ -161,8 +161,8 @@
 </template>
 
 <script>
-import JobSearch from '@/components/JobSearch.vue'
-import JobDetailsModal from '@/components/admin/jobs/JobDetailModal.vue'
+import JobSearch from '@/components/Search/JobSearch.vue'
+import JobDetailsModal from '@/components/admin/Jobs/JobDetailModal.vue'
 import EditJobModal from '@/components/admin/Jobs/EditJobModal.vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'

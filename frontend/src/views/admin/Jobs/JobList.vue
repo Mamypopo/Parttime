@@ -149,7 +149,7 @@
 </template>
 
 <script>
-import JobSearch from '@/components/JobSearch.vue'
+import JobSearch from '@/components/Search/JobSearch.vue'
 import JobDetailModal from '@/components/admin/jobs/JobDetailModal.vue'
 
 import axios from 'axios'

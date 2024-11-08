@@ -308,7 +308,7 @@
 
 <script>
 import axios from 'axios'
-import SearchUsersBar from '@/components/SearchUsersBar.vue'
+import SearchUsersBar from '@/components/Search/SearchUsersBar.vue'
 
 export default {
   name: 'AdminAllUsers',

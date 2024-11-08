@@ -25,7 +25,9 @@
             leave-from="opacity-100 scale-100"
             leave-to="opacity-0 scale-95"
           >
-            <DialogPanel class="relative bg-white rounded-2xl shadow-xl w-full max-w-3xl">
+            <DialogPanel
+              class="relative bg-white rounded-2xl shadow-xl w-full max-w-3xl pointer-events-auto"
+            >
               <!-- Header -->
               <div
                 class="flex items-center justify-between p-4 border-b bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] rounded-t-2xl"

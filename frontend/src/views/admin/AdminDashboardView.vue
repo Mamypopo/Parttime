@@ -1,42 +1,21 @@
 <template>
-  <div class="space-y-6">
-    <!-- Calendar Section -->
-    <JobCalendar @select-job="handleSelectJob" />
-
-    <!-- Job Detail Modal -->
-    <JobDetailModal :is-open="showJobDetail" :job="selectedJob" @close="closeJobDetail" />
+  <div class="p-6">
+    <div
+      class="rounded-lg p-4 md:p-8 min-h-screen bg-white transition-all duration-500 ease-in-out"
+    >
+      <JobCalendar />
+    </div>
   </div>
 </template>
 
 <script>
 import JobCalendar from '@/components/admin/Dashboard/JobCalendar.vue'
-import JobDetailModal from '@/components/admin/Jobs/JobDetailModal.vue'
 
 export default {
   name: 'AdminDashboard',
 
   components: {
-    JobCalendar,
-    JobDetailModal
-  },
-
-  data() {
-    return {
-      showJobDetail: false,
-      selectedJob: null
-    }
-  },
-
-  methods: {
-    handleSelectJob(job) {
-      this.selectedJob = job
-      this.showJobDetail = true
-    },
-
-    closeJobDetail() {
-      this.showJobDetail = false
-      this.selectedJob = null
-    }
+    JobCalendar
   }
 }
 </script>

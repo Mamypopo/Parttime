@@ -318,7 +318,7 @@
 <script>
 import axios from 'axios'
 import Swal from 'sweetalert2'
-import SearchUsersBar from '@/components/SearchUsersBar.vue'
+import SearchUsersBar from '@/components/Search/SearchUsersBar.vue'
 
 export default {
   name: 'AdminRejectedUsers',
