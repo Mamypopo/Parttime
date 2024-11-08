@@ -1,6 +1,6 @@
 <template>
   <!-- พื้นทีหน้าหลัก -->
-  <div class="flex flex-col min-h-screen bg-[#F2F5FF]">
+  <div class="flex flex-col min-h-screen bg-[#F2F5FF] relative">
     <!-- Desktop/Tablet Sidebar with Transition -->
     <Transition
       enter-active-class="transition-all duration-500 ease-in-out"
@@ -12,7 +12,7 @@
     >
       <div
         v-show="!isMobile"
-        class="h-screen fixed bg-white border-r drop-shadow-md transition-all duration-500 ease-in-out"
+        class="sidebar h-screen fixed bg-white border-r drop-shadow-md transition-all duration-500 ease-in-out"
         :class="[isCollapsed ? 'w-16' : 'w-70']"
       >
         <!-- Header -->
@@ -126,7 +126,11 @@
     </Transition>
 
     <!-- Mobile Bottom Navigation -->
-    <nav v-if="isMobile" class="fixed bottom-0 left-0 right-0 bg-white border-t px-4 py-2">
+    <nav
+      v-if="isMobile"
+      class="mobile-bottom-nav fixed bottom-0 left-0 right-0 bg-white border-t px-4 py-2 z-800"
+      style="z-index: 800"
+    >
       <div class="flex justify-around items-center">
         <!-- หน้าหลัก -->
         <button

@@ -17,3 +17,31 @@
     /* Chrome, Safari, Opera */
   }
 }
+
+.mobile-bottom-nav {
+  z-index: 800; /* สูงกว่า Sidebar และคอนเทนต์หลัก แต่ต่ำกว่า Notifications และ Modals */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.sidebar {
+  z-index: 700; /* ตั้งค่าให้ Sidebar มีระดับสูงพอสมควรแต่ต่ำกว่าการแจ้งเตือน */
+}
+
+.fixed-top-toggle-btn {
+  z-index: 750; /* ปุ่ม Toggle ควรมี z-index ที่สูงกว่าสำหรับการขยาย sidebar */
+}
+
+.notification {
+  z-index: 900; /* การแจ้งเตือนให้มี z-index ที่สูง */
+}
+
+.modal {
+  z-index: 1000; /* Modal ต้องอยู่บนสุด */
+}
+
+.main-content {
+  z-index: 10; /* คอนเทนต์หลัก ตั้ง z-index ต่ำที่สุด */
+}
