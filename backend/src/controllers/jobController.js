@@ -151,6 +151,7 @@ export const getMyCreatedJobs = async (req, res) => {
         });
     }
 };
+
 // ฟังก์ชันสำหรับอัปเดตงาน
 export const editJob = async (req, res) => {
     const { jobId } = req.params;
@@ -247,7 +248,6 @@ export const editJob = async (req, res) => {
     }
 };
 
-
 // ฟังก์ชันสำหรับลบงาน
 export const deleteJob = async (req, res) => {
     const { jobId } = req.params;
@@ -338,6 +338,7 @@ export const applyForJob = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'ไม่พบผู้ใช้ในระบบ' });
         }
+
         if (!userId) {
             return res.status(400).json({ message: 'ไม่พบ userId กรุณาเข้าสู่ระบบใหม่' });
         }
@@ -346,7 +347,14 @@ export const applyForJob = async (req, res) => {
         if (!jobPosition) {
             return res.status(404).json({ message: 'ตำแหน่งงานไม่ถูกต้อง' });
         }
-
+        // เพิ่มการตรวจสอบ skills
+        const hasMatchingSkills = await jobModel.checkUserSkillsMatch(userId, jobPositionId);
+        if (!hasMatchingSkills) {
+            return res.status(400).json({
+                message: 'คุณไม่มีทักษะที่เหมาะสมกับตำแหน่งงานนี้',
+                position: jobPosition.position_name
+            });
+        }
         if (jobPosition.required_people <= 0) {
             return res.status(400).json({ message: 'จำนวนผู้เข้าร่วมงานเต็มแล้ว' });
         }
@@ -401,7 +409,7 @@ export const applyForJob = async (req, res) => {
     }
 };
 
-
+// ฟังชั่นอนุมัติเข้าทำงาน
 export const approveJobParticipation = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
@@ -506,9 +514,36 @@ export const approveJobParticipation = async (req, res) => {
     }
 };
 
+// ฟั่งชั่นดึงคนที่มาร่วมงาน
+export const getJobParticipants = async (req, res) => {
+    try {
+        const jobId = parseInt(req.params.jobId);
 
+        // ตรวจสอบว่างานมีอยู่จริง
+        const job = await jobModel.getJobById(jobId);
+        if (!job) {
+            return res.status(404).json({
+                success: false,
+                message: 'ไม่พบข้อมูลงาน'
+            });
+        }
 
+        // ดึงข้อมูลผู้ที่ได้รับอนุมัติ
+        const participants = await jobModel.getJobById(jobId);
 
+        res.status(200).json({
+            success: true,
+            data: participants
+        });
+
+    } catch (error) {
+        console.error('Error getting job participants:', error);
+        res.status(500).json({
+            success: false,
+            message: 'เกิดข้อผิดพลาดในการดึงข้อมูลผู้เข้าร่วมงาน'
+        });
+    }
+};
 
 
 // ฟังก์ชันอัปเดตสถานะการสมัครงานเมื่อเสร็จสิ้น

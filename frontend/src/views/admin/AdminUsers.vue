@@ -87,7 +87,7 @@
                       รายละเอียด
                     </button>
                     <button
-                      @click="handleApprove(user.id)"
+                      @click="handleViewHistory(user.id)"
                       class="bg-green-400 text-white px-3 py-1 rounded-full hover:bg-green-500 text-sm whitespace-nowrap"
                     >
                       ดูประวัติ
@@ -148,7 +148,7 @@
                 รายละเอียด
               </button>
               <button
-                @click="handleApprove(user.id)"
+                @click="handleViewHistory(user.id)"
                 class="w-full bg-green-400 text-white px-3 py-1.5 rounded-full hover:bg-green-500 text-sm"
               >
                 ดูประวัติการทำงาน
@@ -193,142 +193,59 @@
       </div>
 
       <!-- User Details Modal -->
-      <div
-        v-if="selectedUser && showModal"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-1"
-      >
-        <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">รายละเอียดผู้ใช้</h2>
-            <button @click="closeModal" class="text-gray-500 hover:text-gray-700">
-              <span class="text-2xl">&times;</span>
-            </button>
-          </div>
+      <UserDetailsModal
+        v-if="showModal"
+        :is-open="showModal"
+        :user="selectedUser"
+        @close="closeModal"
+      />
 
-          <div class="space-y-6">
-            <!-- Profile Image -->
-            <div class="flex justify-center">
-              <img
-                :src="`${baseURL}/uploads/profiles/${selectedUser.profileImage}`"
-                alt="Profile"
-                class="w-32 h-32 rounded-full object-cover border-4 border-purple-100"
-              />
-            </div>
-
-            <!-- Basic Info -->
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <p class="text-gray-600">ชื่อ-นามสกุล</p>
-                <p class="font-medium">{{ selectedUser.fullName }}</p>
-              </div>
-              <div>
-                <p class="text-gray-600">อีเมล</p>
-                <p class="font-medium break-words">{{ selectedUser.email }}</p>
-              </div>
-              <div>
-                <p class="text-gray-600">เบอร์โทรศัพท์</p>
-                <p class="font-medium">{{ selectedUser.phoneNumber }}</p>
-              </div>
-              <div>
-                <p class="text-gray-600">เลขบัตรประชาชน</p>
-                <p class="font-medium">{{ selectedUser.idCardNumber }}</p>
-              </div>
-              <div>
-                <p class="text-gray-600">Line ID</p>
-                <p class="font-medium break-words">{{ selectedUser.lineId }}</p>
-              </div>
-              <div>
-                <p class="text-gray-600">เพศ</p>
-                <p class="font-medium">{{ selectedUser.gender }}</p>
-              </div>
-              <div>
-                <p class="text-gray-600">วันเกิด</p>
-                <p class="font-medium">{{ selectedUser.birthDate }}</p>
-              </div>
-              <div>
-                <p class="text-gray-600">อายุ</p>
-                <p class="font-medium">{{ selectedUser.age }} ปี</p>
-              </div>
-            </div>
-
-            <!-- Skills -->
-            <div class="border-t pt-4">
-              <h3 class="font-semibold mb-2">ทักษะความสามารถ</h3>
-              <div class="flex flex-wrap gap-2">
-                <span
-                  v-for="skill in JSON.parse(selectedUser.skills)"
-                  :key="skill"
-                  class="px-3 py-1 text-sm rounded-full bg-purple-100 text-purple-600"
-                >
-                  {{ skill }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Education Certificate -->
-            <div class="border-t pt-4">
-              <h3 class="font-semibold mb-2">วุฒิการศึกษา</h3>
-              <div v-if="selectedUser.educationCertificate" class="flex items-center gap-2">
-                <a
-                  :href="`${baseURL}/uploads/certificates/${selectedUser.educationCertificate}`"
-                  target="_blank"
-                  class="text-blue-500 hover:underline inline-flex items-center"
-                >
-                  <i class="fas fa-file-pdf mr-2"></i>
-                  ดูไฟล์วุฒิการศึกษา
-                </a>
-              </div>
-              <p v-else class="text-gray-500">ไม่มีไฟล์วุฒิการศึกษา</p>
-            </div>
-
-            <!-- Documents -->
-            <div class="border-t pt-4">
-              <h3 class="font-semibold mb-2">เอกสารประกอบ</h3>
-              <div
-                v-if="selectedUser.documents && selectedUser.documents !== '-'"
-                class="flex items-center gap-2"
-              >
-                <a
-                  :href="getDocumentUrl(selectedUser.documents)"
-                  target="_blank"
-                  class="text-blue-500 hover:underline inline-flex items-center"
-                >
-                  <i class="fas fa-folder-open mr-2"></i>
-                  ดูเอกสารประกอบ
-                </a>
-              </div>
-              <p v-else class="text-gray-500">ไม่มีเอกสารแนบ</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <JobHistoryModal
+        v-if="showHistoryModal"
+        :show="showHistoryModal"
+        :user="selectedUser"
+        @close="closeHistoryModal"
+        :jobs="jobHistory.data || []"
+        :total-jobs="jobHistory.totalJobs || 0"
+      />
     </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import Swal from 'sweetalert2'
 import SearchUsersBar from '@/components/Search/SearchUsersBar.vue'
-
+import UserDetailsModal from '@/components/Users/UserDetailsModal.vue'
+import JobHistoryModal from '@/components/Users/JobHistoryModal.vue'
 export default {
   name: 'AdminAllUsers',
   components: {
-    SearchUsersBar
+    SearchUsersBar,
+    UserDetailsModal,
+    JobHistoryModal
   },
   data() {
     return {
+      baseURL: import.meta.env.VITE_API_URL,
       formattedUsers: [],
+      showHistoryModal: false,
+      selectedUser: null,
       loading: false,
       currentPage: 1,
       perPage: 10,
       totalItems: 0,
-      selectedUser: null,
       showModal: false,
-      baseURL: import.meta.env.VITE_API_URL,
       searchFilters: {
         userId: '',
         idCard: '',
         name: ''
+      },
+      jobHistory: {
+        data: [],
+        currentPage: 1,
+        totalPages: 1,
+        totalJobs: 0
       }
     }
   },
@@ -349,14 +266,22 @@ export default {
       if (!user) return null
 
       return {
-        id: user.id || '',
-        fullName: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
-        email: user.email || '',
-        isVerified: user.email_verified || false,
-        registeredDate: user.created_at ? this.formatDate(user.created_at) : '-',
-        skills: user.skills || '[]',
-        profileImage: user.profile_image || '',
-        educationCertificate: user.education_certificate || '',
+        id: user.id,
+        fullName: `${user.prefix || ''} ${user.first_name} ${user.last_name}`.trim(),
+        email: user.email,
+        phoneNumber: user.phone_number || '-',
+        idCardNumber: user.national_id || '-',
+        lineId: user.line_id || '-',
+        isVerified: user.email_verified,
+        registeredDate: this.formatDate(user.created_at),
+        skills: user.skills ? user.skills.split(',') : [],
+        // ข้อมูลส่วนตัว
+        gender: user.gender || '-',
+        birthDate: user.birth_date ? this.formatDate(user.birth_date) : '-',
+        age: user.age || '0',
+        profileImage: user.profile_image,
+        // เอกสาร
+        educationCertificate: user.education_certificate,
         documents: user.user_documents || '-'
       }
     },
@@ -389,17 +314,69 @@ export default {
             .map(this.formatUserData)
             .filter((user) => user !== null)
 
-          this.totalItems = response.data.pagination?.total || 0
+          this.totalItems = parseInt(response.data.pagination.total)
         }
       } catch (error) {
         console.error('Error fetching users:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'ไม่สามารถดึงข้อมูลผู้ใช้ได้'
+        })
         this.formattedUsers = []
         this.totalItems = 0
       } finally {
         this.loading = false
       }
     },
+    async handleViewHistory(userId) {
+      try {
+        this.selectedUser = this.formattedUsers.find((u) => u.id === userId)
 
+        const response = await axios.get(`${this.baseURL}/api/users/history/${userId}`)
+
+        if (response.data) {
+          const formattedJobs =
+            response.data.jobHistory.map((job) => ({
+              id: job.id || undefined,
+              title: job.jobPosition?.job?.title || 'ไม่ระบุชื่องาน',
+              position_name: job.jobPosition?.position_name || 'ไม่ระบุตำแหน่ง',
+              location: job.jobPosition?.job?.location || 'ไม่ระบุสถานที่',
+              status: job.status || 'pending',
+              created_at: job.created_at,
+              updated_at: job.updated_at,
+              wage: job.jobPosition?.wage || 0,
+              work_date: job.jobPosition?.job?.work_date || null
+            })) || []
+
+          this.jobHistory = {
+            data: formattedJobs,
+            totalJobs: response.data.totalJobs || 0,
+            currentPage: response.data.currentPage || 1,
+            totalPages: response.data.totalPages || 1
+          }
+
+          this.showHistoryModal = true
+        }
+      } catch (error) {
+        console.error('Error fetching job history:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'ไม่สามารถดึงข้อมูลประวัติการทำงานได้'
+        })
+      }
+    },
+    closeHistoryModal() {
+      this.showHistoryModal = false
+      this.selectedUser = null
+      this.jobHistory = {
+        data: [],
+        currentPage: 1,
+        totalPages: 1,
+        totalJobs: 0
+      }
+    },
     formatDate(dateString) {
       return new Date(dateString).toLocaleDateString('th-TH', {
         year: 'numeric',
@@ -409,17 +386,14 @@ export default {
     },
 
     showUserDetails(user) {
-      this.selectedUser = user
-      this.showModal = true
+      if (user) {
+        this.selectedUser = { ...user }
+        this.showModal = true
+      }
     },
 
     closeModal() {
       this.showModal = false
-      this.selectedUser = null
-    },
-
-    getDocumentUrl(documentPath) {
-      return `${this.baseURL}/uploads/documents/${documentPath}`
     },
 
     handleSearch(filters) {

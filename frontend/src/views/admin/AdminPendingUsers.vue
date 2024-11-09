@@ -203,115 +203,12 @@
       </div>
 
       <!-- User Details Modal -->
-      <div
-        v-if="selectedUser && showModal"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-1"
-      >
-        <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">รายละเอียดผู้ใช้</h2>
-            <button @click="closeModal" class="text-gray-500 hover:text-gray-700">
-              <span class="text-2xl">&times;</span>
-            </button>
-          </div>
-
-          <div class="space-y-6">
-            <!-- Profile Image -->
-            <div class="flex justify-center">
-              <img
-                :src="`${baseURL}/uploads/profiles/${selectedUser.profileImage}`"
-                alt="Profile"
-                class="w-32 h-32 rounded-full object-cover border-4 border-purple-100"
-              />
-            </div>
-
-            <!-- Basic Info -->
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <p class="text-gray-600">ชื่อ-นามสกุล</p>
-                <p class="font-medium">{{ selectedUser.fullName }}</p>
-              </div>
-              <div>
-                <p class="text-gray-600">อีเมล</p>
-                <p class="font-medium break-words">{{ selectedUser.email }}</p>
-              </div>
-              <div>
-                <p class="text-gray-600">เบอร์โทรศัพท์</p>
-                <p class="font-medium">{{ selectedUser.phoneNumber }}</p>
-              </div>
-              <div>
-                <p class="text-gray-600">เลขบัตรประชาชน</p>
-                <p class="font-medium">{{ selectedUser.idCardNumber }}</p>
-              </div>
-              <div>
-                <p class="text-gray-600">Line ID</p>
-                <p class="font-medium break-words">{{ selectedUser.lineId }}</p>
-              </div>
-              <div>
-                <p class="text-gray-600">เพศ</p>
-                <p class="font-medium">{{ selectedUser.gender }}</p>
-              </div>
-              <div>
-                <p class="text-gray-600">วันเกิด</p>
-                <p class="font-medium">{{ selectedUser.birthDate }}</p>
-              </div>
-              <div>
-                <p class="text-gray-600">อายุ</p>
-                <p class="font-medium">{{ selectedUser.age }} ปี</p>
-              </div>
-            </div>
-
-            <!-- Skills -->
-            <div class="border-t pt-4">
-              <h3 class="font-semibold mb-2">ทักษะความสามารถ</h3>
-              <div class="flex flex-wrap gap-2">
-                <span
-                  v-for="skill in JSON.parse(selectedUser.skills)"
-                  :key="skill"
-                  class="px-3 py-1 text-sm rounded-full bg-purple-100 text-purple-600"
-                >
-                  {{ skill }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Education Certificate -->
-            <div class="border-t pt-4">
-              <h3 class="font-semibold mb-2">วุฒิการศึกษา</h3>
-              <div v-if="selectedUser.educationCertificate" class="flex items-center gap-2">
-                <a
-                  :href="`${baseURL}/uploads/certificates/${selectedUser.educationCertificate}`"
-                  target="_blank"
-                  class="text-blue-500 hover:underline inline-flex items-center"
-                >
-                  <i class="fas fa-file-pdf mr-2"></i>
-                  ดูไฟล์วุฒิการศึกษา
-                </a>
-              </div>
-              <p v-else class="text-gray-500">ไม่มีไฟล์วุฒิการศึกษา</p>
-            </div>
-
-            <!-- Documents -->
-            <div class="border-t pt-4">
-              <h3 class="font-semibold mb-2">เอกสารประกอบ</h3>
-              <div
-                v-if="selectedUser.documents && selectedUser.documents !== '-'"
-                class="flex items-center gap-2"
-              >
-                <a
-                  :href="getDocumentUrl(selectedUser.documents)"
-                  target="_blank"
-                  class="text-blue-500 hover:underline inline-flex items-center"
-                >
-                  <i class="fas fa-folder-open mr-2"></i>
-                  ดูเอกสารประกอบ
-                </a>
-              </div>
-              <p v-else class="text-gray-500">ไม่มีเอกสารแนบ</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <UserDetailsModal
+        v-if="showModal"
+        :is-open="showModal"
+        :user="selectedUser"
+        @close="closeModal"
+      />
     </div>
   </div>
 </template>
@@ -320,18 +217,20 @@
 import axios from 'axios'
 import Swal from 'sweetalert2'
 import SearchUsersBar from '@/components/Search/SearchUsersBar.vue'
+import UserDetailsModal from '@/components/Users/UserDetailsModal.vue'
 
 export default {
   name: 'AdminPendingUsers',
   components: {
-    SearchUsersBar
+    SearchUsersBar,
+    UserDetailsModal
   },
   data() {
     return {
       baseURL: import.meta.env.VITE_API_URL,
       formattedUsers: [], // เก็บข้อมูลที่จัดรูปแบบแล้ว
       loading: false,
-      selectedUser: null,
+
       showModal: false,
       currentPage: 1,
       perPage: 10,
@@ -529,14 +428,8 @@ export default {
       }
     },
 
-    getDocumentUrl(documentPath) {
-      const cleanPath = documentPath.replace(/[[\]"]/g, '')
-      return `${this.baseURL}/uploads/documents/${cleanPath}`
-    },
-
     closeModal() {
       this.showModal = false
-      this.selectedUser = null
     }
   },
 
@@ -544,7 +437,6 @@ export default {
     this.fetchPendingUsers()
   },
   beforeUnmount() {
-    this.selectedUser = null
     this.showModal = false
   }
 }

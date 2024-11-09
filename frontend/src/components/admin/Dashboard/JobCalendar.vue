@@ -98,9 +98,18 @@ export default {
         height: 'auto',
         contentHeight: 'auto',
         slotMinWidth: 50,
+        dayMaxEvents: 3, // แสดงสูงสุด 3 งาน
+        moreLinkContent: (args) => {
+          return {
+            html: `<div class="more-link">
+              +${args.num} งาน
+            </div>`
+          }
+        },
         eventOverlap: false, // ป้องกันการทับซ้อน
         slotEventOverlap: false, // ป้องกันการทับซ้อนใน timeGrid
         eventDisplay: 'block', // ให้แสดงแบบบล็อกเต็มพื้นที่
+        eventOrder: 'start,-duration,allDay,title',
         eventTimeFormat: {
           hour: '2-digit',
           minute: '2-digit',
@@ -195,30 +204,40 @@ export default {
         ...this.calendarOptions,
         eventContent: (arg) => ({
           html: `
-       <div class="p-2 w-full min-h-[80px]">
-         <div class="text-xs truncate">
-          <span class="text-lime-600 ">ชื่อ:</span>
-          <span class="text-gray-600">${arg.event.extendedProps.title}</span>
-        </div>
-      <div class="flex justify-between items-start mb-1">
-        <div class="text-xs truncate">
-          <span class="text-lime-600  ">สถานที่:</span>
-          <span class="text-gray-600">${arg.event.extendedProps.location}</span>
-        </div>
-
-      </div>
-      <div class="flex flex-wrap gap-1 mb-2">
-        ${arg.event.extendedProps.positions}
-      </div>
-      <div class="text-xs text-gray-500 truncate">
-         <span class="text-lime-600">เวลา:</span>
-        ${arg.event.extendedProps.time}
-      </div>
-    </div>
-      `
+          <div class="calendar-event-content p-2 w-full min-h-[80px] hover:shadow-lg transition-shadow rounded-lg">
+            <div class="event-header mb-1">
+              <div class="text-xs font-semibold truncate">
+                <i class="fas fa-bookmark text-lime-600 mr-1"></i>
+                ${arg.event.extendedProps.title}
+              </div>
+            </div>
+            
+            <div class="event-body">
+              <div class="text-xs truncate mb-1">
+                <i class="fas fa-map-marker-alt text-lime-600 mr-1"></i>
+                ${arg.event.extendedProps.location}
+              </div>
+              
+              <div class="flex flex-wrap gap-1 mb-1">
+                ${arg.event.extendedProps.positions}
+              </div>
+              
+              <div class="text-xs text-gray-500 truncate">
+                <i class="far fa-clock text-lime-600 mr-1"></i>
+                ${arg.event.extendedProps.time}
+              </div>
+            </div>
+          </div>
+          `
         }),
         events,
-        eventClick: this.handleEventClick // เพิ่ม event click handler
+        eventClick: this.handleEventClick,
+        eventDidMount: (info) => {
+          info.el.setAttribute(
+            'title',
+            `${info.event.extendedProps.title}\n${info.event.extendedProps.location}\n${info.event.extendedProps.time}`
+          )
+        }
       }
     },
 
@@ -358,5 +377,167 @@ export default {
 /* Custom Shadows */
 .fc-header-toolbar {
   @apply shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)];
+}
+
+/* เพิ่ม styles สำหรับ event cards */
+.calendar-event-content {
+  @apply bg-white border border-gray-100 
+         hover:border-[#81E2C4] transition-all duration-200;
+}
+
+.event-header {
+  @apply border-b border-gray-100 pb-1;
+}
+
+/* Style สำหรับปุ่ม more */
+.more-link {
+  @apply bg-[#81E2C4] text-white px-2 py-1 rounded-full text-xs
+         hover:bg-[#6ED7D1] transition-colors cursor-pointer
+         flex items-center justify-center;
+}
+
+/* ปรับแต่ง cell ที่มีหลายงาน */
+.fc-daygrid-day-bottom {
+  @apply mt-1 text-center;
+}
+
+/* Animation เมื่อ hover ที่งาน */
+.calendar-event {
+  @apply transition-all duration-200 
+         hover:transform hover:scale-[1.02]
+         hover:shadow-md;
+}
+
+/* ปรับขนาดและ style ของ cell */
+.fc-daygrid-day-frame {
+  @apply min-h-[120px] p-1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .fc-daygrid-day-frame {
+    @apply min-h-[100px];
+  }
+
+  .calendar-event-content {
+    @apply min-h-[60px];
+  }
+}
+
+/* Loading state */
+.fc-event-skeleton {
+  @apply animate-pulse bg-gray-200;
+}
+
+/* Empty state */
+.fc-daygrid-day-frame:empty {
+  @apply bg-gray-50;
+}
+
+/* Today highlight */
+.fc-day-today {
+  @apply bg-[#F8C8DC]/50 !important;
+}
+
+/* Weekend days */
+.fc-day-sat,
+.fc-day-sun {
+  @apply bg-gray-50/50;
+}
+
+/* Event Card Styles */
+.event-card {
+  @apply bg-white p-2 rounded-lg shadow-sm
+         border border-gray-100
+         hover:shadow-md hover:border-[#81E2C4]
+         transition-all duration-200
+         mb-1 last:mb-0;
+}
+
+.event-title {
+  @apply text-sm font-medium text-gray-700 
+         truncate mb-1;
+}
+
+.event-location {
+  @apply text-xs text-gray-600 
+         truncate mb-1;
+}
+
+.event-positions {
+  @apply flex flex-wrap gap-1 mb-1;
+}
+
+.event-time {
+  @apply text-xs text-gray-500;
+}
+
+/* More Events Button */
+.more-events-btn {
+  @apply bg-[#81E2C4] text-white
+         px-3 py-1.5 rounded-full
+         text-xs font-medium
+         hover:bg-[#6ED7D1]
+         transition-colors
+         shadow-sm
+         mt-1;
+}
+
+/* Popover Styles */
+.fc-popover {
+  @apply shadow-xl border-0 rounded-lg !important;
+}
+
+.fc-popover-header {
+  @apply bg-gradient-to-r from-[#81E2C4] to-[#6ED7D1]
+         text-white p-3 !important;
+}
+
+.fc-popover-body {
+  @apply p-3 space-y-2 
+         max-h-[400px] overflow-y-auto
+         bg-white !important;
+}
+
+/* Position Badge */
+.position-badge {
+  @apply inline-flex items-center
+         px-2 py-0.5 rounded-full
+         text-xs font-medium
+         bg-purple-100 text-purple-700;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .fc-popover {
+    @apply max-w-[90vw] !important;
+  }
+
+  .fc-popover-body {
+    @apply max-h-[60vh] !important;
+  }
+
+  .event-card {
+    @apply p-1.5;
+  }
+}
+
+/* Custom Scrollbar */
+.fc-popover-body::-webkit-scrollbar {
+  @apply w-1.5;
+}
+
+.fc-popover-body::-webkit-scrollbar-track {
+  @apply bg-gray-100 rounded-full;
+}
+
+.fc-popover-body::-webkit-scrollbar-thumb {
+  @apply bg-[#81E2C4] rounded-full
+         hover:bg-[#6ED7D1];
+}
+
+/* Spacing between events in popover */
+.fc-popover-body .event-card {
+  @apply mb-2 last:mb-0;
 }
 </style>

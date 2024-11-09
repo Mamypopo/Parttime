@@ -35,6 +35,7 @@
               <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">วันที่ทำงาน</th>
               <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">เวลา</th>
               <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">ตำแหน่ง</th>
+              <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">ผู้เข้าร่วม</th>
               <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">ค่าจ้างรวม</th>
               <th class="px-6 py-4 text-center text-sm font-medium text-gray-500">สถานะ</th>
               <th class="px-6 py-4 text-center text-sm font-medium text-gray-500">จัดการ</th>
@@ -61,6 +62,33 @@
                     {{ position.position_name }}
                   </span>
                 </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex -space-x-2 overflow-hidden" v-if="job.JobParticipation?.length">
+                  <img
+                    v-for="participant in job.JobParticipation.slice(0, 3)"
+                    :key="participant.user.id"
+                    :src="getProfileImage(participant.user.profile_image)"
+                    :alt="participant.user.first_name"
+                    class="inline-block h-8 w-8 rounded-full ring-2 ring-white"
+                  />
+                  <span
+                    v-if="job.JobParticipation.length > 3"
+                    class="flex items-center justify-center h-8 w-8 rounded-full bg-gray-200 ring-2 ring-white"
+                  >
+                    <span class="text-xs text-gray-600">
+                      +{{ job.JobParticipation.length - 3 }}
+                    </span>
+                  </span>
+                </div>
+                <button
+                  v-if="job.JobParticipation?.length"
+                  @click="openParticipantsModal(job)"
+                  class="ml-2 text-xs text-[#7BC4C4] hover:text-[#5DA3A3]"
+                >
+                  ดูทั้งหมด
+                </button>
+                <span v-else class="text-gray-400 text-sm">ยังไม่มีผู้เข้าร่วม</span>
               </td>
 
               <td class="px-4 py-2">
@@ -145,6 +173,12 @@
         </button>
       </div>
 
+      <JobParticipantsModal
+        :show="showParticipantsModal"
+        :job="selectedJob || {}"
+        @close="closeParticipantsModal"
+      />
+
       <!-- Modals รายละเอียด -->
       <JobDetailsModal :is-open="showDetailsModal" :job="selectedJob" @close="closeDetailsModal" />
 
@@ -161,6 +195,7 @@
 </template>
 
 <script>
+import JobParticipantsModal from '@/components/Users/JobParticipantsModal.vue'
 import JobSearch from '@/components/Search/JobSearch.vue'
 import JobDetailsModal from '@/components/admin/Jobs/JobDetailModal.vue'
 import EditJobModal from '@/components/admin/Jobs/EditJobModal.vue'
@@ -173,7 +208,8 @@ export default {
   components: {
     JobSearch,
     JobDetailsModal,
-    EditJobModal
+    EditJobModal,
+    JobParticipantsModal
   },
 
   data() {
@@ -186,6 +222,8 @@ export default {
       loading: false,
       selectedJob: null,
       showDetailsModal: false,
+      showParticipantsModal: false,
+
       showEditModal: false,
       jobToDelete: null
     }
@@ -276,7 +314,9 @@ export default {
         })
       }
     },
-
+    getProfileImage(image) {
+      return image ? `${this.baseURL}/uploads/profiles/${image}` : '/default-avatar.png'
+    },
     handleSearch(searchFilters) {
       this.filters = searchFilters
       this.currentPage = 1
@@ -319,7 +359,15 @@ export default {
       this.showEditModal = false
       this.selectedJob = null
     },
+    openParticipantsModal(job) {
+      this.selectedJob = job
+      this.showParticipantsModal = true
+    },
 
+    closeParticipantsModal() {
+      this.showParticipantsModal = false
+      this.selectedJob = null
+    },
     formatDate(date) {
       return new Date(date).toLocaleDateString('th-TH', {
         year: 'numeric',

@@ -220,15 +220,73 @@ export const getJobById = (jobId) =>
     prisma.job.findUnique({
         where: { id: jobId },
         include: {
-            JobPositions: {
+            JobParticipation: {
+                where: {
+                    status: 'approved'
+                },
                 select: {
-                    position_name: true,
-                    required_people: true
+                    id: true,
+                    created_at: true,
+                    jobPositionId: true,
+                    user: {
+                        select: {
+                            id: true,
+                            first_name: true,
+                            last_name: true,
+                            email: true,
+                            phone_number: true,
+                            profile_image: true,
+                            skills: true
+                        }
+                    },
+                    jobPosition: {
+                        select: {
+                            id: true,
+                            position_name: true,
+                            wage: true
+                        }
+                    }
+                },
+                orderBy: {
+                    created_at: 'desc'
                 }
             },
             creator: {
                 select: {
-                    id: true
+                    id: true,
+                    first_name: true,
+                    last_name: true
+                }
+            },
+
+            JobParticipation: {
+                where: {
+                    status: 'approved'
+                },
+                select: {
+                    id: true,
+                    created_at: true,
+                    user: {
+                        select: {
+                            id: true,
+                            first_name: true,
+                            last_name: true,
+                            email: true,
+                            phone_number: true,
+                            skills: true
+                        }
+                    },
+                    jobPosition: {
+                        select: {
+                            id: true,
+                            position_name: true,
+                            required_people: true,
+                            wage: true
+                        }
+                    }
+                },
+                orderBy: {
+                    created_at: 'desc'
                 }
             }
         }
@@ -319,18 +377,24 @@ export const getMyCreatedJobs = async (page = 1, pageSize = 10, filters = {}) =>
                     details: true,
                     required_people: true,
                     status: true,
-                    JobParticipation: {
+                }
+            },
+            // แยก JobParticipation ออกมาเป็น field แยก
+            JobParticipation: {
+                where: {
+                    status: 'approved'  // ดึงเฉพาะที่อนุมัติแล้ว
+                },
+                select: {
+                    id: true,
+                    status: true,
+                    job_position_id: true,
+                    user: {
                         select: {
                             id: true,
-                            status: true,
-                            user: {
-                                select: {
-                                    id: true,
-                                    first_name: true,
-                                    last_name: true,
-                                    email: true
-                                }
-                            }
+                            first_name: true,
+                            last_name: true,
+                            email: true,
+                            profile_image: true  // เพิ่ม profile_image
                         }
                     }
                 }
@@ -576,7 +640,6 @@ export const findJobPositionById = (jobPositionId) =>
         include: { job: true }
     });
 
-
 export const checkUserSkillsMatch = async (userId, jobPositionId) => {
     // ดึงข้อมูล skills ของผู้ใช้
     const user = await prisma.user.findUnique({
@@ -590,16 +653,49 @@ export const checkUserSkillsMatch = async (userId, jobPositionId) => {
         select: { position_name: true }
     });
 
-    if (!jobPosition || !jobPosition.required_skills || jobPosition.required_skills.length === 0) {
-        return true; // ถ้าตำแหน่งงานไม่ได้ระบุ skills ที่ต้องการ ให้ผ่าน
-    }
+    // ถ้าผู้ใช้ไม่มีทักษะ
+    if (!user?.skills) return false;
 
-    if (!user || !user.skills || user.skills.length === 0) {
-        return false; // ถ้าผู้ใช้ไม่มี skills
-    }
+    // แปลง skills เป็น array
+    const userSkills = Array.isArray(user.skills)
+        ? user.skills
+        : JSON.parse(user.skills);
 
-    const userSkills = user.skills.map(skill => skill.toLowerCase());
+    // เช็คว่าสกิลของ user ตรงกับชื่อตำแหน่งหรือไม่
     const positionName = jobPosition.position_name.toLowerCase();
-    // ตรวจสอบว่าผู้ใช้มี skills ที่จำเป็นทั้งหมดหรือไม่
-    return userSkills.some(skill => positionName.includes(skill));
+    return userSkills.some(skill =>
+        positionName.includes(skill.toLowerCase())
+    );
+};
+
+export const getJobParticipantsByJobId = async (jobId) => {
+    return prisma.jobParticipation.findMany({
+        where: {
+            Job: {  // เปลี่ยนจาก jobId เป็น Job
+                id: parseInt(jobId)
+            },
+            status: 'approved'
+        },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    first_name: true,
+                    last_name: true,
+                    email: true,
+                    phone_number: true,
+                    skills: true
+                }
+            },
+            jobPosition: {
+                select: {
+                    position_name: true,
+                    wage: true
+                }
+            }
+        },
+        orderBy: {
+            created_at: 'desc'
+        }
+    });
 };
