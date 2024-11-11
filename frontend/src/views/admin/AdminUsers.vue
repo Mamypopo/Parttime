@@ -361,9 +361,11 @@ export default {
       } catch (error) {
         console.error('Error fetching job history:', error)
         Swal.fire({
-          icon: 'error',
-          title: 'เกิดข้อผิดพลาด',
-          text: 'ไม่สามารถดึงข้อมูลประวัติการทำงานได้'
+          title: 'ไม่พบประวัติการทำงาน',
+          text: 'ผู้ใช้งานนี้ยังไม่มีประวัติการทำงาน',
+          icon: 'info',
+          confirmButtonText: 'ตกลง',
+          confirmButtonColor: '#6366f1'
         })
       }
     },

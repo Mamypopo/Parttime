@@ -183,7 +183,7 @@ export const getAdminById = async (req, res) => {
 
 
 
-// ดึงผู้ใช้ที่รอการอนุมัติ
+// ดึงผู้ใช้ที่รอการอนุมัติ เข้าใช้งาน
 export const getPendingUsers = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1
@@ -290,7 +290,7 @@ export const getUserStats = async (req, res) => {
     }
 };
 
-// อนุมัติผู้ใช้งาน
+// อนุมัติผู้ใช้งานในระบบ
 export const approveUser = async (req, res) => {
     const { status } = req.body;
     const { userId } = req.params;
@@ -387,7 +387,6 @@ export const approveUser = async (req, res) => {
 
 
 // admin pending skill
-
 export const getAdminPendingSkills = async (req, res) => {
     try {
         const pendingSkills = await adminModel.getAllPendingSkillsForAdmin();

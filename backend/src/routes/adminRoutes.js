@@ -23,7 +23,6 @@ router.post('/login-admin', loginAdmin);
 router.post('/register-admin', registerAdmin);
 
 // ต้องการการยืนยันตัวตนเท่านั้น
-// router.get('/pending-users', authMiddleware, getPendingUsers);
 router.get('/pending', authMiddleware, checkAdminRole, getPendingUsers);
 router.get('/approved', authMiddleware, checkAdminRole, getApprovedUsers);
 router.get('/rejected', authMiddleware, checkAdminRole, getRejectedUsers);

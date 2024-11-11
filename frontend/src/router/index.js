@@ -93,6 +93,12 @@ const router = createRouter({
           component: () => import('@/views/admin/Jobs/MyCreatedJobs.vue'),
           meta: { requiresAdmin: true }
         },
+        {
+          path: 'job-applicants',
+          name: 'JobApplicantsView',
+          component: () => import('@/views/admin/Jobs/JobApplicantsView.vue'),
+          meta: { requiresAdmin: true }
+        },
       ]
     },
 

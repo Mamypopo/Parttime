@@ -220,6 +220,7 @@ export const getJobById = (jobId) =>
     prisma.job.findUnique({
         where: { id: jobId },
         include: {
+            JobPositions: true,
             JobParticipation: {
                 where: {
                     status: 'approved'
@@ -227,7 +228,7 @@ export const getJobById = (jobId) =>
                 select: {
                     id: true,
                     created_at: true,
-                    jobPositionId: true,
+                    job_position_id: true,
                     user: {
                         select: {
                             id: true,
@@ -243,9 +244,12 @@ export const getJobById = (jobId) =>
                         select: {
                             id: true,
                             position_name: true,
+                            required_people: true,
                             wage: true
                         }
-                    }
+                    },
+                    status: true,
+                    updated_at: true
                 },
                 orderBy: {
                     created_at: 'desc'
@@ -259,36 +263,7 @@ export const getJobById = (jobId) =>
                 }
             },
 
-            JobParticipation: {
-                where: {
-                    status: 'approved'
-                },
-                select: {
-                    id: true,
-                    created_at: true,
-                    user: {
-                        select: {
-                            id: true,
-                            first_name: true,
-                            last_name: true,
-                            email: true,
-                            phone_number: true,
-                            skills: true
-                        }
-                    },
-                    jobPosition: {
-                        select: {
-                            id: true,
-                            position_name: true,
-                            required_people: true,
-                            wage: true
-                        }
-                    }
-                },
-                orderBy: {
-                    created_at: 'desc'
-                }
-            }
+
         }
     });
 
@@ -602,16 +577,6 @@ export const findExistingDayApplication = (userId) => {
     });
 };
 
-export const updateJobParticipationStatus = (jobParticipationId, status) =>
-    prisma.jobParticipation.update({
-        where: { id: jobParticipationId },
-        data: { status },
-        include: {
-            jobPosition: { include: { job: true } },
-            user: true
-        }
-    });
-
 
 // ฟังก์ชันเพื่อค้นหา Job Participation ตาม ID
 export const findJobParticipationById = (jobParticipationId) =>
@@ -622,6 +587,8 @@ export const findJobParticipationById = (jobParticipationId) =>
             user: true
         }
     });
+
+
 
 // ฟังก์ชันเพื่ออัปเดตจำนวนคนที่เหลือใน JobPosition พร้อมอัปเดตสถานะ
 export const decreaseJobPositionSlots = (jobPositionId, remainingSlots) =>
@@ -668,34 +635,3 @@ export const checkUserSkillsMatch = async (userId, jobPositionId) => {
     );
 };
 
-export const getJobParticipantsByJobId = async (jobId) => {
-    return prisma.jobParticipation.findMany({
-        where: {
-            Job: {  // เปลี่ยนจาก jobId เป็น Job
-                id: parseInt(jobId)
-            },
-            status: 'approved'
-        },
-        include: {
-            user: {
-                select: {
-                    id: true,
-                    first_name: true,
-                    last_name: true,
-                    email: true,
-                    phone_number: true,
-                    skills: true
-                }
-            },
-            jobPosition: {
-                select: {
-                    position_name: true,
-                    wage: true
-                }
-            }
-        },
-        orderBy: {
-            created_at: 'desc'
-        }
-    });
-};

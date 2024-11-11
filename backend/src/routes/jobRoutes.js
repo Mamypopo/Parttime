@@ -3,14 +3,13 @@ import {
     createJob,
     getAllJobs,
     applyForJob,
-    approveJobParticipation,
-    markJobAsCompleted,
+
     deleteJob,
     editJob,
     getMyCreatedJobs,
-    getJobParticipants
 } from '../controllers/jobController.js';
 import { authMiddleware, checkAdminRole } from '../middleware/authMiddleware.js';
+import * as jobParticipationController from '../controllers/jobParticipationController.js'
 
 const router = express.Router();
 
@@ -21,14 +20,22 @@ router.get('/', getAllJobs);
 router.use(authMiddleware);
 
 router.post('/apply', applyForJob);
-router.put('/mark-complete', markJobAsCompleted);
+// router.put('/mark-complete', markJobAsCompleted);
 
 // เส้นทางสำหรับแอดมิน
 router.post('/create', checkAdminRole, createJob);
 router.get('/my-created-jobs', checkAdminRole, getMyCreatedJobs);
-router.get('/participants/:jobId', checkAdminRole, getJobParticipants);
-router.put('/approve/:id', checkAdminRole, approveJobParticipation);
+router.get('/my-created-jobs/participants', checkAdminRole, jobParticipationController.getJobsWithParticipants);
+router.put('/:id/approved-rejected', checkAdminRole, jobParticipationController.approveJobParticipation);
 router.delete('/delete-job/:jobId', checkAdminRole, deleteJob);
 router.put('/editJob/:jobId', checkAdminRole, editJob);
 
+
+
+
+// routes  job participation
+router.put('/participants/:jobParticipationId/complete',
+    checkAdminRole,
+    jobParticipationController.updateApplicationStatus
+)
 export default router;

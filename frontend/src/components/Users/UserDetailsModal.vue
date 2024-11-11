@@ -31,7 +31,7 @@
               class="sticky top-0 z-10 flex justify-between items-center p-6 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] rounded-t-xl"
             >
               <HeadlessDialogTitle class="text-2xl font-semibold text-white">
-                รายละเอียดผู้ใช้
+                รายละเอียดผู้ใช้ #{{ user.id }}
               </HeadlessDialogTitle>
               <button
                 @click="closeModal"

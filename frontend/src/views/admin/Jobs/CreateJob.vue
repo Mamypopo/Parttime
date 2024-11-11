@@ -171,6 +171,7 @@
 import CreatePositionModal from '@/components/admin/Jobs/CreatePositionModal.vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
+import { useJobStore } from '@/stores/jobStore'
 import { useAdminStore } from '@/stores/adminStore'
 export default {
   name: 'CreateJob',
@@ -179,6 +180,8 @@ export default {
   },
   data() {
     return {
+      jobStore: useJobStore(),
+
       baseURL: import.meta.env.VITE_API_URL,
       form: {
         title: '',
@@ -259,31 +262,8 @@ export default {
 
     async handleSubmit() {
       try {
-        if (this.positions.length === 0) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'ไม่สามารถสร้างงานได้',
-            text: 'กรุณาเพิ่มตำแหน่งงานอย่างน้อย 1 ตำแหน่ง'
-          })
-          return
-        }
-
-        if (
-          !this.form.title ||
-          !this.form.date ||
-          !this.form.startDate ||
-          !this.form.endDate ||
-          !this.form.location
-        ) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'ข้อมูลไม่ครบถ้วน',
-            text: 'กรุณากรอกข้อมูลให้ครบทุกช่อง'
-          })
-          return
-        }
-        const adminStore = useAdminStore()
-        const token = adminStore.token
+        // ตรวจสอบข้อมูล
+        this.jobStore.validateJobData(this.form, this.positions)
 
         const result = await Swal.fire({
           title: 'ยืนยันการสร้างงาน',
@@ -294,15 +274,14 @@ export default {
           cancelButtonText: 'ยกเลิก'
         })
 
-        if (!result.isConfirmed) {
-          return
-        }
+        if (!result.isConfirmed) return
+
         const jobData = {
           title: this.form.title,
           work_date: this.form.date,
           location: this.form.location,
-          start_time: this.formatDateTime(this.form.date, this.form.startDate),
-          end_time: this.formatDateTime(this.form.date, this.form.endDate),
+          start_time: this.jobStore.formatDateTime(this.form.date, this.form.startDate),
+          end_time: this.jobStore.formatDateTime(this.form.date, this.form.endDate),
           details: this.form.details,
           positions: this.positions.map((pos) => ({
             name: pos.name,
@@ -311,29 +290,23 @@ export default {
             required_people: Number(pos.requiredPeople)
           }))
         }
-        const response = await axios.post(`${this.baseURL}/api/jobs/create`, jobData, {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          }
+
+        await this.jobStore.createJob(jobData)
+
+        await Swal.fire({
+          icon: 'success',
+          title: 'สร้างงานสำเร็จ',
+          text: 'งานถูกสร้างเรียบร้อยแล้ว'
         })
 
-        if (response.status === 201) {
-          await Swal.fire({
-            icon: 'success',
-            title: 'สร้างงานสำเร็จ',
-            text: 'งานถูกสร้างเรียบร้อยแล้ว'
-          })
-
-          this.resetForm()
-          this.positions = []
-        }
+        this.resetForm()
+        this.positions = []
       } catch (error) {
         console.error('Error creating job:', error)
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: error.response?.data?.message || 'เกิดข้อผิดพลาดในการสร้างงาน'
+          text: error.message || 'เกิดข้อผิดพลาดในการสร้างงาน'
         })
       }
     },

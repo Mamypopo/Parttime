@@ -388,7 +388,14 @@ export default {
       jobMenuItems: [
         { name: 'งาน', path: '/admin/job-List', icon: 'fas fa-briefcase', indent: false },
         { name: 'สร้างงาน', path: '/admin/create-job', icon: 'fas fa-plus', indent: true },
-        { name: 'งานของฉัน', path: '/admin/my-create-jobs', icon: 'fas fa-list', indent: true }
+        { name: 'งานของฉัน', path: '/admin/my-create-jobs', icon: 'fas fa-list', indent: true },
+        {
+          name: 'ผู้สมัครงาน',
+          path: '/admin/job-applicants',
+          icon: 'fas fa-user-tie',
+          indent: true,
+          badge: true
+        }
       ],
       mobileMainItems: [
         { name: 'หน้าหลัก', path: '/admin/dashboard', icon: 'fas fa-home' },
@@ -428,7 +435,13 @@ export default {
             items: [
               { name: 'งานทั้งหมด', path: '/admin/job-List', icon: 'fas fa-briefcase' },
               { name: 'งานของฉัน', path: '/admin/my-create-jobs', icon: 'fas fa-list' },
-              { name: 'สร้างงาน', path: '/admin/create-job', icon: 'fas fa-plus' }
+              { name: 'สร้างงาน', path: '/admin/create-job', icon: 'fas fa-plus' },
+              {
+                name: 'ผู้สมัครงาน',
+                path: '/admin/job-applicants',
+                icon: 'fas fa-user-tie',
+                badge: true
+              }
             ]
           }
         },
