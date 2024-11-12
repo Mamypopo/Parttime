@@ -59,12 +59,14 @@ model PendingSkill {
 }
 
 model Job {
-  id               Int                @id @default(autoincrement())
-  title            String // ชื่องาน
-  work_date        DateTime           @db.Timestamptz // วันที่ทำงาน
-  location         String // สถานที่
-  start_time       DateTime           @db.Timestamptz // เวลาเริ่ม
-  end_time         DateTime           @db.Timestamptz // เวลาสิ้นสุด
+  id         Int      @id @default(autoincrement())
+  title      String // ชื่องาน
+  work_date  DateTime @db.Timestamptz // วันที่ทำงาน
+  location   String // สถานที่
+  start_time DateTime @db.Timestamptz // เวลาเริ่ม
+  end_time   DateTime @db.Timestamptz // เวลาสิ้นสุด
+  status     String   @default("published") // เพิ่ม column status
+
   completed        Boolean            @default(false) // สถานะงาน (เสร็จสิ้นหรือยัง)
   details          String // รายละเอียดเพิ่มเติม
   created_by       Int // ผู้สร้างงาน (Admin)
@@ -75,7 +77,7 @@ model Job {
   JobParticipation JobParticipation[] // ผู้เข้าร่วมในงานนี้
   Notification     Notification[]
 
-  @@index([work_date, location, title])
+  @@index([work_date, location, title, status])
 }
 
 model JobPosition {

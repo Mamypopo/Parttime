@@ -60,10 +60,9 @@ export const getAllJobs = async (page = 1, pageSize = 20, filters = {}) => {
             }
         });
     }
-
-    if (filters.status !== undefined) {
+    if (filters.status) {
         where.AND.push({
-            completed: filters.status === 'completed'
+            status: filters.status
         });
     }
 
@@ -300,11 +299,7 @@ export const getMyCreatedJobs = async (page = 1, pageSize = 10, filters = {}) =>
         });
     }
 
-    if (filters.status !== undefined) {
-        where.AND.push({
-            completed: filters.status === 'completed'
-        });
-    }
+
 
     if (filters.position) {
         where.AND.push({
@@ -315,7 +310,11 @@ export const getMyCreatedJobs = async (page = 1, pageSize = 10, filters = {}) =>
             }
         });
     }
-
+    if (filters.status) {
+        where.AND.push({
+            status: filters.status
+        });
+    }
     if (filters.minWage || filters.maxWage) {
         where.AND.push({
             JobPositions: {
@@ -578,15 +577,6 @@ export const findExistingDayApplication = (userId) => {
 };
 
 
-// ฟังก์ชันเพื่อค้นหา Job Participation ตาม ID
-export const findJobParticipationById = (jobParticipationId) =>
-    prisma.jobParticipation.findUnique({
-        where: { id: jobParticipationId },
-        include: {
-            jobPosition: true,
-            user: true
-        }
-    });
 
 
 
@@ -635,3 +625,13 @@ export const checkUserSkillsMatch = async (userId, jobPositionId) => {
     );
 };
 
+// ฟังชั่นอัพเดทสถานะงาน
+export const updateJobStatus = (jobId, status) => {
+    return prisma.job.update({
+        where: { id: jobId },
+        data: {
+            status,
+            completed: status === 'completed'  // ยังคง update completed เพื่อความเข้ากันได้กับโค้ดเดิม
+        }
+    });
+};

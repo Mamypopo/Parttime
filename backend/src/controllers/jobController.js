@@ -410,39 +410,38 @@ export const applyForJob = async (req, res) => {
     }
 };
 
+// ฟังก์ชันอัพเดท สถานะงาน
+export const updateJobStatus = async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    const adminId = req.user.id;
 
-
-
-// ฟั่งชั่นดึงคนที่มาร่วมงาน
-export const getJobParticipants = async (req, res) => {
     try {
-        const jobId = req.params.jobId
+        const job = await jobModel.getJobById(parseInt(id));
 
-        // ตรวจสอบว่างานมีอยู่จริง
-        const job = await jobModel.getJobById(jobId);
         if (!job) {
-            return res.status(404).json({
-                success: false,
-                message: 'ไม่พบข้อมูลงาน'
-            });
+            return res.status(404).json({ message: 'ไม่พบงาน' });
         }
 
-        // ดึงข้อมูลผู้ที่ได้รับอนุมัติ
-        const participants = await jobModel.getJobById(jobId);
+        if (job.created_by !== adminId) {
+            return res.status(403).json({ message: 'คุณไม่มีสิทธิ์แก้ไขงานนี้' });
+        }
 
-        res.status(200).json({
-            success: true,
-            data: participants
-        });
+        const validStatuses = ['published', 'in_progress', 'completed'];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ message: 'สถานะไม่ถูกต้อง' });
+        }
 
+        const updatedJob = await jobModel.updateJobStatus(parseInt(id), status);
+
+        res.json(updatedJob);
     } catch (error) {
-        console.error('Error getting job participants:', error);
-        res.status(500).json({
-            success: false,
-            message: 'เกิดข้อผิดพลาดในการดึงข้อมูลผู้เข้าร่วมงาน'
-        });
+        console.error('Error updating job status:', error);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการอัพเดทสถานะ' });
     }
 };
+
+
 
 
 

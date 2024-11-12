@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6">
+  <div class="p-6 ml-6">
     <!-- เพิ่ม padding เพื่อให้มีระยะห่างจาก sidebar -->
     <div class="mx-auto bg-white rounded-lg shadow-sm overflow-hidden">
       <!-- Header -->

@@ -94,9 +94,9 @@ const router = createRouter({
           meta: { requiresAdmin: true }
         },
         {
-          path: 'job-applicants',
-          name: 'JobApplicantsView',
-          component: () => import('@/views/admin/Jobs/JobApplicantsView.vue'),
+          path: 'job-Management',
+          name: 'JobManagement',
+          component: () => import('@/views/admin/Jobs/JobManagement.vue'),
           meta: { requiresAdmin: true }
         },
       ]

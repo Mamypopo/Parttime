@@ -3,7 +3,7 @@ import {
     createJob,
     getAllJobs,
     applyForJob,
-
+    updateJobStatus,
     deleteJob,
     editJob,
     getMyCreatedJobs,
@@ -24,11 +24,18 @@ router.post('/apply', applyForJob);
 
 // เส้นทางสำหรับแอดมิน
 router.post('/create', checkAdminRole, createJob);
-router.get('/my-created-jobs', checkAdminRole, getMyCreatedJobs);
-router.get('/my-created-jobs/participants', checkAdminRole, jobParticipationController.getJobsWithParticipants);
-router.put('/:id/approved-rejected', checkAdminRole, jobParticipationController.approveJobParticipation);
 router.delete('/delete-job/:jobId', checkAdminRole, deleteJob);
 router.put('/editJob/:jobId', checkAdminRole, editJob);
+
+// เส้นอัพเดท สถานะงาน
+router.patch('/:id/status', checkAdminRole, updateJobStatus);
+
+router.get('/my-created-jobs', checkAdminRole, getMyCreatedJobs);
+router.get('/getJobsWithParticipants', checkAdminRole, jobParticipationController.getJobsWithParticipants);
+
+
+router.put('/:id/approved-rejected', checkAdminRole, jobParticipationController.approveJobParticipation);
+
 
 
 

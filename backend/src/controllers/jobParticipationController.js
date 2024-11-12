@@ -203,7 +203,9 @@ export const updateApplicationStatus = async (req, res) => {
 export const getJobsWithParticipants = async (req, res) => {
     try {
         const adminId = req.user.id;
+
         const jobs = await jobParticipationModel.getJobsWithParticipants(adminId);
+
 
         return res.status(200).json({
             success: true,

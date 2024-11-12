@@ -154,7 +154,40 @@
               </div>
             </div>
           </div>
-
+          <!-- เพิ่มในส่วน template ต่อจาก wage range -->
+          <div class="lg:col-span-3">
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                <i class="fas fa-users text-sm"></i>
+              </span>
+              <input
+                type="text"
+                v-model="selectedPeopleCount"
+                @click="showPeopleCountList = true"
+                @blur="handlePeopleCountBlur"
+                readonly
+                class="w-full pl-9 pr-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200 cursor-pointer"
+                placeholder="จำนวนคน"
+              />
+              <!-- People Count Dropdown -->
+              <div
+                v-if="showPeopleCountList"
+                class="absolute z-10 w-full mt-1 bg-gray-100 rounded-lg shadow-lg border border-purple-100"
+              >
+                <div class="p-2 space-y-1">
+                  <button
+                    v-for="option in peopleCountOptions"
+                    :key="option.value"
+                    type="button"
+                    class="block w-full text-left px-3 py-2 hover:bg-[#C5B4E3] hover:bg-opacity-40 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
+                    @click="selectPeopleCount(option)"
+                  >
+                    {{ option.label }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
           <!-- วันที่ -->
           <div class="lg:col-span-5">
             <div class="flex flex-col sm:flex-row gap-2">
@@ -219,14 +252,24 @@ export default {
         dateFrom: '',
         dateTo: '',
         minWage: null,
-        maxWage: null
+        maxWage: null,
+        peopleCount: ''
       },
+      showPeopleCountList: false,
+      selectedPeopleCount: '',
+      peopleCountOptions: [
+        { value: '', label: 'ทั้งหมด' },
+        { value: 'less_than_5', label: 'น้อยกว่า 5 คน' },
+        { value: '5_to_10', label: '5-10 คน' },
+        { value: 'more_than_10', label: 'มากกว่า 10 คน' }
+      ],
       showStatusList: false,
       selectedStatus: '',
       statusOptions: [
         { value: '', label: 'ทั้งหมด' },
-        { value: 'completed', label: 'เสร็จสิ้น' },
-        { value: 'in_progress', label: 'กำลังดำเนินการ' }
+        { value: 'published', label: 'เปิดรับสมัคร' },
+        { value: 'in_progress', label: 'กำลังดำเนินการ' },
+        { value: 'completed', label: 'เสร็จสิ้น' }
       ],
       showPositionList: false,
       selectedPosition: '',
@@ -243,6 +286,15 @@ export default {
       ]
     }
   },
+
+  watch: {
+    filters: {
+      deep: true,
+      handler() {
+        this.handleSearch()
+      }
+    }
+  },
   mounted() {
     this.isSearchVisible = window.innerWidth >= 1024
     window.addEventListener('resize', this.handleResize)
@@ -257,17 +309,37 @@ export default {
     handleResize() {
       this.isSearchVisible = window.innerWidth >= 1024
     },
-    handleSearch() {
-      const queryParams = Object.entries(this.filters)
-        .filter(([, value]) => value !== '' && value !== null)
 
+    handleSearch() {
+      // กรองเฉพาะค่าที่มีข้อมูล
+      const queryParams = Object.entries(this.filters)
+        .filter(([key, value]) => {
+          if (value === null || value === undefined) return false
+          if (typeof value === 'string' && value.trim() === '') return false
+          if (typeof value === 'number' && isNaN(value)) return false
+          return true
+        })
         .reduce((acc, [key, value]) => {
           acc[key] = value
           return acc
         }, {})
-
+      console.log('Search params:', queryParams)
       this.$emit('search', queryParams)
     },
+
+    handlePeopleCountBlur() {
+      setTimeout(() => {
+        this.showPeopleCountList = false
+      }, 200)
+    },
+
+    selectPeopleCount(option) {
+      this.selectedPeopleCount = option.label
+      this.filters.peopleCount = option.value
+      this.showPeopleCountList = false
+      this.handleSearch()
+    },
+
     handleClear() {
       this.filters = {
         id: '',
@@ -278,11 +350,14 @@ export default {
         dateFrom: '',
         dateTo: '',
         minWage: null,
-        maxWage: null
+        maxWage: null,
+        peopleCount: ''
       }
-      this.selectStatus({ value: '' })
+      this.selectedPeopleCount = ''
+      this.selectedStatus = ''
+      this.selectedPosition = ''
       this.$emit('clear')
-      this.selectPosition({ value: '', label: 'ทั้งหมด' })
+      this.handleSearch()
     },
     handleStatusBlur() {
       setTimeout(() => {
@@ -291,9 +366,12 @@ export default {
     },
     selectStatus(status) {
       this.selectedStatus = status.label
+      // ส่งค่า value เป็นภาษาอังกฤษไปให้ backend
       this.filters.status = status.value
       this.showStatusList = false
+      this.handleSearch()
     },
+
     handlePositionBlur() {
       setTimeout(() => {
         this.showPositionList = false
@@ -309,13 +387,25 @@ export default {
 </script>
 
 <style scoped>
-/* เพิ่ม transition แบบ fade */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.5s ease;
+  transition: all 0.3s ease;
 }
-.fade-enter,
+.fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* เพิ่ม hover effects */
+input:hover,
+button:hover {
+  transition: all 0.2s ease;
+}
+
+/* เพิ่ม loading indicator styles ถ้าต้องการ */
+.loading {
+  opacity: 0.7;
+  pointer-events: none;
 }
 </style>

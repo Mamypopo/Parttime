@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6">
+  <div class="p-6 ml-6">
     <!-- Main Card -->
     <div
       class="bg-white p-4 md:p-8 min-h-screen rounded-lg transition-all duration-500 ease-in-out shadow-sm overflow-hidden"

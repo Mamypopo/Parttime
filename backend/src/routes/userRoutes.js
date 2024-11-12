@@ -18,8 +18,8 @@ router.use(authMiddleware);
 
 router.get('/users', userController.getUser);
 router.get('/profile', userController.getProfile); // ใช้ฟังก์ชัน getUser สำหรับการดึงโปรไฟล์ของตัวเอง
-router.put('/update-profile', authMiddleware, upload, userController.updateUserProfile);
-router.post('/skills', authMiddleware, userController.addUserSkills);
+router.put('/update-profile', upload, userController.updateUserProfile);
+router.post('/skills', userController.addUserSkills);
 
 router.get('/history/:userId', userController.getUserHistory);
 router.get('/notifications', userController.getUserNotifications);

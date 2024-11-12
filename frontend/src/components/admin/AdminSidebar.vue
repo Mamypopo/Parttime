@@ -70,6 +70,12 @@
             >
               <i :class="['text-[#A8E6E2] text-xl', item.icon]"></i>
               <span v-if="!isCollapsed">{{ item.name }}</span>
+              <span
+                v-if="item.name === 'TEST' && jobStore.pendingApplicationsCount > 0"
+                class="absolute right-4 bg-[#f76363] text-white rounded-full text-xs px-2 py-0.5 flex items-center justify-center animate-pulse"
+              >
+                {{ jobStore.pendingApplicationsCount }}
+              </span>
             </router-link>
           </div>
         </nav>
@@ -351,6 +357,8 @@ import NotificationsPanel from '@/components/admin/Notifications/NotificationsPa
 import MobileNotifications from '@/components/admin/MobileNotifications/MobileNotifications.vue'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { useAdminStore } from '@/stores/adminStore'
+import { useJobStore } from '@/stores/jobStore'
+
 import Swal from 'sweetalert2'
 
 export default {
@@ -390,8 +398,8 @@ export default {
         { name: 'สร้างงาน', path: '/admin/create-job', icon: 'fas fa-plus', indent: true },
         { name: 'งานของฉัน', path: '/admin/my-create-jobs', icon: 'fas fa-list', indent: true },
         {
-          name: 'ผู้สมัครงาน',
-          path: '/admin/job-applicants',
+          name: 'TEST',
+          path: '/admin/job-Management',
           icon: 'fas fa-user-tie',
           indent: true,
           badge: true
@@ -437,8 +445,8 @@ export default {
               { name: 'งานของฉัน', path: '/admin/my-create-jobs', icon: 'fas fa-list' },
               { name: 'สร้างงาน', path: '/admin/create-job', icon: 'fas fa-plus' },
               {
-                name: 'ผู้สมัครงาน',
-                path: '/admin/job-applicants',
+                name: 'TEST',
+                path: '/admin/job-Management',
                 icon: 'fas fa-user-tie',
                 badge: true
               }
@@ -463,8 +471,9 @@ export default {
     }
   },
   setup() {
+    const jobStore = useJobStore()
     const notificationStore = useNotificationStore()
-    return { notificationStore }
+    return { jobStore, notificationStore }
   },
   methods: {
     toggleSubmenu(menu) {
@@ -564,6 +573,7 @@ export default {
     }
   },
   mounted() {
+    this.jobStore.fetchJobsAndParticipants()
     window.addEventListener('resize', this.handleResize)
     this.handleResize()
     this.isDarkMode = localStorage.getItem('theme') === 'dark'
