@@ -396,11 +396,10 @@ export default {
       jobMenuItems: [
         { name: 'งาน', path: '/admin/job-List', icon: 'fas fa-briefcase', indent: false },
         { name: 'สร้างงาน', path: '/admin/create-job', icon: 'fas fa-plus', indent: true },
-        { name: 'งานของฉัน', path: '/admin/my-create-jobs', icon: 'fas fa-list', indent: true },
         {
-          name: 'TEST',
+          name: 'งานของฉัน',
           path: '/admin/job-Management',
-          icon: 'fas fa-user-tie',
+          icon: 'fa-solid fa-list-check',
           indent: true,
           badge: true
         }
@@ -442,12 +441,11 @@ export default {
             title: 'จัดการงาน',
             items: [
               { name: 'งานทั้งหมด', path: '/admin/job-List', icon: 'fas fa-briefcase' },
-              { name: 'งานของฉัน', path: '/admin/my-create-jobs', icon: 'fas fa-list' },
               { name: 'สร้างงาน', path: '/admin/create-job', icon: 'fas fa-plus' },
               {
-                name: 'TEST',
+                name: 'งานของฉัน',
                 path: '/admin/job-Management',
-                icon: 'fas fa-user-tie',
+                icon: 'fa-solid fa-list-check',
                 badge: true
               }
             ]

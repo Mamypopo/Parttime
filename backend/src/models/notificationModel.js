@@ -97,3 +97,17 @@ export const markAllAsRead = (adminId) =>
             read: true
         }
     });
+
+
+export const notifyAdminJobStatusChange = async (job, oldStatus, newStatus) => {
+    try {
+        await createAdminNotification(
+            job.created_by,
+            `งาน "${job.title}" เปลี่ยนสถานะจาก ${oldStatus} เป็น ${newStatus}`,
+            'JOB_STATUS_AUTO_UPDATED',
+            { jobId: job.id }
+        );
+    } catch (error) {
+        console.error('Error notifying admin:', error);
+    }
+};

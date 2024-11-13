@@ -173,6 +173,7 @@ import axios from 'axios'
 import Swal from 'sweetalert2'
 import { useJobStore } from '@/stores/jobStore'
 import { useAdminStore } from '@/stores/adminStore'
+import router from '@/router'
 export default {
   name: 'CreateJob',
   components: {
@@ -299,8 +300,17 @@ export default {
           text: 'งานถูกสร้างเรียบร้อยแล้ว'
         })
 
+        // รีเซ็ตฟอร์มและข้อมูล
         this.resetForm()
         this.positions = []
+
+        // นำทางไปยังหน้างานทั้งหมด
+        this.$router.push({
+          name: 'JobManagement',
+          query: {
+            refresh: 'true'
+          }
+        })
       } catch (error) {
         console.error('Error creating job:', error)
         Swal.fire({

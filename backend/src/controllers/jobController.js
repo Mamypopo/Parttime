@@ -415,6 +415,8 @@ export const updateJobStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
     const adminId = req.user.id;
+    const ip = req.ip;
+    const userAgent = req.headers['user-agent'];
 
     try {
         const job = await jobModel.getJobById(parseInt(id));
@@ -434,14 +436,54 @@ export const updateJobStatus = async (req, res) => {
 
         const updatedJob = await jobModel.updateJobStatus(parseInt(id), status);
 
-        res.json(updatedJob);
+        // สร้าง log การอัพเดทสถานะ
+        await createLog(
+            null,
+            adminId,
+            'Update Job Status',
+            req.originalUrl,
+            req.method,
+            `Job ID: ${id} status updated to ${status}`,
+            ip,
+            userAgent
+        );
+
+        // สร้างการแจ้งเตือนสำหรับผู้สมัครงาน
+        const applicants = await jobModel.getJobApplicants(id);
+        if (applicants.length > 0) {
+            const notificationPromises = applicants.map(applicant =>
+                notificationModel.createUserNotification(
+                    applicant.id,
+                    `งาน "${job.title}" มีการเปลี่ยนสถานะเป็น ${status}`,
+                    'JOB_STATUS_UPDATED',
+                    { jobId: id, status }
+                )
+            );
+            await Promise.all(notificationPromises);
+        }
+
+        res.json({
+            message: 'อัพเดทสถานะงานสำเร็จ',
+            job: updatedJob
+        });
     } catch (error) {
         console.error('Error updating job status:', error);
+
+        // สร้าง log กรณีเกิดข้อผิดพลาด
+        await createLog(
+            null,
+            adminId,
+            'Update Job Status Failed',
+            req.originalUrl,
+            req.method,
+            `Failed to update job status. Job ID: ${id}. Error: ${error.message}`,
+            ip,
+            userAgent
+        );
+
         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการอัพเดทสถานะ' });
     }
 };
-
-
 
 
 

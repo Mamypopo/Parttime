@@ -19,29 +19,25 @@ router.get('/', getAllJobs);
 // เส้นทางที่ต้องการการยืนยันตัวตน
 router.use(authMiddleware);
 
+// ฟังชั่นสมัครงาน
 router.post('/apply', applyForJob);
-// router.put('/mark-complete', markJobAsCompleted);
 
 // เส้นทางสำหรับแอดมิน
 router.post('/create', checkAdminRole, createJob);
 router.delete('/delete-job/:jobId', checkAdminRole, deleteJob);
 router.put('/editJob/:jobId', checkAdminRole, editJob);
 
+// routes  job participation
 // เส้นอัพเดท สถานะงาน
 router.patch('/:id/status', checkAdminRole, updateJobStatus);
-
+// ดึงงานที่ตัวเองสร้าง
 router.get('/my-created-jobs', checkAdminRole, getMyCreatedJobs);
+// ดึงงาน
 router.get('/getJobsWithParticipants', checkAdminRole, jobParticipationController.getJobsWithParticipants);
-
-
+// อนุมัติการสมัครงาน
 router.put('/:id/approved-rejected', checkAdminRole, jobParticipationController.approveJobParticipation);
-
-
-
-
-
-// routes  job participation
-router.put('/participants/:jobParticipationId/complete',
+// อัพเดทสถานะหลังจบงาน
+router.put('/job-participations/:jobParticipationId/update-status',
     checkAdminRole,
     jobParticipationController.updateApplicationStatus
 )

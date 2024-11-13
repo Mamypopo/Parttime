@@ -7,7 +7,7 @@
         <p class="text-2xl font-semibold mt-2">{{ totalJobs }}</p>
       </div>
       <div class="bg-white rounded-lg p-4 shadow-sm">
-        <h3 class="text-gray-500 text-sm">รอดำเนินการ</h3>
+        <h3 class="text-gray-500 text-sm">ประกาศรับสมัคร</h3>
         <p class="text-2xl font-semibold text-[#7BC4C4] mt-2">{{ pendingJobs }}</p>
       </div>
       <div class="bg-white rounded-lg p-4 shadow-sm">
@@ -113,7 +113,15 @@
                 <i class="far fa-clock w-5"></i>
                 <span>{{ formatTime(job.start_time) }} - {{ formatTime(job.end_time) }}</span>
               </div>
-
+              <div v-if="getJobStatus(job) === 'completed'" class="mt-4">
+                <button
+                  @click="openUpdateWorkStatusModal(job)"
+                  class="w-full px-4 py-2 text-sm bg-[#81E2C4] text-white rounded-lg hover:bg-opacity-80"
+                >
+                  <i class="fas fa-clipboard-check mr-2"></i>
+                  อัพเดทสถานะการทำงาน
+                </button>
+              </div>
               <!-- Positions -->
               <div class="flex flex-wrap gap-2">
                 <span
@@ -217,6 +225,14 @@
       @close="handleCloseModal"
       @submit="handleEditJob"
     />
+
+    <UpdateWorkStatusModal
+      v-if="showUpdateWorkStatusModal && selectedJob"
+      :show="showUpdateWorkStatusModal"
+      :job="selectedJob"
+      @close="closeUpdateWorkStatusModal"
+      @update="handleUpdateWorkStatus"
+    />
   </div>
 </template>
 <script>
@@ -224,6 +240,7 @@ import { useJobStore } from '@/stores/jobStore'
 import ParticipantsModal from '@/components/admin/Jobs/ParticipantsModal.vue'
 import JobDetailsModal from '@/components/admin/Jobs/JobDetailModal.vue'
 import EditJobModal from '@/components/admin/Jobs/EditJobModal.vue'
+import UpdateWorkStatusModal from '@/components/admin/Jobs/UpdateWorkStatusModal.vue'
 import JobSearch from '@/components/Search/JobSearch.vue'
 
 import Swal from 'sweetalert2'
@@ -234,7 +251,8 @@ export default {
     ParticipantsModal,
     EditJobModal,
     JobDetailsModal,
-    JobSearch
+    JobSearch,
+    UpdateWorkStatusModal
   },
 
   data() {
@@ -244,6 +262,7 @@ export default {
       selectedJob: null,
       showDetailsModal: false,
       showParticipantsModal: false,
+      showUpdateWorkStatusModal: false,
       showEditModal: false,
       searchFilters: {
         search: '',
@@ -267,7 +286,7 @@ export default {
       return this.jobStore.jobs || []
     },
     loading() {
-      return this.jobStore.loading.jobs || this.jobStore.loading.participants
+      return this.jobStore.loading
     },
     currentPage() {
       return this.jobStore.pagination.currentPage
@@ -582,6 +601,42 @@ export default {
           return count + (position.JobParticipation?.length || 0)
         }, 0) || 0
       )
+    },
+    openUpdateWorkStatusModal(job) {
+      this.selectedJob = job
+      this.showUpdateWorkStatusModal = true
+    },
+
+    closeUpdateWorkStatusModal() {
+      this.showUpdateWorkStatusModal = false
+      this.selectedJob = null
+    },
+
+    async handleUpdateWorkStatus({ participationId, status, rating, comment }) {
+      try {
+        await this.jobStore.updateWorkStatus(participationId, {
+          status,
+          rating,
+          comment
+        })
+        Swal.fire({
+          icon: 'success',
+          title: 'อัพเดทสถานะสำเร็จ',
+          showConfirmButton: false,
+          timer: 1500
+        })
+
+        // รีโหลดข้อมูล
+        await this.loadJobs()
+        this.closeUpdateWorkStatusModal()
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: error.message || 'ไม่สามารถอัพเดทสถานะได้',
+          confirmButtonText: 'ตกลง'
+        })
+      }
     },
     openParticipantsModal(job) {
       // เมื่อเปิดดูรายชื่อ ให้ mark ทุกคนในงานนี้เป็น viewed

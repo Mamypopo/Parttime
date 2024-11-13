@@ -100,7 +100,6 @@ export const getAllJobs = async (page = 1, pageSize = 20, filters = {}) => {
             location: true,
             start_time: true,
             end_time: true,
-            completed: true,
             details: true,
             created_by: true,
             created_at: true,
@@ -258,7 +257,8 @@ export const getJobById = (jobId) =>
                 select: {
                     id: true,
                     first_name: true,
-                    last_name: true
+                    last_name: true,
+                    email: true
                 }
             },
 
@@ -339,7 +339,6 @@ export const getMyCreatedJobs = async (page = 1, pageSize = 10, filters = {}) =>
             location: true,
             start_time: true,
             end_time: true,
-            completed: true,
             details: true,
             created_by: true,
             created_at: true,
@@ -422,11 +421,7 @@ export const getMyCreatedJobsCount = async (adminId, filters = {}) => {
         });
     }
 
-    if (filters.status !== undefined) {
-        where.AND.push({
-            completed: filters.status === 'completed'
-        });
-    }
+
 
     if (filters.position) {
         where.AND.push({
@@ -625,13 +620,65 @@ export const checkUserSkillsMatch = async (userId, jobPositionId) => {
     );
 };
 
-// ฟังชั่นอัพเดทสถานะงาน
-export const updateJobStatus = (jobId, status) => {
-    return prisma.job.update({
-        where: { id: jobId },
-        data: {
-            status,
-            completed: status === 'completed'  // ยังคง update completed เพื่อความเข้ากันได้กับโค้ดเดิม
-        }
-    });
+export const getAllJobsForStatusUpdate = async () => {
+    try {
+        const jobs = await prisma.job.findMany({
+            select: {
+                id: true,
+                title: true,
+                work_date: true,
+                status: true,
+                created_by: true,
+                JobPositions: {
+                    include: {
+                        JobParticipation: true
+                    }
+                },
+                creator: {
+                    select: {
+                        id: true,
+                        first_name: true,
+                        last_name: true,
+                        email: true
+                    }
+                }
+            },
+        });
+        return jobs;
+    } catch (error) {
+        console.error('Error getting jobs for status update:', error);
+        throw error;
+    }
+};
+
+export const updateJobStatus = async (jobId, status) => {
+    try {
+        const updatedJob = await prisma.job.update({
+            where: { id: jobId },
+            data: {
+                status,
+                updated_at: new Date()
+            },
+            include: {
+                JobPositions: {
+                    include: {
+                        JobParticipation: true,
+
+                    }
+                },
+                creator: {
+                    select: {
+                        id: true,
+                        first_name: true,
+                        last_name: true,
+                        email: true
+                    }
+                }
+            }
+        });
+        return updatedJob;
+    } catch (error) {
+        console.error('Error updating job status:', error);
+        throw error;
+    }
 };

@@ -141,7 +141,7 @@ export const getTotalJobHistoryCount = (userId) =>
 export const createPendingSkill = async (userId, skill) => {
     return prisma.pendingSkill.create({
         data: {
-            userId,  // ใช้ shorthand syntax เมื่อชื่อตัวแปรเหมือนกัน
+            userId,
             skill,
             status: 'pending'
         }

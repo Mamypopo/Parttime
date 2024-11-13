@@ -59,15 +59,13 @@ model PendingSkill {
 }
 
 model Job {
-  id         Int      @id @default(autoincrement())
-  title      String // ชื่องาน
-  work_date  DateTime @db.Timestamptz // วันที่ทำงาน
-  location   String // สถานที่
-  start_time DateTime @db.Timestamptz // เวลาเริ่ม
-  end_time   DateTime @db.Timestamptz // เวลาสิ้นสุด
-  status     String   @default("published") // เพิ่ม column status
-
-  completed        Boolean            @default(false) // สถานะงาน (เสร็จสิ้นหรือยัง)
+  id               Int                @id @default(autoincrement())
+  title            String // ชื่องาน
+  work_date        DateTime           @db.Timestamptz // วันที่ทำงาน
+  location         String // สถานที่
+  start_time       DateTime           @db.Timestamptz // เวลาเริ่ม
+  end_time         DateTime           @db.Timestamptz // เวลาสิ้นสุด
+  status           String             @default("published") // เพิ่ม column status
   details          String // รายละเอียดเพิ่มเติม
   created_by       Int // ผู้สร้างงาน (Admin)
   created_at       DateTime           @default(now()) @db.Timestamptz
@@ -93,17 +91,31 @@ model JobPosition {
 }
 
 model JobParticipation {
-  id              Int      @id @default(autoincrement())
+  id              Int           @id @default(autoincrement())
   user_id         Int // ผู้ใช้ที่สมัครเข้าร่วม
   job_position_id Int // ตำแหน่งงานที่สมัคร
   status          String // สถานะของผู้เข้าร่วมงาน (สำเร็จ, ล้มเหลว, อื่นๆ)
-  created_at      DateTime @default(now()) @db.Timestamptz
-  updated_at      DateTime @updatedAt @db.Timestamptz
+  created_at      DateTime      @default(now()) @db.Timestamptz
+  updated_at      DateTime      @updatedAt @db.Timestamptz
+  workHistories   WorkHistory[] // เพิ่มความสัมพันธ์กับประวัติการทำงาน
+  user            User          @relation(fields: [user_id], references: [id]) // ความสัมพันธ์กับผู้ใช้
+  jobPosition     JobPosition   @relation(fields: [job_position_id], references: [id]) // ความสัมพันธ์กับตำแหน่งงาน
+  Job             Job?          @relation(fields: [jobId], references: [id])
+  jobId           Int?
+}
 
-  user        User        @relation(fields: [user_id], references: [id]) // ความสัมพันธ์กับผู้ใช้
-  jobPosition JobPosition @relation(fields: [job_position_id], references: [id]) // ความสัมพันธ์กับตำแหน่งงาน
-  Job         Job?        @relation(fields: [jobId], references: [id])
-  jobId       Int?
+// เพิ่มโมเดลใหม่สำหรับเก็บประวัติการทำงาน
+model WorkHistory {
+  id                 Int              @id @default(autoincrement())
+  jobParticipation   JobParticipation @relation(fields: [jobParticipationId], references: [id])
+  jobParticipationId Int              @unique
+  work_status        String // successful, needs_improvement, failed
+  comment            String? // ความคิดเห็นเพิ่มเติม (ถ้ามี)
+  rating             Int? // คะแนนการประเมิน (เช่น 0-100)
+  created_at         DateTime         @default(now()) @db.Timestamptz
+  updated_at         DateTime         @updatedAt @db.Timestamptz
+
+  @@index([jobParticipationId, work_status])
 }
 
 model Log {

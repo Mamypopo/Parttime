@@ -3,9 +3,12 @@ import dotenv from 'dotenv';
 import userRoutes from './routes/userRoutes.js';
 import jobRoutes from './routes/jobRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
-import { logCleanup } from './utils/logCleanup.js';
-import { startNotificationCleanup } from './cron/notificationCleanup.js';
+import workHistoryRoutes from './routes/workHistoryRoutes.js';
+
+import { startNotificationCleanup, runCleanupNow } from './cron/notificationCleanup.js';
+import { startLogCleanup, runlogCleanupNow } from './cron/logCleanup.js';
 import cors from 'cors';
+import { initJobStatusCron } from './cron/jobStatusCron.js';
 
 const app = express();
 app.use(cors());
@@ -20,12 +23,19 @@ app.use(cors());
 app.use('/api/users', userRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/work-history', workHistoryRoutes);
 
+// เริ่ม cron jobs
+// ลบ การแจ้งเตือน อัตโนมัติ
 startNotificationCleanup();
+// await runCleanupNow();
 
-// ตั้งเวลาให้ลบ log ทุกๆ 7 วัน (604800000 มิลลิวินาที)
-setInterval(logCleanup, 604800000);
+// อัพเดทสถานะ อัตโนมัติ
+initJobStatusCron();
 
+// ลบ Log อัตโนมัติ
+startLogCleanup();
+// runlogCleanupNow();
 
 
 

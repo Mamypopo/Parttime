@@ -141,7 +141,6 @@ export default {
       type: Object,
       required: true,
       validator: (value) => {
-        // เพิ่ม validator เช็คโครงสร้างข้อมูล
         return value && Array.isArray(value.JobPositions)
       }
     }

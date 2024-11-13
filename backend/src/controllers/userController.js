@@ -204,7 +204,7 @@ export const loginUser = async (req, res) => {
         const token = jwt.sign(
             { userId: user.id, email: user.email, role: user.role },
             process.env.JWT_SECRET,
-            { expiresIn: '1h' }
+            { expiresIn: '24h' }
         );
 
 
@@ -444,7 +444,7 @@ export const getUser = async (req, res) => {
     }
 };
 
-
+//อันเก่า ทีใช้อยู่
 export const getUserHistory = async (req, res) => {
     const { userId } = req.params;
     const { limit = 10, page = 1 } = req.query;

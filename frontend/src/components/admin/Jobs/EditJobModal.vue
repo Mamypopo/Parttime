@@ -9,11 +9,11 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-black/50" @click="closeModal" />
+        <div class="fixed inset-0 bg-black/25 backdrop-blur-sm" @click="closeModal" />
       </TransitionChild>
 
       <div class="flex min-h-full items-center justify-center p-4">
-        <div class="relative w-full max-w-4xl bg-white rounded-2xl shadow-xl">
+        <div class="relative w-full max-w-4xl bg-white rounded-2xl shadow-xl mb-20">
           <!-- Modal Header -->
           <div
             class="flex items-center justify-between p-4 md:p-5 rounded-t-2xl border-b bg-gradient-to-r from-[#6ED7D1] to-[#9899ee]"
@@ -140,22 +140,41 @@
                       <i class="fas fa-user-tie text-[#81E2C4] mr-2"></i>
                       ตำแหน่งที่ {{ index + 1 }}: {{ position.name || 'ตำแหน่งใหม่' }}
                     </h5>
-                    <div class="flex items-center gap-2">
+                    <!-- แถบแสดงสถานะ "ใหม่" -->
+                    <span
+                      v-if="position.isNew"
+                      class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-green-400 to-blue-400 text-white animate-bounce shadow-sm"
+                    >
+                      <i class="fas fa-star-of-life mr-1 text-xs"></i>
+                      ใหม่
+                    </span>
+                    <div class="flex items-center gap-4">
+                      <!-- ปุ่มลบ -->
                       <button
                         type="button"
                         @click.stop="removePosition(index)"
-                        class="text-[#EA6B6B] hover:text-[#e95757] p-1 hover:bg-red-50 rounded"
+                        class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors duration-200 group focus:outline-none focus:ring-2 focus:ring-red-200"
                       >
-                        <i class="fas fa-trash"></i>
+                        <i
+                          class="fas fa-trash-alt text-red-500 group-hover:text-red-600 transition-colors"
+                        ></i>
+                        <span class="hidden sm:inline">ลบตำแหน่ง</span>
                       </button>
-                      <i
-                        :class="[
-                          'fas transition-transform duration-300',
-                          expandedPositions[index]
-                            ? 'fa-chevron-up rotate-0'
-                            : 'fa-chevron-down -rotate-180'
-                        ]"
-                      ></i>
+
+                      <!-- ปุ่มขยาย/ย่อ -->
+                      <button
+                        type="button"
+                        class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 hover:bg-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                      >
+                        <i
+                          :class="[
+                            'fas text-gray-500 transition-all duration-300',
+                            expandedPositions[index] ? 'fa-chevron-up' : 'fa-chevron-down',
+                            'transform hover:text-gray-700',
+                            expandedPositions[index] ? 'rotate-0' : 'rotate-180'
+                          ]"
+                        ></i>
+                      </button>
                     </div>
                   </div>
 
@@ -281,7 +300,7 @@
 <script>
 import Swal from 'sweetalert2'
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
-
+import { useJobStore } from '@/stores/jobStore'
 export default {
   name: 'EditJobModal',
   emits: ['close', 'submit', 'update:show'],
@@ -374,11 +393,99 @@ export default {
         wage: 0,
         required_people: 1,
         details: '',
-        showList: false
+        showList: false,
+        isNew: true
       })
       this.expandedPositions.push(true)
     },
 
+    validateForm() {
+      if (
+        !this.formData.title ||
+        !this.formData.location ||
+        !this.formData.work_date ||
+        !this.formData.start_time ||
+        !this.formData.end_time
+      ) {
+        return false
+      }
+
+      return this.formData.positions.every(
+        (position) => position.name && position.wage > 0 && position.required_people > 0
+      )
+    },
+
+    async handleSubmit() {
+      try {
+        const jobStore = useJobStore()
+
+        // ตรวจสอบข้อมูลฟอร์ม
+        if (!this.validateForm()) {
+          Swal.fire({
+            icon: 'error',
+            title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
+            text: 'โปรดตรวจสอบข้อมูลทุกช่อง',
+            confirmButtonText: 'ตกลง'
+          })
+          return
+        }
+
+        const result = await Swal.fire({
+          title: 'คุณแน่ใจหรือไม่?',
+          text: 'คุณต้องการบันทึกการเปลี่ยนแปลงนี้หรือไม่?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#CDE45F',
+          cancelButtonColor: '#EA6B6B',
+          confirmButtonText: 'ใช่, บันทึก',
+          cancelButtonText: 'ยกเลิก'
+        })
+
+        if (!result.isConfirmed) return
+        // ลบสถานะ isNew ทั้งหมดก่อนส่งข้อมูล
+        this.formData.positions = this.formData.positions.map((pos) => ({
+          ...pos,
+          isNew: false
+        }))
+        // จัดรูปแบบข้อมูลก่อนส่ง
+        const jobData = {
+          id: this.job.id,
+          title: this.formData.title,
+          location: this.formData.location,
+          work_date: this.formData.work_date,
+          start_time: jobStore.formatDateTime(this.formData.work_date, this.formData.start_time),
+          end_time: jobStore.formatDateTime(this.formData.work_date, this.formData.end_time),
+          details: this.formData.details,
+          positions: this.formData.positions.map((pos) => ({
+            id: pos.id,
+            name: pos.name,
+            wage: Number(pos.wage),
+            required_people: Number(pos.required_people),
+            details: pos.details
+          }))
+        }
+
+        await jobStore.editJob(this.job.id, jobData)
+
+        await Swal.fire({
+          icon: 'success',
+          title: 'แก้ไขงานสำเร็จ',
+          text: 'ข้อมูลงานถูกอัพเดทเรียบร้อยแล้ว',
+          confirmButtonText: 'ตกลง'
+        })
+
+        this.$emit('close')
+        await jobStore.fetchJobs()
+      } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการแก้ไขงาน:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: error.message || 'ไม่สามารถแก้ไขงานได้',
+          confirmButtonText: 'ตกลง'
+        })
+      }
+    },
     removePosition(index) {
       if (this.formData.positions.length > 1) {
         Swal.fire({
@@ -441,73 +548,6 @@ export default {
       const newExpandedPositions = [...this.expandedPositions]
       newExpandedPositions[index] = !newExpandedPositions[index]
       this.expandedPositions = newExpandedPositions
-    },
-
-    validateForm() {
-      if (
-        !this.formData.title ||
-        !this.formData.location ||
-        !this.formData.work_date ||
-        !this.formData.start_time ||
-        !this.formData.end_time
-      ) {
-        return false
-      }
-
-      return this.formData.positions.every(
-        (position) => position.name && position.wage > 0 && position.required_people > 0
-      )
-    },
-
-    async handleSubmit() {
-      // แสดงการยืนยันก่อนส่งข้อมูล
-      const result = await Swal.fire({
-        title: 'คุณแน่ใจหรือไม่?',
-        text: 'คุณต้องการบันทึกการเปลี่ยนแปลงนี้หรือไม่?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#CDE45F',
-        cancelButtonColor: '#EA6B6B',
-        confirmButtonText: 'ใช่, บันทึก',
-        cancelButtonText: 'ยกเลิก'
-      })
-
-      if (!result.isConfirmed) {
-        // ถ้าผู้ใช้ยกเลิกการยืนยัน จะไม่ดำเนินการส่งข้อมูลต่อ
-        return
-      }
-
-      // ตรวจสอบข้อมูลฟอร์ม
-      if (!this.validateForm()) {
-        Swal.fire({
-          icon: 'error',
-          title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
-          text: 'โปรดตรวจสอบข้อมูลทุกช่อง',
-          confirmButtonText: 'ตกลง'
-        })
-        return
-      }
-
-      try {
-        const jobData = {
-          ...this.formData,
-          id: this.job.id,
-          work_date: new Date(this.formData.work_date).toISOString(),
-          start_time: `${this.formData.work_date}T${this.formData.start_time}:00.000Z`,
-          end_time: `${this.formData.work_date}T${this.formData.end_time}:00.000Z`
-        }
-
-        // ส่งข้อมูลฟอร์ม
-        this.$emit('submit', jobData)
-      } catch (error) {
-        console.error('เกิดข้อผิดพลาดในการแก้ไขงาน:', error)
-        Swal.fire({
-          icon: 'error',
-          title: 'เกิดข้อผิดพลาด',
-          text: 'ไม่สามารถแก้ไขงานได้',
-          confirmButtonText: 'ตกลง'
-        })
-      }
     }
   }
 }

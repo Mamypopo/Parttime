@@ -16,12 +16,13 @@
 
       <!-- Table Section -->
       <div class="overflow-x-auto">
+        <!-- Loading State -->
         <div v-if="loading" class="flex justify-center items-center py-12">
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
         </div>
 
         <!-- Empty State -->
-        <div v-else-if="!jobs.length" class="text-center py-12 text-gray-500">
+        <div v-else-if="jobs.length === 0" class="text-center py-12 text-gray-500">
           <i class="fas fa-clipboard-list text-4xl mb-4 text-[#EABF71]"></i>
           <p>ไม่พบข้อมูลงาน</p>
         </div>
@@ -77,11 +78,9 @@
               <td class="px-6 py-4 text-center">
                 <span
                   class="inline-flex px-3 py-1 rounded-full text-xs whitespace-nowrap"
-                  :class="
-                    job.completed ? 'bg-[#B8E994] text-[#2E7D32]' : 'bg-[#FDD1C1] text-[#3A506B]'
-                  "
+                  :class="getJobStatus(job).class"
                 >
-                  {{ job.completed ? 'เสร็จสิ้น' : 'กำลังดำเนินการ' }}
+                  {{ getJobStatus(job).text }}
                 </span>
               </td>
 
@@ -151,9 +150,7 @@
 <script>
 import JobSearch from '@/components/Search/JobSearch.vue'
 import JobDetailModal from '@/components/admin/jobs/JobDetailModal.vue'
-
-import axios from 'axios'
-import Swal from 'sweetalert2'
+import { useJobStore } from '@/stores/jobStore'
 
 export default {
   name: 'JobList',
@@ -180,105 +177,81 @@ export default {
       })
     }
   },
+  setup() {
+    const jobStore = useJobStore()
+    return { jobStore }
+  },
   data() {
     return {
       baseURL: import.meta.env.VITE_API_URL,
-      jobs: [],
-      loading: false,
       currentPage: 1,
-      totalPages: 1,
       pageSize: 10,
-      filters: {},
       isModalOpen: false,
       selectedJob: null
+    }
+  },
+  computed: {
+    jobs() {
+      return this.jobStore.jobs || []
+    },
+    loading() {
+      return this.jobStore.loading
+    },
+    pagination() {
+      return this.jobStore.pagination
+    },
+    totalPages() {
+      return this.jobStore.pagination.totalPages
+    }
+  },
+  async created() {
+    try {
+      await this.fetchJobs()
+    } catch (error) {
+      console.error('Error in created hook:', error)
     }
   },
   methods: {
     async fetchJobs() {
       try {
-        this.loading = true
-        const params = {
-          page: this.currentPage,
-          pageSize: this.pageSize,
-          ...this.filters
-        }
-        const response = await axios.get(`${this.baseURL}/api/jobs`, {
-          params
-        })
-        if (response?.data) {
-          this.jobs = response.data.jobs
-          this.totalPages = response.data.totalPages
-        }
+        await this.jobStore.fetchJobs()
       } catch (error) {
         console.error('Error fetching jobs:', error)
-        Swal.fire({
-          icon: 'error',
-          title: 'เกิดข้อผิดพลาด',
-          text: 'ไม่สามารถดึงข้อมูลงานได้'
-        })
-      } finally {
-        this.loading = false
       }
     },
-
     handleSearch(searchFilters) {
-      this.filters = searchFilters
-      this.currentPage = 1
+      this.jobStore.updateSearchFilters(searchFilters)
+      this.jobStore.resetPagination()
       this.fetchJobs()
     },
-
     handleClear() {
-      this.filters = {}
-      this.currentPage = 1
+      this.jobStore.clearSearchFilters()
+      this.jobStore.resetPagination()
       this.fetchJobs()
     },
-
     handlePrevPage() {
       if (this.currentPage > 1) {
-        this.currentPage--
+        this.jobStore.pagination.page--
         this.fetchJobs()
       }
     },
     handleNextPage() {
       if (this.currentPage < this.totalPages) {
-        this.currentPage++
+        this.jobStore.pagination.page++
         this.fetchJobs()
       }
     },
-
-    // สำหรับวันที่
+    // ใช้ utility functions จาก store
     formatDate(date) {
-      if (!date) return '-'
-      return new Date(date).toLocaleDateString('th-TH', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })
+      return this.jobStore.formatDate(date)
     },
-
-    // สำหรับเวลา
     formatTime(time) {
-      if (!time) return '-'
-      const date = new Date(time)
-      return date.toLocaleTimeString('th-TH', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false // ใช้ระบบ 24 ชั่วโมง
-      })
+      return this.jobStore.formatTime(time)
     },
-    // คำนวณรายจ่ายต่องานทั้งหมด total
     calculateTotalWage(job) {
-      if (!job.JobPositions || job.JobPositions.length === 0) return 0
-
-      const total = job.JobPositions.reduce((sum, position) => {
-        const wagePerPerson = Number(position.wage) || 0
-        const requiredPeople = Number(position.required_people) || 0
-        const totalWageForPosition = wagePerPerson * requiredPeople
-        return sum + totalWageForPosition
-      }, 0)
-
-      return total.toLocaleString('th-TH')
+      return this.jobStore.calculateTotalWage(job)
     },
+    // Modal handlers
     openModal(job) {
       this.selectedJob = job
       this.isModalOpen = true
@@ -286,19 +259,31 @@ export default {
     closeModal() {
       this.isModalOpen = false
       this.selectedJob = null
-    }
-  },
-  created() {
-    this.fetchJobs()
-  },
-  watch: {
-    // ดักการเปลี่ยนแปลงของ filters หรือ search params อื่นๆ
-    '$route.query': {
-      handler() {
-        this.currentPage = 1 // reset page
-        this.fetchJobs()
-      },
-      deep: true
+    },
+    // เพิ่มฟังก์ชันสำหรับแสดงสถานะ
+    getJobStatus(job) {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const workDate = new Date(job.work_date)
+      workDate.setHours(0, 0, 0, 0)
+
+      // ดูสถานะจริงของงานก่อน
+      if (job.status === 'completed') {
+        return { text: 'เสร็จสิ้น', class: 'text-green-600 bg-green-100' }
+      }
+      if (job.status === 'cancelled') {
+        return { text: 'ยกเลิก', class: 'text-red-600 bg-red-100' }
+      }
+
+      // ตรวจสอบตามวันที่
+      if (workDate > today) {
+        return { text: 'ประกาศรับสมัคร', class: 'text-blue-600 bg-blue-100' }
+      }
+      if (workDate.getTime() === today.getTime()) {
+        return { text: 'กำลังดำเนินงาน', class: 'text-yellow-600 bg-yellow-100' }
+      }
+
+      return { text: 'เสร็จสิ้น', class: 'text-green-600 bg-green-100' }
     }
   }
 }

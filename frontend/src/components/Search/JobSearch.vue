@@ -323,7 +323,6 @@ export default {
           acc[key] = value
           return acc
         }, {})
-      console.log('Search params:', queryParams)
       this.$emit('search', queryParams)
     },
 

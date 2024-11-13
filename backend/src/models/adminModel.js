@@ -323,6 +323,7 @@ export const countUsersApproved = (searchParams = {}) => {
         where: whereClause
     });
 }
+
 // ดึงผู้ใช้ที่ถูกปฏิเสธ
 export const findRejectedUsers = (limit = 10, offset = 0, searchParams = {}) => {
     const whereClause = {

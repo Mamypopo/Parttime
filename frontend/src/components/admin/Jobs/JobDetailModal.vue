@@ -11,7 +11,7 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-black/50" />
+        <div class="fixed inset-0 bg-black/25 backdrop-blur-sm" />
       </TransitionChild>
 
       <div class="fixed inset-0 overflow-y-auto">
@@ -26,7 +26,7 @@
             leave-to="opacity-0 scale-95"
           >
             <DialogPanel
-              class="relative bg-white rounded-2xl shadow-xl w-full max-w-3xl pointer-events-auto"
+              class="relative bg-white rounded-2xl shadow-xl w-full max-w-3xl pointer-events-auto mb-20"
             >
               <!-- Header -->
               <div

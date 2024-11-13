@@ -8,10 +8,7 @@ export const useJobStore = defineStore('job', {
         jobParticipants: [],
         jobsWithParticipants: [],
         newParticipations: new Set(),
-        loading: {
-            jobs: false,
-            participants: false
-        },
+        loading: false,
         error: null,
         selectedJob: null,
         searchFilters: {
@@ -67,12 +64,32 @@ export const useJobStore = defineStore('job', {
         // ดึงข้อมูลงานทั้งหมด
         async fetchJobs() {
             this.loading = true
-            this.error = null
             try {
-                const response = await axios.get(`${this.baseURL}/api/jobs?pageSize=1000`)
-                if (response.data && Array.isArray(response.data.jobs)) {
+                // เพิ่ม headers สำหรับ authentication
+                const adminStore = useAdminStore()
+                const headers = {
+                    Authorization: `Bearer ${adminStore.token}`,
+                    'Content-Type': 'application/json'
+                }
+
+                // เพิ่ม params จาก searchFilters
+                const params = new URLSearchParams()
+                Object.entries(this.searchFilters).forEach(([key, value]) => {
+                    if (value) params.append(key, value)
+                })
+
+                // เพิ่ม pagination params
+                params.append('page', this.pagination.page)
+                params.append('pageSize', this.pagination.pageSize)
+
+                const response = await axios.get(
+                    `${this.baseURL}/api/jobs?${params.toString()}`,
+                    { headers }
+                )
+
+
+                if (response.data?.jobs) {
                     this.jobs = response.data.jobs
-                    // อัพเดทข้อมูล pagination
                     this.pagination = {
                         page: response.data.page || 1,
                         pageSize: response.data.pageSize || 10,
@@ -80,13 +97,12 @@ export const useJobStore = defineStore('job', {
                         totalPages: response.data.totalPages || 0
                     }
                 } else {
+                    console.warn('No jobs data in response:', response.data)
                     this.jobs = []
-                    console.warn('Invalid response format:', response.data)
                 }
-                // console.log('Jobs fetched:', this.jobs)
             } catch (error) {
-                this.error = 'ไม่สามารถโหลดข้อมูลงานได้'
                 console.error('Error fetching jobs:', error)
+                this.error = 'ไม่สามารถโหลดข้อมูลงานได้'
                 this.jobs = []
             } finally {
                 this.loading = false
@@ -94,72 +110,73 @@ export const useJobStore = defineStore('job', {
         },
 
         async fetchJobsAndParticipants() {
-            this.loading = true
+            this.loading = true;
+
             try {
-                const headers = this.getAuthHeaders()
-                // ใช้ searchFilters จาก state โดยตรง
-                // สร้าง query parameters จาก filters
-                const params = new URLSearchParams()
+                const headers = this.getAuthHeaders();
+                const params = new URLSearchParams();
 
-                // เพิ่มเงื่อนไขการค้นหาต่างๆ
-                if (this.searchFilters.id) params.append('id', this.searchFilters.id)
-                if (this.searchFilters.title) params.append('title', this.searchFilters.title)
-                if (this.searchFilters.location) params.append('location', this.searchFilters.location)
-                if (this.searchFilters.position) params.append('position', this.searchFilters.position)
+                // เพิ่มเงื่อนไขการค้นหาจาก searchFilters
+                if (this.searchFilters.id) params.append('id', this.searchFilters.id);
+                if (this.searchFilters.title) params.append('title', this.searchFilters.title);
+                if (this.searchFilters.location) params.append('location', this.searchFilters.location);
+                if (this.searchFilters.position) params.append('position', this.searchFilters.position);
                 if (this.searchFilters.status) params.append('status', this.searchFilters.status);
-                if (this.searchFilters.dateFrom) params.append('dateFrom', this.searchFilters.dateFrom)
-                if (this.searchFilters.dateTo) params.append('dateTo', this.searchFilters.dateTo)
-                if (this.searchFilters.minWage) params.append('minWage', this.searchFilters.minWage)
-                if (this.searchFilters.maxWage) params.append('maxWage', this.searchFilters.maxWage)
-                if (this.searchFilters.peopleCount) params.append('peopleCount', this.searchFilters.peopleCount)
+                if (this.searchFilters.dateFrom) params.append('dateFrom', this.searchFilters.dateFrom);
+                if (this.searchFilters.dateTo) params.append('dateTo', this.searchFilters.dateTo);
+                if (this.searchFilters.minWage) params.append('minWage', this.searchFilters.minWage);
+                if (this.searchFilters.maxWage) params.append('maxWage', this.searchFilters.maxWage);
+                if (this.searchFilters.peopleCount) params.append('peopleCount', this.searchFilters.peopleCount);
 
-                const queryString = params.toString()
-                const endpoint = queryString ? `?${queryString}` : ''
+                const queryString = params.toString();
+                const endpoint = queryString ? `?${queryString}` : '';
 
                 // เรียก API พร้อมกัน
                 const [jobsResponse, participantsResponse] = await Promise.all([
                     axios.get(`${this.baseURL}/api/jobs/my-created-jobs${endpoint}`, { headers }),
                     axios.get(`${this.baseURL}/api/jobs/getJobsWithParticipants`, { headers })
-                ])
+                ]);
 
-                this.jobs = []
-                // อัพเดท state
-                if (jobsResponse.data?.jobs) {
+                // ตรวจสอบว่า jobsResponse มีข้อมูลและเป็น array
+                this.jobs = Array.isArray(jobsResponse.data?.jobs) ? jobsResponse.data.jobs : [];
+
+                if (this.jobs.length > 0) {
                     // รวมข้อมูล JobParticipation และเก็บสถานะ "ใหม่"
-                    this.jobs = jobsResponse.data.jobs.map(job => {
-                        const jobWithParticipants = participantsResponse.data.data.find(p => p.id === job.id)
+                    this.jobs = this.jobs.map(job => {
+                        const jobWithParticipants = participantsResponse.data?.data?.find(p => p.id === job.id);
 
-                        // สร้าง job object ใหม่พร้อม JobParticipation
-                        const updatedJob = {
-                            ...job,
-                            JobPositions: job.JobPositions.map(position => {
-                                const participations = jobWithParticipants?.JobPositions?.find(p => p.id === position.id)?.JobParticipation || []
+                        // ตรวจสอบว่า JobPositions เป็น array
+                        const updatedJobPositions = Array.isArray(job.JobPositions)
+                            ? job.JobPositions.map(position => {
+                                const participations = jobWithParticipants?.JobPositions?.find(p => p.id === position.id)?.JobParticipation || [];
 
                                 // เก็บ ID ของการสมัครที่มีสถานะ pending เป็น "ใหม่"
                                 participations.forEach(participation => {
                                     if (participation.status === 'pending') {
-                                        this.newParticipations.add(participation.id)
+                                        this.newParticipations.add(participation.id);
                                     }
-                                })
+                                });
 
                                 return {
                                     ...position,
                                     JobParticipation: participations
-                                }
+                                };
                             })
-                        }
+                            : [];
 
-                        return updatedJob
-                    })
-
+                        return {
+                            ...job,
+                            JobPositions: updatedJobPositions
+                        };
+                    });
                 }
 
             } catch (error) {
-                console.error('Error fetching data:', error)
-                this.error = error.message
-                throw error
+                console.error('Error fetching data:', error);
+                this.error = error.message || 'ไม่สามารถโหลดข้อมูลงานได้';
+                throw error;
             } finally {
-                this.loading = false
+                this.loading = false;
             }
         },
 
@@ -218,30 +235,58 @@ export const useJobStore = defineStore('job', {
             }
         },
 
+
+        async updateWorkStatus(jobParticipationId, data) {
+            try {
+                const headers = this.getAuthHeaders();
+                await axios.put(
+                    `${this.baseURL}/api/jobs/job-participations/${jobParticipationId}/update-status`,
+                    {
+                        status: data.status,
+                        comment: data.comment || null,
+                        rating: data.rating || null
+                    },
+                    { headers }
+                );
+
+                await this.fetchJobsAndParticipants();
+
+            } catch (error) {
+                console.error('Error updating work status:', error);
+                throw new Error(error.response?.data?.message || 'ไม่สามารถอัพเดทสถานะได้');
+            }
+        },
         // เพิ่มงานใหม่
         async createJob(jobData) {
-            this.loading.jobs = true
-            this.error = null
+            this.loading = true;
+            this.error = null;
             try {
-                const adminStore = useAdminStore()
+                const adminStore = useAdminStore();
                 const response = await axios.post(`${this.baseURL}/api/jobs/create`, jobData, {
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${adminStore.token}`
                     }
-                })
+                });
 
-                if (response.status === 201) {
-                    // เพิ่มงานใหม่เข้าไปใน state
-                    this.jobs.push(response.data)
-                    this.updateJobCountsByStatus()
-                    return response.data
+                // ตรวจสอบรูปแบบของ response ก่อน
+                if (response.data && response.data.job) {
+                    // ตรวจสอบว่า this.jobs เป็น array ก่อนทำการ push
+                    if (Array.isArray(this.jobs)) {
+                        this.jobs.push(response.data.job);
+                    } else {
+                        console.error('Error: this.jobs is not an array');
+                        this.jobs = [response.data.job];
+                    }
+                } else {
+                    console.warn('Unexpected response format:', response.data);
                 }
             } catch (error) {
-                this.error = error.response?.data?.message || 'เกิดข้อผิดพลาดในการสร้างงาน'
-                throw error
+                this.error = error.response?.data?.message || 'เกิดข้อผิดพลาดในการสร้างงาน';
+                console.error('Error creating job:', error);
+                throw error;
             } finally {
-                this.loading.jobs = false
+                this.loading = false;
             }
         },
 
@@ -250,7 +295,12 @@ export const useJobStore = defineStore('job', {
         async editJob(jobId, jobData) {
             this.loading = true
             try {
-                const response = await axios.put(`${this.baseURL}/api/jobs/editJob/${jobId}`, jobData)
+                // ตรวจสอบข้อมูลก่อนส่ง
+                if (!jobData.start_time || !jobData.end_time) {
+                    throw new Error('กรุณาระบุเวลาเริ่มต้นและสิ้นสุด')
+                }
+                const headers = this.getAuthHeaders()
+                const response = await axios.put(`${this.baseURL}/api/jobs/editJob/${jobId}`, jobData, { headers })
 
                 // อัพเดท state
                 const index = this.jobs.findIndex(job => job.id === jobId)
@@ -262,19 +312,24 @@ export const useJobStore = defineStore('job', {
             } catch (error) {
                 console.error('Error editing job:', error)
                 throw error
+            } finally {
+                this.loading = false
             }
         },
 
         // ลบงาน
         async deleteJob(jobId) {
+            this.loading = true
             try {
                 await axios.delete(`${this.baseURL}/api/jobs/delete-job/${jobId}`)
                 // ลบออกจาก state
                 this.jobs = this.jobs.filter(job => job.id !== jobId)
-                this.updateJobCountsByStatus()
+
             } catch (error) {
                 console.error('Error deleting job:', error)
                 throw error
+            } finally {
+                this.loading = false
             }
         },
 
@@ -348,10 +403,7 @@ export const useJobStore = defineStore('job', {
             this.jobParticipants = []
             this.jobsWithParticipants = []
             this.newParticipations = new Set()
-            this.loading = {
-                jobs: false,
-                participants: false
-            }
+            this.loading = false
             this.error = null
             this.selectedJob = null
             this.searchFilters = {
