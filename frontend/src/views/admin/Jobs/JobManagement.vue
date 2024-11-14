@@ -113,15 +113,21 @@
                 <i class="far fa-clock w-5"></i>
                 <span>{{ formatTime(job.start_time) }} - {{ formatTime(job.end_time) }}</span>
               </div>
+
+              <!-- เปิด modal อัพเดทสถานะ -->
               <div v-if="getJobStatus(job) === 'completed'" class="mt-4">
                 <button
-                  @click="openUpdateWorkStatusModal(job)"
+                  @click="openWorkStatusModal(job)"
                   class="w-full px-4 py-2 text-sm bg-[#81E2C4] text-white rounded-lg hover:bg-opacity-80"
                 >
                   <i class="fas fa-clipboard-check mr-2"></i>
                   อัพเดทสถานะการทำงาน
+                  <span v-if="getCompletedWorkCount(job) > 0" class="ml-1">
+                    (ประเมินแล้ว {{ getCompletedWorkCount(job) }})
+                  </span>
                 </button>
               </div>
+
               <!-- Positions -->
               <div class="flex flex-wrap gap-2">
                 <span
@@ -227,10 +233,10 @@
     />
 
     <UpdateWorkStatusModal
-      v-if="showUpdateWorkStatusModal && selectedJob"
-      :show="showUpdateWorkStatusModal"
+      v-if="showWorkStatusModal"
+      :show="showWorkStatusModal"
       :job="selectedJob"
-      @close="closeUpdateWorkStatusModal"
+      @close="closeWorkStatusModal"
       @update="handleUpdateWorkStatus"
     />
   </div>
@@ -262,7 +268,7 @@ export default {
       selectedJob: null,
       showDetailsModal: false,
       showParticipantsModal: false,
-      showUpdateWorkStatusModal: false,
+      showWorkStatusModal: false,
       showEditModal: false,
       searchFilters: {
         search: '',
@@ -568,11 +574,13 @@ export default {
       this.jobStore.changePage(page)
     },
 
+    // การนับต่าง ๆ
     hasNewParticipants(job) {
       return job.JobPositions?.some((position) =>
         position.JobParticipation?.some((p) => this.jobStore.newParticipations.has(p.id))
       )
     },
+
     getPendingCount(job) {
       return (
         job.JobPositions?.reduce((count, position) => {
@@ -602,42 +610,53 @@ export default {
         }, 0) || 0
       )
     },
-    openUpdateWorkStatusModal(job) {
-      this.selectedJob = job
-      this.showUpdateWorkStatusModal = true
+    // เพิ่มเมธอดสำหรับนับจำนวนคนที่ได้รับการประเมินแล้ว
+    getCompletedWorkCount(job) {
+      return (
+        job.JobPositions?.reduce((count, position) => {
+          return (
+            count +
+            (position.JobParticipation?.filter((p) => p.status === 'approved' && p.work_status)
+              .length || 0)
+          )
+        }, 0) || 0
+      )
     },
 
-    closeUpdateWorkStatusModal() {
-      this.showUpdateWorkStatusModal = false
+    openWorkStatusModal(job) {
+      this.selectedJob = job
+      this.showWorkStatusModal = true
+    },
+
+    closeWorkStatusModal() {
+      this.showWorkStatusModal = false
       this.selectedJob = null
     },
 
-    async handleUpdateWorkStatus({ participationId, status, rating, comment }) {
+    async handleUpdateWorkStatus(data) {
       try {
-        await this.jobStore.updateWorkStatus(participationId, {
-          status,
-          rating,
-          comment
+        await this.jobStore.updateWorkStatus(data.participationId, {
+          rating: data.rating,
+          comment: data.comment
         })
+
+        this.closeWorkStatusModal()
         Swal.fire({
           icon: 'success',
-          title: 'อัพเดทสถานะสำเร็จ',
+          title: 'บันทึกการประเมินสำเร็จ',
           showConfirmButton: false,
           timer: 1500
         })
-
-        // รีโหลดข้อมูล
-        await this.loadJobs()
-        this.closeUpdateWorkStatusModal()
       } catch (error) {
         Swal.fire({
           icon: 'error',
           title: 'เกิดข้อผิดพลาด',
-          text: error.message || 'ไม่สามารถอัพเดทสถานะได้',
+          text: error.message || 'ไม่สามารถบันทึกการประเมินได้',
           confirmButtonText: 'ตกลง'
         })
       }
     },
+
     openParticipantsModal(job) {
       // เมื่อเปิดดูรายชื่อ ให้ mark ทุกคนในงานนี้เป็น viewed
       job.JobPositions?.forEach((position) => {

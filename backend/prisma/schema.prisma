@@ -109,13 +109,12 @@ model WorkHistory {
   id                 Int              @id @default(autoincrement())
   jobParticipation   JobParticipation @relation(fields: [jobParticipationId], references: [id])
   jobParticipationId Int              @unique
-  work_status        String // successful, needs_improvement, failed
   comment            String? // ความคิดเห็นเพิ่มเติม (ถ้ามี)
   rating             Int? // คะแนนการประเมิน (เช่น 0-100)
   created_at         DateTime         @default(now()) @db.Timestamptz
   updated_at         DateTime         @updatedAt @db.Timestamptz
 
-  @@index([jobParticipationId, work_status])
+  @@map("work_histories")
 }
 
 model Log {

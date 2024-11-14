@@ -113,9 +113,9 @@ export const approveJobParticipation = async (req, res) => {
 };
 
 
-// ฟังก์ชันอัปเดตสถานะการสมัครงานเมื่อเสร็จสิ้น
-export const updateApplicationStatus = async (req, res) => {
-    const { status, comment, rating } = req.body;
+// ฟังก์ชันให้คะแนนการทำงานเมื่อเสร็จสิ้น
+export const updateWorkHistory = async (req, res) => {
+    const { comment, rating } = req.body;
     const jobParticipationId = parseInt(req.params.jobParticipationId);
     const adminId = req.user?.role === 'admin' ? req.user.id : null;
 
@@ -123,9 +123,9 @@ export const updateApplicationStatus = async (req, res) => {
         return res.status(403).json({ message: 'คุณไม่มีสิทธิ์ในการดำเนินการนี้' });
     }
 
-    // if (!jobParticipationId || !['successful', 'needs_improvement', 'failed'].includes(status)) {
-    //     return res.status(400).json({ message: 'กรุณาระบุ Job participation ID และสถานะที่ถูกต้อง' });
-    // }
+    if (!rating || rating < 1 || rating > 5) {
+        return res.status(400).json({ message: 'กรุณาระบุคะแนนระหว่าง 1-5' });
+    }
 
     try {
         // ตรวจสอบว่ามี WorkHistory อยู่แล้วหรือไม่
@@ -143,75 +143,60 @@ export const updateApplicationStatus = async (req, res) => {
 
         const job = await jobModel.getJobById(currentJobParticipation.jobId);
         if (!job || job.created_by !== adminId) {
-            return res.status(403).json({ message: 'คุณไม่มีสิทธิ์ในการอัปเดตสถานะงานนี้' });
+            return res.status(403).json({ message: 'คุณไม่มีสิทธิ์ในการประเมินงานนี้' });
         }
 
         // สร้าง WorkHistory
         const workHistory = await workHistoryModel.createWorkHistory({
             jobParticipationId,
-            work_status: status,
             comment: comment || null,
-            rating: rating || null
+            rating
         });
-
-
-        // อัพเดทสถานะใน JobParticipation เป็น completed
-        await jobParticipationModel.updateJobParticipationStatus(jobParticipationId, 'completed');
 
         // สร้างการแจ้งเตือน
         const jobPosition = await jobModel.findJobPositionById(currentJobParticipation.job_position_id);
         const positionName = jobPosition?.position_name || 'ไม่ระบุตำแหน่ง';
 
-
-        const notificationMessages = {
-            successful: `ยินดีด้วย! คุณได้ทำงาน "${job.title}" (${positionName}) เสร็จสมบูรณ์แล้ว`,
-            needs_improvement: `งาน "${job.title}" (${positionName}) ของคุณต้องการการปรับปรุง`,
-            failed: `ขออภัย งาน "${job.title}" (${positionName}) ของคุณไม่ผ่านการประเมิน`
-        };
-
-        const notificationMessage = notificationMessages[status];
+        const notificationMessage = `งาน "${job.title}" (${positionName}) ได้รับการประเมินแล้ว คุณได้ ${rating} คะแนน`;
 
         await Promise.all([
-            notificationModel.createUserNotification({
-                userId: currentJobParticipation.user_id,
-                message: notificationMessage[status],
-                type: 'JOB_COMPLETION_STATUS',
-                jobId: job.id
-            }),
-            createLog({
-                userId: currentJobParticipation?.user_id,
+            notificationModel.createUserNotification(
+                currentJobParticipation.user_id,
+                notificationMessage
+            ),
+            createLog(
+                currentJobParticipation.user_id,
                 adminId,
-                action: 'Update Job Status',
-                requestUrl: '/api/jobs/update-status',
-                method: 'PUT',
-                details: `Job: ${job.title} (${positionName}) completed with status: ${status}`,
-                ipAddress: req.ip || 'Unknown IP',
-                userAgent: req.headers['user-agent'] || 'Unknown User Agent'
-            })
+                'Job Evaluation',
+                '/api/jobs/participation/evaluate',
+                'POST',
+                `Job: ${job.title} (${positionName}) evaluated with rating: ${rating}`,
+                req.ip || 'Unknown IP',
+                req.headers['user-agent'] || 'Unknown User Agent'
+            )
         ]);
 
         res.status(200).json({
-            message: `บันทึกผลการทำงานสำเร็จ`,
+            message: 'บันทึกการประเมินสำเร็จ',
             data: workHistory
         });
 
     } catch (error) {
-        console.error('เกิดข้อผิดพลาดในการอัปเดตสถานะงาน:', error);
+        console.error('เกิดข้อผิดพลาดในการประเมินงาน:', error);
 
-        // await createLog({
-        //     req.user?.id,
-        //     adminId,
-        //     action: 'Update Job Status Failed',
-        //     requestUrl: req.originalUrl,
-        //     method: 'PUT',
-        //     details: `Error updating job status: ${error.message}`,
-        //     ipAddress: req.ip || 'Unknown IP',
-        //     userAgent: req.headers['user-agent'] || 'Unknown User Agent'
-        // });
-
+        await createLog(
+            req.user?.id || null,
+            adminId,
+            'Job Evaluation Failed',
+            req.originalUrl,
+            'POST',
+            `Error evaluating job: ${error.message}`,
+            req.ip || 'Unknown IP',
+            req.headers['user-agent'] || 'Unknown User Agent'
+        );
 
         res.status(500).json({
-            message: 'เกิดข้อผิดพลาดในการบันทึกผลการทำงาน',
+            message: 'เกิดข้อผิดพลาดในการบันทึกการประเมิน',
             error: error.message
         });
     }

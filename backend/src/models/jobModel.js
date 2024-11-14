@@ -246,9 +246,18 @@ export const getJobById = (jobId) =>
                             wage: true
                         }
                     },
+                    workHistories: {
+                        select: {
+                            id: true,
+                            rating: true,
+                            comment: true,
+                            created_at: true
+                        }
+                    },
                     status: true,
                     updated_at: true
                 },
+
                 orderBy: {
                     created_at: 'desc'
                 }

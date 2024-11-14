@@ -6,7 +6,6 @@ export const createWorkHistory = async (data) => {
     return prisma.workHistory.create({
         data: {
             jobParticipationId: data.jobParticipationId,
-            work_status: data.work_status,
             comment: data.comment || null,
             rating: data.rating || null
         },

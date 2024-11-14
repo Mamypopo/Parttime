@@ -141,25 +141,29 @@ export const useJobStore = defineStore('job', {
                 this.jobs = Array.isArray(jobsResponse.data?.jobs) ? jobsResponse.data.jobs : [];
 
                 if (this.jobs.length > 0) {
-                    // รวมข้อมูล JobParticipation และเก็บสถานะ "ใหม่"
                     this.jobs = this.jobs.map(job => {
                         const jobWithParticipants = participantsResponse.data?.data?.find(p => p.id === job.id);
 
-                        // ตรวจสอบว่า JobPositions เป็น array
                         const updatedJobPositions = Array.isArray(job.JobPositions)
                             ? job.JobPositions.map(position => {
                                 const participations = jobWithParticipants?.JobPositions?.find(p => p.id === position.id)?.JobParticipation || [];
 
-                                // เก็บ ID ของการสมัครที่มีสถานะ pending เป็น "ใหม่"
-                                participations.forEach(participation => {
+                                // อัพเดทให้รวม workHistories
+                                const updatedParticipations = participations.map(participation => {
+                                    // เก็บ ID ของการสมัครที่มีสถานะ pending เป็น "ใหม่"
                                     if (participation.status === 'pending') {
                                         this.newParticipations.add(participation.id);
                                     }
+
+                                    return {
+                                        ...participation,
+                                        workHistories: participation.workHistories || []
+                                    };
                                 });
 
                                 return {
                                     ...position,
-                                    JobParticipation: participations
+                                    JobParticipation: updatedParticipations
                                 };
                             })
                             : [];
@@ -170,7 +174,6 @@ export const useJobStore = defineStore('job', {
                         };
                     });
                 }
-
             } catch (error) {
                 console.error('Error fetching data:', error);
                 this.error = error.message || 'ไม่สามารถโหลดข้อมูลงานได้';
@@ -240,11 +243,10 @@ export const useJobStore = defineStore('job', {
             try {
                 const headers = this.getAuthHeaders();
                 await axios.put(
-                    `${this.baseURL}/api/jobs/job-participations/${jobParticipationId}/update-status`,
+                    `${this.baseURL}/api/jobs/participations/${jobParticipationId}/evaluate`,
                     {
-                        status: data.status,
-                        comment: data.comment || null,
-                        rating: data.rating || null
+                        rating: data.rating,
+                        comment: data.comment || ''
                     },
                     { headers }
                 );
@@ -256,6 +258,8 @@ export const useJobStore = defineStore('job', {
                 throw new Error(error.response?.data?.message || 'ไม่สามารถอัพเดทสถานะได้');
             }
         },
+
+
         // เพิ่มงานใหม่
         async createJob(jobData) {
             this.loading = true;
@@ -397,6 +401,7 @@ export const useJobStore = defineStore('job', {
         markAsViewed(participationId) {
             this.newParticipations.delete(participationId)
         },
+
         resetStore() {
             // Reset all state to initial values
             this.jobs = []
@@ -418,6 +423,7 @@ export const useJobStore = defineStore('job', {
                 totalPages: 0
             }
         },
+
         updateSearchFilters(filters) {
             this.searchFilters = { ...filters }
         },

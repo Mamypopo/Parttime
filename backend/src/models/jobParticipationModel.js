@@ -12,7 +12,7 @@ export const findJobParticipationById = (jobParticipationId) =>
         }
     });
 
-
+// อัพเดทสถานะ JobParticipation เป็น approved
 export const updateJobParticipationStatus = async (jobParticipationId, status) => {
     try {
         return await prisma.jobParticipation.update({
@@ -70,6 +70,19 @@ export const getJobsWithParticipants = async (adminId) => {
                                         phone_number: true,
                                         profile_image: true
                                     }
+                                },
+
+                                workHistories: {
+                                    select: {
+                                        id: true,
+                                        rating: true,
+                                        comment: true,
+                                        created_at: true
+                                    },
+                                    orderBy: {
+                                        created_at: 'desc'
+                                    },
+                                    take: 1 // เอาแค่อันล่าสุด
                                 }
                             }
                         }
