@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
+// สร้าง users
 export const createUser = async (userData) => {
     const { password, ...otherData } = userData;
     // ตรวจสอบว่ามีรหัสผ่านหรือไม่
@@ -20,7 +21,7 @@ export const createUser = async (userData) => {
     });
 };
 
-
+// เช็ค password
 export const verifyPassword = (password, hashedPassword) =>
     bcrypt.compare(password, hashedPassword);
 
@@ -34,6 +35,9 @@ export const verifyUserEmail = (email) =>
             verification_token: null
         },
     });
+
+
+// อัพเดทข้อมูล user
 export const updateUser = async (userId, userData) => {
     try {
         return await prisma.user.update({
@@ -46,6 +50,7 @@ export const updateUser = async (userId, userData) => {
     }
 };
 
+// ฟังชั่นตรวจว่ามีอีเมลและเลขบัตรประชาชนในระบบหรือยัง
 export const checkExistingUser = (email, national_id) =>
     prisma.user.findFirst({
         where: {
@@ -91,7 +96,6 @@ const createSelectObject = (fields) => {
 };
 
 
-
 // ฟังก์ชันนับจำนวนผู้ใช้ทั้งหมด
 export const getTotalUsersCount = () => prisma.user.count();
 
@@ -102,9 +106,14 @@ export const getUserJobHistory = (userId, limit = 10, offset = 0) =>
     prisma.jobParticipation.findMany({
         where: {
             user_id: parseInt(userId),
+            // เงื่อนไขให้ดึงเฉพาะงานที่เสร็จสิ้นแล้ว
+            status: 'approved',
+            workHistories: {
+                some: {} // มีประวัติการทำงาน
+            }
         },
         select: {
-            status: true,
+            id: true,
             created_at: true,
             updated_at: true,
             jobPosition: {
@@ -120,6 +129,18 @@ export const getUserJobHistory = (userId, limit = 10, offset = 0) =>
                     },
                 },
             },
+
+            workHistories: {
+                select: {
+                    rating: true,
+                    comment: true,
+                    created_at: true
+                },
+                orderBy: {
+                    created_at: 'desc'
+                },
+                take: 1 // เอาเฉพาะการประเมินล่าสุด
+            }
         },
         orderBy: {
             created_at: 'desc',
@@ -128,11 +149,15 @@ export const getUserJobHistory = (userId, limit = 10, offset = 0) =>
         skip: parseInt(offset),
     });
 
-
+// query ให้นับเฉพาะงานที่มีการประเมิน
 export const getTotalJobHistoryCount = (userId) =>
     prisma.jobParticipation.count({
         where: {
             user_id: parseInt(userId),
+            status: 'approved',
+            workHistories: {
+                some: {} // มีประวัติการทำงาน
+            }
         },
     });
 

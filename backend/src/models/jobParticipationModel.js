@@ -50,6 +50,8 @@ export const getParticipationById = async (participationId) => {
     });
 };
 
+
+// ฟังก์ชันดึงงานที่มีผู้ใช้งานสมัครเข้ามาเพื่อรออนุมัติ
 export const getJobsWithParticipants = async (adminId) => {
     try {
         const jobs = await prisma.job.findMany({

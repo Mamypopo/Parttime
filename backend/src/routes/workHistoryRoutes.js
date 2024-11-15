@@ -1,16 +1,15 @@
 import express from 'express';
 import { authMiddleware } from '../middleware/authMiddleware.js';
-import {
-    getUserWorkHistory,
-    getWorkHistoryByParticipationId
-} from '../controllers/workHistoryController.js';
+import * as workHistoryController from '../controllers/workHistoryController.js';
 
 const router = express.Router();
 
+
+router.use(authMiddleware);
 // ดึงประวัติการทำงานทั้งหมดของผู้ใช้
-router.get('/user/:userId', authMiddleware, getUserWorkHistory);
+router.get('/user/:userId', workHistoryController.getUserWorkHistory);
 
 // ดึงประวัติการทำงานตาม participation ID
-router.get('/participation/:participationId', authMiddleware, getWorkHistoryByParticipationId);
+router.get('/participation/:participationId', workHistoryController.getWorkHistoryByParticipationId);
 
 export default router;

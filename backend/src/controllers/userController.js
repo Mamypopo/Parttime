@@ -236,7 +236,7 @@ export const loginUser = async (req, res) => {
 
 export const updateUserProfile = async (req, res) => {
     try {
-        const userId = req.user.id; // สมมติว่าเรามี middleware ที่เก็บข้อมูลผู้ใช้ใน req.user
+        const userId = req.user.id;
         const {
             first_name, last_name,
             phone_number, line_id
@@ -267,7 +267,7 @@ export const updateUserProfile = async (req, res) => {
 
         // ลบไฟล์เอกสารเก่า ถ้ามีการอัปโหลดเอกสารใหม่
         if (newUserDocumentsPaths.length && existingUser.user_documents) {
-            const oldUserDocumentsPaths = JSON.parse(existingUser.user_documents); // Assume it's stored as JSON array
+            const oldUserDocumentsPaths = JSON.parse(existingUser.user_documents);
             oldUserDocumentsPaths.forEach((docPath) => {
                 const fullOldDocumentPath = path.join(uploadBasePath, 'documents', docPath);
                 fileUploadUtils.deleteFile(fullOldDocumentPath); // ลบไฟล์เอกสารเก่า
@@ -531,67 +531,3 @@ export const getProfileImage = (req, res) => {
 };
 
 
-export const getUserJobStats = async (req, res) => {
-    try {
-        const userId = req.user.id;
-
-        // ตรวจสอบว่ามีผู้ใช้อยู่จริง
-        const user = await userModel.getUserById(userId);
-        if (!user) {
-            return res.status(404).json({ message: "ไม่พบข้อมูลผู้ใช้" });
-        }
-
-        // ดึงสถิติทั้งหมด
-        const jobStats = await userModel.getUserJobStatistics(userId);
-
-        // ดึงสถิติรายเดือนของปีปัจจุบัน
-        const currentYear = new Date().getFullYear();
-        const monthlyStats = await userModel.getMonthlyJobStats(userId, currentYear);
-
-        // รวมข้อมูลทั้งหมด
-        const response = {
-            overall_stats: jobStats,
-            monthly_stats: monthlyStats,
-            user_info: {
-                name: `${user.first_name} ${user.last_name}`,
-                email: user.email
-            }
-        };
-
-        res.status(200).json(response);
-
-    } catch (error) {
-        console.error('เกิดข้อผิดพลาดในการดึงสถิติงาน:', error);
-        res.status(500).json({
-            message: "เกิดข้อผิดพลาดในการดึงสถิติงาน กรุณาลองใหม่อีกครั้ง",
-            error: error.message
-        });
-    }
-};
-
-// เพิ่มฟังก์ชันสำหรับดึงสถิติรายเดือน
-export const getMonthlyStats = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const year = parseInt(req.query.year) || new Date().getFullYear();
-
-        const user = await userModel.getUserById(userId);
-        if (!user) {
-            return res.status(404).json({ message: "ไม่พบข้อมูลผู้ใช้" });
-        }
-
-        const monthlyStats = await userModel.getMonthlyJobStats(userId, year);
-
-        res.status(200).json({
-            year,
-            monthly_stats: monthlyStats
-        });
-
-    } catch (error) {
-        console.error('เกิดข้อผิดพลาดในการดึงสถิติรายเดือน:', error);
-        res.status(500).json({
-            message: "เกิดข้อผิดพลาดในการดึงสถิติรายเดือน กรุณาลองใหม่อีกครั้ง",
-            error: error.message
-        });
-    }
-};

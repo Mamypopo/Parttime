@@ -1,3 +1,4 @@
+// ฟังชั่นคำนวนอายุ
 export const calculateAge = (birthDate) => {
     const today = new Date();
     const birth = new Date(birthDate);

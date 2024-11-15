@@ -67,7 +67,7 @@ export const upload = multer({
 export const deleteFile = (filePath) => {
     if (fs.existsSync(filePath)) {
         try {
-            fs.unlinkSync(filePath); // ลบไฟล์อย่างซิงค์ (หรือใช้ fs.unlink สำหรับแบบแอสิงค์)
+            fs.unlinkSync(filePath);
             console.log(`ลบไฟล์ ${filePath} สำเร็จ`);
         } catch (error) {
             console.error(`เกิดข้อผิดพลาดในการลบไฟล์ ${filePath}:`, error);

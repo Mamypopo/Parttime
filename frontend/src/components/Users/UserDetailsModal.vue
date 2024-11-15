@@ -1,6 +1,6 @@
 <template>
   <TransitionRoot appear :show="isOpen" as="template">
-    <HeadlessDialog as="div" @close="closeModal" class="relative z-50">
+    <HeadlessDialog as="div" @close="closeModal" class="relative modal">
       <!-- Backdrop -->
       <TransitionChild
         enter="duration-300 ease-out"
@@ -10,7 +10,7 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-black/25" @click="closeModal" />
+        <div class="fixed inset-0 bg-black/25 backdrop-blur-sm" @click="closeModal" />
       </TransitionChild>
 
       <!-- Modal Container -->

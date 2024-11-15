@@ -1,6 +1,6 @@
 <template>
   <TransitionRoot appear :show="isOpen" as="template">
-    <HeadlessDialog as="div" @close="closeModal" class="relative z-50">
+    <HeadlessDialog as="div" @close="closeModal" class="relative modal">
       <!-- Backdrop -->
       <TransitionChild
         enter="duration-300 ease-out"
@@ -27,7 +27,7 @@
             <HeadlessDialogPanel class="w-[80%] max-w-md h-full bg-white shadow-xl relative">
               <!-- Header -->
               <div
-                class="sticky top-0 z-10 flex justify-between items-center p-4 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] border-b"
+                class="sticky top-0 modal flex justify-between items-center p-4 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] border-b"
               >
                 <HeadlessDialogTitle class="text-base font-medium text-[#EA6B6B]">
                   การแจ้งเตือนทั้งหมด

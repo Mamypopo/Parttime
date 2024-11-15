@@ -5,7 +5,7 @@ export const getUserWorkHistory = async (req, res) => {
     const userId = parseInt(req.params.userId);
 
     try {
-        // ตรวจสอบสิทธิ์ (ดูได้เฉพาะเจ้าของหรือ admin)
+        // ตรวจสอบสิทธิ์ 
         if (req.user.role !== 'admin' && req.user.id !== userId) {
             return res.status(403).json({
                 message: 'คุณไม่มีสิทธิ์ดูข้อมูลนี้'

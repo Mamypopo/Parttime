@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6 ml-5">
+  <div class="p-6">
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
       <div class="bg-white rounded-lg p-4 shadow-sm">
@@ -23,8 +23,8 @@
     <!-- Main Content -->
     <div class="bg-white rounded-lg shadow-sm">
       <!-- Header -->
-      <div class="p-6 border-b">
-        <div class="flex justify-between items-center">
+      <div class="p-5 border-b">
+        <div class="flex justify-between items-center overflow-hidden">
           <h2 class="text-xl font-semibold text-gray-800">จัดการงาน</h2>
           <JobSearch @search="handleSearch" @clear="handleClear" />
         </div>
@@ -49,11 +49,11 @@
             v-else
             v-for="job in jobs"
             :key="job.id"
-            class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 border"
+            class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 border overflow-hidden"
           >
             <!-- Card Header -->
             <div class="p-4 border-b">
-              <div class="flex justify-between items-start">
+              <div class="flex justify-between items-start flex-wrap sm:flex-nowrap">
                 <div>
                   <h3 class="font-medium text-gray-900">{{ job.title }}</h3>
                   <p class="text-sm text-gray-500 mt-1">
@@ -158,14 +158,6 @@
                     <i class="fas fa-user-check text-green-500"></i>
                     อนุมัติแล้ว: {{ getApprovedCount(job) }}
                   </span>
-                  <!-- เพิ่มปุ่มจัดการผู้สมัคร -->
-                  <button
-                    v-if="getPendingCount(job) > 0"
-                    @click="openParticipantsModal(job)"
-                    class="ml-2 px-3 py-1 text-sm bg-[#7BC4C4] text-white rounded-lg hover:bg-[#5DA3A3]"
-                  >
-                    จัดการผู้สมัคร
-                  </button>
                 </div>
               </div>
 
@@ -190,13 +182,25 @@
                     </span>
                   </div>
                   <button
-                    v-if="job.JobParticipation?.length"
                     @click="openParticipantsModal(job)"
-                    class="ml-3 text-sm text-[#7BC4C4] hover:text-[#5DA3A3]"
+                    class="ml-3 text-sm"
+                    :class="[
+                      getPendingCount(job) > 0
+                        ? 'bg-[#7BC4C4] text-white px-3 py-1 rounded-lg hover:bg-[#5DA3A3]'
+                        : 'text-[#7BC4C4] hover:text-[#5DA3A3]'
+                    ]"
                   >
-                    ดูทั้งหมด
+                    <template v-if="getPendingCount(job) > 0">
+                      จัดการผู้สมัคร ({{ getPendingCount(job) }})
+                    </template>
+                    <template v-else-if="job.JobParticipation?.length">
+                      ดูผู้สมัครทั้งหมด ({{ job.JobParticipation.length }})
+                    </template>
+                    <template v-else>
+                      <i class="fas fa-user-plus mr-2"></i>
+                      ยังไม่มีผู้สมัคร
+                    </template>
                   </button>
-                  <span v-else class="text-sm text-gray-400">ยังไม่มีผู้เข้าร่วม</span>
                 </div>
                 <div class="text-right">
                   <p class="text-[#6ED7D1] font-medium">

@@ -28,6 +28,7 @@ export const createJob = async (jobData, adminId) => {
     });
 };
 
+// ดึงงานทั้งหมด
 export const getAllJobs = async (page = 1, pageSize = 20, filters = {}) => {
     const skip = (page - 1) * pageSize;
 
@@ -128,11 +129,11 @@ export const getAllJobs = async (page = 1, pageSize = 20, filters = {}) => {
     });
 };
 
-// เพิ่มฟังก์ชันสำหรับนับจำนวนงานทั้งหมดที่ตรงกับ filters
+// ฟังก์ชันสำหรับนับจำนวนงานทั้งหมดที่ตรงกับ filters
 export const getJobsCount = async (filters = {}) => {
     const where = {};
 
-    // เพิ่มเงื่อนไขการค้นหาตาม filters
+    // เงื่อนไขการค้นหาตาม filters
     if (filters.id) {
         where.id = parseInt(filters.id);
     }
@@ -170,7 +171,7 @@ export const getJobsCount = async (filters = {}) => {
     // ค้นหาใน JobPositions
     if (filters.position_name || filters.wage || filters.required_people || filters.status) {
         where.JobPositions = {
-            some: {} // ใช้ some เพื่อค้นหาใน relation
+            some: {}
         };
 
         if (filters.position_name) {
@@ -196,7 +197,7 @@ export const getJobsCount = async (filters = {}) => {
     return prisma.job.count({ where });
 };
 
-
+// ดึง jobId เพื่ออัพเดท
 export const getJobByIdforUpdate = (jobId) =>
     prisma.job.findUnique({
         where: { id: jobId },
@@ -361,7 +362,7 @@ export const getMyCreatedJobs = async (page = 1, pageSize = 10, filters = {}) =>
                     status: true,
                 }
             },
-            // แยก JobParticipation ออกมาเป็น field แยก
+
             JobParticipation: {
                 where: {
                     status: 'approved'  // ดึงเฉพาะที่อนุมัติแล้ว
@@ -376,7 +377,7 @@ export const getMyCreatedJobs = async (page = 1, pageSize = 10, filters = {}) =>
                             first_name: true,
                             last_name: true,
                             email: true,
-                            profile_image: true  // เพิ่ม profile_image
+                            profile_image: true
                         }
                     }
                 }
@@ -397,7 +398,7 @@ export const getMyCreatedJobsCount = async (adminId, filters = {}) => {
         ]
     };
 
-    // เพิ่มเงื่อนไขการค้นหาตาม filters
+    // เงื่อนไขการค้นหาตาม filters
     if (filters.title) {
         where.AND.push({
             title: { contains: filters.title, mode: 'insensitive' }
@@ -459,6 +460,8 @@ export const getMyCreatedJobsCount = async (adminId, filters = {}) => {
     return prisma.job.count({ where });
 };
 
+
+
 // ฟังก์ชันสำหรับอัปเดตงาน
 export const updateJobMain = (jobId, jobData) =>
     prisma.job.update({
@@ -476,7 +479,7 @@ export const updateJobMain = (jobId, jobData) =>
         }
     });
 
-
+// อัปเดตตำแหน่งงาน
 export const updateJobPosition = (positionId, positionData) =>
     prisma.jobPosition.update({
         where: { id: positionId },
@@ -488,7 +491,7 @@ export const updateJobPosition = (positionId, positionData) =>
         }
     });
 
-
+// สร้างตำแหน่งใหม่
 export const createJobPosition = (jobId, positionData) =>
     prisma.jobPosition.create({
         data: {
@@ -500,16 +503,18 @@ export const createJobPosition = (jobId, positionData) =>
         }
     });
 
-
+// ลบตำแหน่ง
 export const deleteJobPosition = (positionId) =>
     prisma.jobPosition.delete({
         where: { id: positionId }
     });
 
+
 export const getJobParticipations = (positionId) =>
     prisma.jobParticipation.findMany({
         where: { job_position_id: positionId }
     });
+
 
 export const getJobApplicants = async (jobId) => {
     const applicants = await prisma.jobParticipation.findMany({
@@ -582,8 +587,6 @@ export const findExistingDayApplication = (userId) => {
 
 
 
-
-
 // ฟังก์ชันเพื่ออัปเดตจำนวนคนที่เหลือใน JobPosition พร้อมอัปเดตสถานะ
 export const decreaseJobPositionSlots = (jobPositionId, remainingSlots) =>
     prisma.jobPosition.update({
@@ -601,6 +604,7 @@ export const findJobPositionById = (jobPositionId) =>
         include: { job: true }
     });
 
+// ฟังชั่นเช็คสกิลของผู้ใช้ว่าตรงกับงานหรือไม่
 export const checkUserSkillsMatch = async (userId, jobPositionId) => {
     // ดึงข้อมูล skills ของผู้ใช้
     const user = await prisma.user.findUnique({
@@ -629,6 +633,10 @@ export const checkUserSkillsMatch = async (userId, jobPositionId) => {
     );
 };
 
+
+
+
+// ฟังชั่นอัพเดทสถานะงาน
 export const getAllJobsForStatusUpdate = async () => {
     try {
         const jobs = await prisma.job.findMany({
@@ -660,6 +668,7 @@ export const getAllJobsForStatusUpdate = async () => {
     }
 };
 
+// ฟังชั่นอัพเดทสถานะงาน
 export const updateJobStatus = async (jobId, status) => {
     try {
         const updatedJob = await prisma.job.update({

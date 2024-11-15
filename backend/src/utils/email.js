@@ -28,7 +28,7 @@ import nodemailer from 'nodemailer';
 export const sendVerificationEmail = async (user, token) => {
     // สร้างบัญชีชั่วคราวสำหรับทดสอบ
     let testAccount = await nodemailer.createTestAccount();
-    console.log(testAccount);  // พิมพ์ข้อมูลบัญชีชั่วคราวออกมาเพื่อให้คุณตรวจสอบ
+    console.log(testAccount);
 
     const transporter = nodemailer.createTransport({
         host: 'smtp.ethereal.email',

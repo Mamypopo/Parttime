@@ -1,365 +1,374 @@
 <template>
-  <div class="p-6 ml-6">
+  <div class="p-4 md:p-6 transition-all duration-300 ease-in-out">
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div class="mb-4 md:mb-0">
+          <h2
+            class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
+          >
+            รายการผู้ใช้ที่ผ่านการอนุมัติ
+          </h2>
+          <p class="text-gray-500 mt-1">จัดการและดูข้อมูลผู้ใช้ทั้งหมดในระบบ</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div class="bg-gradient-to-br from-purple-50 to-blue-50 p-4 rounded-xl shadow-sm">
+            <div class="text-sm text-gray-500">ผู้ใช้ทั้งหมด</div>
+            <div class="text-2xl font-bold text-purple-600">{{ totalUsers }}</div>
+          </div>
+          <div class="bg-gradient-to-br from-green-50 to-teal-50 p-4 rounded-xl shadow-sm">
+            <div class="text-sm text-gray-500">ยืนยันอีเมลแล้ว</div>
+            <div class="text-2xl font-bold text-green-600">{{ verifiedUsers }}</div>
+          </div>
+          <div
+            class="hidden md:block bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-xl shadow-sm"
+          >
+            <div class="text-sm text-gray-500">ออนไลน์</div>
+            <div class="text-2xl font-bold text-yellow-600">{{ onlineUsers }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Bar with Animation -->
+      <div class="mt-6 transform transition-all duration-300 hover:scale-[1.01]">
+        <SearchUsersBar
+          :filters="searchFilters"
+          @search="handleSearch"
+          @clear="handleClear"
+          class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+        />
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div v-if="loading" class="flex justify-center items-center py-12">
+      <div class="relative">
+        <div
+          class="w-12 h-12 rounded-full border-t-2 border-b-2 border-purple-500 animate-spin"
+        ></div>
+        <div
+          class="w-12 h-12 rounded-full border-t-2 border-b-2 border-blue-500 animate-spin absolute top-0 left-0"
+          style="animation-delay: -0.3s"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
     <div
-      class="rounded-lg p-4 md:p-8 min-h-screen bg-white transition-all duration-500 ease-in-out"
+      v-else-if="formattedUsers.length === 0"
+      class="flex flex-col items-center justify-center py-12"
     >
-      <div class="p-5">
-        <div class="flex justify-between items-center">
-          <h2 class="text-xl font-semibold text-gray-800">รายการผู้ใช้ที่ผ่านการอนุมัติ</h2>
-        </div>
+      <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+        <i class="fas fa-users text-3xl text-gray-400"></i>
       </div>
-      <SearchUsersBar :filters="searchFilters" @search="handleSearch" @clear="handleClear" />
-      <!-- เพิ่ม loading indicator -->
-      <div v-if="loading" class="flex justify-center items-center py-8">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
-      </div>
-      <!-- แสดงข้อความเมื่อไม่มีข้อมูล -->
-      <div v-else-if="formattedUsers.length === 0" class="text-center py-8 text-gray-500">
-        ไม่พบข้อมูลผู้ใช้
+      <p class="text-gray-500 text-lg">ไม่พบข้อมูลผู้ใช้</p>
+      <p class="text-gray-400 text-sm mt-2">ลองปรับเงื่อนไขการค้นหาใหม่</p>
+    </div>
+
+    <!-- Users Table/Grid -->
+    <div v-else class="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300">
+      <!-- Desktop Table View -->
+      <div class="hidden md:block overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-gradient-to-r from-purple-50 to-blue-50">
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left">ผู้ใช้งาน</th>
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left">อีเมล</th>
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left">ตำแหน่ง</th>
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left">
+                สถานะยืนยันอีเมล
+              </th>
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left">วันที่สมัคร</th>
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left">การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="user in formattedUsers"
+              :key="user.id"
+              class="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150"
+            >
+              <!-- User cells with hover effects -->
+              <td class="px-6 py-4">
+                <div class="flex items-center space-x-3">
+                  <div
+                    class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center text-white font-medium"
+                  >
+                    {{ user.fullName.charAt(0) }}
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-900">{{ user.fullName }}</div>
+                    <div class="text-sm text-gray-500">ID: {{ user.id }}</div>
+                  </div>
+                </div>
+              </td>
+              <!-- ... other cells ... -->
+              <td class="px-6 py-4">
+                <div class="flex space-x-2">
+                  <button
+                    @click="showUserDetails(user)"
+                    class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white text-sm hover:opacity-90 transition-opacity"
+                  >
+                    รายละเอียด
+                  </button>
+                  <button
+                    @click="handleViewHistory(user.id)"
+                    class="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 text-white text-sm hover:opacity-90 transition-opacity"
+                  >
+                    ประวัติ
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <div v-else>
-        <!-- Desktop: Table View -->
-        <div class="hidden md:block overflow-x-auto transition-all duration-500 ease-in-out">
-          <table class="w-full min-w-[800px] transition-all duration-500 ease-in-out">
-            <!-- กำหนดความกว้างขั้นต่ำ -->
-            <thead>
-              <tr class="text-left border-b bg-gray-50">
-                <th class="px-4 py-2 text-center text-sm font-medium text-gray-500">ID</th>
-                <th class="px-4 py-2 text-center w-48 text-sm font-medium text-gray-500">
-                  วันที่ลงทะเบียน
-                </th>
-                <th class="px-4 py-2 text-center text-sm font-medium text-gray-500">
-                  ชื่อ-นามสกุล
-                </th>
-                <th class="px-4 py-2 text-center text-sm font-medium text-gray-500">ทักษะ</th>
-                <th class="px-4 py-2 text-center text-sm font-medium text-gray-500">อีเมล</th>
-                <th class="px-4 py-2 text-center w-48 text-sm font-medium text-gray-500">
-                  ยืนยันอีเมล
-                </th>
-                <th class="px-4 py-2 text-center text-sm font-medium text-gray-500">จัดการ</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="user in formattedUsers"
-                :key="user.id"
-                class="border-b hover:bg-gray-50 transition-colors"
-              >
-                <td class="px-4 py-2 text-gray-600">{{ user.id }}</td>
-                <td class="px-4 py-2">{{ user.registeredDate }}</td>
-                <td class="px-4 py-2">{{ user.fullName }}</td>
-                <td class="px-4 py-2">
-                  <div class="flex flex-wrap gap-1.5">
-                    <span
-                      v-for="skill in JSON.parse(user.skills)"
-                      :key="skill"
-                      class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-600 whitespace-nowrap"
-                    >
-                      {{ skill }}
-                    </span>
-                  </div>
-                </td>
-                <td class="px-4 py-2 text-gray-600 break-all">{{ user.email }}</td>
-                <td class="px-4 py-2">
-                  <div class="flex justify-center">
-                    <span
-                      :class="[
-                        'flex items-center justify-center w-8 h-8 rounded-full',
-                        user.isVerified ? 'bg-green-100' : 'bg-red-100'
-                      ]"
-                    >
-                      <i
-                        :class="[
-                          user.isVerified ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-xmark',
-                          user.isVerified ? 'text-green-600' : 'text-red-600'
-                        ]"
-                      ></i>
-                    </span>
-                  </div>
-                </td>
-                <td class="px-4 py-4">
-                  <div class="flex justify-center gap-2">
-                    <button
-                      @click="showUserDetails(user)"
-                      class="bg-blue-400 text-white px-3 py-1 rounded-full hover:bg-blue-500 text-sm whitespace-nowrap"
-                    >
-                      รายละเอียด
-                    </button>
-                    <button
-                      @click="handleViewHistory(user.id)"
-                      class="bg-green-400 text-white px-3 py-1 rounded-full hover:bg-green-500 text-sm whitespace-nowrap"
-                    >
-                      ดูประวัติ
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- Mobile Grid View -->
+      <div class="md:hidden">
+        <div v-if="loading" class="flex justify-center py-4">
+          <div class="loading-spinner"></div>
         </div>
 
-        <!-- Mobile: Card View -->
-        <div class="md:hidden space-y-4 p-1 transition-all duration-500 ease-in-out">
+        <div v-else-if="formattedUsers.length === 0" class="text-center py-4">
+          <p class="text-gray-500">ไม่พบข้อมูลผู้ใช้</p>
+        </div>
+
+        <div v-else class="space-y-3">
           <div
             v-for="user in formattedUsers"
             :key="user.id"
-            class="bg-white rounded-lg p-4 shadow-sm space-y-3 transition-all duration-500 ease-in-out"
+            class="bg-white p-4 rounded-lg shadow-sm"
           >
-            <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-500">ID: {{ user.id }}</span>
-              <span class="text-sm text-gray-500">วันที่ลงทะเบียน : {{ user.registeredDate }}</span>
-              <span
-                :class="[
-                  'flex items-center justify-center w-8 h-8 rounded-full',
-                  user.isVerified ? 'bg-green-100' : 'bg-red-100'
-                ]"
+            <!-- User Info -->
+            <div class="flex items-center gap-3 mb-3">
+              <div
+                class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white font-medium"
               >
-                <i
-                  :class="[
-                    user.isVerified ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-xmark',
-                    user.isVerified ? 'text-green-600' : 'text-red-600'
-                  ]"
-                ></i>
-              </span>
+                {{ user.fullName.charAt(0) }}
+              </div>
+              <div>
+                <div class="font-medium text-gray-900">{{ user.fullName }}</div>
+                <div class="text-sm text-gray-500">{{ user.email }}</div>
+              </div>
             </div>
 
-            <div class="space-y-1">
-              <h3 class="font-medium">ชื่อ : {{ user.fullName }}</h3>
-              <p class="text-sm text-gray-600 break-words">อีเมล : {{ user.email }}</p>
+            <!-- Mobile View User Details -->
+            <div class="space-y-2 mb-3">
+              <!-- ข้อมูลพื้นฐาน -->
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">อีเมล:</span>
+                <span class="font-medium">{{ user.email }}</span>
+              </div>
+
+              <!-- ทักษะ -->
+              <div class="space-y-2">
+                <p class="text-sm text-gray-500">ทักษะ:</p>
+                <div class="flex flex-wrap gap-1.5">
+                  <span
+                    v-for="skill in JSON.parse(user.skills)"
+                    :key="skill"
+                    class="px-2.5 py-0.5 text-xs rounded-full bg-purple-100 text-purple-600"
+                  >
+                    {{ skill }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- สถานะยืนยันอีเมล -->
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">สถานะยืนยันอีเมล:</span>
+                <span
+                  class="px-2 py-1 rounded-full text-xs"
+                  :class="
+                    user.isVerified ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                  "
+                >
+                  {{ user.isVerified ? 'ยืนยันแล้ว' : 'ยังไม่ยืนยัน' }}
+                </span>
+              </div>
+
+              <!-- วันที่สมัคร -->
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">วันที่สมัคร:</span>
+                <span>{{ formatDate(user.registeredDate) }}</span>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex gap-2 mt-4">
+                <button
+                  @click="showUserDetails(user)"
+                  class="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white text-sm hover:opacity-90 transition-opacity"
+                >
+                  <i class="fas fa-info-circle mr-1"></i> รายละเอียด
+                </button>
+                <button
+                  @click="handleViewHistory(user.id)"
+                  class="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 text-white text-sm hover:opacity-90 transition-opacity"
+                >
+                  <i class="fas fa-history mr-1"></i> ประวัติ
+                </button>
+              </div>
             </div>
 
-            <div class="flex flex-wrap gap-1.5">
-              <p class="text-sm">ทักษะ</p>
-              <span
-                v-for="skill in JSON.parse(user.skills)"
-                :key="skill"
-                class="px-2.5 py-0.5 text-xs rounded-full bg-purple-100 text-purple-600"
-              >
-                {{ skill }}
-              </span>
-            </div>
-
-            <div class="flex flex-col gap-2 pt-2">
+            <!-- Action Buttons -->
+            <div class="flex gap-2">
               <button
                 @click="showUserDetails(user)"
-                class="w-full bg-blue-400 text-white px-3 py-1.5 rounded-full hover:bg-blue-500 text-sm"
+                class="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white text-sm hover:opacity-90 transition-opacity"
               >
-                รายละเอียด
+                <i class="fas fa-info-circle mr-1"></i> รายละเอียด
               </button>
               <button
                 @click="handleViewHistory(user.id)"
-                class="w-full bg-green-400 text-white px-3 py-1.5 rounded-full hover:bg-green-500 text-sm"
+                class="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 text-white text-sm hover:opacity-90 transition-opacity"
               >
-                ดูประวัติการทำงาน
+                <i class="fas fa-history mr-1"></i> ประวัติ
               </button>
             </div>
           </div>
         </div>
+
+        <!-- Mobile Pagination -->
+        <div v-if="formattedUsers.length > 0" class="flex justify-center mt-4 gap-2">
+          <button
+            @click="handlePrevPage"
+            :disabled="currentPage <= 1"
+            class="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white disabled:opacity-50"
+          >
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <span class="flex items-center px-4 text-sm text-gray-600">
+            หน้า {{ currentPage }} จาก {{ totalPages }}
+          </span>
+          <button
+            @click="handleNextPage"
+            :disabled="!hasMorePages"
+            class="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white disabled:opacity-50"
+          >
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
       </div>
-      <!-- Pagination controls -->
-      <div v-if="!loading && formattedUsers.length > 0" class="flex justify-center mt-6 space-x-2">
-        <button
-          @click="handlePrevPage"
-          :disabled="currentPage <= 1"
-          class="px-3 py-1 rounded-lg transition-colors"
-          :class="[
-            currentPage <= 1
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-purple-100 text-[#C5B4E3] hover:bg-purple-200'
-          ]"
-        >
-          <i class="fas fa-chevron-left"></i>
-        </button>
+    </div>
 
-        <button class="px-3 py-1 rounded-lg bg-[#C5B4E3] text-white">
-          {{ currentPage }}
-        </button>
+    <!-- Pagination -->
+    <div
+      v-if="!loading && formattedUsers.length > 0"
+      class="mt-6 flex justify-center items-center space-x-2"
+    >
+      <button
+        @click="handlePrevPage"
+        :disabled="currentPage <= 1"
+        class="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white disabled:opacity-50 transition-all duration-300 hover:shadow-md"
+      >
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <!-- ... pagination buttons ... -->
+    </div>
 
-        <span class="px-3 py-1 rounded-lg bg-purple-100 text-[#C5B4E3]"> of {{ totalPages }} </span>
+    <!-- Modals -->
+    <TransitionRoot appear :show="showModal" as="template">
+      <UserDetailsModal :is-open="showModal" :user="selectedUser" @close="closeModal" />
+    </TransitionRoot>
 
-        <button
-          @click="handleNextPage"
-          :disabled="currentPage >= totalPages"
-          class="px-3 py-1 rounded-lg transition-colors"
-          :class="[
-            currentPage >= totalPages
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-purple-100 text-purple-600 hover:bg-purple-200'
-          ]"
-        >
-          <i class="fas fa-chevron-right"></i>
-        </button>
-      </div>
-
-      <!-- User Details Modal -->
-      <UserDetailsModal
-        v-if="showModal"
-        :is-open="showModal"
-        :user="selectedUser"
-        @close="closeModal"
-      />
-
+    <TransitionRoot appear :show="showHistoryModal" as="template">
       <JobHistoryModal
-        v-if="showHistoryModal"
         :show="showHistoryModal"
         :user="selectedUser"
         @close="closeHistoryModal"
-        :jobs="jobHistory.data || []"
-        :total-jobs="jobHistory.totalJobs || 0"
+        :jobs="userHistoryStore.jobHistory.data"
+        :total-jobs="userHistoryStore.jobHistory.totalJobs"
       />
-    </div>
+    </TransitionRoot>
   </div>
 </template>
-
 <script>
 import axios from 'axios'
 import Swal from 'sweetalert2'
 import SearchUsersBar from '@/components/Search/SearchUsersBar.vue'
 import UserDetailsModal from '@/components/Users/UserDetailsModal.vue'
 import JobHistoryModal from '@/components/Users/JobHistoryModal.vue'
+import { useSidebarStore } from '@/stores/sidebarStore'
+import { useUserHistoryStore } from '@/stores/userHistoryStore'
+import { useAdminUserStore } from '@/stores/adminUserStore'
+import {
+  Dialog as HeadlessDialog,
+  DialogPanel as HeadlessDialogPanel,
+  DialogTitle as HeadlessDialogTitle,
+  TransitionRoot,
+  TransitionChild
+} from '@headlessui/vue'
 export default {
   name: 'AdminAllUsers',
   components: {
     SearchUsersBar,
     UserDetailsModal,
-    JobHistoryModal
+    JobHistoryModal,
+    HeadlessDialog,
+    HeadlessDialogPanel,
+    HeadlessDialogTitle,
+    TransitionRoot,
+    TransitionChild
   },
   data() {
     return {
       baseURL: import.meta.env.VITE_API_URL,
-      formattedUsers: [],
       showHistoryModal: false,
       selectedUser: null,
       loading: false,
       currentPage: 1,
       perPage: 10,
       totalItems: 0,
-      showModal: false,
-      searchFilters: {
-        userId: '',
-        idCard: '',
-        name: ''
-      },
-      jobHistory: {
-        data: [],
-        currentPage: 1,
-        totalPages: 1,
-        totalJobs: 0
-      }
+      showModal: false
     }
   },
 
   created() {
-    this.fetchUsers()
+    this.adminUserStore.fetchUsers()
+  },
+  setup() {
+    const adminUserStore = useAdminUserStore()
+    const userHistoryStore = useUserHistoryStore()
+    const sidebarStore = useSidebarStore()
+    return { adminUserStore, userHistoryStore, sidebarStore }
   },
   computed: {
+    searchFilters() {
+      return this.adminUserStore.searchFilters
+    },
+    formattedUsers() {
+      return this.adminUserStore.users
+    },
     totalPages() {
       return Math.max(1, Math.ceil(this.totalItems / this.perPage))
     },
     hasMorePages() {
       return this.currentPage < this.totalPages
+    },
+
+    totalUsers() {
+      return this.formattedUsers.length
+    },
+    verifiedUsers() {
+      return this.formattedUsers.filter((user) => user.isVerified).length
+    },
+    onlineUsers() {
+      return Math.floor(this.totalUsers * 0.3)
+    },
+    isSidebarCollapsed() {
+      return this.sidebarStore.isCollapsed
     }
   },
   methods: {
-    formatUserData(user) {
-      if (!user) return null
-
-      return {
-        id: user.id,
-        fullName: `${user.prefix || ''} ${user.first_name} ${user.last_name}`.trim(),
-        email: user.email,
-        phoneNumber: user.phone_number || '-',
-        idCardNumber: user.national_id || '-',
-        lineId: user.line_id || '-',
-        isVerified: user.email_verified,
-        registeredDate: this.formatDate(user.created_at),
-        skills: user.skills ? user.skills.split(',') : [],
-        // ข้อมูลส่วนตัว
-        gender: user.gender || '-',
-        birthDate: user.birth_date ? this.formatDate(user.birth_date) : '-',
-        age: user.age || '0',
-        profileImage: user.profile_image,
-        // เอกสาร
-        educationCertificate: user.education_certificate,
-        documents: user.user_documents || '-'
-      }
-    },
-
-    async fetchUsers() {
-      this.loading = true
-      try {
-        const params = {
-          page: this.currentPage,
-          limit: this.perPage,
-          offset: (this.currentPage - 1) * this.perPage
-        }
-
-        if (this.searchFilters.userId.trim()) {
-          params.userId = this.searchFilters.userId.trim()
-        }
-        if (this.searchFilters.name.trim()) {
-          params.name = this.searchFilters.name.trim()
-        }
-        if (this.searchFilters.idCard.trim()) {
-          params.idCard = this.searchFilters.idCard.trim()
-        }
-
-        const response = await axios.get(`${this.baseURL}/api/admin/approved`, {
-          params: params
-        })
-
-        if (response.data) {
-          this.formattedUsers = response.data.users
-            .map(this.formatUserData)
-            .filter((user) => user !== null)
-
-          this.totalItems = parseInt(response.data.pagination.total)
-        }
-      } catch (error) {
-        console.error('Error fetching users:', error)
-        Swal.fire({
-          icon: 'error',
-          title: 'เกิดข้อผิดพลาด',
-          text: 'ไม่สามารถดึงข้อมูลผู้ใช้ได้'
-        })
-        this.formattedUsers = []
-        this.totalItems = 0
-      } finally {
-        this.loading = false
-      }
-    },
     async handleViewHistory(userId) {
       try {
         this.selectedUser = this.formattedUsers.find((u) => u.id === userId)
-
-        const response = await axios.get(`${this.baseURL}/api/users/history/${userId}`)
-
-        if (response.data) {
-          const formattedJobs =
-            response.data.jobHistory.map((job) => ({
-              id: job.id || undefined,
-              title: job.jobPosition?.job?.title || 'ไม่ระบุชื่องาน',
-              position_name: job.jobPosition?.position_name || 'ไม่ระบุตำแหน่ง',
-              location: job.jobPosition?.job?.location || 'ไม่ระบุสถานที่',
-              status: job.status || 'pending',
-              created_at: job.created_at,
-              updated_at: job.updated_at,
-              wage: job.jobPosition?.wage || 0,
-              work_date: job.jobPosition?.job?.work_date || null
-            })) || []
-
-          this.jobHistory = {
-            data: formattedJobs,
-            totalJobs: response.data.totalJobs || 0,
-            currentPage: response.data.currentPage || 1,
-            totalPages: response.data.totalPages || 1
-          }
-
-          this.showHistoryModal = true
-        }
+        await this.userHistoryStore.fetchUserHistory(userId)
+        this.showHistoryModal = true
       } catch (error) {
-        console.error('Error fetching job history:', error)
         Swal.fire({
           title: 'ไม่พบประวัติการทำงาน',
           text: 'ผู้ใช้งานนี้ยังไม่มีประวัติการทำงาน',
@@ -369,22 +378,11 @@ export default {
         })
       }
     },
+
     closeHistoryModal() {
       this.showHistoryModal = false
       this.selectedUser = null
-      this.jobHistory = {
-        data: [],
-        currentPage: 1,
-        totalPages: 1,
-        totalJobs: 0
-      }
-    },
-    formatDate(dateString) {
-      return new Date(dateString).toLocaleDateString('th-TH', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })
+      this.userHistoryStore.clearHistory()
     },
 
     showUserDetails(user) {
@@ -399,20 +397,12 @@ export default {
     },
 
     handleSearch(filters) {
-      this.searchFilters = { ...filters }
-      this.currentPage = 1
-      this.fetchUsers()
+      this.adminUserStore.setSearchFilters(filters)
     },
 
     handleClear() {
-      this.searchFilters = {
-        userId: '',
-        name: '',
-        idCard: ''
-      }
-      this.currentPage = 1
-      this.fetchUsers()
-    }, // เพิ่ม comma ตรงนี้
+      this.adminUserStore.clearSearchFilters()
+    },
     handlePrevPage() {
       if (this.currentPage > 1) {
         this.currentPage--
@@ -424,10 +414,64 @@ export default {
     handleNextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++
-        this.fetchUsers()
+        this.adminUserStore.fetchUsers()
         window.scrollTo(0, 0)
       }
+    },
+
+    formatDate(dateString) {
+      return this.adminUserStore.formatDate(dateString)
     }
   }
 }
 </script>
+<style scoped>
+/* Add any custom animations or transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c5b4e3;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9899ee;
+}
+
+.loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #6366f1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+</style>

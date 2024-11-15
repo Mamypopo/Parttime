@@ -1,6 +1,6 @@
 <template>
   <TransitionRoot appear :show="show" as="template">
-    <Dialog as="div" class="fixed inset-0 z-50 overflow-y-auto" v-if="show">
+    <Dialog as="div" class="fixed inset-0 modal overflow-y-auto" v-if="show">
       <TransitionChild
         enter="transition-opacity duration-300"
         enter-from="opacity-0"
@@ -13,7 +13,7 @@
       </TransitionChild>
 
       <div class="flex min-h-full items-center justify-center p-4">
-        <div class="relative w-full max-w-4xl bg-white rounded-2xl shadow-xl mb-20">
+        <div class="relative w-full max-w-4xl bg-white rounded-2xl shadow-xl">
           <!-- Modal Header -->
           <div
             class="flex items-center justify-between p-4 md:p-5 rounded-t-2xl border-b bg-gradient-to-r from-[#6ED7D1] to-[#9899ee]"

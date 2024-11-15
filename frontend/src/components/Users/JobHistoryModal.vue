@@ -1,7 +1,7 @@
 <template>
   <TransitionRoot appear :show="show" as="template">
     <Teleport to="body">
-      <Dialog as="div" @close="handleClose" class="relative z-50">
+      <Dialog as="div" @close="handleClose" class="relative modal">
         <TransitionChild
           as="template"
           enter="duration-300 ease-out"
@@ -11,7 +11,7 @@
           leave-from="opacity-100"
           leave-to="opacity-0"
         >
-          <div class="fixed inset-0 bg-black/25" />
+          <div class="fixed inset-0 bg-black/25 backdrop-blur-sm" />
         </TransitionChild>
 
         <div class="fixed inset-0 overflow-y-auto">
@@ -50,8 +50,8 @@
                     <!-- สรุปภาพรวม -->
                     <div class="bg-white rounded-lg shadow p-4 border-l-4 border-purple-400">
                       <h3 class="text-lg font-medium text-gray-800 mb-2">สรุปการทำงาน</h3>
-                      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                        <!-- งานทั้งหมด -->
+                      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- จำนวนงานทั้งหมด -->
                         <div class="text-center p-3 bg-purple-50 rounded-lg">
                           <p class="text-sm text-gray-500">งานทั้งหมด</p>
                           <p class="text-2xl font-semibold text-purple-600">
@@ -59,35 +59,22 @@
                           </p>
                         </div>
 
-                        <!-- งานที่สำเร็จ -->
-                        <div class="text-center p-3 bg-green-50 rounded-lg">
-                          <p class="text-sm text-gray-500">งานที่สำเร็จ</p>
-                          <p class="text-2xl font-semibold text-green-600">
-                            {{ successfulJobs }}
-                          </p>
-                        </div>
-
-                        <!-- งานที่กำลังทำ -->
+                        <!-- คะแนนเฉลี่ย -->
                         <div class="text-center p-3 bg-yellow-50 rounded-lg">
-                          <p class="text-sm text-gray-500">งานที่กำลังทำ</p>
-                          <p class="text-2xl font-semibold text-yellow-600">
-                            {{ pendingJobs }}
-                          </p>
+                          <p class="text-sm text-gray-500">คะแนนเฉลี่ย</p>
+                          <div class="flex items-center justify-center gap-1">
+                            <p class="text-2xl font-semibold text-yellow-600">
+                              {{ averageRating.toFixed(1) }}
+                            </p>
+                            <i class="fas fa-star text-yellow-400 text-xl"></i>
+                          </div>
                         </div>
 
-                        <!-- งานที่ต้องปรับปรุง -->
-                        <div class="text-center p-3 bg-orange-50 rounded-lg">
-                          <p class="text-sm text-gray-500">งานที่ต้องปรับปรุง</p>
-                          <p class="text-2xl font-semibold text-orange-600">
-                            {{ needsImprovementJobs }}
-                          </p>
-                        </div>
-
-                        <!-- งานที่ไม่สำเร็จ -->
-                        <div class="text-center p-3 bg-red-50 rounded-lg">
-                          <p class="text-sm text-gray-500">งานที่ไม่สำเร็จ</p>
-                          <p class="text-2xl font-semibold text-red-600">
-                            {{ failedJobs }}
+                        <!-- จำนวนรีวิว -->
+                        <div class="text-center p-3 bg-blue-50 rounded-lg">
+                          <p class="text-sm text-gray-500">จำนวนรีวิว</p>
+                          <p class="text-2xl font-semibold text-blue-600">
+                            {{ totalReviews }}
                           </p>
                         </div>
                       </div>
@@ -102,7 +89,6 @@
                       >
                         <div class="flex justify-between items-start mb-3">
                           <div class="flex items-center gap-3">
-                            <!-- ไอคอนตามประเภทงาน -->
                             <div
                               class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center"
                             >
@@ -113,14 +99,14 @@
                               <p class="text-sm text-gray-500">{{ job.position_name }}</p>
                             </div>
                           </div>
-                          <span
-                            :class="[
-                              'px-3 py-1.5 text-sm font-medium rounded-full',
-                              getStatusClass(job.status)
-                            ]"
-                          >
-                            {{ getStatusText(job.status) }}
-                          </span>
+
+                          <!-- แสดงคะแนน -->
+                          <div v-if="job.workHistories?.length" class="flex items-center gap-1">
+                            <span class="text-lg font-semibold text-yellow-500">{{
+                              job.workHistories[0].rating
+                            }}</span>
+                            <i class="fas fa-star text-yellow-400"></i>
+                          </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -131,22 +117,18 @@
                             </div>
                             <div class="flex items-center gap-2 text-gray-600">
                               <i class="fas fa-calendar w-5 text-gray-400"></i>
-                              <span>วันที่เริ่มงาน: {{ formatDate(job.created_at) }}</span>
-                            </div>
-                            <div class="flex items-center gap-2 text-gray-600">
-                              <i class="fas fa-clock w-5 text-gray-400"></i>
                               <span>วันที่ทำงาน: {{ formatDate(job.work_date) }}</span>
                             </div>
-                          </div>
-                          <div class="space-y-2">
                             <div class="flex items-center gap-2 text-gray-600">
                               <i class="fas fa-coins w-5 text-gray-400"></i>
                               <span>ค่าตอบแทน: {{ job.wage.toLocaleString() }} บาท</span>
                             </div>
-                            <div class="flex items-center gap-2 text-gray-600">
-                              <i class="fas fa-clock w-5 text-gray-400"></i>
-                              <span>อัพเดทล่าสุด: {{ formatDate(job.updated_at) }}</span>
-                            </div>
+                          </div>
+
+                          <!-- ส่วนแสดงความคิดเห็น -->
+                          <div v-if="job.workHistories?.length" class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-sm text-gray-500 mb-1">ความคิดเห็นจากผู้ว่าจ้าง:</p>
+                            <p class="text-gray-700">{{ job.workHistories[0].comment || '-' }}</p>
                           </div>
                         </div>
                       </div>
@@ -199,24 +181,40 @@ export default {
       default: () => []
     },
     totalJobs: {
-      // เพิ่ม prop ใหม่
       type: Number,
       default: 0
     }
   },
 
   computed: {
-    successfulJobs() {
-      return (this.jobs || []).filter((job) => job?.status === 'successful').length
+    averageRating() {
+      const ratedJobs =
+        this.jobs?.filter(
+          (job) =>
+            job.workHistories &&
+            job.workHistories.length > 0 &&
+            job.workHistories[0].rating !== null
+        ) || []
+
+      if (!ratedJobs.length) return 0
+      const totalRating = ratedJobs.reduce((sum, job) => {
+        const rating = job.workHistories[0].rating
+        return sum + (rating || 0)
+      }, 0)
+
+      return totalRating / ratedJobs.length
     },
-    pendingJobs() {
-      return (this.jobs || []).filter((job) => job?.status === 'pending').length
-    },
-    needsImprovementJobs() {
-      return (this.jobs || []).filter((job) => job?.status === 'needs_improvement').length
-    },
-    failedJobs() {
-      return (this.jobs || []).filter((job) => job?.status === 'failed').length
+
+    totalReviews() {
+      // นับเฉพาะงานที่มีการให้คะแนนและความคิดเห็น
+      return (
+        this.jobs?.filter(
+          (job) =>
+            job.workHistories &&
+            job.workHistories.length > 0 &&
+            (job.workHistories[0].rating !== null || job.workHistories[0].comment)
+        ).length || 0
+      )
     }
   },
 

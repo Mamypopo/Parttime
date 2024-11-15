@@ -209,7 +209,7 @@ export const findApprovedUsers = (limit = 10, offset = 0, searchParams = {}) => 
         approved: "approved"
     }
 
-    // เพิ่มเงื่อนไขการค้นหา
+    // เงื่อนไขการค้นหา
     if (searchParams.userId) {
         whereClause.id = parseInt(searchParams.userId)
     }
@@ -338,7 +338,7 @@ export const findRejectedUsers = (limit = 10, offset = 0, searchParams = {}) => 
     if (searchParams.idCard) {
         whereClause.national_id = {
             contains: searchParams.idCard,
-            mode: 'insensitive'  // เพิ่ม mode insensitive
+            mode: 'insensitive'
         }
     }
 
@@ -457,7 +457,7 @@ export const countUsersByStatus = () =>
     });
 
 
-
+// อัพเดทอนุมัติการใช้งาน users
 export const updateUserApprovalStatus = (userId, status) =>
     prisma.user.update({
         where: { id: userId },
@@ -466,7 +466,7 @@ export const updateUserApprovalStatus = (userId, status) =>
 
 
 
-// สำหรับแอดมิน - ดึงข้อมูล pending skills ทั้งหมดพร้อมข้อมูลผู้ใช้
+//  ดึงข้อมูล pending skills ทั้งหมดพร้อมข้อมูลผู้ใช้
 export const getAllPendingSkillsForAdmin = async () => {
     return prisma.pendingSkill.findMany({
         where: {
@@ -527,7 +527,7 @@ export const updateUserSkills = async (userId, skills) => {
     });
 };
 
-
+// ตรวจว่าเคยอัพเดทกกิลหรือยังภายใน สัปดาห์
 export const checkWeeklySkillRequest = async (userId) => {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -543,7 +543,7 @@ export const checkWeeklySkillRequest = async (userId) => {
             id: true,
             skill: true,
             status: true,
-            created_at: true  // ต้องแน่ใจว่ามีการเลือก createdAt
+            created_at: true
         },
         orderBy: {
             created_at: 'desc'

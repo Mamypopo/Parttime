@@ -15,14 +15,19 @@ app.use(cors());
 
 dotenv.config();
 
-
 app.use('/uploads', express.static('uploads'))
+
 app.use(express.json());
+
 app.use(cors());
+
 //  routes
 app.use('/api/users', userRoutes);
+
 app.use('/api/jobs', jobRoutes);
+
 app.use('/api/admin', adminRoutes);
+
 app.use('/api/work-history', workHistoryRoutes);
 
 // เริ่ม cron jobs

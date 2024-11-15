@@ -3,45 +3,58 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Z-Index System */
+    --z-main: 10;
+    --z-sidebar: 700;
+    --z-toggle: 750;
+    --z-bottom-nav: 800;
+    --z-notification: 900;
+    --z-modal-overlay: 998;
+    --z-modal: 999;
+  }
+
   html {
     overflow-y: scroll;
     scrollbar-width: none;
     @apply text-[#3A3A49];
-    /* Firefox */
     -ms-overflow-style: none;
-    /* IE and Edge */
   }
 
   html::-webkit-scrollbar {
     display: none;
-    /* Chrome, Safari, Opera */
   }
 }
 
+/* Z-Index Classes */
+.main-content {
+  z-index: var(--z-main);
+}
+
+.sidebar {
+  z-index: var(--z-sidebar);
+}
+
+.fixed-top-toggle-btn {
+  z-index: var(--z-toggle);
+}
+
 .mobile-bottom-nav {
-  z-index: 800; /* สูงกว่า Sidebar และคอนเทนต์หลัก แต่ต่ำกว่า Notifications และ Modals */
+  z-index: var(--z-bottom-nav);
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
 }
 
-.sidebar {
-  z-index: 700; /* ตั้งค่าให้ Sidebar มีระดับสูงพอสมควรแต่ต่ำกว่าการแจ้งเตือน */
-}
-
-.fixed-top-toggle-btn {
-  z-index: 750; /* ปุ่ม Toggle ควรมี z-index ที่สูงกว่าสำหรับการขยาย sidebar */
-}
-
 .notification {
-  z-index: 900; /* การแจ้งเตือนให้มี z-index ที่สูง */
+  z-index: var(--z-notification);
+}
+
+.modal-overlay {
+  z-index: var(--z-modal-overlay);
 }
 
 .modal {
-  z-index: 1000; /* Modal ต้องอยู่บนสุด */
-}
-
-.main-content {
-  z-index: 10; /* คอนเทนต์หลัก ตั้ง z-index ต่ำที่สุด */
+  z-index: var(--z-modal);
 }

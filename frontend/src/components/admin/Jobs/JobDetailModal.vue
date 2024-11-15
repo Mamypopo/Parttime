@@ -1,6 +1,6 @@
 <template>
   <TransitionRoot appear :show="isOpen" as="template">
-    <Dialog as="div" class="relative z-50" @close="closeModal">
+    <Dialog as="div" class="relative modal" @close="closeModal">
       <!-- Background Overlay -->
       <TransitionChild
         as="template"
@@ -26,7 +26,7 @@
             leave-to="opacity-0 scale-95"
           >
             <DialogPanel
-              class="relative bg-white rounded-2xl shadow-xl w-full max-w-3xl pointer-events-auto mb-20"
+              class="relative bg-white rounded-2xl shadow-xl w-full max-w-3xl pointer-events-auto"
             >
               <!-- Header -->
               <div

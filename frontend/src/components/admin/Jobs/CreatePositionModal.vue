@@ -1,6 +1,6 @@
 <template>
   <TransitionRoot appear :show="isOpen" as="template">
-    <HeadlessDialog as="div" @close="closeModal" class="relative z-50">
+    <HeadlessDialog as="div" @close="closeModal" class="relative modal">
       <!-- Backdrop -->
       <TransitionChild
         enter="duration-300 ease-out"
@@ -15,7 +15,7 @@
 
       <!-- Modal Container -->
       <div
-        class="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50 overflow-y-auto"
+        class="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center modal overflow-y-auto"
       >
         <div class="flex min-h-full items-center justify-center p-3 sm:p-4">
           <TransitionChild
@@ -26,7 +26,9 @@
             leave-from="opacity-100 scale-100"
             leave-to="opacity-0 scale-95"
           >
-            <HeadlessDialogPanel class="w-full max-w-3xl bg-white rounded-lg p-4 sm:p-6">
+            <HeadlessDialogPanel
+              class="w-full max-w-none sm:max-w-lg md:max-w-3xl lg:max-w-4xl bg-white rounded-lg p-4 sm:p-6 pb-20"
+            >
               <HeadlessDialogTitle
                 class="text-lg sm:text-xl text-center text-[#4FD1C5] mb-4 sm:mb-6"
               >

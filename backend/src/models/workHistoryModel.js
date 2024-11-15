@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+// ฟังชั่นสร้างประวัติการทำงานหลังจาก ให้คะแนน
 export const createWorkHistory = async (data) => {
     return prisma.workHistory.create({
         data: {
@@ -21,6 +22,7 @@ export const createWorkHistory = async (data) => {
     });
 };
 
+// ฟังชั่นดึงประวัติเป็นรายบุคคล
 export const getWorkHistoryByUserId = async (userId) => {
     return prisma.workHistory.findMany({
         where: {
@@ -42,6 +44,7 @@ export const getWorkHistoryByUserId = async (userId) => {
     });
 };
 
+// ฟังชั่นตรวจสอบว่ามี WorkHistory อยู่แล้วหรือไม่
 export const findByJobParticipationId = async (jobParticipationId) => {
     return prisma.workHistory.findFirst({
         where: {

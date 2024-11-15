@@ -36,10 +36,10 @@ export const approveJobParticipation = async (req, res) => {
             return res.status(403).json({ message: 'คุณไม่มีสิทธิ์อนุมัติการสมัครงานนี้' });
         }
 
-        // ตรวจสอบว่าการสมัครงานนี้ได้รับการอนุมัติหรือปฏิเสธไปแล้วหรือไม่
-        if (['approved', 'rejected'].includes(jobParticipation.status)) {
-            return res.status(400).json({ message: `การสมัครงานนี้ได้รับการ ${jobParticipation.status} ไปแล้ว` });
-        }
+        // // ตรวจสอบว่าการสมัครงานนี้ได้รับการอนุมัติหรือปฏิเสธไปแล้วหรือไม่
+        // if (['approved', 'rejected'].includes(jobParticipation.status)) {
+        //     return res.status(400).json({ message: `การสมัครงานนี้ได้รับการ ${jobParticipation.status} ไปแล้ว` });
+        // }
 
         // ค้นหาข้อมูลตำแหน่งงานที่สมัคร
         const { jobPosition, user } = jobParticipation;

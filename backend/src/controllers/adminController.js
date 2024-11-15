@@ -281,14 +281,14 @@ export const getRejectedUsers = async (req, res) => {
 
 
 // ดึงสถิติจำนวนผู้ใช้แต่ละสถานะ
-export const getUserStats = async (req, res) => {
-    try {
-        const stats = await adminModel.countUsersByStatus();
-        res.json(stats);
-    } catch (error) {
-        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูลสถิติ' });
-    }
-};
+// export const getUserStats = async (req, res) => {
+//     try {
+//         const stats = await adminModel.countUsersByStatus();
+//         res.json(stats);
+//     } catch (error) {
+//         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูลสถิติ' });
+//     }
+// };
 
 // อนุมัติผู้ใช้งานในระบบ
 export const approveUser = async (req, res) => {
@@ -524,6 +524,8 @@ export const getAdminNotifications = async (req, res) => {
     }
 };
 
+
+// อ่าน 1 การแจ้งเตือน
 export const markNotificationAsRead = async (req, res) => {
     try {
         const notificationId = parseInt(req.params.id, 10);
@@ -536,7 +538,7 @@ export const markNotificationAsRead = async (req, res) => {
     }
 };
 
-
+// อ่านการแจ้งเตือนทั้งหมด
 export const markAllNotificationsAsRead = async (req, res) => {
     try {
         const adminId = req.user.id;
