@@ -72,9 +72,9 @@
             <!-- Position List Dropdown -->
             <div
               v-if="showPositionList"
-              class="absolute z-10 w-full mt-1 bg-gray-100 rounded-lg shadow-lg border border-purple-100"
+              class="absolute z-[9999] w-full mt-1 bg-gray-100 rounded-lg shadow-lg border border-purple-100"
             >
-              <div class="p-2 space-y-1">
+              <div class="p-2 space-y-1 max-h-[200px] overflow-y-auto">
                 <button
                   v-for="position in positionOptions"
                   :key="position.value"
@@ -154,7 +154,7 @@
               </div>
             </div>
           </div>
-          <!-- เพิ่มในส่วน template ต่อจาก wage range -->
+
           <div class="lg:col-span-3">
             <div class="relative">
               <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
@@ -401,7 +401,10 @@ input:hover,
 button:hover {
   transition: all 0.2s ease;
 }
-
+/* ปรับแต่ง dropdown animation */
+[v-if] {
+  transition: all 0.2s ease-in-out;
+}
 /* เพิ่ม loading indicator styles ถ้าต้องการ */
 .loading {
   opacity: 0.7;

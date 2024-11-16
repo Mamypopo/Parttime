@@ -5,7 +5,9 @@ import Swal from 'sweetalert2'
 export const useAdminUserStore = defineStore('adminUser', {
     state: () => ({
         baseURL: import.meta.env.VITE_API_URL,
-        users: [],
+        users: [], // approved users
+        pendingUsers: [], // pending users
+        rejectedUsers: [], // rejected users
         loading: false,
         error: null,
         pagination: {
@@ -37,18 +39,12 @@ export const useAdminUserStore = defineStore('adminUser', {
                 idCardNumber: user.national_id || '-',
                 lineId: user.line_id || '-',
                 isVerified: user.email_verified,
-                registeredDate: new Date(user.created_at).toLocaleDateString('th-TH', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                }),
-                skills: user.skills ? user.skills.split(',') : [],
+                registeredDate: this.formatDate(user.created_at),
+                approvedDate: this.formatDate(user.updated_at),
+                rejectedDate: this.formatDate(user.updated_at),
+                skills: user.skills ? JSON.parse(user.skills) : [],
                 gender: user.gender || '-',
-                birthDate: user.birth_date ? new Date(user.birth_date).toLocaleDateString('th-TH', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                }) : '-',
+                birthDate: user.birth_date ? this.formatDate(user.birth_date) : '-',
                 age: user.age || '0',
                 profileImage: user.profile_image,
                 educationCertificate: user.education_certificate,
@@ -56,6 +52,7 @@ export const useAdminUserStore = defineStore('adminUser', {
             }
         },
 
+        // ดึงคนที่มีสถานะ approved = ผู้ใช้ในระบบ
         async fetchUsers() {
             this.loading = true
             try {
@@ -66,7 +63,6 @@ export const useAdminUserStore = defineStore('adminUser', {
                     ...this.searchFilters
                 }
 
-                // ลบ key ที่มีค่าว่างออก
                 Object.keys(params).forEach(key => {
                     if (params[key] === '') delete params[key]
                 })
@@ -93,10 +89,109 @@ export const useAdminUserStore = defineStore('adminUser', {
             }
         },
 
+        // ดึงข้อมูล pending users
+        async fetchPendingUsers() {
+            this.loading = true
+            try {
+                const params = {
+                    page: this.pagination.currentPage,
+                    limit: this.pagination.perPage,
+                    offset: (this.pagination.currentPage - 1) * this.pagination.perPage,
+                    ...this.searchFilters
+                }
+
+                Object.keys(params).forEach(key => {
+                    if (params[key] === '') delete params[key]
+                })
+
+                const response = await axios.get(`${this.baseURL}/api/admin/pending`, { params })
+
+                if (response.data) {
+                    this.pendingUsers = response.data.users.map(this.formatUserData)
+                    if (response.data.pagination) {
+                        this.pagination.totalItems = parseInt(response.data.pagination.total)
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching pending users:', error)
+                this.pendingUsers = []
+                this.pagination.totalItems = 0
+            } finally {
+                this.loading = false
+            }
+        },
+
+        // อนุมัติ user
+        async approveUser(userId) {
+            try {
+                await axios.post(`${this.baseURL}/api/admin/approve-reject-user/${userId}`, {
+                    status: 'approved'
+                })
+            } catch (error) {
+                console.error('Error approving user:', error)
+                throw error
+            }
+        },
+
+        // ปฏิเสธ user
+        async rejectUser(userId) {
+            try {
+                await axios.post(`${this.baseURL}/api/admin/approve-reject-user/${userId}`, {
+                    status: 'rejected'
+                })
+            } catch (error) {
+                console.error('Error rejecting user:', error)
+                throw error
+            }
+        },
+
+        async fetchRejectedUsers() {  // ปรับให้ไม่รับ parameters
+            this.loading = true
+            try {
+                const params = {
+                    page: this.pagination.currentPage,
+                    limit: this.pagination.perPage,
+                    offset: (this.pagination.currentPage - 1) * this.pagination.perPage,
+                    ...this.searchFilters
+                }
+
+                // ลบ params ที่เป็นค่าว่าง
+                Object.keys(params).forEach(key => {
+                    if (params[key] === '') delete params[key]
+                })
+
+                const response = await axios.get(`${this.baseURL}/api/admin/rejected`, { params })
+
+                if (response.data) {
+                    this.rejectedUsers = response.data.users.map(this.formatUserData)
+                    if (response.data.pagination) {
+                        this.pagination.totalItems = parseInt(response.data.pagination.total)
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching rejected users:', error)
+                this.rejectedUsers = []
+                this.pagination.totalItems = 0
+            } finally {
+                this.loading = false
+            }
+        },
+
+        getProfileImage(image) {
+            if (image) {
+                return `${this.baseURL}/uploads/profiles/${image}`
+            }
+            return null
+        },
+
+        // ฟังก์ชันสำหรับดึงตัวอักษรแรกของชื่อ
+        getInitials(fullName) {
+            return fullName ? fullName.trim().charAt(0).toUpperCase() : ''
+        },
         setSearchFilters(filters) {
             this.searchFilters = { ...filters }
             this.pagination.currentPage = 1
-            this.fetchUsers()
+
         },
 
         clearSearchFilters() {
@@ -106,12 +201,12 @@ export const useAdminUserStore = defineStore('adminUser', {
                 idCard: ''
             }
             this.pagination.currentPage = 1
-            this.fetchUsers()
+
         },
 
         setPage(page) {
             this.pagination.currentPage = page
-            this.fetchUsers()
+
             window.scrollTo(0, 0)
         },
 

@@ -32,26 +32,44 @@
       </div>
 
       <!-- Search Bar with Animation -->
-      <div class="mt-6 transform transition-all duration-300 hover:scale-[1.01]">
-        <SearchUsersBar
-          :filters="searchFilters"
-          @search="handleSearch"
-          @clear="handleClear"
-          class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
-        />
+      <div class="mt-6 flex items-center gap-2">
+        <div class="flex-1 transform transition-all duration-300 hover:scale-[1.01]">
+          <SearchUsersBar
+            :filters="searchFilters"
+            @search="handleSearch"
+            @clear="handleClear"
+            class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+          />
+        </div>
+
+        <!-- ปุ่ม Refresh -->
+        <button
+          @click="refreshData"
+          class="p-3 rounded-xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 text-gray-600 hover:text-purple-600"
+          title="รีเฟรชข้อมูล"
+        >
+          <i class="fas fa-sync-alt"></i>
+        </button>
       </div>
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="flex justify-center items-center py-12">
-      <div class="relative">
-        <div
-          class="w-12 h-12 rounded-full border-t-2 border-b-2 border-purple-500 animate-spin"
-        ></div>
-        <div
-          class="w-12 h-12 rounded-full border-t-2 border-b-2 border-blue-500 animate-spin absolute top-0 left-0"
-          style="animation-delay: -0.3s"
-        ></div>
+    <div v-if="loading" class="grid gap-4">
+      <div v-for="n in 5" :key="n" class="animate-pulse bg-white p-4 rounded-lg">
+        <div class="flex items-center space-x-3">
+          <!-- Avatar skeleton -->
+          <div class="w-10 h-10 bg-gray-200 rounded-full"></div>
+          <!-- Text skeleton -->
+          <div class="space-y-2 flex-1">
+            <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div class="h-3 bg-gray-200 rounded w-1/3"></div>
+          </div>
+          <!-- Button skeleton -->
+          <div class="flex space-x-2">
+            <div class="w-20 h-8 bg-gray-200 rounded-lg"></div>
+            <div class="w-20 h-8 bg-gray-200 rounded-lg"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -61,7 +79,7 @@
       class="flex flex-col items-center justify-center py-12"
     >
       <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-        <i class="fas fa-users text-3xl text-gray-400"></i>
+        <i class="fas fa-users text-3xl text-[#EABF71]"></i>
       </div>
       <p class="text-gray-500 text-lg">ไม่พบข้อมูลผู้ใช้</p>
       <p class="text-gray-400 text-sm mt-2">ลองปรับเงื่อนไขการค้นหาใหม่</p>
@@ -80,7 +98,7 @@
               <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left">
                 สถานะยืนยันอีเมล
               </th>
-              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left">วันที่สมัคร</th>
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left">วันที่อนุมัติ</th>
               <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left">การจัดการ</th>
             </tr>
           </thead>
@@ -93,10 +111,19 @@
               <!-- User cells with hover effects -->
               <td class="px-6 py-4">
                 <div class="flex items-center space-x-3">
-                  <div
-                    class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center text-white font-medium"
-                  >
-                    {{ user.fullName.charAt(0) }}
+                  <div class="w-10 h-10 rounded-full overflow-hidden">
+                    <img
+                      v-if="user.profileImage"
+                      :src="adminUserStore.getProfileImage(user.profileImage)"
+                      :alt="user.fullName"
+                      class="w-full h-full object-cover"
+                    />
+                    <div
+                      v-else
+                      class="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center text-white font-medium"
+                    >
+                      {{ user.fullName.charAt(0) }}
+                    </div>
                   </div>
                   <div>
                     <div class="font-medium text-gray-900">{{ user.fullName }}</div>
@@ -104,20 +131,60 @@
                   </div>
                 </div>
               </td>
-              <!-- ... other cells ... -->
+
+              <!-- อีเมล -->
+              <td class="px-6 py-4">
+                <div class="text-sm text-gray-900">{{ user.email }}</div>
+              </td>
+              <!-- ทักษะ -->
+
+              <td class="px-6 py-4">
+                <div class="flex flex-wrap gap-1">
+                  <span
+                    v-for="skill in user.skills"
+                    :key="skill"
+                    class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-600"
+                  >
+                    {{ skill }}
+                  </span>
+                </div>
+              </td>
+
+              <!-- สถานะยืนยันอีเมล -->
+              <td class="px-6 py-4">
+                <span
+                  class="px-2 py-1 rounded-full text-xs"
+                  :class="
+                    user.isVerified ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                  "
+                >
+                  {{ user.isVerified ? 'ยืนยันแล้ว' : 'ยังไม่ยืนยัน' }}
+                </span>
+              </td>
+
+              <!-- วันที่สมัคร -->
+              <td class="px-6 py-4">
+                <div class="text-sm text-gray-900">{{ user.approvedDate }}</div>
+              </td>
+
+              <!--  action -->
               <td class="px-6 py-4">
                 <div class="flex space-x-2">
                   <button
                     @click="showUserDetails(user)"
                     class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white text-sm hover:opacity-90 transition-opacity"
                   >
-                    รายละเอียด
+                    <i class="fas fa-info-circle text-xs mr-1"></i>
+                    <span>รายละเอียด</span>
                   </button>
+
+                  <!-- ปุ่มประวัติ -->
                   <button
                     @click="handleViewHistory(user.id)"
                     class="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 text-white text-sm hover:opacity-90 transition-opacity"
                   >
-                    ประวัติ
+                    <i class="fas fa-history text-xs mr-1"></i>
+                    <span>ประวัติ</span>
                   </button>
                 </div>
               </td>
@@ -143,15 +210,26 @@
             class="bg-white p-4 rounded-lg shadow-sm"
           >
             <!-- User Info -->
-            <div class="flex items-center gap-3 mb-3">
-              <div
-                class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white font-medium"
-              >
-                {{ user.fullName.charAt(0) }}
-              </div>
-              <div>
-                <div class="font-medium text-gray-900">{{ user.fullName }}</div>
-                <div class="text-sm text-gray-500">{{ user.email }}</div>
+            <div class="md:hidden">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-full overflow-hidden">
+                  <img
+                    v-if="user.profileImage"
+                    :src="adminUserStore.getProfileImage(user.profileImage)"
+                    :alt="user.fullName"
+                    class="w-full h-full object-cover"
+                  />
+                  <div
+                    v-else
+                    class="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center text-white font-medium"
+                  >
+                    {{ user.fullName.charAt(0).toUpperCase() }}
+                  </div>
+                </div>
+                <div>
+                  <div class="font-medium text-gray-900">{{ user.fullName }}</div>
+                  <div class="text-sm text-gray-500">{{ user.email }}</div>
+                </div>
               </div>
             </div>
 
@@ -168,7 +246,7 @@
                 <p class="text-sm text-gray-500">ทักษะ:</p>
                 <div class="flex flex-wrap gap-1.5">
                   <span
-                    v-for="skill in JSON.parse(user.skills)"
+                    v-for="skill in user.skills"
                     :key="skill"
                     class="px-2.5 py-0.5 text-xs rounded-full bg-purple-100 text-purple-600"
                   >
@@ -193,23 +271,7 @@
               <!-- วันที่สมัคร -->
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">วันที่สมัคร:</span>
-                <span>{{ formatDate(user.registeredDate) }}</span>
-              </div>
-
-              <!-- Action Buttons -->
-              <div class="flex gap-2 mt-4">
-                <button
-                  @click="showUserDetails(user)"
-                  class="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white text-sm hover:opacity-90 transition-opacity"
-                >
-                  <i class="fas fa-info-circle mr-1"></i> รายละเอียด
-                </button>
-                <button
-                  @click="handleViewHistory(user.id)"
-                  class="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 text-white text-sm hover:opacity-90 transition-opacity"
-                >
-                  <i class="fas fa-history mr-1"></i> ประวัติ
-                </button>
+                <span>{{ formatDate(user.approvedDate) }}</span>
               </div>
             </div>
 
@@ -219,37 +281,19 @@
                 @click="showUserDetails(user)"
                 class="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white text-sm hover:opacity-90 transition-opacity"
               >
-                <i class="fas fa-info-circle mr-1"></i> รายละเอียด
+                <i class="fas fa-info-circle text-xs mr-1"></i>
+                รายละเอียด
               </button>
+
               <button
                 @click="handleViewHistory(user.id)"
                 class="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 text-white text-sm hover:opacity-90 transition-opacity"
               >
-                <i class="fas fa-history mr-1"></i> ประวัติ
+                <i class="fas fa-history text-xs mr-1"></i>
+                ประวัติ
               </button>
             </div>
           </div>
-        </div>
-
-        <!-- Mobile Pagination -->
-        <div v-if="formattedUsers.length > 0" class="flex justify-center mt-4 gap-2">
-          <button
-            @click="handlePrevPage"
-            :disabled="currentPage <= 1"
-            class="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white disabled:opacity-50"
-          >
-            <i class="fas fa-chevron-left"></i>
-          </button>
-          <span class="flex items-center px-4 text-sm text-gray-600">
-            หน้า {{ currentPage }} จาก {{ totalPages }}
-          </span>
-          <button
-            @click="handleNextPage"
-            :disabled="!hasMorePages"
-            class="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white disabled:opacity-50"
-          >
-            <i class="fas fa-chevron-right"></i>
-          </button>
         </div>
       </div>
     </div>
@@ -257,16 +301,49 @@
     <!-- Pagination -->
     <div
       v-if="!loading && formattedUsers.length > 0"
-      class="mt-6 flex justify-center items-center space-x-2"
+      class="mt-6 flex justify-center items-center space-x-3 pb-3"
     >
       <button
         @click="handlePrevPage"
         :disabled="currentPage <= 1"
-        class="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white disabled:opacity-50 transition-all duration-300 hover:shadow-md"
+        class="px-4 py-2 rounded-lg transition-all duration-300 flex items-center"
+        :class="[
+          currentPage <= 1
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            : 'bg-gradient-to-r from-purple-500/10 to-blue-500/10 text-purple-600 hover:from-purple-500/20 hover:to-blue-500/20 hover:shadow-md'
+        ]"
       >
-        <i class="fas fa-chevron-left"></i>
+        <i class="fas fa-chevron-left text-sm"></i>
       </button>
-      <!-- ... pagination buttons ... -->
+
+      <div class="flex items-center space-x-2">
+        <button
+          class="px-4 py-2 rounded-lg bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] text-white font-medium min-w-[40px]"
+        >
+          {{ currentPage }}
+        </button>
+
+        <span class="text-gray-500 font-medium">จาก</span>
+
+        <span
+          class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 text-gray-600 font-medium min-w-[40px] text-center"
+        >
+          {{ totalPages }}
+        </span>
+      </div>
+
+      <button
+        @click="handleNextPage"
+        :disabled="currentPage >= totalPages"
+        class="px-4 py-2 rounded-lg transition-all duration-300 flex items-center"
+        :class="[
+          currentPage >= totalPages
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            : 'bg-gradient-to-r from-purple-500/10 to-blue-500/10 text-purple-600 hover:from-purple-500/20 hover:to-blue-500/20 hover:shadow-md'
+        ]"
+      >
+        <i class="fas fa-chevron-right text-sm"></i>
+      </button>
     </div>
 
     <!-- Modals -->
@@ -301,6 +378,8 @@ import {
   TransitionRoot,
   TransitionChild
 } from '@headlessui/vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+
 export default {
   name: 'AdminAllUsers',
   components: {
@@ -311,47 +390,68 @@ export default {
     HeadlessDialogPanel,
     HeadlessDialogTitle,
     TransitionRoot,
-    TransitionChild
+    TransitionChild,
+    LoadingSpinner
   },
   data() {
+    const adminUserStore = useAdminUserStore()
+    const userHistoryStore = useUserHistoryStore()
+    const sidebarStore = useSidebarStore()
+
     return {
       baseURL: import.meta.env.VITE_API_URL,
       showHistoryModal: false,
+      showModal: false,
       selectedUser: null,
-      loading: false,
-      currentPage: 1,
-      perPage: 10,
-      totalItems: 0,
-      showModal: false
+      adminUserStore,
+      userHistoryStore,
+      sidebarStore
     }
   },
 
   created() {
-    this.adminUserStore.fetchUsers()
+    this.initializeData()
   },
-  setup() {
-    const adminUserStore = useAdminUserStore()
-    const userHistoryStore = useUserHistoryStore()
-    const sidebarStore = useSidebarStore()
-    return { adminUserStore, userHistoryStore, sidebarStore }
+
+  mounted() {
+    if (window.innerWidth < 768) {
+      window.addEventListener('scroll', this.handleScroll)
+    }
   },
+  beforeUnmount() {
+    window.removeEventListener('scroll', this.handleScroll)
+  },
+
   computed: {
+    // Pagination
+    currentPage: {
+      get() {
+        return this.adminUserStore.pagination.currentPage
+      },
+      set(value) {
+        this.adminUserStore.pagination.currentPage = value
+      }
+    },
+    totalPages() {
+      return this.adminUserStore.totalPages
+    },
+
+    // Store Data
+    loading() {
+      return this.adminUserStore.loading
+    },
+
     searchFilters() {
       return this.adminUserStore.searchFilters
     },
     formattedUsers() {
       return this.adminUserStore.users
     },
-    totalPages() {
-      return Math.max(1, Math.ceil(this.totalItems / this.perPage))
-    },
-    hasMorePages() {
-      return this.currentPage < this.totalPages
+    totalUsers() {
+      return this.adminUserStore.pagination.totalItems
     },
 
-    totalUsers() {
-      return this.formattedUsers.length
-    },
+    // User Stats
     verifiedUsers() {
       return this.formattedUsers.filter((user) => user.isVerified).length
     },
@@ -363,6 +463,23 @@ export default {
     }
   },
   methods: {
+    async initializeData() {
+      try {
+        await this.adminUserStore.fetchUsers({
+          page: this.currentPage,
+          limit: this.perPage
+        })
+      } catch (error) {
+        console.error('Error fetching rejected users:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'ไม่สามารถโหลดข้อมูลผู้ใช้ได้',
+          confirmButtonText: 'ตกลง'
+        })
+      }
+    },
+    // User Actions
     async handleViewHistory(userId) {
       try {
         this.selectedUser = this.formattedUsers.find((u) => u.id === userId)
@@ -378,35 +495,35 @@ export default {
         })
       }
     },
-
+    // Modal Management
     closeHistoryModal() {
       this.showHistoryModal = false
       this.selectedUser = null
       this.userHistoryStore.clearHistory()
     },
-
-    showUserDetails(user) {
-      if (user) {
-        this.selectedUser = { ...user }
-        this.showModal = true
-      }
+    async showUserDetails(user) {
+      this.selectedUser = { ...user }
+      this.showModal = true
     },
 
     closeModal() {
       this.showModal = false
     },
-
+    // Search & Filter
     handleSearch(filters) {
       this.adminUserStore.setSearchFilters(filters)
+      this.adminUserStore.fetchUsers()
     },
 
     handleClear() {
       this.adminUserStore.clearSearchFilters()
+      this.adminUserStore.fetchUsers()
     },
+    // Pagination
     handlePrevPage() {
       if (this.currentPage > 1) {
         this.currentPage--
-        this.fetchUsers()
+        this.adminUserStore.fetchUsers()
         window.scrollTo(0, 0)
       }
     },
@@ -418,15 +535,34 @@ export default {
         window.scrollTo(0, 0)
       }
     },
-
+    // Data Management
     formatDate(dateString) {
       return this.adminUserStore.formatDate(dateString)
+    },
+
+    async refreshData() {
+      try {
+        this.handleClear()
+        await this.adminUserStore.fetchUsers()
+        Swal.fire({
+          icon: 'success',
+          title: 'รีเฟรชข้อมูลสำเร็จ',
+          showConfirmButton: false,
+          timer: 1500
+        })
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'ไม่สามารถรีเฟรชข้อมูลได้',
+          confirmButtonText: 'ตกลง'
+        })
+      }
     }
   }
 }
 </script>
 <style scoped>
-/* Add any custom animations or transitions */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;

@@ -47,11 +47,23 @@
             >
               <!-- Profile Image -->
               <div class="flex flex-col items-center">
-                <img
-                  :src="`${baseURL}/uploads/profiles/${user.profileImage}`"
-                  alt="Profile"
-                  class="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover shadow-lg ring-4 ring-[#9899ee]/30 mb-4"
-                />
+                <div
+                  class="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-lg ring-4 ring-[#9899ee]/30 mb-4"
+                >
+                  <img
+                    v-if="user.profileImage"
+                    :src="adminUserStore.getProfileImage(user.profileImage)"
+                    :alt="user.fullName"
+                    class="w-full h-full object-cover"
+                    @error="$event.target.style.display = 'none'"
+                  />
+                  <div
+                    v-else
+                    class="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center text-white font-medium text-3xl"
+                  >
+                    {{ user.fullName.charAt(0) }}
+                  </div>
+                </div>
                 <div class="text-center">
                   <p class="text-xl font-semibold text-gray-800">{{ user.fullName }}</p>
                   <p class="text-gray-500">{{ user.email }}</p>
@@ -74,7 +86,7 @@
                 <h3 class="text-lg font-semibold text-gray-700 mb-4">ทักษะความสามารถ</h3>
                 <div class="flex flex-wrap gap-3">
                   <span
-                    v-for="skill in JSON.parse(user.skills)"
+                    v-for="skill in user.skills"
                     :key="skill"
                     class="px-3 py-1 text-sm font-medium rounded-full bg-purple-200 text-purple-800 shadow-sm"
                   >
@@ -118,6 +130,7 @@ import {
   TransitionRoot,
   TransitionChild
 } from '@headlessui/vue'
+import { useAdminUserStore } from '@/stores/adminUserStore'
 
 export default {
   components: {
@@ -127,7 +140,7 @@ export default {
     TransitionRoot,
     TransitionChild
   },
-
+  emits: ['close', 'onClose'],
   props: {
     isOpen: Boolean,
     user: Object
@@ -138,7 +151,12 @@ export default {
       baseURL: import.meta.env.VITE_API_URL
     }
   },
-
+  setup() {
+    const adminUserStore = useAdminUserStore()
+    return {
+      adminUserStore
+    }
+  },
   computed: {
     userInfo() {
       return [

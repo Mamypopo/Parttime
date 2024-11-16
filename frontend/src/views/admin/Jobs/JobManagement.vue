@@ -26,8 +26,8 @@
       <div class="p-5 border-b">
         <div class="flex justify-between items-center overflow-hidden">
           <h2 class="text-xl font-semibold text-gray-800">จัดการงาน</h2>
-          <JobSearch @search="handleSearch" @clear="handleClear" />
         </div>
+        <JobSearch @search="handleSearch" @clear="handleClear" />
       </div>
 
       <!-- Job Cards Grid -->

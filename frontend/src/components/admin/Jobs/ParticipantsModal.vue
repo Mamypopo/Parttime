@@ -304,7 +304,6 @@ export default {
     return { jobStore }
   },
   computed: {
-    // Add a computed property to show if any filter is active
     isFilterActive() {
       return this.statusFilter !== null
     }
@@ -484,15 +483,11 @@ export default {
       return this.jobStore.getProfileImage(image)
     },
     toggleFilter(status) {
-      // Toggle status filter
       this.statusFilter = this.statusFilter === status ? null : status
-      // Reset rating filter when status filter is used
       this.ratingFilter = null
     },
     toggleRatingFilter(rating) {
-      // Toggle rating filter
       this.ratingFilter = this.ratingFilter === rating ? null : rating
-      // Reset status filter when rating filter is used
       this.statusFilter = null
     }
   }

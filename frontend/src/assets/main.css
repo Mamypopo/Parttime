@@ -12,6 +12,7 @@
     --z-notification: 900;
     --z-modal-overlay: 998;
     --z-modal: 999;
+    --z-dropdown: 1100;
   }
 
   html {
@@ -57,4 +58,14 @@
 
 .modal {
   z-index: var(--z-modal);
+}
+.dropdown-menu {
+  z-index: var(--z-dropdown);
+  position: absolute; /* ใช้ absolute เพื่อกำหนดตำแหน่งสัมพันธ์กับ parent */
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-height: 200px;
+  overflow-y: auto;
 }

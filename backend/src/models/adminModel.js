@@ -66,6 +66,7 @@ const baseUserSelect = {
     email: true,
     email_verified: true,
     created_at: true,
+    updated_at: true,
     skills: true,
     // ข้อมูลพื้นฐาน
     prefix: true,
@@ -79,7 +80,7 @@ const baseUserSelect = {
     // เอกสาร
     education_certificate: true,
     user_documents: true,
-    approved: true // เพิ่ม field approved
+    approved: true
 };
 
 

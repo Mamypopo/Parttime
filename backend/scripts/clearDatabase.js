@@ -6,7 +6,7 @@ async function clearDatabase() {
     try {
         // ลบข้อมูลตามลำดับ เริ่มจากตารางที่มี Foreign key ไปยังตารางหลัก
         console.log('เริ่มล้างข้อมูล...');
-
+        await prisma.workHistory.deleteMany({});
         // ลบ JobParticipation ก่อน (ถ้ามี)
         await prisma.jobParticipation.deleteMany();
         console.log('ล้างข้อมูล JobParticipation เรียบร้อย');

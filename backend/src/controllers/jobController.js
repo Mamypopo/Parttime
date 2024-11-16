@@ -343,6 +343,21 @@ export const applyForJob = async (req, res) => {
             return res.status(400).json({ message: 'ไม่พบ userId กรุณาเข้าสู่ระบบใหม่' });
         }
 
+
+
+        if (!user.email_verified) {
+            return res.status(400).json({
+                message: 'กรุณายืนยันอีเมลก่อนสมัครงาน',
+
+            });
+        }
+
+
+        if (!user.approved) {
+            return res.status(400).json({
+                message: 'บัญชีของคุณยังไม่ได้รับการอนุมัติ กรุณารอการอนุมัติจากแอดมิน',
+            });
+        }
         const jobPosition = await jobModel.findJobPositionById(jobPositionId);
         if (!jobPosition) {
             return res.status(404).json({ message: 'ตำแหน่งงานไม่ถูกต้อง' });

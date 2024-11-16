@@ -168,7 +168,7 @@
         'ml-72': !sidebarStore.isMobile && !sidebarStore.isCollapsed
       }"
     >
-      <router-view></router-view>
+      <router-view> </router-view>
     </div>
     <!-- Expand Button -->
     <TransitionRoot
