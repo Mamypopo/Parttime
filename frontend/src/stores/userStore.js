@@ -76,6 +76,22 @@ export const useUserStore = defineStore('user', {
 
         },
 
+        startHeartbeat() {
+            this.heartbeatInterval = setInterval(async () => {
+                try {
+                    await axios.post(`${this.baseURL}/api/user/heartbeat`);
+                } catch (error) {
+                    console.error('Heartbeat failed:', error);
+                }
+            }, 30000); // 30 seconds
+        },
+
+        stopHeartbeat() {
+            if (this.heartbeatInterval) {
+                clearInterval(this.heartbeatInterval);
+            }
+        }
+
 
     },
 

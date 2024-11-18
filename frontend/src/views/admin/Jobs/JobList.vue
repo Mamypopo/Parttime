@@ -1,35 +1,73 @@
 <template>
-  <div class="p-6 ml-6">
-    <!-- Main Card -->
-    <div
-      class="bg-white p-4 md:p-8 min-h-screen rounded-lg transition-all duration-500 ease-in-out shadow-sm overflow-hidden"
-    >
-      <!-- Header -->
-      <div class="p-6 border-b">
-        <div class="flex justify-between items-center">
-          <h2 class="text-xl font-semibold text-gray-800">งานทั้งหมดในระบบ</h2>
+  <div class="p-4 md:p-6 transition-all duration-300 ease-in-out">
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div class="mb-4 md:mb-0">
+          <h2
+            class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
+          >
+            งานทั้งหมดในระบบ
+          </h2>
+          <p class="text-gray-500 mt-1">จัดการและดูรายละเอียดงานทั้งหมด</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div class="bg-gradient-to-br from-purple-50 to-blue-50 p-4 rounded-xl shadow-sm">
+            <div class="text-sm text-gray-500">งานทั้งหมด</div>
+            <div class="text-2xl font-bold text-purple-600">{{ jobs.length }}</div>
+          </div>
+          <div class="bg-gradient-to-br from-green-50 to-teal-50 p-4 rounded-xl shadow-sm">
+            <div class="text-sm text-gray-500">งานที่เสร็จสิ้น</div>
+            <div class="text-2xl font-bold text-green-600">
+              {{ jobs.filter((job) => job.status === 'completed').length }}
+            </div>
+          </div>
+          <div
+            class="hidden md:block bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-xl shadow-sm"
+          >
+            <div class="text-sm text-gray-500">งานที่กำลังดำเนินการ</div>
+            <div class="text-2xl font-bold text-yellow-600">
+              {{ jobs.filter((job) => job.status === 'in_progress').length }}
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Search Component -->
-      <JobSearch @search="handleSearch" @clear="handleClear" />
-
-      <!-- Table Section -->
-      <div class="overflow-x-auto">
-        <!-- Loading State -->
-        <div v-if="loading" class="flex justify-center items-center py-12">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
+      <!-- Search Bar with Animation -->
+      <div class="mt-6 flex items-center gap-2">
+        <div class="flex-1 transform transition-all duration-300 hover:scale-[1.01]">
+          <JobSearch
+            @search="handleSearch"
+            @clear="handleClear"
+            class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+          />
         </div>
+      </div>
+    </div>
 
-        <!-- Empty State -->
-        <div v-else-if="jobs.length === 0" class="text-center py-12 text-gray-500">
-          <i class="fas fa-clipboard-list text-4xl mb-4 text-[#EABF71]"></i>
-          <p>ไม่พบข้อมูลงาน</p>
+    <!-- Main Content -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300">
+      <!-- Loading State -->
+      <div v-if="loading" class="flex justify-center items-center py-12">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else-if="jobs.length === 0" class="flex flex-col items-center justify-center py-12">
+        <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+          <i class="fas fa-clipboard-list text-3xl text-[#EABF71]"></i>
         </div>
+        <p class="text-gray-500 text-lg">ไม่พบข้อมูลงาน</p>
+        <p class="text-gray-400 text-sm mt-2">ลองปรับเงื่อนไขการค้นหาใหม่</p>
+      </div>
 
-        <table v-else class="w-full">
-          <thead class="bg-gray-50 border-b">
-            <tr>
+      <!-- Table -->
+      <div v-else class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-gradient-to-r from-purple-50 to-blue-50">
               <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">Job ID</th>
               <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">ADMIN</th>
               <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">ชื่องาน</th>
@@ -42,8 +80,12 @@
               <th class="px-6 py-4 text-center text-sm font-medium text-gray-500">รายละเอียด</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-200">
-            <tr v-for="job in jobs" :key="job.id" class="hover:bg-gray-50">
+          <tbody class="divide-y divide-gray-100">
+            <tr
+              v-for="job in jobs"
+              :key="job.id"
+              class="hover:bg-gray-50 transition-colors duration-150"
+            >
               <td class="px-6 py-4 text-gray-900">{{ job.id }}</td>
               <td class="px-6 py-4 text-gray-600">
                 {{ job.creator?.first_name || `Admin ${job.created_by}` }}
@@ -54,27 +96,23 @@
               <td class="px-6 py-4 text-gray-600">
                 {{ formatTime(job.start_time) }} - {{ formatTime(job.end_time) }}
               </td>
-
-              <!-- Positions -->
               <td class="px-6 py-4">
-                <div class="flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-1">
                   <span
                     v-for="position in job.JobPositions"
                     :key="position.id"
-                    class="px-3 py-1 text-xs rounded-full bg-purple-100 text-purple-600"
+                    class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-600"
                   >
                     {{ position.position_name }}
                   </span>
                 </div>
               </td>
-              <td class="px-4 py-2">
-                <span class="text-[#6ED7D1] font-medium">
-                  {{ calculateTotalWage(job) }}
-                  <span class="text-[#969696]">บาท</span>
+              <td class="px-6 py-4">
+                <span class="font-medium text-purple-600">
+                  {{ jobStore.calculateTotalWage(job) }}
+                  <span class="text-gray-500">บาท</span>
                 </span>
               </td>
-
-              <!-- Status -->
               <td class="px-6 py-4 text-center">
                 <span
                   class="inline-flex px-3 py-1 rounded-full text-xs whitespace-nowrap"
@@ -83,67 +121,70 @@
                   {{ getJobStatus(job).text }}
                 </span>
               </td>
-
-              <!-- Actions -->
               <td class="px-6 py-4 text-center">
-                <div class="flex justify-center space-x-2">
-                  <button @click="openModal(job)" class="text-[#7BC4C4] hover:text-[#5DA3A3]">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                </div>
+                <button
+                  @click="openModal(job)"
+                  class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white text-sm hover:opacity-90 transition-opacity"
+                >
+                  <i class="fas fa-eye mr-1"></i>
+                  รายละเอียด
+                </button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+    </div>
 
-      <!-- เพิ่ม Modal Component -->
-      <JobDetailModal :is-open="isModalOpen" :job="selectedJob || {}" @close="closeModal" />
-
-      <!-- Pagination controls -->
-      <div
-        v-if="!loading && jobs.length > 0"
-        class="flex justify-center items-center mt-6 space-x-2 pb-4"
+    <!-- Pagination -->
+    <div
+      v-if="!loading && jobs.length > 0"
+      class="mt-6 flex justify-center items-center space-x-3 pb-3"
+    >
+      <button
+        @click="handlePrevPage"
+        :disabled="currentPage <= 1"
+        class="px-4 py-2 rounded-lg transition-all duration-300 flex items-center"
+        :class="[
+          currentPage <= 1
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            : 'bg-gradient-to-r from-purple-500/10 to-blue-500/10 text-purple-600 hover:from-purple-500/20 hover:to-blue-500/20 hover:shadow-md'
+        ]"
       >
-        <!-- ปุ่มย้อนกลับ -->
-        <button
-          @click="handlePrevPage"
-          :disabled="currentPage <= 1"
-          class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
-          :class="[
-            currentPage <= 1
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-white text-purple-600 hover:bg-purple-50 border border-purple-200'
-          ]"
-        >
-          <i class="fas fa-chevron-left text-sm"></i>
-        </button>
+        <i class="fas fa-chevron-left text-sm"></i>
+      </button>
 
-        <!-- หน้าปัจจุบัน -->
+      <div class="flex items-center space-x-2">
         <button
-          class="w-8 h-8 flex items-center justify-center rounded-lg bg-purple-400 text-white"
+          class="px-4 py-2 rounded-lg bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] text-white font-medium min-w-[40px]"
         >
           {{ currentPage }}
         </button>
 
-        <!-- จำนวนหน้าทั้งหมด -->
-        <span class="text-gray-600"> of {{ totalPages }} </span>
+        <span class="text-gray-500 font-medium">จาก</span>
 
-        <!-- ปุ่มถัดไป -->
-        <button
-          @click="handleNextPage"
-          :disabled="currentPage >= totalPages"
-          class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
-          :class="[
-            currentPage >= totalPages
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-white text-purple-600 hover:bg-purple-50 border border-purple-200'
-          ]"
+        <span
+          class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 text-gray-600 font-medium min-w-[40px] text-center"
         >
-          <i class="fas fa-chevron-right text-sm"></i>
-        </button>
+          {{ totalPages }}
+        </span>
       </div>
+
+      <button
+        @click="handleNextPage"
+        :disabled="currentPage >= totalPages"
+        class="px-4 py-2 rounded-lg transition-all duration-300 flex items-center"
+        :class="[
+          currentPage >= totalPages
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            : 'bg-gradient-to-r from-purple-500/10 to-blue-500/10 text-purple-600 hover:from-purple-500/20 hover:to-blue-500/20 hover:shadow-md'
+        ]"
+      >
+        <i class="fas fa-chevron-right text-sm"></i>
+      </button>
     </div>
+    <!-- Job Detail Modal -->
+    <JobDetailModal :is-open="isModalOpen" :job="selectedJob || {}" @close="closeModal" />
   </div>
 </template>
 
@@ -184,7 +225,6 @@ export default {
   data() {
     return {
       baseURL: import.meta.env.VITE_API_URL,
-      currentPage: 1,
       pageSize: 10,
       isModalOpen: false,
       selectedJob: null
@@ -200,13 +240,21 @@ export default {
     pagination() {
       return this.jobStore.pagination
     },
+    currentPage: {
+      get() {
+        return this.jobStore.pagination.currentPage
+      },
+      set(value) {
+        this.jobStore.pagination.currentPage = value
+      }
+    },
     totalPages() {
-      return this.jobStore.pagination.totalPages
+      return this.jobStore.totalPages
     }
   },
   async created() {
     try {
-      await this.fetchJobs()
+      await this.jobStore.fetchJobsAndParticipants()
     } catch (error) {
       console.error('Error in created hook:', error)
     }
@@ -229,16 +277,18 @@ export default {
       this.jobStore.resetPagination()
       this.fetchJobs()
     },
+    // Pagination
     handlePrevPage() {
       if (this.currentPage > 1) {
-        this.jobStore.pagination.page--
-        this.fetchJobs()
+        this.jobStore.setPage(this.currentPage - 1) // ถูก
+        this.jobStore.fetchJobs() // ถูก
       }
     },
+
     handleNextPage() {
       if (this.currentPage < this.totalPages) {
-        this.jobStore.pagination.page++
-        this.fetchJobs()
+        this.jobStore.setPage(this.currentPage + 1) // ถูก
+        this.jobStore.fetchJobs() // ถูก
       }
     },
     // ใช้ utility functions จาก store

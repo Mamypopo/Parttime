@@ -531,3 +531,37 @@ export const getProfileImage = (req, res) => {
 };
 
 
+export const updateUserOnlineStatus = async (req, res) => {
+    const userId = req.user.id;
+    try {
+        await userModel.updateUserOnlineStatus(userId);
+        res.status(200).json({
+            success: true,
+            message: 'อัพเดทสถานะออนไลน์สำเร็จ'
+        });
+    } catch (error) {
+        console.error('Controller - updateUserOnlineStatus error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'เกิดข้อผิดพลาดในการอัพเดทสถานะ'
+        });
+    }
+};
+
+// เพิ่ม endpoint สำหรับ offline
+export const updateUserOfflineStatus = async (req, res) => {
+    const userId = req.user.id;
+    try {
+        await userModel.updateUserOfflineStatus(userId);
+        res.status(200).json({
+            success: true,
+            message: 'อัพเดทสถานะออฟไลน์สำเร็จ'
+        });
+    } catch (error) {
+        console.error('Controller - updateUserOfflineStatus error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'เกิดข้อผิดพลาดในการอัพเดทสถานะ'
+        });
+    }
+};

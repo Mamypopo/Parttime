@@ -1,22 +1,5 @@
 <template>
   <div class="relative">
-    <!-- ปุ่มการแจ้งเตือน -->
-    <button
-      class="flex flex-col items-center p-2 text-[#3A3A49]"
-      @click="$emit('update:modelValue', true)"
-    >
-      <div class="relative">
-        <i class="fas fa-bell text-xl"></i>
-        <span
-          v-if="notificationStore.unreadCount > 0"
-          class="absolute -top-2 -right-2 bg-[#EA6B6B] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse"
-        >
-          {{ notificationStore.unreadCount }}
-        </span>
-      </div>
-      <span class="text-xs mt-1">การแจ้งเตือน</span>
-    </button>
-
     <TransitionRoot appear :show="modelValue" as="template">
       <Dialog as="div" class="relative z-50" @close="$emit('update:modelValue', false)">
         <TransitionChild

@@ -198,15 +198,22 @@ export const getPendingUsers = async (req, res) => {
         }
 
         // ส่ง searchParams ไปยัง Model
-        const users = await adminModel.findPendingUsers(limit, offset, searchParams)
-        const total = await adminModel.countUsersPending(searchParams)
+
+        const [users, counts] = await Promise.all([
+            adminModel.findPendingUsers(limit, offset, searchParams),
+            adminModel.countUsersPending(searchParams)
+        ]);
 
         res.json({
             users,
             pagination: {
-                total,
+                total: counts.total,
                 page,
                 limit
+            },
+            stats: {
+                totalVerified: counts.totalVerified,
+                totalNotVerified: counts.totalNotVerified
             }
         })
     } catch (error) {
@@ -308,10 +315,12 @@ export const approveUser = async (req, res) => {
         if (!user) {
             return res.status(400).json({ message: "ไม่พบผู้ใช้ กรุณาตรวจสอบและลองอีกครั้ง" });
         }
-
-        // if (!user.email_verified) {
-        //     return res.status(400).json({ message: "ผู้ใช้ต้องยืนยันอีเมลก่อนที่จะสามารถอนุมัติได้" });
-        // }
+        if (status === 'approved' && !user.email_verified) {
+            return res.status(400).json({
+                message: "ไม่สามารถอนุมัติได้เนื่องจากผู้ใช้ยังไม่ได้ยืนยันอีเมล กรุณารอให้ผู้ใช้ยืนยันอีเมลก่อน",
+                email_verified: false
+            });
+        }
 
 
         if (user.approved === "approved") {
@@ -363,10 +372,11 @@ export const approveUser = async (req, res) => {
         );
 
         res.status(200).json({
-            message: `อัปเดตสถานะผู้ใช้เป็น ${status} สำเร็จ`,
+            message: `อัปเดตสถานะผู้ใช้เป็น ${status} สำเร็จ${!user.email_verified && status === 'approved' ? ' (รอการยืนยันอีเมล)' : ''}`,
             user: {
                 id: updatedUser.id,
-                status: updatedUser.approved
+                status: updatedUser.approved,
+                email_verified: updatedUser.email_verified
             }
         });
     } catch (error) {
@@ -547,5 +557,18 @@ export const markAllNotificationsAsRead = async (req, res) => {
         res.status(200).json({ message: 'อัพเดทสถานะการอ่านทั้งหมดเรียบร้อย' });
     } catch (error) {
         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการอัพเดทสถานะการอ่าน' });
+    }
+};
+
+
+export const getOnlineUsersCount = async (req, res) => {
+    try {
+        const count = await adminModel.getOnlineUsersCount();
+        res.status(200).json({ onlineCount: count });
+    } catch (error) {
+        console.error('Controller - getOnlineUsersCount error:', error);
+        res.status(500).json({
+            message: error.message || 'เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้ออนไลน์'
+        });
     }
 };

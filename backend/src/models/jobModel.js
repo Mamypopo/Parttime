@@ -674,7 +674,7 @@ export const updateJobStatus = async (jobId, status) => {
         const updatedJob = await prisma.job.update({
             where: { id: jobId },
             data: {
-                status,
+                status: { not: 'completed' },
                 updated_at: new Date()
             },
             include: {

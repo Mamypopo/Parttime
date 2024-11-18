@@ -1,5 +1,7 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-[#F2F5FF] relative">
+  <div
+    class="flex flex-col min-h-screen bg-[#F2F5FF] dark:bg-gray-900 relative transition-colors duration-300 ease-in-out"
+  >
     <!-- Desktop/Tablet Sidebar -->
     <TransitionRoot
       :show="!sidebarStore.isMobile"
@@ -13,10 +15,15 @@
     >
       <div
         class="sidebar h-screen fixed bg-white border-r shadow-lg transition-all duration-500 ease-in-out"
-        :class="[sidebarStore.isCollapsed ? 'w-20' : 'w-72']"
+        :class="[
+          sidebarStore.isCollapsed ? 'w-20' : 'w-72',
+          'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+        ]"
       >
         <!-- Header with Gradient -->
-        <div class="relative h-16 bg-gradient-to-r from-purple-600 to-blue-500">
+        <div
+          class="relative h-16 bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-700 dark:to-blue-600"
+        >
           <div
             class="absolute inset-0 flex items-center justify-between px-4"
             :class="[sidebarStore.isCollapsed ? 'justify-center' : '']"
@@ -36,14 +43,59 @@
             </button>
           </div>
         </div>
+        <!-- Toggle Dark Mode -->
+        <div class="mt-auto">
+          <div
+            class="flex items-center px-4 py-3 rounded-xl transition-all duration-200"
+            :class="[sidebarStore.isCollapsed ? 'justify-center' : 'gap-3']"
+          >
+            <!-- Toggle Switch -->
+            <button
+              @click="toggleDarkMode"
+              class="relative inline-flex items-center cursor-pointer"
+            >
+              <div
+                class="w-11 h-6 rounded-full transition-colors duration-200 ease-in-out"
+                :class="[
+                  isDarkMode ? 'bg-purple-600 dark:bg-purple-500' : 'bg-gray-200 dark:bg-gray-700'
+                ]"
+              >
+                <div
+                  class="absolute top-[2px] left-[2px] w-5 h-5 bg-white rounded-full transition-transform duration-200 ease-in-out"
+                  :class="{ 'translate-x-full': isDarkMode }"
+                ></div>
+                <!-- Icons -->
+                <span
+                  class="absolute left-[4px] top-[4px] text-[10px] transition-opacity duration-200"
+                  :class="{ 'opacity-0': isDarkMode }"
+                >
+                  🌞
+                </span>
+                <span
+                  class="absolute right-[4px] top-[4px] text-[10px] transition-opacity duration-200"
+                  :class="{ 'opacity-0': !isDarkMode }"
+                >
+                  🌙
+                </span>
+              </div>
+            </button>
 
+            <!-- Label -->
+            <span
+              v-if="!sidebarStore.isCollapsed"
+              class="text-sm font-medium text-gray-600 dark:text-gray-300"
+            >
+              {{ isDarkMode ? 'โหมดมืด' : 'โหมดสว่าง' }}
+            </span>
+          </div>
+        </div>
         <!-- Navigation Menu -->
         <div class="p-4 space-y-8">
           <!-- Main Menu -->
           <div>
             <h2
               v-if="!sidebarStore.isCollapsed"
-              class="text-xs font-semibold text-gray-400 mb-4 px-4"
+              class="text-xs font-semibold text-gray-400 mb-4 px-4 dark:text-gray-500"
             >
               เมนูหลัก
             </h2>
@@ -55,8 +107,8 @@
                 class="flex items-center px-4 py-3 rounded-xl transition-all duration-200"
                 :class="[
                   $route.path === item.path
-                    ? 'bg-gradient-to-r from-purple-50 to-blue-50 text-purple-600'
-                    : 'text-gray-600 hover:bg-gray-50',
+                    ? 'bg-gradient-to-r from-purple-50 to-blue-50 text-purple-600  dark:from-purple-800/30 dark:to-blue-800/30 dark:text-purple-400'
+                    : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700',
                   sidebarStore.isCollapsed ? 'justify-center' : 'gap-3'
                 ]"
               >
@@ -64,7 +116,9 @@
                   :class="[
                     item.icon,
                     'text-xl',
-                    $route.path === item.path ? 'text-purple-600' : 'text-gray-400'
+                    $route.path === item.path
+                      ? 'text-purple-600 dark:text-purple-400'
+                      : 'text-gray-400 dark:text-gray-500'
                   ]"
                 ></i>
                 <span v-if="!sidebarStore.isCollapsed" class="font-medium">{{ item.name }}</span>
@@ -76,7 +130,7 @@
           <div>
             <h2
               v-if="!sidebarStore.isCollapsed"
-              class="text-xs font-semibold text-gray-400 mb-4 px-4"
+              class="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-4 px-4"
             >
               งาน
             </h2>
@@ -88,8 +142,8 @@
                 class="flex items-center px-4 py-3 rounded-xl transition-all duration-200"
                 :class="[
                   $route.path === item.path
-                    ? 'bg-gradient-to-r from-purple-50 to-blue-50 text-purple-600'
-                    : 'text-gray-600 hover:bg-gray-50',
+                    ? 'bg-gradient-to-r from-purple-50 to-blue-50 text-purple-600 dark:from-purple-900/50 dark:to-blue-900/50 dark:text-purple-400'
+                    : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700',
                   sidebarStore.isCollapsed ? 'justify-center' : 'gap-3'
                 ]"
               >
@@ -110,18 +164,19 @@
               </router-link>
             </nav>
           </div>
-          <h2
-            v-if="!sidebarStore.isCollapsed"
-            class="text-xs font-semibold text-gray-400 mb-4 px-4"
-          >
-            การแจ้งเตือน
-          </h2>
-          <!-- Notifications -->
-          <NotificationsPanel
-            v-model="sidebarStore.showNotifications"
-            :is-collapsed="sidebarStore.isCollapsed"
-            @show-all="sidebarStore.showAllNotifications = true"
-          />
+          <div>
+            <h2
+              v-if="!sidebarStore.isCollapsed"
+              class="text-xs font-semibold text-gray-400 mb-4 px-4"
+            >
+              การแจ้งเตือน
+            </h2>
+            <NotificationsPanel
+              v-model="sidebarStore.showNotifications"
+              :is-collapsed="sidebarStore.isCollapsed"
+              @show-all="sidebarStore.showAllNotifications = true"
+            />
+          </div>
         </div>
 
         <!-- Profile Section -->
@@ -130,7 +185,7 @@
           :class="[sidebarStore.isCollapsed ? 'py-4' : 'py-6']"
         >
           <div
-            class="rounded-2xl bg-gradient-to-r from-purple-50 to-blue-50 p-4"
+            class="rounded-2xl bg-white/10 dark:bg-gray-700/50 transition-all duration-200 p-4"
             :class="[sidebarStore.isCollapsed ? 'px-2' : 'px-4']"
           >
             <div
@@ -142,15 +197,15 @@
                 alt="Profile"
                 class="w-10 h-10 rounded-xl shadow-md"
               />
-              <div v-if="!sidebarStore.isCollapsed">
-                <h3 class="font-semibold text-gray-700">Admin User</h3>
-                <p class="text-sm text-gray-500">admin@example.com</p>
+              <div v-if="!sidebarStore.isCollapsed" class="flex-1">
+                <h3 class="font-semibold text-gray-700 dark:text-gray-300">Admin User</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">admin@example.com</p>
               </div>
             </div>
             <div v-if="!sidebarStore.isCollapsed" class="mt-4">
               <button
                 @click="handleLogout"
-                class="w-full px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-500 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-md"
+                class="w-full px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-700 dark:to-blue-600 rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-md"
               >
                 <i class="fas fa-sign-out-alt"></i>
                 ออกจากระบบ
@@ -183,10 +238,10 @@
     >
       <button
         @click="sidebarStore.toggleSidebar"
-        class="fixed top-4 left-[4.5rem] p-2 bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group z-50"
+        class="fixed top-4 left-[4.5rem] p-2 ml-4 bg-white/50 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group z-50 dark:bg-gray-800/50"
       >
         <i
-          class="fas fa-chevron-right text-gray-400 group-hover:text-purple-600 transition-colors"
+          class="fas fa-chevron-right text-gray-400 group-hover:text-purple-600 transition-colors dark:text-gray-300"
         ></i>
       </button>
     </TransitionRoot>
@@ -232,9 +287,15 @@ export default {
     MobileMoreSubmenu
   },
   data() {
+    const sidebarStore = useSidebarStore()
+    const jobStore = useJobStore()
+    const notificationStore = useNotificationStore()
+
     return {
-      sidebarStore: useSidebarStore(),
-      jobStore: useJobStore()
+      sidebarStore,
+      jobStore,
+      notificationStore,
+      isDarkMode: localStorage.getItem('darkMode') === 'true' || false
     }
   },
 
@@ -244,11 +305,26 @@ export default {
       if (success) {
         this.$router.push('/signin-admin')
       }
+    },
+    toggleDarkMode() {
+      this.isDarkMode = !this.isDarkMode
+
+      if (this.isDarkMode) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+
+      localStorage.setItem('darkMode', this.isDarkMode)
     }
   },
 
   mounted() {
     this.sidebarStore.initializeResponsive()
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.documentElement.classList.add('dark')
+      this.isDarkMode = true
+    }
   },
 
   beforeUnmount() {
@@ -258,21 +334,21 @@ export default {
 </script>
 
 <style scoped>
-.router-link-active {
-  @apply bg-[#5D5FEF]/10;
-}
 .sidebar {
-  @apply backdrop-blur-lg bg-white/80;
+  @apply backdrop-blur-lg bg-white/80 dark:bg-gray-800/95;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
-/* Hover Effects */
+.router-link-active {
+  @apply bg-purple-100/10 dark:bg-purple-900/20;
+}
+
 .router-link-active i {
-  @apply text-purple-600;
+  @apply text-purple-600 dark:text-purple-400;
 }
 
 .router-link-active:hover {
-  @apply bg-purple-100;
+  @apply bg-purple-100 dark:bg-purple-900/30;
 }
 
 /* Mobile Navigation Animation */

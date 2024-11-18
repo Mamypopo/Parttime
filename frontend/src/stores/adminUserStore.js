@@ -8,6 +8,10 @@ export const useAdminUserStore = defineStore('adminUser', {
         users: [], // approved users
         pendingUsers: [], // pending users
         rejectedUsers: [], // rejected users
+        totalVerifiedUsers: 0,
+        totalNotVerifiedUsers: 0,
+        onlineUsersCount: 0,
+        onlineTrackingInterval: null,
         loading: false,
         error: null,
         pagination: {
@@ -19,11 +23,21 @@ export const useAdminUserStore = defineStore('adminUser', {
             userId: '',
             idCard: '',
             name: ''
+        },
+        rejectedStats: {
+            total: 0,
+            verified: 0,
+            notVerified: 0
         }
     }),
 
     getters: {
-        totalPages: (state) => Math.max(1, Math.ceil(state.pagination.totalItems / state.pagination.perPage)),
+        totalPages: (state) => {
+            if (!state.pagination.totalItems || isNaN(state.pagination.totalItems)) {
+                return 1
+            }
+            return Math.max(1, Math.ceil(state.pagination.totalItems / state.pagination.perPage))
+        },
         hasMorePages: (state) => state.pagination.currentPage < state.totalPages
     },
 
@@ -111,11 +125,22 @@ export const useAdminUserStore = defineStore('adminUser', {
                     if (response.data.pagination) {
                         this.pagination.totalItems = parseInt(response.data.pagination.total)
                     }
+                    // อัพเดทข้อมูลสถิติ
+                    if (response.data.stats) {
+                        this.rejectedStats = {
+                            total: response.data.stats.total,
+                            verified: response.data.stats.totalVerified,
+                            notVerified: response.data.stats.totalNotVerified
+                        }
+                    }
                 }
+
             } catch (error) {
                 console.error('Error fetching pending users:', error)
                 this.pendingUsers = []
                 this.pagination.totalItems = 0
+                this.totalVerifiedUsers = 0
+                this.totalNotVerifiedUsers = 0
             } finally {
                 this.loading = false
             }
@@ -145,7 +170,7 @@ export const useAdminUserStore = defineStore('adminUser', {
             }
         },
 
-        async fetchRejectedUsers() {  // ปรับให้ไม่รับ parameters
+        async fetchRejectedUsers() {
             this.loading = true
             try {
                 const params = {
@@ -167,13 +192,49 @@ export const useAdminUserStore = defineStore('adminUser', {
                     if (response.data.pagination) {
                         this.pagination.totalItems = parseInt(response.data.pagination.total)
                     }
+                    // อัพเดทสถิติของผู้ใช้ที่ถูก reject
+                    if (response.data.stats) {
+                        this.totalVerifiedUsers = response.data.stats.totalVerified
+                        this.totalNotVerifiedUsers = response.data.stats.totalNotVerified
+                    }
                 }
+
             } catch (error) {
                 console.error('Error fetching rejected users:', error)
                 this.rejectedUsers = []
                 this.pagination.totalItems = 0
+                this.totalVerifiedUsers = 0
+                this.totalNotVerifiedUsers = 0
             } finally {
                 this.loading = false
+            }
+        },
+        startOnlineTracking() {
+            // ยกเลิก interval เก่าถ้ามี
+            if (this.onlineTrackingInterval) {
+                clearInterval(this.onlineTrackingInterval)
+            }
+
+            // เริ่ม interval ใหม่
+            this.onlineTrackingInterval = setInterval(async () => {
+                await this.fetchOnlineUsers()
+            }, 60000) // update ทุก 1 นาที
+        },
+
+        stopOnlineTracking() {
+            if (this.onlineTrackingInterval) {
+                clearInterval(this.onlineTrackingInterval)
+                this.onlineTrackingInterval = null
+            }
+        },
+
+        async fetchOnlineUsers() {
+            try {
+                const response = await axios.get(`${this.baseURL}/api/admin/online-users`)
+                this.onlineUsersCount = response.data.onlineCount || 0
+            } catch (error) {
+                console.error('Error fetching online users:', error)
+                this.onlineUsersCount = 0
             }
         },
 

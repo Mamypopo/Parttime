@@ -15,19 +15,32 @@
       <div class="fixed inset-0 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
           <DialogPanel
-            class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all"
+            class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all"
           >
-            <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">ผู้ใช้งาน</h3>
-            <div class="space-y-2">
+            <!-- Header -->
+            <div
+              class="bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] p-4 flex justify-between items-center"
+            >
+              <h3 class="text-lg font-medium text-white">ผู้ใช้งาน</h3>
+              <button
+                @click="$emit('close')"
+                class="text-white/70 hover:text-white transition-colors"
+              >
+                <i class="fas fa-times text-xl"></i>
+              </button>
+            </div>
+
+            <!-- Menu Items -->
+            <div class="p-4 space-y-3">
               <router-link
                 v-for="item in userMenuItems"
                 :key="item.path"
                 :to="item.path"
-                class="block px-4 py-2 rounded-lg hover:bg-gray-50"
+                class="flex items-center p-3 rounded-lg hover:bg-[#F2F5FF] transition-all duration-200"
                 @click="$emit('close')"
               >
-                <i :class="[item.icon, 'mr-3 text-gray-400']"></i>
-                {{ item.name }}
+                <i :class="[item.icon, 'text-[#6366F1] text-xl mr-3']"></i>
+                <span class="text-[#3A3A49]">{{ item.name }}</span>
               </router-link>
             </div>
           </DialogPanel>
@@ -63,3 +76,13 @@ export default {
   emits: ['close']
 }
 </script>
+<style scoped>
+.router-link-active {
+  background-color: #f2f5ff;
+  color: #6366f1;
+}
+
+.router-link-active i {
+  color: #6366f1;
+}
+</style>

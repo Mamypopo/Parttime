@@ -16,33 +16,34 @@ generator client {
 }
 
 model User {
-  id                    Int      @id @default(autoincrement())
-  email                 String   @unique
+  id                    Int                @id @default(autoincrement())
+  email                 String             @unique
   password              String
   prefix                String // คำนำหน้า
   first_name            String
   last_name             String
-  national_id           String   @unique // เลขบัตรประชาชน
+  national_id           String             @unique // เลขบัตรประชาชน
   gender                String
-  birth_date            DateTime @db.Timestamptz // วันเกิด
+  birth_date            DateTime           @db.Timestamptz // วันเกิด
   age                   Int // อายุ (คำนวณจากวันเกิด)
   education_certificate String // วุฒิการศึกษา
   phone_number          String // เบอร์โทร
   line_id               String? // Line ID
   profile_image         String? // รูปโปรไฟล์
   skills                String // ทักษะความสามารถ
-  email_verified        Boolean  @default(false)
+  email_verified        Boolean            @default(false)
   verification_token    String? // โทเค็นยืนยันอีเมล
-  approved              String   @default("pending")
-  role                  String   @default("user") // บทบาท
-  created_at            DateTime @default(now()) @db.Timestamptz
-  updated_at            DateTime @updatedAt @db.Timestamptz
+  approved              String             @default("pending")
+  role                  String             @default("user") // บทบาท
+  created_at            DateTime           @default(now()) @db.Timestamptz
+  updated_at            DateTime           @updatedAt @db.Timestamptz
   user_documents        String? // ฟิลด์ใหม่สำหรับเก็บเอกสารของผู้ใช้
-
-  JobParticipation JobParticipation[] // ความสัมพันธ์กับงานที่สมัคร
-  Log              Log[]
-  notifications    Notification[] // ความสัมพันธ์กับ Notification
-  pending_skills   PendingSkill[]
+  last_active           DateTime?
+  is_online             Boolean            @default(false)
+  JobParticipation      JobParticipation[] // ความสัมพันธ์กับงานที่สมัคร
+  Log                   Log[]
+  notifications         Notification[] // ความสัมพันธ์กับ Notification
+  pending_skills        PendingSkill[]
 }
 
 model PendingSkill {
@@ -59,13 +60,14 @@ model PendingSkill {
 }
 
 model Job {
-  id               Int                @id @default(autoincrement())
-  title            String // ชื่องาน
-  work_date        DateTime           @db.Timestamptz // วันที่ทำงาน
-  location         String // สถานที่
-  start_time       DateTime           @db.Timestamptz // เวลาเริ่ม
-  end_time         DateTime           @db.Timestamptz // เวลาสิ้นสุด
-  status           String             @default("published") // เพิ่ม column status
+  id         Int      @id @default(autoincrement())
+  title      String // ชื่องาน
+  work_date  DateTime @db.Timestamptz // วันที่ทำงาน
+  location   String // สถานที่
+  start_time DateTime @db.Timestamptz // เวลาเริ่ม
+  end_time   DateTime @db.Timestamptz // เวลาสิ้นสุด
+  status     String   @default("published") // เพิ่ม column status
+
   details          String // รายละเอียดเพิ่มเติม
   created_by       Int // ผู้สร้างงาน (Admin)
   created_at       DateTime           @default(now()) @db.Timestamptz

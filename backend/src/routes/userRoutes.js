@@ -21,6 +21,8 @@ router.put('/update-profile', upload, userController.updateUserProfile);
 
 router.post('/skills', userController.addUserSkills);
 
+router.post('heartbeat', userController.updateUserOnlineStatus);
+
 router.get('/history/:userId', userController.getUserHistory);
 
 router.get('/notifications', userController.getUserNotifications);

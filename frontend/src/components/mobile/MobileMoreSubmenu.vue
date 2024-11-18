@@ -15,16 +15,29 @@
       <div class="fixed inset-0 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
           <DialogPanel
-            class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all"
+            class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all"
           >
-            <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">เพิ่มเติม</h3>
-            <div class="space-y-2">
+            <!-- Header -->
+            <div
+              class="bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] p-4 flex justify-between items-center"
+            >
+              <h3 class="text-lg font-medium text-white">เพิ่มเติม</h3>
+              <button
+                @click="$emit('close')"
+                class="text-white/70 hover:text-white transition-colors"
+              >
+                <i class="fas fa-times text-xl"></i>
+              </button>
+            </div>
+
+            <!-- Menu Items -->
+            <div class="p-4 space-y-4">
               <button
                 @click="handleLogout"
-                class="w-full px-4 py-2 text-left rounded-lg hover:bg-gray-50 text-red-600"
+                class="w-full flex items-center text-[#EA6B6B] hover:bg-red-50 p-2 rounded-lg transition-colors"
               >
-                <i class="fas fa-sign-out-alt mr-3"></i>
-                ออกจากระบบ
+                <i class="fas fa-sign-out-alt text-xl"></i>
+                <span class="ml-3">ออกจากระบบ</span>
               </button>
             </div>
           </DialogPanel>
@@ -66,3 +79,14 @@ export default {
   emits: ['close']
 }
 </script>
+
+<style scoped>
+.router-link-active {
+  background-color: #f2f5ff;
+  color: #6366f1;
+}
+
+.router-link-active i {
+  color: #6366f1;
+}
+</style>

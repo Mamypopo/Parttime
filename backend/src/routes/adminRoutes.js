@@ -18,6 +18,8 @@ router.get('/approved', checkAdminRole, adminController.getApprovedUsers);
 
 router.get('/rejected', checkAdminRole, adminController.getRejectedUsers);
 
+router.get('/online-users', adminController.getOnlineUsersCount)
+
 router.get('/admin/:adminId', adminController.getAdminById);
 
 router.get('/profile', adminController.getAdminProfile)

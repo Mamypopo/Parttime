@@ -1,45 +1,71 @@
 <template>
-  <div class="p-6">
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-      <div class="bg-white rounded-lg p-4 shadow-sm">
-        <h3 class="text-gray-500 text-sm">งานทั้งหมด</h3>
-        <p class="text-2xl font-semibold mt-2">{{ totalJobs }}</p>
+  <div class="mb-4 p-4 md:p-6 transition-all duration-300 ease-in-out">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div class="mb-4 md:mb-0">
+          <h2
+            class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
+          >
+            จัดการงาน
+          </h2>
+          <p class="text-gray-500 mt-1">จัดการและดูรายละเอียดงานทั้งหมด</p>
+        </div>
+
+        <router-link
+          to="/admin/create-job"
+          class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-xl hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg whitespace-nowrap"
+        >
+          <i class="fas fa-plus mr-2"></i>สร้างงานใหม่
+        </router-link>
       </div>
-      <div class="bg-white rounded-lg p-4 shadow-sm">
-        <h3 class="text-gray-500 text-sm">ประกาศรับสมัคร</h3>
-        <p class="text-2xl font-semibold text-[#7BC4C4] mt-2">{{ pendingJobs }}</p>
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+        <div class="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+          <div class="text-sm text-gray-500">งานทั้งหมด</div>
+          <div class="text-2xl font-bold text-[#9333EA]">{{ totalJobs }}</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+          <div class="text-sm text-gray-500">ประกาศรับสมัคร</div>
+          <div class="text-2xl font-bold text-[#3B82F6]">{{ pendingJobs }}</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+          <div class="text-sm text-gray-500">กำลังดำเนินการ</div>
+          <div class="text-2xl font-bold text-[#EAB308]">{{ inProgressJobs }}</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+          <div class="text-sm text-gray-500">เสร็จสิ้น</div>
+          <div class="text-2xl font-bold text-[#22C55E]">{{ completedJobs }}</div>
+        </div>
       </div>
-      <div class="bg-white rounded-lg p-4 shadow-sm">
-        <h3 class="text-gray-500 text-sm">กำลังดำเนินการ</h3>
-        <p class="text-2xl font-semibold text-[#F0B429] mt-2">{{ inProgressJobs }}</p>
-      </div>
-      <div class="bg-white rounded-lg p-4 shadow-sm">
-        <h3 class="text-gray-500 text-sm">เสร็จสิ้น</h3>
-        <p class="text-2xl font-semibold text-[#81E2C4] mt-2">{{ completedJobs }}</p>
+
+      <!-- Search Bar with Animation -->
+      <div class="mt-5 flex items-center gap-2">
+        <div class="flex-1 transform transition-all duration-300 hover:scale-[1.01]">
+          <JobSearch
+            @search="handleSearch"
+            @clear="handleClear"
+            class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+          />
+        </div>
       </div>
     </div>
 
     <!-- Main Content -->
-    <div class="bg-white rounded-lg shadow-sm">
-      <!-- Header -->
-      <div class="p-5 border-b">
-        <div class="flex justify-between items-center overflow-hidden">
-          <h2 class="text-xl font-semibold text-gray-800">จัดการงาน</h2>
-        </div>
-        <JobSearch @search="handleSearch" @clear="handleClear" />
-      </div>
-
+    <div class="rounded-2xl">
       <!-- Job Cards Grid -->
-      <div class="p-6">
+      <div class="p-1">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <!-- Loading State -->
           <div v-if="loading" class="col-span-full flex justify-center py-12">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
           </div>
 
           <!-- Empty State -->
-          <div v-else-if="!jobs.length" class="col-span-full text-center py-12">
+          <div
+            v-else-if="!jobs.length"
+            class="col-span-full flex flex-col items-center justify-center py-12 bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl"
+          >
             <i class="fas fa-clipboard-list text-4xl mb-4 text-[#EABF71]"></i>
             <p class="text-gray-500">ไม่พบข้อมูลงาน</p>
           </div>
@@ -49,7 +75,7 @@
             v-else
             v-for="job in jobs"
             :key="job.id"
-            class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 border overflow-hidden"
+            class="bg-white rounded-2xl hover:scale-[1.01]shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden"
           >
             <!-- Card Header -->
             <div class="p-4 border-b">
@@ -718,3 +744,5 @@ export default {
   }
 }
 </script>
+
+<style></style>

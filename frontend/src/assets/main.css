@@ -13,6 +13,12 @@
     --z-modal-overlay: 998;
     --z-modal: 999;
     --z-dropdown: 1100;
+
+    --background-light: #f2f5ff;
+    --text-light: #3a3a49;
+
+    --background-dark: #1a202c;
+    --text-dark: #a0aec0;
   }
 
   html {
@@ -24,6 +30,18 @@
 
   html::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Light Mode */
+  html {
+    background-color: var(--background-light);
+    color: var(--text-light);
+  }
+
+  /* Dark Mode */
+  html.dark {
+    background-color: var(--background-dark);
+    color: var(--text-dark);
   }
 }
 

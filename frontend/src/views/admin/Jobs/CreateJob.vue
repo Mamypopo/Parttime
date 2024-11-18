@@ -1,32 +1,41 @@
 <template>
-  <div class="p-6 ml-6">
-    <!-- เพิ่ม padding เพื่อให้มีระยะห่างจาก sidebar -->
-    <div class="mx-auto bg-white rounded-lg shadow-sm overflow-hidden">
-      <!-- Header -->
-      <div class="p-6 border-b">
-        <h1 class="text-xl sm:text-2xl font-semibold text-[#3A3A49]">สร้างงานใหม่</h1>
+  <div class="p-4 md:p-6 transition-all duration-300 ease-in-out">
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div class="mb-4 md:mb-0">
+          <h2
+            class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
+          >
+            สร้างงานใหม่
+          </h2>
+          <p class="text-gray-500 mt-1">กรอกรายละเอียดงานและตำแหน่งที่ต้องการ</p>
+        </div>
       </div>
+    </div>
 
-      <!-- Form Content -->
+    <!-- Main Form Card -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300">
       <form @submit.prevent="handleSubmit" class="p-6">
+        <!-- Form Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
           <!-- Left Column -->
           <div class="lg:col-span-5 space-y-6">
-            <!-- Title -->
-            <div>
+            <!-- Title Input -->
+            <div class="form-group">
               <label class="block text-sm font-medium text-gray-700 mb-2">
                 ชื่องาน <span class="text-red-500">*</span>
               </label>
               <input
                 v-model="form.title"
                 type="text"
-                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                class="w-full px-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all duration-300"
                 placeholder="ระบุชื่องาน"
               />
             </div>
 
-            <!-- Start time / End time -->
-            <div>
+            <!-- Time Inputs -->
+            <div class="form-group">
               <label class="block text-sm font-medium text-gray-700 mb-2">
                 เวลาเริ่ม/สิ้นสุด <span class="text-red-500">*</span>
               </label>
@@ -34,57 +43,56 @@
                 <input
                   v-model="form.startDate"
                   type="time"
-                  class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                  class="px-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all duration-300"
                 />
                 <input
                   v-model="form.endDate"
                   type="time"
-                  class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                  class="px-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all duration-300"
                 />
                 <input
                   v-model="form.date"
                   type="date"
-                  class="px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                  class="px-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all duration-300"
                 />
               </div>
             </div>
 
-            <!-- Location -->
-            <div>
+            <!-- Location Input -->
+            <div class="form-group">
               <label class="block text-sm font-medium text-gray-700 mb-2">
                 สถานที่ <span class="text-red-500">*</span>
               </label>
               <input
                 v-model="form.location"
                 type="text"
-                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                class="w-full px-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all duration-300"
                 placeholder="ระบุสถานที่"
               />
             </div>
 
-            <!-- Details -->
-            <div>
+            <!-- Details Textarea -->
+            <div class="form-group">
               <label class="block text-sm font-medium text-gray-700 mb-2">รายละเอียด</label>
               <textarea
                 v-model="form.details"
                 rows="4"
-                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                class="w-full px-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all duration-300"
                 placeholder="รายละเอียดเพิ่มเติม"
               ></textarea>
             </div>
           </div>
 
-          <!-- Right Column -->
+          <!-- Right Column - Positions -->
           <div class="lg:col-span-7">
-            <!-- Positions Header -->
             <div class="flex items-center justify-between mb-4">
-              <label class="text-sm font-medium text-gray-700"
-                >ตำแหน่งงาน <span class="text-red-500">*</span></label
-              >
+              <label class="text-sm font-medium text-gray-700">
+                ตำแหน่งงาน <span class="text-red-500">*</span>
+              </label>
               <button
                 @click="showPositionModal = true"
                 type="button"
-                class="px-4 py-2 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] text-white rounded-lg hover:opacity-90 transition-opacity"
+                class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-xl hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg"
               >
                 <i class="fas fa-plus mr-2"></i>เพิ่มตำแหน่ง
               </button>
@@ -95,11 +103,14 @@
               <div
                 v-for="position in positions"
                 :key="position.id"
-                class="bg-gray-50 rounded-lg p-4"
+                class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300"
               >
+                <!-- Position Content -->
                 <div class="flex justify-between items-start">
                   <div>
-                    <div class="inline-block px-3 py-1 bg-purple-200 rounded-lg mb-2">
+                    <div
+                      class="inline-block px-3 py-1 bg-gradient-to-r from-purple-200 to-blue-200 rounded-xl mb-2"
+                    >
                       {{ position.name }}
                     </div>
                     <div class="space-y-1 text-sm text-gray-600">
@@ -108,18 +119,19 @@
                       <div>รายละเอียด: {{ position.details || '-' }}</div>
                     </div>
                   </div>
+                  <!-- Action Buttons -->
                   <div class="flex gap-3">
                     <button
                       @click.prevent="editPosition(position)"
                       type="button"
-                      class="text-[#6DB5DE] hover:text-[#5D9CEC] transition-colors"
+                      class="text-blue-500 hover:text-blue-600 transition-colors"
                     >
                       <i class="fas fa-edit"></i>
                     </button>
                     <button
                       @click.prevent="deletePosition(position.id)"
                       type="button"
-                      class="text-[#E98585] hover:text-[#da7171] transition-colors"
+                      class="text-red-500 hover:text-red-600 transition-colors"
                     >
                       <i class="fas fa-trash"></i>
                     </button>
@@ -128,12 +140,12 @@
               </div>
             </div>
 
-            <!-- Empty Position State -->
+            <!-- Empty State -->
             <div
               v-if="positions.length === 0"
-              class="text-center py-8 bg-gray-50 rounded-lg text-gray-500"
+              class="text-center py-8 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl text-gray-500"
             >
-              <i class="fas fa-users text-3xl mb-2 text-[#F3C998]"></i>
+              <i class="fas fa-users text-3xl mb-2 text-[#EABF71]"></i>
               <p>ยังไม่มีตำแหน่งงาน</p>
             </div>
           </div>
@@ -144,11 +156,11 @@
           <button
             type="submit"
             :disabled="positions.length === 0"
-            class="px-6 py-3 text-white rounded-lg transition-colors"
+            class="px-6 py-3 text-white rounded-xl transition-all duration-300 shadow-md hover:shadow-lg"
             :class="[
               positions.length === 0
                 ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] hover:opacity-90'
+                : 'bg-gradient-to-r from-purple-600 to-blue-500 hover:opacity-90'
             ]"
           >
             {{ positions.length === 0 ? 'กรุณาเพิ่มตำแหน่งงานอย่างน้อย 1 ตำแหน่ง' : 'สร้างงาน' }}

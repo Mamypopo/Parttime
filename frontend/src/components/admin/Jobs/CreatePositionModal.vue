@@ -27,19 +27,19 @@
             leave-to="opacity-0 scale-95"
           >
             <HeadlessDialogPanel
-              class="w-full max-w-none sm:max-w-lg md:max-w-3xl lg:max-w-4xl bg-white rounded-lg p-4 sm:p-6 pb-20"
+              class="w-full max-w-none sm:max-w-lg md:max-w-3xl lg:max-w-4xl bg-white rounded-2xl p-4 sm:p-6 pb-20 shadow-xl"
             >
               <HeadlessDialogTitle
-                class="text-lg sm:text-xl text-center text-[#4FD1C5] mb-4 sm:mb-6"
+                class="text-lg sm:text-xl font-bold text-center bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent mb-4 sm:mb-6"
               >
-                {{ editingPosition ? 'Edit Job Position' : 'เพิ่มตำแหน่งงาน' }}
+                {{ editingPosition ? 'แก้ไขตำแหน่งงาน' : 'เพิ่มตำแหน่งงาน' }}
               </HeadlessDialogTitle>
 
               <form @submit.prevent="handleSubmit" class="space-y-4">
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                   <!-- Position -->
                   <div class="relative">
-                    <label class="block text-sm mb-1">ตำแหน่ง</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">ตำแหน่ง</label>
                     <div class="relative">
                       <input
                         type="text"
@@ -47,25 +47,23 @@
                         @click="showPositionList = true"
                         @blur="handleBlur"
                         readonly
-                        class="w-full px-3 py-2 border rounded-lg pr-8 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                        class="w-full px-4 py-2.5 border rounded-xl pr-8 focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all duration-300"
                         placeholder="ตำแหน่งงาน"
                       />
-                      <i class="fas fa-user-tie absolute right-3 top-3 text-[#81E2C4]"></i>
+                      <i class="fas fa-user-tie absolute right-3 top-3 text-purple-400"></i>
                     </div>
 
                     <!-- Position List Dropdown -->
                     <div
                       v-if="showPositionList"
-                      class="absolute z-10 w-full mt-1 bg-gray-100 rounded-lg shadow-lg border border-purple-100"
+                      class="absolute z-10 w-full mt-1 bg-white rounded-xl shadow-lg border border-purple-100"
                     >
-                      <div
-                        class="p-2 space-y-1 max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-200 scrollbar-track-gray-100"
-                      >
+                      <div class="p-2 space-y-1 max-h-48 overflow-y-auto scrollbar-thin">
                         <button
                           v-for="pos in positions"
                           :key="pos"
                           type="button"
-                          class="block w-full text-left px-3 py-2 hover:bg-[#C5B4E3] hover:bg-opacity-40 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
+                          class="block w-full text-left px-4 py-2.5 hover:bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl text-sm transition-all duration-300"
                           @click="selectPosition(pos)"
                         >
                           {{ pos }}
@@ -76,53 +74,53 @@
 
                   <!-- Wage -->
                   <div>
-                    <label class="block text-sm mb-1">ค่าแรง</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">ค่าแรง</label>
                     <div class="relative">
                       <input
                         type="number"
                         v-model="form.wage"
-                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                        class="w-full px-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all duration-300"
                         placeholder="ค่าแรง"
                       />
-                      <i class="fa-solid fa-baht-sign absolute right-3 top-3 text-[#81E2C4]"></i>
+                      <i class="fa-solid fa-baht-sign absolute right-3 top-3 text-purple-400"></i>
                     </div>
                   </div>
 
                   <!-- Required people -->
                   <div>
-                    <label class="block text-sm mb-1">จำนวนคน</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">จำนวนคน</label>
                     <div class="relative">
                       <input
                         type="number"
                         v-model="form.requiredPeople"
-                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                        class="w-full px-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all duration-300"
                         placeholder="จำนวนคนที่ต้องการ"
                       />
-                      <i class="fas fa-users absolute right-3 top-3 text-[#81E2C4]"></i>
+                      <i class="fas fa-users absolute right-3 top-3 text-purple-400"></i>
                     </div>
                   </div>
                 </div>
 
                 <!-- Detail -->
                 <div class="mt-4 sm:mt-6">
-                  <label class="block text-sm mb-1">รายละเอียด</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">รายละเอียด</label>
                   <div class="relative">
                     <textarea
                       v-model="form.detail"
                       rows="4"
-                      class="w-full px-3 py-2 pl-10 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-200"
+                      class="w-full px-4 py-2.5 pl-10 border rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all duration-300"
                       placeholder="รายละเอียด"
                     ></textarea>
-                    <i class="fas fa-clipboard-list absolute left-3 top-3 text-[#81E2C4]"></i>
+                    <i class="fas fa-clipboard-list absolute left-3 top-3 text-purple-400"></i>
                   </div>
                 </div>
 
                 <!-- Submit Button -->
                 <button
                   type="submit"
-                  class="w-full py-2 sm:py-3 text-white rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] hover:bg-[#b399e0] transition-colors mt-6"
+                  class="w-full py-3 text-white rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg mt-6"
                 >
-                  {{ editingPosition ? 'Update' : 'Add!' }}
+                  {{ editingPosition ? 'อัพเดทตำแหน่ง' : 'เพิ่มตำแหน่ง' }}
                 </button>
               </form>
             </HeadlessDialogPanel>

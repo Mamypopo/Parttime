@@ -2,16 +2,21 @@
   <div class="w-full relative">
     <HeadlessMenu v-if="!isMobile" as="div" class="w-full">
       <HeadlessMenuButton
-        class="w-full flex items-center px-4 py-2 hover:bg-[#5D5FEF] hover:bg-opacity-5 rounded-lg font-semibold text-[#4D4D4D] transition-colors duration-200"
-        :class="[isCollapsed ? 'justify-center' : 'gap-3']"
+        class="w-full flex items-center px-4 py-2 hover:bg-[#5D5FEF] hover:bg-opacity-5 rounded-lg font-semibold text-gray-600 transition-colors duration-200"
+        :class="[
+          isCollapsed ? 'justify-center' : 'gap-3',
+          'hover:bg-[#5D5FEF] hover:bg-opacity-5 dark:hover:bg-opacity-10 text-gray-600 dark:text-gray-300'
+        ]"
       >
         <div class="w-4 text-center">
-          <i class="fas fa-bell text-xl text-[#A8E6E2]"></i>
+          <i class="fas fa-bell text-xl text-[#A8E6E2] dark:text-[#6ED7D1]"></i>
         </div>
-        <span v-if="!isCollapsed" class="font-semibold ml-1 text-[#3A3A49]">การแจ้งเตือน</span>
+        <span v-if="!isCollapsed" class="font-semibold ml-1 text-gray-600 dark:text-gray-300"
+          >การแจ้งเตือน</span
+        >
         <span
           v-if="notificationCount"
-          class="text-xs bg-[#f76363] text-white px-2 py-0.5 rounded-full animate-pulse"
+          class="text-xs bg-[#f76363] dark:bg-[#ff4444] text-white px-2 py-0.5 rounded-full animate-pulse"
           :class="[isCollapsed ? 'absolute -top-1 -right-1' : 'ml-auto']"
         >
           {{ notificationCount }}
@@ -28,21 +33,21 @@
       >
         <HeadlessMenuItems
           v-if="!isModalOpen"
-          class="absolute left-0 mt-1 w-80 bg-white rounded-lg shadow-lg border z-50 origin-top-left overflow-hidden"
+          class="fixed ml-3 w-80 bg-white rounded-xl shadow-xl border overflow-visible dark:bg-gray-800 dark:border-gray-700"
           :class="{
-            'left-full ml-2 top-0': isCollapsed, // ถ้า sidebar หดจะแสดงทางขวา
-            'right-0 top-full mt-2': !isCollapsed // ถ้า sidebar ขยายจะแสดงด้านล่าง
+            'left-20 bottom-16': isCollapsed, // sidebar หด
+            'left-72 bottom-16': !isCollapsed // sidebar ขยาย
           }"
           style="width: 320px; max-height: 480px; overflow-y: auto"
         >
           <div
-            class="flex justify-between items-center px-4 py-2 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] border-b"
+            class="flex justify-between items-center px-4 py-2 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4a9490] dark:to-[#6667aa] border-b"
           >
             <h3 class="font-medium text-[#EA6B6B]">การแจ้งเตือน</h3>
             <button
               v-if="notifications.length > 0"
               @click="markAllAsRead"
-              class="text-sm text-[#6ED7D1] hover:text-[#4bb3af] transition-colors duration-200"
+              class="text-sm text-[#6ED7D1] hover:text-[#4bb3af] dark:text-[#A8E6E2] dark:hover:text-[#6ED7D1] transition-colors duration-200"
             >
               <span class="flex items-center gap-2">
                 <i class="fas fa-check-double"></i>
@@ -59,7 +64,7 @@
               v-slot="{ active }"
             >
               <div
-                class="px-4 py-3 cursor-pointer transition-colors duration-200 border-b last:border-b-0"
+                class="px-4 py-3 cursor-pointer transition-colors duration-200 border-b last:border-b-0 dark:bg-gray-800 dark:border-gray-700"
                 :class="[
                   active ? 'bg-[#5D5FEF]/5' : '',
                   !notification.read ? 'bg-[#5D5FEF]/10' : ''
@@ -103,7 +108,7 @@
           </div>
 
           <!-- Footer -->
-          <div class="px-4 py-2 border-t bg-gray-50">
+          <div class="px-4 py-2 border-t bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
             <button
               class="w-full text-center text-sm text-[#3A3A49] hover:text-[#5D5FEF] transition-colors duration-200"
               @click="openModal"

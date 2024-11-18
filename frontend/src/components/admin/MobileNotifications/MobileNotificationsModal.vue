@@ -24,7 +24,7 @@
             leave-from="opacity-100 translate-y-0"
             leave-to="opacity-0 translate-y-full"
           >
-            <HeadlessDialogPanel class="w-[80%] max-w-md h-full bg-white shadow-xl relative">
+            <HeadlessDialogPanel class="w-[300px] max-w-md h-full bg-white shadow-xl relative">
               <!-- Header -->
               <div
                 class="sticky top-0 modal flex justify-between items-center p-4 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] border-b"
@@ -53,17 +53,17 @@
               </div>
 
               <!-- Filters -->
-              <div class="sticky top-[65px] z-10 p-4 border-b bg-gray-50 overflow-x-auto">
+              <div class="sticky top-[65px] z-10 px-3 py-2 border-b bg-white">
                 <div class="flex gap-2">
                   <button
                     v-for="filter in filters"
                     :key="filter.value"
                     @click="currentFilter = filter.value"
-                    class="px-4 py-2 text-sm rounded-full transition-all duration-200 flex items-center gap-2 whitespace-nowrap"
+                    class="px-4 py-1.5 text-sm rounded-full transition-all duration-200 flex items-center justify-center gap-1.5"
                     :class="
                       currentFilter === filter.value
-                        ? 'bg-[#babbec] text-white shadow-md'
-                        : 'bg-white text-gray-600 hover:bg-gray-100 border'
+                        ? 'bg-[#babbec] text-white'
+                        : 'bg-white text-gray-600'
                     "
                   >
                     <i :class="getFilterIcon(filter.value)"></i>
@@ -76,12 +76,14 @@
               <div class="overflow-y-auto" style="height: calc(100vh - 130px)">
                 <div
                   v-if="filteredNotifications.length === 0"
-                  class="p-8 text-center text-[#3A3A49] flex flex-col items-center gap-3"
+                  class="flex flex-col items-center justify-center h-[50vh] p-8 text-center"
                 >
-                  <i class="fas fa-bell-slash text-3xl text-[#EABF71]"></i>
-                  <p>ไม่มีการแจ้งเตือน</p>
+                  <div class="bg-gray-50 rounded-full p-6 mb-4">
+                    <i class="fas fa-bell-slash text-4xl text-[#EABF71]"></i>
+                  </div>
+                  <h3 class="text-lg font-medium text-[#3A3A49] mb-2">ไม่มีการแจ้งเตือน</h3>
+                  <p class="text-sm text-gray-500">ยังไม่มีการแจ้งเตือนใหม่ในขณะนี้</p>
                 </div>
-
                 <div
                   v-else
                   v-for="notification in filteredNotifications"
@@ -159,10 +161,10 @@ export default {
       currentFilter: 'all',
       filters: [
         { label: 'ทั้งหมด', value: 'all' },
-        { label: 'ยังไม่ได้อ่าน', value: 'unread' },
+        { label: 'ยังไม่ได้อ่าน', value: 'unread' }
         // { label: 'ผู้ใช้งาน', value: 'user' },
         // { label: 'ทักษะ', value: 'skill' },
-        { label: 'งาน', value: 'job' }
+        // { label: 'งาน', value: 'job' }
       ]
     }
   },

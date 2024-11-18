@@ -10,16 +10,25 @@
         <i :class="[item.icon, 'text-xl']"></i>
         <span class="text-xs mt-1">{{ item.name }}</span>
       </button>
+
+      <!-- การแจ้งเตือน -->
+      <MobileNotifications
+        v-model="sidebarStore.showNotifications"
+        @update:modelValue="handleNotificationClick"
+      />
     </div>
   </nav>
 </template>
 
 <script>
 import { useSidebarStore } from '@/stores/sidebarStore'
+import MobileNotifications from '@/components/admin/MobileNotifications/MobileNotifications.vue'
 
 export default {
   name: 'MobileNavigation',
-
+  components: {
+    MobileNotifications
+  },
   data() {
     return {
       sidebarStore: useSidebarStore()
@@ -33,6 +42,9 @@ export default {
       } else {
         this.$router.push(item.path)
       }
+    },
+    handleNotificationClick(value) {
+      this.sidebarStore.showNotifications = value
     }
   }
 }

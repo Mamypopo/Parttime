@@ -89,14 +89,24 @@
         <table class="w-full">
           <thead>
             <tr class="bg-gradient-to-r from-purple-50 to-blue-50">
-              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left">ผู้ใช้งาน</th>
-              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left">อีเมล</th>
-              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left">ทักษะ</th>
-              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left">
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left w-[200px]">
+                ผู้ใช้งาน
+              </th>
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left w-[200px]">
+                อีเมล
+              </th>
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left w-[300px]">
+                ทักษะ
+              </th>
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left w-[150px]">
                 สถานะยืนยันอีเมล
               </th>
-              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left">วันที่สมัคร</th>
-              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left">การจัดการ</th>
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left w-[150px]">
+                วันที่สมัคร
+              </th>
+              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left w-[300px]">
+                การจัดการ
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -107,7 +117,7 @@
             >
               <!-- User Profile -->
               <td class="px-6 py-4">
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-3 max-w-[250px]">
                   <div class="w-10 h-10 rounded-full overflow-hidden">
                     <img
                       v-if="user.profileImage"
@@ -122,8 +132,8 @@
                       {{ user.fullName.charAt(0) }}
                     </div>
                   </div>
-                  <div>
-                    <div class="font-medium text-gray-900">{{ user.fullName }}</div>
+                  <div class="min-w-0">
+                    <div class="font-medium text-gray-900 truncate">{{ user.fullName }}</div>
                     <div class="text-sm text-gray-500">ID: {{ user.id }}</div>
                   </div>
                 </div>
@@ -131,7 +141,7 @@
 
               <!-- อีเมล -->
               <td class="px-6 py-4">
-                <div class="text-sm text-gray-900">{{ user.email }}</div>
+                <div class="text-sm text-gray-900 truncate max-w-[200px]">{{ user.email }}</div>
               </td>
 
               <!-- ทักษะ -->
@@ -140,7 +150,7 @@
                   <span
                     v-for="skill in user.skills"
                     :key="skill"
-                    class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-600"
+                    class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-600 whitespace-nowrap"
                   >
                     {{ skill }}
                   </span>
@@ -382,10 +392,10 @@ export default {
 
     // User Stats
     verifiedUsers() {
-      return this.formattedUsers.filter((user) => user.isVerified).length
+      return this.adminUserStore.totalVerifiedUsers
     },
     notVerifiedUsers() {
-      return this.formattedUsers.filter((user) => !user.isVerified).length
+      return this.adminUserStore.totalNotVerifiedUsers
     }
   },
 
@@ -434,10 +444,11 @@ export default {
           })
         }
       } catch (error) {
+        const errorMessage = error.response?.data?.message || 'ไม่สามารถดำเนินการได้'
         Swal.fire({
-          icon: 'error',
+          icon: 'warning',
           title: 'เกิดข้อผิดพลาด',
-          text: 'ไม่สามารถอนุมัติผู้ใช้ได้',
+          text: errorMessage,
           confirmButtonText: 'ตกลง'
         })
       }
@@ -467,10 +478,11 @@ export default {
           })
         }
       } catch (error) {
+        const errorMessage = error.response?.data?.message || 'ไม่สามารถดำเนินการได้'
         Swal.fire({
           icon: 'error',
           title: 'เกิดข้อผิดพลาด',
-          text: 'ไม่สามารถดำเนินการได้',
+          text: errorMessage,
           confirmButtonText: 'ตกลง'
         })
       }
@@ -566,5 +578,25 @@ export default {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #9899ee;
+}
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ถ้าต้องการให้แสดง tooltip เมื่อ hover ข้อความที่ถูกตัด */
+[class*='truncate']:hover {
+  overflow: visible;
+  white-space: normal;
+  word-break: break-word;
+  position: relative;
+  z-index: 1;
+}
+
+.flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
 }
 </style>

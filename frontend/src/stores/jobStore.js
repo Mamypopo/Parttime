@@ -24,10 +24,9 @@ export const useJobStore = defineStore('job', {
             peopleCount: ''
         },
         pagination: {
-            page: 1,
-            pageSize: 10,
-            totalCount: 0,
-            totalPages: 0
+            currentPage: 1,
+            perPage: 10,
+            totalItems: 0
         },
 
 
@@ -43,7 +42,16 @@ export const useJobStore = defineStore('job', {
                     );
                 }, 0);
             }, 0);
-        }
+        },
+
+        totalPages: (state) => {
+
+            if (!state.pagination.totalItems || isNaN(state.pagination.totalItems)) {
+                return 1
+            }
+            return Math.max(1, Math.ceil(state.pagination.totalItems / state.pagination.perPage))
+        },
+        hasMorePages: (state) => state.pagination.currentPage < state.totalPages
     },
     actions: {
 
@@ -65,45 +73,36 @@ export const useJobStore = defineStore('job', {
         async fetchJobs() {
             this.loading = true
             try {
-                // เพิ่ม headers สำหรับ authentication
-                const adminStore = useAdminStore()
-                const headers = {
-                    Authorization: `Bearer ${adminStore.token}`,
-                    'Content-Type': 'application/json'
+                const params = {
+                    page: this.pagination.currentPage,
+                    limit: this.pagination.perPage,
+                    offset: (this.pagination.currentPage - 1) * this.pagination.perPage,
+                    ...this.searchFilters
                 }
 
-                // เพิ่ม params จาก searchFilters
-                const params = new URLSearchParams()
-                Object.entries(this.searchFilters).forEach(([key, value]) => {
-                    if (value) params.append(key, value)
+                // ลบ params ที่เป็นค่าว่าง เหมือน adminUserStore
+                Object.keys(params).forEach(key => {
+                    if (params[key] === '') delete params[key]
                 })
 
-                // เพิ่ม pagination params
-                params.append('page', this.pagination.page)
-                params.append('pageSize', this.pagination.pageSize)
+
 
                 const response = await axios.get(
                     `${this.baseURL}/api/jobs?${params.toString()}`,
-                    { headers }
+                    { params }
                 )
 
 
-                if (response.data?.jobs) {
+                if (response.data) {
                     this.jobs = response.data.jobs
-                    this.pagination = {
-                        page: response.data.page || 1,
-                        pageSize: response.data.pageSize || 10,
-                        totalCount: response.data.totalCount || 0,
-                        totalPages: response.data.totalPages || 0
+                    if (response.data.pagination) {
+                        this.pagination.totalItems = parseInt(response.data.pagination.total)
                     }
-                } else {
-                    console.warn('No jobs data in response:', response.data)
-                    this.jobs = []
                 }
             } catch (error) {
                 console.error('Error fetching jobs:', error)
-                this.error = 'ไม่สามารถโหลดข้อมูลงานได้'
                 this.jobs = []
+                this.pagination.totalItems = 0
             } finally {
                 this.loading = false
             }
@@ -441,13 +440,17 @@ export const useJobStore = defineStore('job', {
                 maxWage: null,
                 peopleCount: ''
             }
+            this.pagination.currentPage = 1
         },
         // รีเซ็ต pagination
         resetPagination() {
             this.pagination.currentPage = 1
             this.pagination.totalPages = 1
         },
-
+        setPage(page) {
+            this.pagination.currentPage = page
+            window.scrollTo(0, 0)
+        },
         // เคลียร์ข้อผิดพลาด
         clearError() {
             this.error = null

@@ -147,7 +147,7 @@ export const findPendingUsers = (limit = 10, offset = 0, searchParams = {}) => {
     });
 }
 
-export const countUsersPending = (searchParams = {}) => {
+export const countUsersPending = async (searchParams = {}) => {
     const whereClause = {
         approved: "pending"
     }
@@ -199,10 +199,31 @@ export const countUsersPending = (searchParams = {}) => {
         }
     }
 
-    return prisma.user.count({
-        where: whereClause
-    });
+    const [totalCount, emailStats] = await Promise.all([
+        prisma.user.count({
+            where: whereClause
+        }),
+        prisma.user.groupBy({
+            by: ['email_verified'],
+            where: {
+                approved: 'pending'
+            },
+            _count: true
+        })
+    ]);
+
+    // แปลงผลลัพธ์จาก groupBy เป็นจำนวนตามสถานะการยืนยันอีเมล
+    const verifiedCount = emailStats.find(stat => stat.email_verified)?._count || 0;
+    const notVerifiedCount = emailStats.find(stat => !stat.email_verified)?._count || 0;
+
+    return {
+        total: totalCount,
+        totalVerified: verifiedCount,
+        totalNotVerified: notVerifiedCount
+    };
 }
+
+
 
 // ดึงผู้ใช้ที่อนุมัติแล้ว
 export const findApprovedUsers = (limit = 10, offset = 0, searchParams = {}) => {
@@ -393,7 +414,7 @@ export const findRejectedUsers = (limit = 10, offset = 0, searchParams = {}) => 
 }
 
 
-export const countUsersRejected = (searchParams = {}) => {
+export const countUsersRejected = async (searchParams = {}) => {
     const whereClause = {
         approved: "rejected"
     }
@@ -404,7 +425,8 @@ export const countUsersRejected = (searchParams = {}) => {
 
     if (searchParams.idCard) {
         whereClause.national_id = {
-            contains: searchParams.idCard
+            contains: searchParams.idCard,
+            mode: 'insensitive'
         }
     }
 
@@ -444,11 +466,29 @@ export const countUsersRejected = (searchParams = {}) => {
         }
     }
 
-    return prisma.user.count({
-        where: whereClause
-    });
-}
+    const [totalCount, emailStats] = await Promise.all([
+        prisma.user.count({
+            where: whereClause
+        }),
+        prisma.user.groupBy({
+            by: ['email_verified'],
+            where: {
+                approved: 'rejected'
+            },
+            _count: true
+        })
+    ]);
 
+    // แปลงผลลัพธ์
+    const verifiedCount = emailStats.find(stat => stat.email_verified)?._count || 0;
+    const notVerifiedCount = emailStats.find(stat => !stat.email_verified)?._count || 0;
+
+    return {
+        total: totalCount,
+        totalVerified: verifiedCount,
+        totalNotVerified: notVerifiedCount
+    };
+}
 
 // นับจำนวนผู้ใช้แต่ละสถานะ
 export const countUsersByStatus = () =>
@@ -555,3 +595,21 @@ export const checkWeeklySkillRequest = async (userId) => {
 };
 
 
+export const getOnlineUsersCount = async () => {
+    try {
+        // นับผู้ใช้ที่ active ใน 5 นาทีล่าสุด
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+
+        return await prisma.user.count({
+            where: {
+                last_active: {
+                    gte: fiveMinutesAgo
+                },
+                is_online: true
+            }
+        });
+    } catch (error) {
+        console.error('Error counting online users:', error);
+        throw new Error('ไม่สามารถนับจำนวนผู้ใช้ออนไลน์ได้');
+    }
+};
