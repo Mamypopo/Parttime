@@ -9,17 +9,17 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-black/30" />
+        <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" />
       </TransitionChild>
 
       <div class="fixed inset-0 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
           <DialogPanel
-            class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all"
+            class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-xl transition-all"
           >
             <!-- Header -->
             <div
-              class="flex justify-between items-center p-4 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] rounded-t-2xl mb-4"
+              class="flex justify-between items-center p-4 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA] rounded-t-2xl mb-4"
             >
               <h3 class="text-lg font-medium text-white">งาน</h3>
               <button
@@ -29,17 +29,18 @@
                 <i class="fas fa-times"></i>
               </button>
             </div>
+
             <!-- Menu Items -->
             <div class="p-3 space-y-4">
               <router-link
                 v-for="item in jobMenuItems"
                 :key="item.path"
                 :to="item.path"
-                class="px-4 py-3 rounded-lg hover:bg-[#F2F5FF] transition-colors flex items-center"
+                class="px-4 py-3 rounded-lg hover:bg-[#F2F5FF] dark:hover:bg-gray-700 transition-colors flex items-center"
                 @click="$emit('close')"
               >
-                <i :class="[item.icon, 'mr-3 text-[#6366F1]']"></i>
-                <span class="text-[#3A3A49]">{{ item.name }}</span>
+                <i :class="[item.icon, 'mr-3 text-[#6366F1] dark:text-[#818CF8]']"></i>
+                <span class="text-[#3A3A49] dark:text-gray-200">{{ item.name }}</span>
               </router-link>
             </div>
           </DialogPanel>
@@ -81,11 +82,10 @@ export default {
 
 <style scoped>
 .router-link-active {
-  background-color: #f2f5ff;
-  color: #6366f1;
+  @apply bg-[#F2F5FF] dark:bg-gray-700 text-[#6366F1] dark:text-[#818CF8];
 }
 
 .router-link-active i {
-  color: #6366f1;
+  @apply text-[#6366F1] dark:text-[#818CF8];
 }
 </style>

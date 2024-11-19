@@ -24,11 +24,11 @@
           leave-to="opacity-0 sm:scale-95 translate-y-full sm:translate-y-0"
         >
           <HeadlessDialogPanel
-            class="w-full max-w-5xl bg-white rounded-xl shadow-xl overflow-hidden"
+            class="w-full max-w-5xl bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden"
           >
             <!-- Header -->
             <div
-              class="sticky top-0 z-10 flex justify-between items-center p-6 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] rounded-t-xl"
+              class="sticky top-0 z-10 flex justify-between items-center p-6 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA] rounded-t-xl"
             >
               <HeadlessDialogTitle class="text-2xl font-semibold text-white">
                 รายละเอียดผู้ใช้ #{{ user.id }}
@@ -43,12 +43,12 @@
 
             <!-- Content -->
             <div
-              class="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 bg-gray-50 overflow-y-auto max-h-[calc(100vh-8rem)]"
+              class="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 bg-gray-50 dark:bg-gray-900 overflow-y-auto max-h-[calc(100vh-8rem)]"
             >
               <!-- Profile Image -->
               <div class="flex flex-col items-center">
                 <div
-                  class="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-lg ring-4 ring-[#9899ee]/30 mb-4"
+                  class="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-lg ring-4 ring-[#9899ee]/30 dark:ring-[#6667AA]/30 mb-4"
                 >
                   <img
                     v-if="user.profileImage"
@@ -59,36 +59,46 @@
                   />
                   <div
                     v-else
-                    class="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center text-white font-medium text-3xl"
+                    class="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 flex items-center justify-center text-white font-medium text-3xl"
                   >
                     {{ user.fullName.charAt(0) }}
                   </div>
                 </div>
                 <div class="text-center">
-                  <p class="text-xl font-semibold text-gray-800">{{ user.fullName }}</p>
-                  <p class="text-gray-500">{{ user.email }}</p>
+                  <p class="text-xl font-semibold text-gray-800 dark:text-gray-100">
+                    {{ user.fullName }}
+                  </p>
+                  <p class="text-gray-500 dark:text-gray-400">{{ user.email }}</p>
                 </div>
               </div>
 
               <!-- Basic Info -->
-              <div class="bg-white p-6 rounded-lg shadow-md col-span-1 md:col-span-2">
-                <h3 class="text-lg font-semibold text-gray-700 mb-4">ข้อมูลพื้นฐาน</h3>
+              <div
+                class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md col-span-1 md:col-span-2"
+              >
+                <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">
+                  ข้อมูลพื้นฐาน
+                </h3>
                 <div class="grid grid-cols-2 gap-4">
                   <div v-for="(item, index) in userInfo" :key="index" class="space-y-1">
-                    <p class="text-sm text-gray-500">{{ item.label }}</p>
-                    <p class="text-base font-medium text-gray-800">{{ item.value || '-' }}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ item.label }}</p>
+                    <p class="text-base font-medium text-gray-800 dark:text-gray-100">
+                      {{ item.value || '-' }}
+                    </p>
                   </div>
                 </div>
               </div>
 
               <!-- Skills -->
-              <div class="bg-white p-6 rounded-lg shadow-md">
-                <h3 class="text-lg font-semibold text-gray-700 mb-4">ทักษะความสามารถ</h3>
+              <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">
+                  ทักษะความสามารถ
+                </h3>
                 <div class="flex flex-wrap gap-3">
                   <span
                     v-for="skill in user.skills"
                     :key="skill"
-                    class="px-3 py-1 text-sm font-medium rounded-full bg-purple-200 text-purple-800 shadow-sm"
+                    class="px-3 py-1 text-sm font-medium rounded-full bg-purple-200 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 shadow-sm"
                   >
                     {{ skill }}
                   </span>
@@ -99,20 +109,22 @@
               <div
                 v-for="doc in documents"
                 :key="doc.title"
-                class="bg-white p-6 rounded-lg shadow-md"
+                class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
               >
-                <h3 class="text-lg font-semibold text-gray-700 mb-4">{{ doc.title }}</h3>
+                <h3 class="text-lg font-semibold text-gray-700 mb-4 dark:text-gray-200">
+                  {{ doc.title }}
+                </h3>
                 <div v-if="doc.file" class="flex items-center gap-2">
                   <a
                     :href="doc.url"
                     target="_blank"
-                    class="text-[#6ED7D1] hover:text-[#4bb3af] inline-flex items-center transition-colors duration-200 font-semibold"
+                    class="text-[#6ED7D1] hover:text-[#4bb3af] dark:text-[#4CB3B3] dark:hover:text-[#3A8A8A] inline-flex items-center transition-colors duration-200 font-semibold"
                   >
                     <i :class="[doc.icon, 'mr-2']"></i>
                     {{ doc.label }}
                   </a>
                 </div>
-                <p v-else class="text-gray-400 text-sm">ไม่มีไฟล์แนบ</p>
+                <p v-else class="text-gray-400 dark:text-gray-500 text-sm">ไม่มีไฟล์แนบ</p>
               </div>
             </div>
           </HeadlessDialogPanel>
@@ -225,5 +237,41 @@ export default {
   background-color: #c5b4e3;
   border-radius: 20px;
   border: 2px solid #f3f4f6;
+}
+</style>
+<style scoped>
+.overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #c5b4e3 #f3f4f6;
+}
+
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: #c5b4e3;
+  border-radius: 20px;
+  border: 2px solid #f3f4f6;
+}
+
+/* Dark mode scrollbar */
+@media (prefers-color-scheme: dark) {
+  .overflow-y-auto {
+    scrollbar-color: #9899ee #1f2937;
+  }
+
+  .overflow-y-auto::-webkit-scrollbar-track {
+    background: #1f2937;
+  }
+
+  .overflow-y-auto::-webkit-scrollbar-thumb {
+    background-color: #9899ee;
+    border: 2px solid #1f2937;
+  }
 }
 </style>

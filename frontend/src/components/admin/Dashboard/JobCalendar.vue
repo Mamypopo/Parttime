@@ -92,30 +92,43 @@ export default {
           center: 'title',
           right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
-        locale: thLocale,
-        events: [],
-        eventClick: this.handleEventClick,
-        height: 'auto',
-        contentHeight: 'auto',
-        slotMinWidth: 50,
-        dayMaxEvents: 3, // แสดงสูงสุด 3 งาน
-        moreLinkContent: (args) => {
-          return {
-            html: `<div class="more-link">
-              +${args.num} งาน
-            </div>`
-          }
-        },
-        eventOverlap: false, // ป้องกันการทับซ้อน
-        slotEventOverlap: false, // ป้องกันการทับซ้อนใน timeGrid
-        eventDisplay: 'block', // ให้แสดงแบบบล็อกเต็มพื้นที่
+        // Time Grid Options
+        slotMinTime: '07:00:00',
+        slotMaxTime: '22:00:00',
+        slotDuration: '00:30:00',
+        slotMinWidth: 70,
+        slotLabelInterval: '01:00',
+        expandRows: true,
+        allDaySlot: false,
+        eventMinHeight: 30,
+        nowIndicator: true,
+
+        // Event Display Options
+        eventOverlap: false,
+        slotEventOverlap: false,
+        eventDisplay: 'block',
         eventOrder: 'start,-duration,allDay,title',
+
+        // Locale & Time Format
+        locale: thLocale,
         eventTimeFormat: {
           hour: '2-digit',
           minute: '2-digit',
           meridiem: false,
           hour12: false
         },
+
+        // Events Configuration
+        events: [],
+        height: 'auto',
+        contentHeight: 'auto',
+        dayMaxEvents: 3,
+
+        // Custom Renderers
+        moreLinkContent: (args) => ({
+          html: `<div class="more-link">+${args.num} งาน</div>`
+        }),
+
         dayCellContent: (arg) => {
           const events = arg.view.calendar.getEvents().filter((event) => {
             return event.start?.toDateString() === arg.date.toDateString()
@@ -124,17 +137,25 @@ export default {
           if (events.length > 0) {
             return {
               html: `
-            <div class="flex items-center gap-4">
-          <span class="w-3 h-3 rounded-full  ${
-            events[0].extendedProps.completed ? 'bg-[#CDE45F]' : 'bg-[#F3C998]'
-          }" title="สถานะงาน"></span>
-          <span>${arg.dayNumberText}</span>
-        </div>
-            `
+                <div class="flex items-center gap-4">
+                  <span class="w-3 h-3 rounded-full ${
+                    events[0].extendedProps.completed ? 'bg-[#CDE45F]' : 'bg-[#F3C998]'
+                  }" title="สถานะงาน"></span>
+                  <span>${arg.dayNumberText}</span>
+                </div>
+              `
             }
           }
-
           return arg.dayNumberText
+        },
+
+        // Event Handlers
+        eventClick: this.handleEventClick,
+        eventDidMount: (info) => {
+          info.el.setAttribute(
+            'title',
+            `${info.event.extendedProps.title}\n${info.event.extendedProps.location}\n${info.event.extendedProps.time}`
+          )
         }
       }
     }
@@ -283,261 +304,122 @@ export default {
 </script>
 
 <style>
-/* Header Toolbar */
-.fc .fc-toolbar.fc-header-toolbar {
-  @apply mb-6 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] 
-         rounded-xl p-4 shadow-sm border border-gray-100;
-}
-.fc .fc-toolbar-title {
-  @apply text-xl font-semibold text-white;
-}
-/* ปุ่มต่างๆ */
-.fc-button-group {
-  @apply rounded-lg overflow-hidden shadow-sm;
+/* เพิ่ม styles สำหรับมุมมองสัปดาห์และวัน */
+.fc-timegrid-event-harness {
+  margin: 0 !important;
 }
 
-.fc .fc-button-primary {
-  @apply bg-white border-0 text-gray-700 hover:bg-gray-50 
-         px-4 py-2 text-sm font-medium transition-colors !important;
+.fc-timegrid-event {
+  @apply border-0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
-.fc .fc-button-primary:not(:disabled).fc-button-active {
-  @apply bg-[#81E2C4] text-white hover:bg-[#6ED7D1] !important;
+/* ปรับ event container ในมุมมองสัปดาห์/วัน */
+.fc-timegrid-event .calendar-event-content {
+  @apply h-full w-full rounded-md !important;
+  margin: 1px !important;
+  min-height: unset !important;
 }
 
-/* ปุ่ม Today */
-.fc .fc-today-button {
-  @apply bg-white text-gray-700 border rounded-lg border-gray-200 
-         hover:bg-gray-50 shadow-sm !important;
+/* ปรับความสูงของ event ให้พอดีกับ cell */
+.fc-timegrid-event .event-body {
+  @apply h-full flex flex-col justify-between;
 }
 
-.fc .fc-today-button:disabled {
-  @apply bg-gray-100 text-gray-400 cursor-not-allowed !important;
+/* แก้ไขการแสดงผลที่เกินขอบเขต */
+.fc-timegrid-cols {
+  @apply overflow-hidden !important;
 }
 
-/* หัวเรื่อง */
-.fc .fc-toolbar-title {
-  @apply text-xl font-bold text-gray-800 
-         bg-clip-text bg-gradient-to-r from-[#81E2C4] to-[#6ED7D1];
+.fc-timegrid-col-events {
+  @apply overflow-hidden !important;
 }
 
-/* จัดการ Layout */
-.fc-header-toolbar {
-  @apply flex flex-wrap justify-between items-center gap-4;
+/* ปรับขนาดตัวอักษรใน event สำหรับมุมมองสัปดาห์/วัน */
+.fc-timegrid-event .calendar-event-content {
+  font-size: 0.75rem !important;
 }
 
-.fc-toolbar-chunk {
-  @apply flex items-center gap-2;
+/* ปรับ spacing ใน event */
+.fc-timegrid-event .event-header,
+.fc-timegrid-event .event-body {
+  @apply p-1 !important;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .fc-header-toolbar {
-    @apply flex-col items-stretch;
-  }
-
-  .fc-toolbar-chunk {
-    @apply justify-center;
-  }
-
-  .fc .fc-toolbar-title {
-    @apply text-lg text-center;
+/* ซ่อนบาง elements ในมุมมองสัปดาห์/วัน เมื่อพื้นที่น้อย */
+@media (max-height: 600px) {
+  .fc-timegrid-event .event-body > *:not(:first-child) {
+    display: none;
   }
 }
 
-/* หัวตาราง */
-.fc .fc-col-header {
-  @apply bg-gradient-to-b from-gray-50 to-white;
+/* ปรับ z-index เพื่อป้องกันการทับซ้อน */
+.fc-timegrid-event {
+  z-index: 1 !important;
 }
 
-.fc .fc-col-header-cell {
-  @apply py-3 border-gray-200;
+.fc-timegrid-now-indicator-line {
+  z-index: 2 !important;
 }
 
-.fc .fc-col-header-cell-cushion {
-  @apply text-sm font-semibold text-gray-600 uppercase tracking-wider;
+/* เพิ่ม transition เพื่อให้การเปลี่ยนขนาดนุ่มนวล */
+.fc-timegrid-event {
+  transition: heigh;
 }
 
-/* Animation */
-.fc .fc-button-primary {
-  @apply transform transition-all duration-200 ease-in-out 
-         hover:scale-105 active:scale-95;
+/* Calendar Grid Styles */
+.fc-timegrid-event-harness {
+  margin: 0 !important;
 }
 
-/* Hover Effects */
-.fc .fc-button-primary:hover {
-  @apply shadow-md;
+.fc-timegrid-event {
+  @apply border-0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 1 !important;
+  transition: height 0.2s ease-in-out !important;
 }
 
-/* Focus States */
-.fc .fc-button-primary:focus {
-  @apply outline-none ring-2 ring-[#81E2C4] ring-opacity-50;
+/* Event Content Styles */
+.fc-timegrid-event .calendar-event-content {
+  @apply h-full w-full rounded-md !important;
+  margin: 1px !important;
+  min-height: unset !important;
+  font-size: 0.75rem !important;
 }
 
-/* Custom Shadows */
-.fc-header-toolbar {
-  @apply shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)];
+.fc-timegrid-event .event-body {
+  @apply h-full flex flex-col justify-between;
 }
 
-/* เพิ่ม styles สำหรับ event cards */
-.calendar-event-content {
-  @apply bg-white border border-gray-100 
-         hover:border-[#81E2C4] transition-all duration-200;
+/* Container Overflow Control */
+.fc-timegrid-cols,
+.fc-timegrid-col-events {
+  @apply overflow-hidden !important;
 }
 
-.event-header {
-  @apply border-b border-gray-100 pb-1;
+/* Event Spacing */
+.fc-timegrid-event .event-header,
+.fc-timegrid-event .event-body {
+  @apply p-1 !important;
 }
 
-/* Style สำหรับปุ่ม more */
+/* Responsive Adjustments */
+@media (max-height: 600px) {
+  .fc-timegrid-event .event-body > *:not(:first-child) {
+    display: none;
+  }
+}
+
+/* Z-index Management */
+.fc-timegrid-now-indicator-line {
+  z-index: 2 !important;
+}
+
+/* More Link Styling */
 .more-link {
   @apply bg-[#81E2C4] text-white px-2 py-1 rounded-full text-xs
-         hover:bg-[#6ED7D1] transition-colors cursor-pointer
-         flex items-center justify-center;
-}
-
-/* ปรับแต่ง cell ที่มีหลายงาน */
-.fc-daygrid-day-bottom {
-  @apply mt-1 text-center;
-}
-
-/* Animation เมื่อ hover ที่งาน */
-.calendar-event {
-  @apply transition-all duration-200 
-         hover:transform hover:scale-[1.02]
-         hover:shadow-md;
-}
-
-/* ปรับขนาดและ style ของ cell */
-.fc-daygrid-day-frame {
-  @apply min-h-[120px] p-1;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .fc-daygrid-day-frame {
-    @apply min-h-[100px];
-  }
-
-  .calendar-event-content {
-    @apply min-h-[60px];
-  }
-}
-
-/* Loading state */
-.fc-event-skeleton {
-  @apply animate-pulse bg-gray-200;
-}
-
-/* Empty state */
-.fc-daygrid-day-frame:empty {
-  @apply bg-gray-50;
-}
-
-/* Today highlight */
-.fc-day-today {
-  @apply bg-[#F8C8DC]/50 !important;
-}
-
-/* Weekend days */
-.fc-day-sat,
-.fc-day-sun {
-  @apply bg-gray-50/50;
-}
-
-/* Event Card Styles */
-.event-card {
-  @apply bg-white p-2 rounded-lg shadow-sm
-         border border-gray-100
-         hover:shadow-md hover:border-[#81E2C4]
-         transition-all duration-200
-         mb-1 last:mb-0;
-}
-
-.event-title {
-  @apply text-sm font-medium text-gray-700 
-         truncate mb-1;
-}
-
-.event-location {
-  @apply text-xs text-gray-600 
-         truncate mb-1;
-}
-
-.event-positions {
-  @apply flex flex-wrap gap-1 mb-1;
-}
-
-.event-time {
-  @apply text-xs text-gray-500;
-}
-
-/* More Events Button */
-.more-events-btn {
-  @apply bg-[#81E2C4] text-white
-         px-3 py-1.5 rounded-full
-         text-xs font-medium
-         hover:bg-[#6ED7D1]
-         transition-colors
-         shadow-sm
-         mt-1;
-}
-
-/* Popover Styles */
-.fc-popover {
-  @apply shadow-xl border-0 rounded-lg !important;
-}
-
-.fc-popover-header {
-  @apply bg-gradient-to-r from-[#81E2C4] to-[#6ED7D1]
-         text-white p-3 !important;
-}
-
-.fc-popover-body {
-  @apply p-3 space-y-2 
-         max-h-[400px] overflow-y-auto
-         bg-white !important;
-}
-
-/* Position Badge */
-.position-badge {
-  @apply inline-flex items-center
-         px-2 py-0.5 rounded-full
-         text-xs font-medium
-         bg-purple-100 text-purple-700;
-}
-
-/* Responsive */
-@media (max-width: 640px) {
-  .fc-popover {
-    @apply max-w-[90vw] !important;
-  }
-
-  .fc-popover-body {
-    @apply max-h-[60vh] !important;
-  }
-
-  .event-card {
-    @apply p-1.5;
-  }
-}
-
-/* Custom Scrollbar */
-.fc-popover-body::-webkit-scrollbar {
-  @apply w-1.5;
-}
-
-.fc-popover-body::-webkit-scrollbar-track {
-  @apply bg-gray-100 rounded-full;
-}
-
-.fc-popover-body::-webkit-scrollbar-thumb {
-  @apply bg-[#81E2C4] rounded-full
-         hover:bg-[#6ED7D1];
-}
-
-/* Spacing between events in popover */
-.fc-popover-body .event-card {
-  @apply mb-2 last:mb-0;
+         hover:bg-[#6ED7D1] transition-colors cursor-pointer;
 }
 </style>

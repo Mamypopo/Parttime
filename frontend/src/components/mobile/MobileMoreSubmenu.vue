@@ -9,17 +9,17 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-black/30" />
+        <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" />
       </TransitionChild>
 
       <div class="fixed inset-0 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
           <DialogPanel
-            class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all"
+            class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-xl transition-all"
           >
             <!-- Header -->
             <div
-              class="bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] p-4 flex justify-between items-center"
+              class="bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA] p-4 flex justify-between items-center"
             >
               <h3 class="text-lg font-medium text-white">เพิ่มเติม</h3>
               <button
@@ -32,12 +32,55 @@
 
             <!-- Menu Items -->
             <div class="p-4 space-y-4">
+              <!-- Dark Mode Toggle -->
+              <div
+                class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="text-gray-600 dark:text-gray-300 text-sm">
+                    {{ isDarkMode ? 'โหมดมืด' : 'โหมดสว่าง' }}
+                  </span>
+                </div>
+
+                <!-- Toggle Switch -->
+                <button
+                  @click="toggleDarkMode"
+                  class="relative inline-flex items-center cursor-pointer"
+                >
+                  <div
+                    class="w-11 h-6 rounded-full transition-colors duration-200 ease-in-out"
+                    :class="[
+                      isDarkMode ? 'bg-[#4B9592] dark:bg-[#4B9592]' : 'bg-gray-200 dark:bg-gray-600'
+                    ]"
+                  >
+                    <div
+                      class="absolute top-[2px] left-[2px] w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ease-in-out"
+                      :class="{ 'translate-x-full': isDarkMode }"
+                    ></div>
+                    <!-- Icons -->
+                    <span
+                      class="absolute left-[4px] top-[4px] text-[10px] transition-opacity duration-200"
+                      :class="{ 'opacity-0': isDarkMode }"
+                    >
+                      🌞
+                    </span>
+                    <span
+                      class="absolute right-[4px] top-[4px] text-[10px] transition-opacity duration-200"
+                      :class="{ 'opacity-0': !isDarkMode }"
+                    >
+                      🌙
+                    </span>
+                  </div>
+                </button>
+              </div>
+
+              <!-- Logout Button -->
               <button
                 @click="handleLogout"
-                class="w-full flex items-center text-[#EA6B6B] hover:bg-red-50 p-2 rounded-lg transition-colors"
+                class="w-full flex items-center justify-center gap-3 text-[#EA6B6B] dark:text-[#FF8F8F] hover:bg-red-50 dark:hover:bg-red-900/20 p-3 rounded-lg transition-colors"
               >
                 <i class="fas fa-sign-out-alt text-xl"></i>
-                <span class="ml-3">ออกจากระบบ</span>
+                <span>ออกจากระบบ</span>
               </button>
             </div>
           </DialogPanel>
@@ -63,7 +106,8 @@ export default {
 
   data() {
     return {
-      sidebarStore: useSidebarStore()
+      sidebarStore: useSidebarStore(),
+      isDarkMode: localStorage.getItem('darkMode') === 'true' || false
     }
   },
 
@@ -73,20 +117,35 @@ export default {
       if (success) {
         this.$router.push('/signin-admin')
       }
+    },
+    toggleDarkMode() {
+      this.isDarkMode = !this.isDarkMode
+
+      if (this.isDarkMode) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+
+      localStorage.setItem('darkMode', this.isDarkMode)
     }
   },
-
+  mounted() {
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.documentElement.classList.add('dark')
+      this.isDarkMode = true
+    }
+  },
   emits: ['close']
 }
 </script>
 
 <style scoped>
 .router-link-active {
-  background-color: #f2f5ff;
-  color: #6366f1;
+  @apply bg-[#F2F5FF] dark:bg-gray-700 text-[#6366F1] dark:text-[#818CF8];
 }
 
 .router-link-active i {
-  color: #6366f1;
+  @apply text-[#6366F1] dark:text-[#818CF8];
 }
 </style>

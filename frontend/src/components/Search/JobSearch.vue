@@ -1,8 +1,8 @@
 <template>
-  <div class="p-4 border-b">
+  <div class="p-4 border-b dark:border-gray-700">
     <!-- ปุ่มแว่นขยายสำหรับหน้าจอเล็ก -->
     <button
-      class="lg:hidden mb-4 p-2 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] text-white rounded-lg flex items-center"
+      class="lg:hidden mb-4 p-2 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-purple-500 text-white rounded-lg flex items-center"
       @click="toggleSearch"
     >
       <i class="fas fa-search mr-1"></i> ค้นหา
@@ -20,7 +20,7 @@
             <input
               v-model="filters.id"
               type="text"
-              class="w-full pl-9 pr-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+              class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
               placeholder="ID"
               @keydown.enter="handleSearch"
             />
@@ -33,7 +33,7 @@
             <input
               v-model="filters.title"
               type="text"
-              class="w-full pl-9 pr-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+              class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
               placeholder="ชื่องาน"
               @keydown.enter="handleSearch"
             />
@@ -46,7 +46,7 @@
             <input
               v-model="filters.location"
               type="text"
-              class="w-full pl-9 pr-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+              class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
               placeholder="สถานที่"
               @keydown.enter="handleSearch"
             />
@@ -62,7 +62,7 @@
               @click="showPositionList = true"
               @blur="handlePositionBlur"
               readonly
-              class="w-full pl-9 pr-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200 cursor-pointer"
+              class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
               placeholder="ตำแหน่ง"
             />
             <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400">
@@ -72,14 +72,14 @@
             <!-- Position List Dropdown -->
             <div
               v-if="showPositionList"
-              class="absolute z-[9999] w-full mt-1 bg-gray-100 rounded-lg shadow-lg border border-purple-100"
+              class="absolute z-[9999] w-full mt-1 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-lg border border-purple-100 dark:border-gray-700"
             >
               <div class="p-2 space-y-1 max-h-[200px] overflow-y-auto">
                 <button
                   v-for="position in positionOptions"
                   :key="position.value"
                   type="button"
-                  class="block w-full text-left px-3 py-2 hover:bg-[#C5B4E3] hover:bg-opacity-40 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
+                  class="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#C5B4E3] hover:bg-opacity-40 dark:hover:bg-purple-600 dark:hover:bg-opacity-20 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
                   @click="selectPosition(position)"
                 >
                   {{ position.label }}
@@ -102,20 +102,20 @@
               @click="showStatusList = true"
               @blur="handleStatusBlur"
               readonly
-              class="w-full pl-9 pr-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200 cursor-pointer"
+              class="block w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 cursor-pointer"
               placeholder="สถานะ"
             />
             <!-- Status List Dropdown -->
             <div
               v-if="showStatusList"
-              class="absolute z-10 w-full mt-1 bg-gray-100 rounded-lg shadow-lg border border-purple-100"
+              class="absolute z-10 w-full mt-1 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-lg border border-purple-100 dark:border-gray-700"
             >
               <div class="p-2 space-y-1">
                 <button
                   v-for="status in statusOptions"
                   :key="status.value"
                   type="button"
-                  class="block w-full text-left px-3 py-2 hover:bg-[#C5B4E3] hover:bg-opacity-40 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
+                  class="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#C5B4E3] hover:bg-opacity-40 dark:hover:bg-purple-600 dark:hover:bg-opacity-20 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
                   @click="selectStatus(status)"
                 >
                   {{ status.label }}
@@ -128,26 +128,30 @@
           <div class="lg:col-span-3">
             <div class="flex gap-1">
               <div class="relative flex-1">
-                <span class="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-400">
+                <span
+                  class="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-400 dark:text-gray-500"
+                >
                   <i class="fas fa-baht-sign text-sm"></i>
                 </span>
                 <input
                   v-model.number="filters.minWage"
                   type="number"
-                  class="w-full pl-7 pr-2 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                  class="w-full pl-7 pr-2 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
                   placeholder="ค่าจ้างต่ำสุด"
                   @keydown.enter="handleSearch"
                 />
               </div>
-              <span class="text-gray-500 self-center">-</span>
+              <span class="text-gray-500 dark:text-gray-40 self-center">-</span>
               <div class="relative flex-1">
-                <span class="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-400">
+                <span
+                  class="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-400 dark:text-gray-500"
+                >
                   <i class="fas fa-baht-sign text-sm"></i>
                 </span>
                 <input
                   v-model.number="filters.maxWage"
                   type="number"
-                  class="w-full pl-7 pr-2 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                  class="w-full pl-7 pr-2 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
                   placeholder="สูงสุด"
                   @keydown.enter="handleSearch"
                 />
@@ -155,9 +159,12 @@
             </div>
           </div>
 
+          <!-- จำนวนคน -->
           <div class="lg:col-span-3">
             <div class="relative">
-              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+              <span
+                class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500"
+              >
                 <i class="fas fa-users text-sm"></i>
               </span>
               <input
@@ -166,13 +173,14 @@
                 @click="showPeopleCountList = true"
                 @blur="handlePeopleCountBlur"
                 readonly
-                class="w-full pl-9 pr-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200 cursor-pointer"
+                class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 cursor-pointer"
                 placeholder="จำนวนคน"
               />
+
               <!-- People Count Dropdown -->
               <div
                 v-if="showPeopleCountList"
-                class="absolute z-10 w-full mt-1 bg-gray-100 rounded-lg shadow-lg border border-purple-100"
+                class="absolute z-10 w-full mt-1 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-lg border border-purple-100 dark:border-gray-700"
               >
                 <div class="p-2 space-y-1">
                   <button
@@ -192,17 +200,19 @@
           <div class="lg:col-span-5">
             <div class="flex flex-col sm:flex-row gap-2">
               <div class="relative flex-1">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                <span
+                  class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500"
+                >
                   <i class="fas fa-calendar-day text-sm"></i>
                 </span>
                 <input
                   v-model="filters.dateFrom"
                   type="date"
-                  class="w-full pl-9 pr-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                  class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
                   @keydown.enter="handleSearch"
                 />
               </div>
-              <span class="hidden sm:block text-gray-500 self-center">-</span>
+              <span class="hidden sm:block text-gray-500 dark:text-gray-400 self-center">-</span>
               <div class="relative flex-1">
                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
                   <i class="fas fa-calendar-day text-sm"></i>
@@ -210,7 +220,7 @@
                 <input
                   v-model="filters.dateTo"
                   type="date"
-                  class="w-full pl-9 pr-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                  class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
                   @keydown.enter="handleSearch"
                 />
               </div>
@@ -221,13 +231,13 @@
           <div class="lg:col-span-2 flex gap-2 self-end">
             <button
               @click="handleSearch"
-              class="flex-1 py-1.5 text-sm bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] text-white rounded-lg hover:opacity-90 flex items-center justify-center"
+              class="flex-1 py-1.5 text-sm bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-purple-500 text-white rounded-lg hover:opacity-90 flex items-center justify-center"
             >
               <i class="fas fa-magnifying-glass mr-1"></i>ค้นหา
             </button>
             <button
               @click="handleClear"
-              class="flex-1 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center"
+              class="flex-1 py-1.5 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center justify-center"
             >
               <i class="fas fa-xmark mr-1"></i>ล้าง
             </button>

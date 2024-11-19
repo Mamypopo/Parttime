@@ -5,30 +5,36 @@
       <div class="flex flex-col md:flex-row md:items-center md:justify-between">
         <div class="mb-4 md:mb-0">
           <h2
-            class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
+            class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent dark:from-purple-400 dark:to-blue-300"
           >
             งานทั้งหมดในระบบ
           </h2>
-          <p class="text-gray-500 mt-1">จัดการและดูรายละเอียดงานทั้งหมด</p>
+          <p class="text-gray-500 dark:text-gray-400 mt-1">จัดการและดูรายละเอียดงานทั้งหมด</p>
         </div>
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div class="bg-gradient-to-br from-purple-50 to-blue-50 p-4 rounded-xl shadow-sm">
-            <div class="text-sm text-gray-500">งานทั้งหมด</div>
-            <div class="text-2xl font-bold text-purple-600">{{ jobs.length }}</div>
+          <div
+            class="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 p-4 rounded-xl shadow-sm dark:shadow-gray-900/10"
+          >
+            <div class="text-sm text-gray-500 dark:text-gray-400">งานทั้งหมด</div>
+            <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">
+              {{ jobs.length }}
+            </div>
           </div>
-          <div class="bg-gradient-to-br from-green-50 to-teal-50 p-4 rounded-xl shadow-sm">
-            <div class="text-sm text-gray-500">งานที่เสร็จสิ้น</div>
-            <div class="text-2xl font-bold text-green-600">
+          <div
+            class="bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/30 dark:to-teal-900/30 p-4 rounded-xl shadow-sm dark:shadow-gray-900/10"
+          >
+            <div class="text-sm text-gray-500 dark:text-gray-400">งานที่เสร็จสิ้น</div>
+            <div class="text-2xl font-bold text-green-600 dark:text-green-400">
               {{ jobs.filter((job) => job.status === 'completed').length }}
             </div>
           </div>
           <div
-            class="hidden md:block bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-xl shadow-sm"
+            class="hidden md:block bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/30 dark:to-orange-900/30 p-4 rounded-xl shadow-sm dark:shadow-gray-900/10"
           >
-            <div class="text-sm text-gray-500">งานที่กำลังดำเนินการ</div>
-            <div class="text-2xl font-bold text-yellow-600">
+            <div class="text-sm text-gray-500 dark:text-gray-400">งานที่กำลังดำเนินการ</div>
+            <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
               {{ jobs.filter((job) => job.status === 'in_progress').length }}
             </div>
           </div>
@@ -41,14 +47,16 @@
           <JobSearch
             @search="handleSearch"
             @clear="handleClear"
-            class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+            class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
           />
         </div>
       </div>
     </div>
 
     <!-- Main Content -->
-    <div class="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300">
+    <div
+      class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-all duration-300"
+    >
       <!-- Loading State -->
       <div v-if="loading" class="flex justify-center items-center py-12">
         <div class="loading-spinner"></div>
@@ -64,36 +72,64 @@
       </div>
 
       <!-- Table -->
-      <div v-else class="overflow-x-auto">
+      <div v-else class="hidden md:block overflow-x-auto">
         <table class="w-full">
           <thead>
-            <tr class="bg-gradient-to-r from-purple-50 to-blue-50">
-              <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">Job ID</th>
-              <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">ADMIN</th>
-              <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">ชื่องาน</th>
-              <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">สถานที่</th>
-              <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">วันที่ทำงาน</th>
-              <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">เวลา</th>
-              <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">ตำแหน่ง</th>
-              <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">ค่าจ้างรวม</th>
-              <th class="px-6 py-4 text-center text-sm font-medium text-gray-500">สถานะ</th>
-              <th class="px-6 py-4 text-center text-sm font-medium text-gray-500">รายละเอียด</th>
+            <tr
+              class="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30"
+            >
+              <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+                Job ID
+              </th>
+              <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+                ADMIN
+              </th>
+              <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+                ชื่องาน
+              </th>
+              <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+                สถานที่
+              </th>
+              <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+                วันที่ทำงาน
+              </th>
+              <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+                เวลา
+              </th>
+              <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+                ตำแหน่ง
+              </th>
+              <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">
+                ค่าจ้างรวม
+              </th>
+              <th
+                class="px-6 py-4 text-center text-sm font-medium text-gray-500 dark:text-gray-400"
+              >
+                สถานะ
+              </th>
+              <th
+                class="px-6 py-4 text-center text-sm font-medium text-gray-500 dark:text-gray-400"
+              >
+                รายละเอียด
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
             <tr
               v-for="job in jobs"
               :key="job.id"
-              class="hover:bg-gray-50 transition-colors duration-150"
+              class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150"
             >
-              <td class="px-6 py-4 text-gray-900">{{ job.id }}</td>
-              <td class="px-6 py-4 text-gray-600">
+              <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ job.id }}</td>
+              <td class="px-6 py-4 text-gray-600 dark:text-gray-100">
                 {{ job.creator?.first_name || `Admin ${job.created_by}` }}
               </td>
-              <td class="px-6 py-4 text-gray-900">{{ job.title }}</td>
-              <td class="px-6 py-4 text-gray-600">{{ job.location }}</td>
-              <td class="px-6 py-4 text-gray-600">{{ formatDate(job.work_date) }}</td>
-              <td class="px-6 py-4 text-gray-600">
+              <td class="px-6 py-4 text-gray-900 dark:text-gray-100">{{ job.title }}</td>
+              <td class="px-6 py-4 text-gray-600 dark:text-gray-100">{{ job.location }}</td>
+              <td class="px-6 py-4 text-gray-600 dark:text-gray-100">
+                {{ formatDate(job.work_date) }}
+              </td>
+              <td class="px-6 py-4 text-gray-600 dark:text-gray-100">
                 {{ formatTime(job.start_time) }} - {{ formatTime(job.end_time) }}
               </td>
               <td class="px-6 py-4">
@@ -101,16 +137,16 @@
                   <span
                     v-for="position in job.JobPositions"
                     :key="position.id"
-                    class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-600"
+                    class="px-2 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400"
                   >
                     {{ position.position_name }}
                   </span>
                 </div>
               </td>
               <td class="px-6 py-4">
-                <span class="font-medium text-purple-600">
+                <span class="font-medium text-purple-600 dark:text-purple-400">
                   {{ jobStore.calculateTotalWage(job) }}
-                  <span class="text-gray-500">บาท</span>
+                  <span class="text-gray-500 dark:text-gray-400">บาท</span>
                 </span>
               </td>
               <td class="px-6 py-4 text-center">
@@ -136,6 +172,86 @@
       </div>
     </div>
 
+    <!-- Mobile Card View -->
+    <div class="md:hidden space-y-4">
+      <div
+        v-for="job in jobs"
+        :key="job.id"
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 space-y-3"
+      >
+        <!-- Header -->
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="font-medium text-gray-900 dark:text-gray-100">{{ job.title }}</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Job ID: {{ job.id }}</p>
+          </div>
+          <span
+            class="inline-flex px-3 py-1 rounded-full text-xs whitespace-nowrap"
+            :class="getJobStatus(job).class"
+          >
+            {{ getJobStatus(job).text }}
+          </span>
+        </div>
+
+        <!-- Content -->
+        <div class="space-y-2 text-sm">
+          <div class="flex items-start gap-2">
+            <i class="fas fa-user-tie w-5 text-gray-400"></i>
+            <span class="text-gray-600 dark:text-gray-300">
+              {{ job.creator?.first_name || `Admin ${job.created_by}` }}
+            </span>
+          </div>
+
+          <div class="flex items-start gap-2">
+            <i class="fas fa-map-marker-alt w-5 text-gray-400"></i>
+            <span class="text-gray-600 dark:text-gray-300">{{ job.location }}</span>
+          </div>
+
+          <div class="flex items-start gap-2">
+            <i class="fas fa-calendar w-5 text-gray-400"></i>
+            <span class="text-gray-600 dark:text-gray-300">{{ formatDate(job.work_date) }}</span>
+          </div>
+
+          <div class="flex items-start gap-2">
+            <i class="fas fa-clock w-5 text-gray-400"></i>
+            <span class="text-gray-600 dark:text-gray-300">
+              {{ formatTime(job.start_time) }} - {{ formatTime(job.end_time) }}
+            </span>
+          </div>
+
+          <div class="flex items-start gap-2">
+            <i class="fas fa-briefcase w-5 text-gray-400"></i>
+            <div class="flex flex-wrap gap-1">
+              <span
+                v-for="position in job.JobPositions"
+                :key="position.id"
+                class="px-2 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400"
+              >
+                {{ position.position_name }}
+              </span>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-2">
+            <i class="fas fa-money-bill w-5 text-gray-400"></i>
+            <span class="font-medium text-purple-600 dark:text-purple-400">
+              {{ jobStore.calculateTotalWage(job) }}
+              <span class="text-gray-500 dark:text-gray-400">บาท</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <button
+          @click="openModal(job)"
+          class="w-full mt-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white text-sm hover:opacity-90 transition-opacity"
+        >
+          <i class="fas fa-eye mr-1"></i>
+          รายละเอียด
+        </button>
+      </div>
+    </div>
+
     <!-- Pagination -->
     <div
       v-if="!loading && jobs.length > 0"
@@ -147,8 +263,8 @@
         class="px-4 py-2 rounded-lg transition-all duration-300 flex items-center"
         :class="[
           currentPage <= 1
-            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            : 'bg-gradient-to-r from-purple-500/10 to-blue-500/10 text-purple-600 hover:from-purple-500/20 hover:to-blue-500/20 hover:shadow-md'
+            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+            : 'bg-gradient-to-r from-purple-500/10 to-blue-500/10 dark:from-purple-500/20 dark:to-blue-500/20 text-purple-600 dark:text-purple-400 hover:from-purple-500/20 hover:to-blue-500/20 dark:hover:from-purple-500/30 dark:hover:to-blue-500/30 hover:shadow-md'
         ]"
       >
         <i class="fas fa-chevron-left text-sm"></i>
@@ -156,15 +272,15 @@
 
       <div class="flex items-center space-x-2">
         <button
-          class="px-4 py-2 rounded-lg bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] text-white font-medium min-w-[40px]"
+          class="px-4 py-2 rounded-lg bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4a9490] dark:to-[#6667aa] text-white font-medium min-w-[40px]"
         >
           {{ currentPage }}
         </button>
 
-        <span class="text-gray-500 font-medium">จาก</span>
+        <span class="text-gray-500 dark:text-gray-400 font-medium">จาก</span>
 
         <span
-          class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 text-gray-600 font-medium min-w-[40px] text-center"
+          class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 text-gray-600 dark:text-gray-300 font-medium min-w-[40px] text-center"
         >
           {{ totalPages }}
         </span>
@@ -222,6 +338,14 @@ export default {
     const jobStore = useJobStore()
     return { jobStore }
   },
+  watch: {
+    $route(to, from) {
+      if (to.name === 'JobList' && from.name !== 'JobList') {
+        this.jobStore.resetPagination()
+        this.jobStore.fetchJobsAndParticipants()
+      }
+    }
+  },
   data() {
     return {
       baseURL: import.meta.env.VITE_API_URL,
@@ -254,6 +378,7 @@ export default {
   },
   async created() {
     try {
+      this.jobStore.resetPagination()
       await this.jobStore.fetchJobsAndParticipants()
     } catch (error) {
       console.error('Error in created hook:', error)
@@ -357,5 +482,24 @@ export default {
 
 .overflow-x-auto::-webkit-scrollbar-thumb:hover {
   background: #ccc;
+}
+
+/* Custom scrollbar for dark mode */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-700;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-600;
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-500;
 }
 </style>

@@ -391,7 +391,7 @@ export const useJobStore = defineStore('job', {
 
             if (!form.title || !form.date || !form.startDate ||
                 !form.endDate || !form.location) {
-                throw new Error('กรุณากรอ���ข้อมูลให้ครบทุกช่อง')
+                throw new Error('กรุณากรอกข้อมูลให้ครบทุกช่อง')
             }
 
             return true
@@ -422,7 +422,13 @@ export const useJobStore = defineStore('job', {
                 totalPages: 0
             }
         },
-
+        resetPagination() {
+            this.pagination = {
+                currentPage: 1,
+                pageSize: 10,
+                totalItems: 0
+            }
+        },
         updateSearchFilters(filters) {
             this.searchFilters = { ...filters }
         },

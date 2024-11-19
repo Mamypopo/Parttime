@@ -5,28 +5,45 @@
       <div class="flex flex-col md:flex-row md:items-center md:justify-between">
         <div class="mb-4 md:mb-0">
           <h2
-            class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
+            class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent dark:from-purple-400 dark:to-blue-300"
           >
             รายการผู้ใช้รอการอนุมัติ
           </h2>
-          <p class="text-gray-500 mt-1">จัดการและตรวจสอบผู้ใช้ที่รอการอนุมัติในระบบ</p>
+          <p class="text-gray-500 dark:text-gray-400 mt-1">
+            จัดการและตรวจสอบผู้ใช้ที่รอการอนุมัติในระบบ
+          </p>
         </div>
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div class="bg-gradient-to-br from-purple-50 to-blue-50 p-4 rounded-xl shadow-sm">
-            <div class="text-sm text-gray-500">รอการอนุมัติ</div>
-            <div class="text-2xl font-bold text-purple-600">{{ totalPending }}</div>
-          </div>
-          <div class="bg-gradient-to-br from-green-50 to-teal-50 p-4 rounded-xl shadow-sm">
-            <div class="text-sm text-gray-500">ยืนยันอีเมลแล้ว</div>
-            <div class="text-2xl font-bold text-green-600">{{ verifiedUsers }}</div>
-          </div>
+          <!-- รอการอนุมัติ -->
           <div
-            class="hidden md:block bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-xl shadow-sm"
+            class="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 p-4 rounded-xl shadow-sm dark:shadow-gray-900/10"
           >
-            <div class="text-sm text-gray-500">ยังไม่ยืนยันอีเมล</div>
-            <div class="text-2xl font-bold text-yellow-600">{{ notVerifiedUsers }}</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">รอการอนุมัติ</div>
+            <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">
+              {{ totalPending }}
+            </div>
+          </div>
+
+          <!-- ยืนยันอีเมลแล้ว -->
+          <div
+            class="bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/30 dark:to-teal-900/30 p-4 rounded-xl shadow-sm dark:shadow-gray-900/10"
+          >
+            <div class="text-sm text-gray-500 dark:text-gray-400">ยืนยันอีเมลแล้ว</div>
+            <div class="text-2xl font-bold text-green-600 dark:text-green-400">
+              {{ verifiedUsers }}
+            </div>
+          </div>
+
+          <!-- ยังไม่ยืนยันอีเมล -->
+          <div
+            class="hidden md:block bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/30 dark:to-orange-900/30 p-4 rounded-xl shadow-sm dark:shadow-gray-900/10"
+          >
+            <div class="text-sm text-gray-500 dark:text-gray-400">ยังไม่ยืนยันอีเมล</div>
+            <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+              {{ notVerifiedUsers }}
+            </div>
           </div>
         </div>
       </div>
@@ -38,14 +55,14 @@
             :filters="searchFilters"
             @search="handleSearch"
             @clear="handleClear"
-            class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+            class="bg-white dark:bg-gray-800/80 rounded-2xl shadow-lg dark:shadow-gray-950/20 hover:shadow-xl dark:hover:shadow-gray-950/30 transition-shadow duration-300"
           />
         </div>
 
         <!-- ปุ่ม Refresh -->
         <button
           @click="refreshData"
-          class="p-3 rounded-xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 text-gray-600 hover:text-purple-600"
+          class="p-3 rounded-xl bg-white dark:bg-gray-800/80 shadow-lg hover:shadow-xl transition-all duration-300 text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400"
           title="รีเฟรชข้อมูล"
         >
           <i class="fas fa-sync-alt"></i>
@@ -83,28 +100,45 @@
     </div>
 
     <!-- Users Table/Grid -->
-    <div v-else class="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300">
+    <div
+      v-else
+      class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-all duration-300"
+    >
       <!-- Desktop Table View -->
       <div class="hidden md:block overflow-x-auto">
         <table class="w-full">
           <thead>
-            <tr class="bg-gradient-to-r from-purple-50 to-blue-50">
-              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left w-[200px]">
+            <tr
+              class="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30"
+            >
+              <th
+                class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[200px]"
+              >
                 ผู้ใช้งาน
               </th>
-              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left w-[200px]">
+              <th
+                class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[200px]"
+              >
                 อีเมล
               </th>
-              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left w-[300px]">
+              <th
+                class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[300px]"
+              >
                 ทักษะ
               </th>
-              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left w-[150px]">
+              <th
+                class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[150px]"
+              >
                 สถานะยืนยันอีเมล
               </th>
-              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left w-[150px]">
+              <th
+                class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[150px]"
+              >
                 วันที่สมัคร
               </th>
-              <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-left w-[300px]">
+              <th
+                class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[300px]"
+              >
                 การจัดการ
               </th>
             </tr>
@@ -113,7 +147,7 @@
             <tr
               v-for="user in formattedUsers"
               :key="user.id"
-              class="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150"
+              class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150"
             >
               <!-- User Profile -->
               <td class="px-6 py-4">
@@ -133,15 +167,19 @@
                     </div>
                   </div>
                   <div class="min-w-0">
-                    <div class="font-medium text-gray-900 truncate">{{ user.fullName }}</div>
-                    <div class="text-sm text-gray-500">ID: {{ user.id }}</div>
+                    <div class="font-medium text-gray-900 dark:text-gray-100 truncate">
+                      {{ user.fullName }}
+                    </div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">ID: {{ user.id }}</div>
                   </div>
                 </div>
               </td>
 
               <!-- อีเมล -->
               <td class="px-6 py-4">
-                <div class="text-sm text-gray-900 truncate max-w-[200px]">{{ user.email }}</div>
+                <div class="text-sm text-gray-900 dark:text-gray-100 truncate max-w-[200px]">
+                  {{ user.email }}
+                </div>
               </td>
 
               <!-- ทักษะ -->
@@ -150,7 +188,7 @@
                   <span
                     v-for="skill in user.skills"
                     :key="skill"
-                    class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-600 whitespace-nowrap"
+                    class="px-2 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 whitespace-nowrap"
                   >
                     {{ skill }}
                   </span>
@@ -162,7 +200,9 @@
                 <span
                   class="px-2 py-1 rounded-full text-xs"
                   :class="
-                    user.isVerified ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                    user.isVerified
+                      ? 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400'
+                      : 'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400'
                   "
                 >
                   {{ user.isVerified ? 'ยืนยันแล้ว' : 'ยังไม่ยืนยัน' }}
@@ -171,7 +211,9 @@
 
               <!-- วันที่สมัคร -->
               <td class="px-6 py-4">
-                <div class="text-sm text-gray-900">{{ user.registeredDate }}</div>
+                <div class="text-sm text-gray-900 dark:text-gray-100">
+                  {{ user.registeredDate }}
+                </div>
               </td>
 
               <!-- การจัดการ -->
@@ -179,7 +221,7 @@
                 <div class="flex space-x-2">
                   <button
                     @click="showUserDetails(user)"
-                    class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white text-sm hover:opacity-90 transition-opacity"
+                    class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:opacity-90 transition-opacity"
                   >
                     <i class="fas fa-info-circle text-xs mr-1"></i>
                     <span>รายละเอียด</span>
@@ -210,72 +252,89 @@
         <div
           v-for="user in formattedUsers"
           :key="user.id"
-          class="bg-white rounded-lg p-4 shadow-sm space-y-3"
+          class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700"
         >
-          <div class="flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-              <div class="w-10 h-10 rounded-full overflow-hidden">
-                <img
-                  v-if="user.profileImage"
-                  :src="adminUserStore.getProfileImage(user.profileImage)"
-                  :alt="user.fullName"
-                  class="w-full h-full object-cover"
-                />
-                <div
-                  v-else
-                  class="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center text-white font-medium"
-                >
-                  {{ user.fullName.charAt(0) }}
-                </div>
-              </div>
-              <div>
-                <div class="font-medium">{{ user.fullName }}</div>
-                <div class="text-sm text-gray-500">ID: {{ user.id }}</div>
+          <!-- User Info -->
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-full overflow-hidden">
+              <img
+                v-if="user.profileImage"
+                :src="adminUserStore.getProfileImage(user.profileImage)"
+                :alt="user.fullName"
+                class="w-full h-full object-cover"
+              />
+              <div
+                v-else
+                class="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 flex items-center justify-center text-white font-medium"
+              >
+                {{ user.fullName.charAt(0).toUpperCase() }}
               </div>
             </div>
-            <span
-              class="px-2 py-1 rounded-full text-xs"
-              :class="user.isVerified ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'"
-            >
-              {{ user.isVerified ? 'ยืนยันแล้ว' : 'ยังไม่ยืนยัน' }}
-            </span>
+            <div>
+              <div class="font-medium text-gray-900 dark:text-gray-100">{{ user.fullName }}</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400">
+                ID: {{ user.id }} : {{ user.email }}
+              </div>
+            </div>
           </div>
 
-          <div class="space-y-2">
-            <p class="text-sm text-gray-600">อีเมล: {{ user.email }}</p>
-            <p class="text-sm text-gray-600">วันที่สมัคร: {{ user.registeredDate }}</p>
-            <div class="flex flex-wrap gap-1">
+          <!-- Skills -->
+          <div class="space-y-2 mb-3">
+            <p class="text-sm text-gray-500 dark:text-gray-400">ทักษะ:</p>
+            <div class="flex flex-wrap gap-1.5">
               <span
                 v-for="skill in user.skills"
                 :key="skill"
-                class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-600"
+                class="px-2.5 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400"
               >
                 {{ skill }}
               </span>
             </div>
           </div>
 
-          <div class="flex flex-col gap-2">
+          <!-- Status -->
+          <div class="flex justify-between text-sm mb-2">
+            <span class="text-gray-500 dark:text-gray-400">สถานะยืนยันอีเมล:</span>
+            <span
+              class="px-2 py-1 rounded-full text-xs"
+              :class="
+                user.isVerified
+                  ? 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400'
+                  : 'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400'
+              "
+            >
+              {{ user.isVerified ? 'ยืนยันแล้ว' : 'ยังไม่ยืนยัน' }}
+            </span>
+          </div>
+
+          <!-- Date -->
+          <div class="flex justify-between text-sm mb-4">
+            <span class="text-gray-500 dark:text-gray-400">วันที่สมัคร:</span>
+            <span class="text-gray-900 dark:text-gray-100">{{ user.registeredDate }}</span>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex gap-2">
             <button
               @click="showUserDetails(user)"
-              class="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white text-sm hover:opacity-90 transition-opacity"
+              class="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:opacity-90 transition-opacity"
             >
               <i class="fas fa-info-circle text-xs mr-1"></i>
-              <span>รายละเอียด</span>
+              รายละเอียด
             </button>
             <button
               @click="handleApprove(user.id)"
-              class="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 text-white text-sm hover:opacity-90 transition-opacity"
+              class="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 dark:from-green-600 dark:to-teal-600 text-white text-sm hover:opacity-90 transition-opacity"
             >
               <i class="fas fa-check text-xs mr-1"></i>
-              <span>อนุมัติ</span>
+              อนุมัติ
             </button>
             <button
               @click="handleReject(user.id)"
-              class="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm hover:opacity-90 transition-opacity"
+              class="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-pink-500 dark:from-red-600 dark:to-pink-600 text-white text-sm hover:opacity-90 transition-opacity"
             >
               <i class="fas fa-times text-xs mr-1"></i>
-              <span>ไม่อนุมัติ</span>
+              ไม่อนุมัติ
             </button>
           </div>
         </div>
@@ -293,8 +352,8 @@
         class="px-4 py-2 rounded-lg transition-all duration-300 flex items-center"
         :class="[
           currentPage <= 1
-            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            : 'bg-gradient-to-r from-purple-500/10 to-blue-500/10 text-purple-600 hover:from-purple-500/20 hover:to-blue-500/20 hover:shadow-md'
+            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+            : 'bg-gradient-to-r from-purple-500/10 to-blue-500/10 dark:from-purple-400/10 dark:to-blue-400/10 text-purple-600 dark:text-purple-400 hover:from-purple-500/20 hover:to-blue-500/20 dark:hover:from-purple-400/20 dark:hover:to-blue-400/20 hover:shadow-md'
         ]"
       >
         <i class="fas fa-chevron-left text-sm"></i>
@@ -302,15 +361,15 @@
 
       <div class="flex items-center space-x-2">
         <button
-          class="px-4 py-2 rounded-lg bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] text-white font-medium min-w-[40px]"
+          class="px-4 py-2 rounded-lg bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4a9490] dark:to-[#6667aa] text-white font-medium min-w-[40px]"
         >
           {{ currentPage }}
         </button>
 
-        <span class="text-gray-500 font-medium">จาก</span>
+        <span class="text-gray-500 dark:text-gray-400 font-medium">จาก</span>
 
         <span
-          class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 text-gray-600 font-medium min-w-[40px] text-center"
+          class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 text-gray-600 dark:text-gray-300 font-medium min-w-[40px] text-center"
         >
           {{ totalPages }}
         </span>

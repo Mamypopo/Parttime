@@ -10,7 +10,7 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-black/25" @click="closeModal" />
+        <div class="fixed inset-0 bg-black/25 backdrop-blur-sm" @click="closeModal" />
       </TransitionChild>
 
       <!-- Modal Container -->
@@ -24,19 +24,23 @@
             leave-from="opacity-100 translate-y-0"
             leave-to="opacity-0 translate-y-full"
           >
-            <HeadlessDialogPanel class="w-[300px] max-w-md h-full bg-white shadow-xl relative">
+            <HeadlessDialogPanel
+              class="w-[300px] max-w-md h-full bg-white dark:bg-gray-800 shadow-xl relative"
+            >
               <!-- Header -->
               <div
-                class="sticky top-0 modal flex justify-between items-center p-4 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] border-b"
+                class="sticky top-0 modal flex justify-between items-center p-4 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA] border-b dark:border-gray-700"
               >
-                <HeadlessDialogTitle class="text-base font-medium text-[#EA6B6B]">
+                <HeadlessDialogTitle
+                  class="text-base font-medium text-[#EA6B6B] dark:text-[#FF8F8F]"
+                >
                   การแจ้งเตือนทั้งหมด
                 </HeadlessDialogTitle>
                 <div class="flex items-center gap-4">
                   <button
                     v-if="hasUnread"
                     @click="markAllAsRead"
-                    class="text-sm text-[#6ED7D1] hover:text-[#4bb3af] transition-colors duration-200"
+                    class="text-sm text-[#6ED7D1] dark:text-[#4B9592] hover:text-[#4bb3af] dark:hover:text-[#3D7A78] transition-colors duration-200"
                   >
                     <span class="flex items-center gap-2">
                       <i class="fas fa-check-double"></i>
@@ -53,7 +57,9 @@
               </div>
 
               <!-- Filters -->
-              <div class="sticky top-[65px] z-10 px-3 py-2 border-b bg-white">
+              <div
+                class="sticky top-[65px] z-10 px-3 py-2 border-b dark:border-gray-700 bg-white dark:bg-gray-800"
+              >
                 <div class="flex gap-2">
                   <button
                     v-for="filter in filters"
@@ -62,8 +68,8 @@
                     class="px-4 py-1.5 text-sm rounded-full transition-all duration-200 flex items-center justify-center gap-1.5"
                     :class="
                       currentFilter === filter.value
-                        ? 'bg-[#babbec] text-white'
-                        : 'bg-white text-gray-600'
+                        ? 'bg-[#babbec] dark:bg-[#6667AA] text-white'
+                        : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                     "
                   >
                     <i :class="getFilterIcon(filter.value)"></i>
@@ -78,18 +84,22 @@
                   v-if="filteredNotifications.length === 0"
                   class="flex flex-col items-center justify-center h-[50vh] p-8 text-center"
                 >
-                  <div class="bg-gray-50 rounded-full p-6 mb-4">
-                    <i class="fas fa-bell-slash text-4xl text-[#EABF71]"></i>
+                  <div class="bg-gray-50 dark:bg-gray-700 rounded-full p-6 mb-4">
+                    <i class="fas fa-bell-slash text-4xl text-[#EABF71] dark:text-[#B38B4A]"></i>
                   </div>
-                  <h3 class="text-lg font-medium text-[#3A3A49] mb-2">ไม่มีการแจ้งเตือน</h3>
-                  <p class="text-sm text-gray-500">ยังไม่มีการแจ้งเตือนใหม่ในขณะนี้</p>
+                  <h3 class="text-lg font-medium text-[#3A3A49] dark:text-gray-200 mb-2">
+                    ไม่มีการแจ้งเตือน
+                  </h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                    ยังไม่มีการแจ้งเตือนใหม่ในขณะนี้
+                  </p>
                 </div>
                 <div
                   v-else
                   v-for="notification in filteredNotifications"
                   :key="notification.id"
-                  class="p-4 hover:bg-[#5D5FEF]/5 border-b last:border-b-0 transition-colors duration-200"
-                  :class="!notification.read ? 'bg-[#5D5FEF]/10' : ''"
+                  class="p-4 hover:bg-[#5D5FEF]/5 dark:hover:bg-[#5D5FEF]/20 border-b dark:border-gray-700 last:border-b-0 transition-colors duration-200"
+                  :class="!notification.read ? 'bg-[#5D5FEF]/10 dark:bg-[#5D5FEF]/20' : ''"
                   @click="handleSelect(notification)"
                 >
                   <div class="flex items-start gap-3">
@@ -102,17 +112,25 @@
                     <div class="flex-1">
                       <p
                         class="text-sm font-medium"
-                        :class="!notification.read ? 'text-[#CDE45F]' : 'text-[#888888]'"
+                        :class="
+                          !notification.read
+                            ? 'text-[#CDE45F] dark:text-[#A4B83C]'
+                            : 'text-[#888888] dark:text-gray-400'
+                        "
                       >
                         {{ notification.message }}
                       </p>
-                      <p class="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                      <p
+                        class="text-xs text-gray-400 dark:text-gray-500 mt-1 flex items-center gap-1"
+                      >
                         <i class="far fa-clock"></i>
                         {{ formatTime(notification.created_at) }}
                       </p>
                     </div>
                     <div v-if="!notification.read" class="flex-shrink-0">
-                      <div class="h-3 w-3 rounded-full bg-[#EA6B6B] animate-ping"></div>
+                      <div
+                        class="h-3 w-3 rounded-full bg-[#EA6B6B] dark:bg-[#FF8F8F] animate-ping"
+                      ></div>
                     </div>
                   </div>
                 </div>
@@ -260,6 +278,7 @@ export default {
 </script>
 
 <style scoped>
+/* Light mode scrollbar */
 .overflow-y-auto {
   scrollbar-width: thin;
   scrollbar-color: #c5b4e3 #f3f4f6;
@@ -277,5 +296,21 @@ export default {
   background-color: #c5b4e3;
   border-radius: 20px;
   border: 2px solid #f3f4f6;
+}
+
+/* Dark mode scrollbar */
+@media (prefers-color-scheme: dark) {
+  .overflow-y-auto {
+    scrollbar-color: #4b9592 #1f2937;
+  }
+
+  .overflow-y-auto::-webkit-scrollbar-track {
+    background: #1f2937;
+  }
+
+  .overflow-y-auto::-webkit-scrollbar-thumb {
+    background-color: #4b9592;
+    border: 2px solid #1f2937;
+  }
 }
 </style>

@@ -1,6 +1,7 @@
 <template>
   <TransitionRoot appear :show="show" as="template">
     <Dialog as="div" class="fixed inset-0 modal overflow-y-auto" v-if="show">
+      <!-- Backdrop -->
       <TransitionChild
         enter="transition-opacity duration-300"
         enter-from="opacity-0"
@@ -13,14 +14,13 @@
       </TransitionChild>
 
       <div class="flex min-h-full items-center justify-center p-4">
-        <div class="relative w-full max-w-4xl bg-white rounded-2xl shadow-xl">
+        <div class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-xl">
           <!-- Modal Header -->
           <div
-            class="flex items-center justify-between p-4 md:p-5 rounded-t-2xl border-b bg-gradient-to-r from-[#6ED7D1] to-[#9899ee]"
+            class="flex items-center justify-between p-4 md:p-5 rounded-t-2xl border-b dark:border-gray-700 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA]"
           >
             <h3 class="text-xl font-semibold text-white flex items-center">
               <i class="fas fa-edit text-white mr-2"></i>
-
               แก้ไขงาน
             </h3>
             <button
@@ -32,63 +32,63 @@
           </div>
 
           <!-- Modal Body -->
-          <div class="p-4 md:p-5 space-y-4">
+          <div class="p-4 md:p-5 space-y-4 bg-white dark:bg-gray-800">
             <form @submit.prevent="handleSubmit" class="space-y-4">
               <!-- ข้อมูลพื้นฐาน -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">
-                    <i class="fas fa-heading text-[#81E2C4] mr-1"></i>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <i class="fas fa-heading text-[#81E2C4] dark:text-[#4B9592] mr-1"></i>
                     ชื่องาน
                   </label>
                   <input
                     v-model="formData.title"
                     type="text"
-                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                    class="w-full px-3 py-2 border dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
                     required
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">
-                    <i class="fas fa-location-dot text-[#81E2C4] mr-1"></i>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <i class="fas fa-location-dot text-[#81E2C4] dark:text-[#4B9592] mr-1"></i>
                     สถานที่
                   </label>
                   <input
                     v-model="formData.location"
                     type="text"
-                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                    class="w-full px-3 py-2 border dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
                     required
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">
-                    <i class="fas fa-calendar-day text-[#81E2C4] mr-1"></i>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <i class="fas fa-calendar-day text-[#81E2C4] dark:text-[#4B9592] mr-1"></i>
                     วันที่ทำงาน
                   </label>
                   <input
                     v-model="formData.work_date"
                     type="date"
-                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                    class="w-full px-3 py-2 border dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
                     required
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">
-                    <i class="fas fa-clock text-[#81E2C4] mr-1"></i>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <i class="fas fa-clock text-[#81E2C4] dark:text-[#4B9592] mr-1"></i>
                     เวลาทำงาน
                   </label>
                   <div class="flex items-center gap-2">
                     <input
                       v-model="formData.start_time"
                       type="time"
-                      class="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                      class="flex-1 px-3 py-2 border dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
                       required
                     />
-                    <span class="text-gray-500">-</span>
+                    <span class="text-gray-500 dark:text-gray-300">-</span>
                     <input
                       v-model="formData.end_time"
                       type="time"
-                      class="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                      class="flex-1 px-3 py-2 border dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
                       required
                     />
                   </div>
@@ -97,28 +97,30 @@
 
               <!-- รายละเอียดงาน -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                  <i class="fas fa-align-left text-[#81E2C4] mr-1"></i>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <i class="fas fa-align-left text-[#81E2C4] dark:text-[#4B9592] mr-1"></i>
                   รายละเอียดงาน
                 </label>
                 <textarea
                   v-model="formData.details"
                   rows="3"
-                  class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                  class="w-full px-3 py-2 border dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
                 ></textarea>
               </div>
 
               <!-- ตำแหน่งงาน -->
               <div class="space-y-4">
                 <div class="flex items-center justify-between">
-                  <h4 class="text-lg font-medium flex items-center">
-                    <i class="fas fa-users text-[#81E2C4] mr-2"></i>
+                  <h4
+                    class="text-lg font-medium flex items-center text-gray-800 dark:text-gray-200"
+                  >
+                    <i class="fas fa-users text-[#81E2C4] dark:text-[#4B9592] mr-2"></i>
                     ตำแหน่งงาน
                   </h4>
                   <button
                     type="button"
                     @click="addPosition"
-                    class="px-3 py-1.5 text-sm bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 flex items-center"
+                    class="px-3 py-1.5 text-sm bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800/40 flex items-center"
                   >
                     <i class="fas fa-plus mr-1"></i>
                     เพิ่มตำแหน่ง
@@ -129,21 +131,21 @@
                 <div
                   v-for="(position, index) in formData.positions"
                   :key="index"
-                  class="border rounded-lg bg-gray-50"
+                  class="border dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700"
                 >
                   <!-- หัวข้อตำแหน่ง -->
                   <div
-                    class="p-4 flex justify-between items-center cursor-pointer hover:bg-gray-100"
+                    class="p-4 flex justify-between items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200"
                     @click="togglePosition(index)"
                   >
-                    <h5 class="font-medium flex items-center">
-                      <i class="fas fa-user-tie text-[#81E2C4] mr-2"></i>
+                    <h5 class="font-medium flex items-center text-gray-800 dark:text-gray-200">
+                      <i class="fas fa-user-tie text-[#81E2C4] dark:text-[#4B9592] mr-2"></i>
                       ตำแหน่งที่ {{ index + 1 }}: {{ position.name || 'ตำแหน่งใหม่' }}
                     </h5>
                     <!-- แถบแสดงสถานะ "ใหม่" -->
                     <span
                       v-if="position.isNew"
-                      class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-green-400 to-blue-400 text-white animate-bounce shadow-sm"
+                      class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-green-400 to-blue-400 dark:from-green-500 dark:to-blue-500 text-white animate-bounce shadow-sm"
                     >
                       <i class="fas fa-star-of-life mr-1 text-xs"></i>
                       ใหม่
@@ -153,10 +155,10 @@
                       <button
                         type="button"
                         @click.stop="removePosition(index)"
-                        class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors duration-200 group focus:outline-none focus:ring-2 focus:ring-red-200"
+                        class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors duration-200 group focus:outline-none focus:ring-2 focus:ring-red-200 dark:focus:ring-red-800"
                       >
                         <i
-                          class="fas fa-trash-alt text-red-500 group-hover:text-red-600 transition-colors"
+                          class="fas fa-trash-alt text-red-500 dark:text-red-400 group-hover:text-red-600 dark:group-hover:text-red-300 transition-colors"
                         ></i>
                         <span class="hidden sm:inline">ลบตำแหน่ง</span>
                       </button>
@@ -164,13 +166,13 @@
                       <!-- ปุ่มขยาย/ย่อ -->
                       <button
                         type="button"
-                        class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 hover:bg-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                        class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
                       >
                         <i
                           :class="[
-                            'fas text-gray-500 transition-all duration-300',
+                            'fas text-gray-500 dark:text-gray-400 transition-all duration-300',
                             expandedPositions[index] ? 'fa-chevron-up' : 'fa-chevron-down',
-                            'transform hover:text-gray-700',
+                            'transform hover:text-gray-700 dark:hover:text-gray-300',
                             expandedPositions[index] ? 'rotate-0' : 'rotate-180'
                           ]"
                         ></i>
@@ -180,17 +182,19 @@
 
                   <!-- รายละเอียดตำแหน่ง -->
                   <transition name="expand" @enter="startTransition" @leave="startTransition">
-                    <div v-show="expandedPositions[index]" class="overflow-hidden">
+                    <div v-show="expandedPositions[index]">
                       <div class="p-4 border-t">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                              <i class="fas fa-tag text-[#81E2C4] mr-1"></i>
+                            <label
+                              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                            >
+                              <i class="fas fa-tag text-[#81E2C4] dark:text-[#4B9592] mr-1"></i>
                               ชื่อตำแหน่ง
                             </label>
                             <div class="relative">
                               <span
-                                class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400"
+                                class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500"
                               >
                                 <i class="fas fa-user-tie text-sm"></i>
                               </span>
@@ -200,7 +204,7 @@
                                 @click="position.showList = true"
                                 @blur="handlePositionBlur(index)"
                                 readonly
-                                class="w-full pl-9 pr-3 py-1.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200 cursor-pointer"
+                                class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 cursor-pointer"
                                 placeholder="เลือกตำแหน่ง"
                                 required
                               />
@@ -213,14 +217,14 @@
                               <!-- Position List Dropdown -->
                               <div
                                 v-if="position.showList"
-                                class="absolute z-50 w-full bg-gray-100 rounded-lg shadow-lg border border-purple-100 max-h-48 overflow-y-auto"
+                                class="absolute z-50 w-full bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg border border-purple-100 dark:border-gray-600 max-h-48 overflow-y-auto"
                               >
                                 <div class="p-2 space-y-1">
                                   <button
                                     v-for="option in positionOptions"
                                     :key="option.value"
                                     type="button"
-                                    class="block w-full text-left px-3 py-2 hover:bg-[#C5B4E3] hover:bg-opacity-40 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
+                                    class="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-200 hover:bg-[#C5B4E3] hover:bg-opacity-40 dark:hover:bg-purple-600 dark:hover:bg-opacity-20 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
                                     @click="selectPosition(index, option)"
                                   >
                                     {{ option.label }}
@@ -230,40 +234,48 @@
                             </div>
                           </div>
                           <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                              <i class="fas fa-coins text-[#81E2C4] mr-1"></i>
+                            <label
+                              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                            >
+                              <i class="fas fa-coins text-[#81E2C4] dark:text-[#4B9592] mr-1"></i>
                               ค่าจ้าง (บาท)
                             </label>
                             <input
                               v-model.number="position.wage"
                               type="number"
-                              class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                              class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 cursor-pointer"
                               required
                             />
                           </div>
                           <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                              <i class="fas fa-users text-[#81E2C4] mr-1"></i>
+                            <label
+                              class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                            >
+                              <i class="fas fa-users text-[#81E2C4] dark:text-[#4B9592] mr-1"></i>
                               จำนวนที่ต้องการ
                             </label>
                             <input
                               v-model.number="position.required_people"
                               type="number"
-                              class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                              class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 cursor-pointer"
                               required
                             />
                           </div>
                         </div>
 
                         <div class="mt-4">
-                          <label class="block text-sm font-medium text-gray-700 mb-1">
-                            <i class="fas fa-circle-info text-[#81E2C4] mr-1"></i>
+                          <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                          >
+                            <i
+                              class="fas fa-circle-info text-[#81E2C4] dark:text-[#4B9592] mr-1"
+                            ></i>
                             รายละเอียดตำแหน่ง
                           </label>
                           <textarea
                             v-model="position.details"
                             rows="2"
-                            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200"
+                            class="w-full px-3 py-2 border dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
                           ></textarea>
                         </div>
                       </div>
@@ -275,17 +287,17 @@
           </div>
 
           <!-- Modal Footer -->
-          <div class="flex items-center justify-end gap-3 p-4 md:p-5 border-t">
+          <div class="flex items-center justify-end gap-3 p-4 md:p-5 border-t dark:border-gray-700">
             <button
               @click="closeModal"
-              class="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50 flex items-center"
+              class="px-4 py-2 text-sm border dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg flex items-center"
             >
               <i class="fas fa-xmark mr-1"></i>
               ยกเลิก
             </button>
             <button
               @click="handleSubmit"
-              class="px-4 py-2 text-sm bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] text-white rounded-lg hover:opacity-90 flex items-center"
+              class="px-4 py-2 text-sm text-white rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-purple-500 hover:opacity-90 flex items-center"
             >
               <i class="fas fa-save mr-1"></i>
               บันทึก

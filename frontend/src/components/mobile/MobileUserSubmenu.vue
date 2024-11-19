@@ -9,17 +9,17 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-black/30" />
+        <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" />
       </TransitionChild>
 
       <div class="fixed inset-0 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
           <DialogPanel
-            class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all"
+            class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-xl transition-all"
           >
             <!-- Header -->
             <div
-              class="bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] p-4 flex justify-between items-center"
+              class="bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA] p-4 flex justify-between items-center"
             >
               <h3 class="text-lg font-medium text-white">ผู้ใช้งาน</h3>
               <button
@@ -36,11 +36,11 @@
                 v-for="item in userMenuItems"
                 :key="item.path"
                 :to="item.path"
-                class="flex items-center p-3 rounded-lg hover:bg-[#F2F5FF] transition-all duration-200"
+                class="flex items-center p-3 rounded-lg hover:bg-[#F2F5FF] dark:hover:bg-gray-700 transition-all duration-200"
                 @click="$emit('close')"
               >
-                <i :class="[item.icon, 'text-[#6366F1] text-xl mr-3']"></i>
-                <span class="text-[#3A3A49]">{{ item.name }}</span>
+                <i :class="[item.icon, 'text-[#6366F1] dark:text-[#818CF8] text-xl mr-3']"></i>
+                <span class="text-[#3A3A49] dark:text-gray-200">{{ item.name }}</span>
               </router-link>
             </div>
           </DialogPanel>
@@ -49,7 +49,6 @@
     </Dialog>
   </TransitionRoot>
 </template>
-
 <script>
 import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from '@headlessui/vue'
 
@@ -78,11 +77,10 @@ export default {
 </script>
 <style scoped>
 .router-link-active {
-  background-color: #f2f5ff;
-  color: #6366f1;
+  @apply bg-[#F2F5FF] dark:bg-gray-700 text-[#6366F1] dark:text-[#818CF8];
 }
 
 .router-link-active i {
-  color: #6366f1;
+  @apply text-[#6366F1] dark:text-[#818CF8];
 }
 </style>

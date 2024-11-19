@@ -26,11 +26,11 @@
             leave-to="opacity-0 scale-95"
           >
             <DialogPanel
-              class="relative bg-white rounded-2xl shadow-xl w-full max-w-3xl pointer-events-auto"
+              class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-3xl pointer-events-auto"
             >
               <!-- Header -->
               <div
-                class="flex items-center justify-between p-4 border-b bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] rounded-t-2xl"
+                class="flex items-center justify-between p-4 border-b dark:border-gray-700 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA] rounded-t-2xl"
               >
                 <DialogTitle class="text-lg font-semibold text-white">
                   <i class="fas fa-clipboard-list mr-2"></i>
@@ -49,57 +49,79 @@
                 <div class="space-y-4">
                   <!-- ข้อมูลพื้นฐาน -->
                   <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-gray-50 p-3 rounded-xl">
-                      <h4 class="text-sm font-medium text-gray-700 flex items-center">
-                        <i class="fas fa-briefcase mr-2 text-[#81E2C4]"></i>ชื่องาน
+                    <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl">
+                      <h4
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center"
+                      >
+                        <i class="fas fa-briefcase mr-2 text-[#81E2C4] dark:text-[#4B9592]"></i
+                        >ชื่องาน
                       </h4>
-                      <p class="mt-1">{{ job?.title }}</p>
+                      <p class="mt-1 text-gray-900 dark:text-gray-100">{{ job?.title }}</p>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-xl">
-                      <h4 class="text-sm font-medium text-gray-700 flex items-center">
-                        <i class="fas fa-map-marker-alt mr-2 text-[#81E2C4]"></i>สถานที่
+                    <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl">
+                      <h4
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center"
+                      >
+                        <i class="fas fa-map-marker-alt mr-2 text-[#81E2C4] dark:text-[#4B9592]"></i
+                        >สถานที่
                       </h4>
-                      <p class="mt-1">{{ job?.location }}</p>
+                      <p class="mt-1 text-gray-900 dark:text-gray-100">{{ job?.location }}</p>
                     </div>
                   </div>
 
                   <!-- วันและเวลา -->
                   <div class="grid grid-cols-3 gap-4">
-                    <div class="bg-gray-50 p-3 rounded-xl">
-                      <h4 class="text-sm font-medium text-gray-700 flex items-center">
-                        <i class="fas fa-calendar mr-2 text-[#81E2C4]"></i>วันที่
+                    <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl">
+                      <h4
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center"
+                      >
+                        <i class="fas fa-calendar mr-2 text-[#81E2C4] dark:text-[#4B9592]"></i
+                        >วันที่
                       </h4>
-                      <p class="mt-1">{{ formatDate(job?.work_date) }}</p>
+                      <p class="mt-1 text-gray-900 dark:text-gray-100">
+                        {{ formatDate(job?.work_date) }}
+                      </p>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-xl">
-                      <h4 class="text-sm font-medium text-gray-700 flex items-center">
-                        <i class="fas fa-clock mr-2 text-[#81E2C4]"></i>เริ่ม
+
+                    <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl">
+                      <h4
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center"
+                      >
+                        <i class="fas fa-clock mr-2 text-[#81E2C4] dark:text-[#4B9592]"></i>เริ่ม
                       </h4>
-                      <p class="mt-1">{{ formatTime(job?.start_time) }}</p>
+                      <p class="mt-1 text-gray-900 dark:text-gray-100">
+                        {{ formatTime(job?.start_time) }}
+                      </p>
                     </div>
-                    <div class="bg-gray-50 p-3 rounded-xl">
-                      <h4 class="text-sm font-medium text-gray-700 flex items-center">
-                        <i class="fas fa-clock mr-2 text-[#81E2C4]"></i>สิ้นสุด
+                    <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl">
+                      <h4
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center"
+                      >
+                        <i class="fas fa-clock mr-2 text-[#81E2C4] dark:text-[#4B9592]"></i>สิ้นสุด
                       </h4>
-                      <p class="mt-1">{{ formatTime(job?.end_time) }}</p>
+                      <p class="mt-1 text-gray-900 dark:text-gray-100">
+                        {{ formatTime(job?.end_time) }}
+                      </p>
                     </div>
                   </div>
 
                   <!-- ตำแหน่งงาน -->
-                  <div class="bg-gray-50 p-3 rounded-xl">
-                    <h4 class="text-sm font-medium text-gray-700 flex items-center mb-2">
-                      <i class="fas fa-users mr-2 text-[#81E2C4]"></i>ตำแหน่งงาน
+                  <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl">
+                    <h4
+                      class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center mb-2"
+                    >
+                      <i class="fas fa-users mr-2 text-[#81E2C4] dark:text-[#4B9592]"></i>ตำแหน่งงาน
                     </h4>
                     <div class="space-y-2">
                       <div
                         v-for="position in job?.JobPositions"
                         :key="position.id"
-                        class="bg-white p-3 rounded-xl border border-gray-100"
+                        class="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700"
                       >
                         <div class="flex justify-between items-center mb-2">
-                          <span class="font-medium text-[#81E2C4]">{{
-                            position.position_name
-                          }}</span>
+                          <span class="font-medium text-[#81E2C4] dark:text-[#4B9592]">
+                            {{ position.position_name }}
+                          </span>
                           <span
                             class="px-3 py-1 rounded-full text-xs font-medium"
                             :class="getStatusClass(position.status)"
@@ -109,31 +131,45 @@
                         </div>
 
                         <div class="grid grid-cols-2 gap-2 text-sm">
-                          <div class="flex items-center text-gray-600">
+                          <div class="flex items-center text-gray-600 dark:text-gray-400">
                             <i class="fas fa-coins mr-2"></i>
                             <span>{{ position.wage }} บาท</span>
                           </div>
-                          <div class="flex items-center text-gray-600">
+                          <div class="flex items-center text-gray-600 dark:text-gray-400">
                             <i class="fas fa-user-friends mr-2"></i>
                             <span>ต้องการ {{ position.required_people }} คน</span>
                           </div>
                         </div>
 
-                        <div v-if="position.details" class="mt-2 pt-2 border-t">
-                          <div class="text-sm text-gray-600">
+                        <div
+                          v-if="position.details"
+                          class="mt-2 pt-2 border-t dark:border-gray-700"
+                        >
+                          <div class="text-sm text-gray-600 dark:text-gray-400">
                             <div class="flex items-start space-x-2">
-                              <i class="fas fa-info-circle mt-1 text-[#81E2C4]"></i>
+                              <i
+                                class="fas fa-info-circle mt-1 text-[#81E2C4] dark:text-[#4B9592]"
+                              ></i>
                               <div class="flex-1">
-                                <h5 class="font-medium text-gray-700 mb-1">รายละเอียดตำแหน่ง:</h5>
+                                <h5 class="font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                  รายละเอียดตำแหน่ง:
+                                </h5>
                                 <p class="whitespace-pre-line">{{ position.details }}</p>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        <div v-if="position.requirements" class="mt-2 pt-2 border-t">
-                          <h5 class="text-sm font-medium text-gray-700 mb-1">คุณสมบัติ:</h5>
-                          <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                        <div
+                          v-if="position.requirements"
+                          class="mt-2 pt-2 border-t dark:border-gray-700"
+                        >
+                          <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            คุณสมบัติ:
+                          </h5>
+                          <ul
+                            class="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1"
+                          >
                             <li
                               v-for="(req, index) in position.requirements.split('\n')"
                               :key="index"
@@ -145,7 +181,7 @@
 
                         <div
                           v-if="position.applicants_count"
-                          class="mt-2 pt-2 border-t text-sm text-gray-600"
+                          class="mt-2 pt-2 border-t dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400"
                         >
                           <div class="flex items-center">
                             <i class="fas fa-users mr-2"></i>
@@ -157,11 +193,16 @@
                   </div>
 
                   <!-- รายละเอียดเพิ่มเติม -->
-                  <div v-if="job?.details" class="bg-gray-50 p-3 rounded-xl">
-                    <h4 class="text-sm font-medium text-gray-700 flex items-center mb-2">
-                      <i class="fas fa-info-circle mr-2 text-[#81E2C4]"></i>รายละเอียดเพิ่มเติม
+                  <div v-if="job?.details" class="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl">
+                    <h4
+                      class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center mb-2"
+                    >
+                      <i class="fas fa-info-circle mr-2 text-[#81E2C4] dark:text-[#4B9592]"></i
+                      >รายละเอียดเพิ่มเติม
                     </h4>
-                    <p class="text-sm text-gray-600 whitespace-pre-line">{{ job?.details }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line">
+                      {{ job?.details }}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -202,13 +243,13 @@ export default {
     getStatusClass(status) {
       switch (status) {
         case 'open':
-          return 'bg-[#E3F5E1] text-[#4CAF50]'
+          return 'bg-[#E3F5E1] dark:bg-green-900/30 text-[#4CAF50] dark:text-green-400'
         case 'closed':
-          return 'bg-[#FFE7E7] text-[#FF5252]'
+          return 'bg-[#FFE7E7] dark:bg-red-900/30 text-[#FF5252] dark:text-red-400'
         case 'full':
-          return 'bg-[#FFF3E0] text-[#FF9800]'
+          return 'bg-[#FFF3E0] dark:bg-orange-900/30 text-[#FF9800] dark:text-orange-400'
         default:
-          return 'bg-gray-100 text-gray-600'
+          return 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
       }
     },
 

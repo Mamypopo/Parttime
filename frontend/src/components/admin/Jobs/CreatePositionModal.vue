@@ -10,13 +10,11 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-black/25" />
+        <div class="fixed inset-0 bg-black/25 backdrop-blur-sm" />
       </TransitionChild>
 
       <!-- Modal Container -->
-      <div
-        class="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center modal overflow-y-auto"
-      >
+      <div class="fixed inset-0 flex items-center justify-center modal overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-3 sm:p-4">
           <TransitionChild
             enter="duration-300 ease-out"
@@ -27,10 +25,10 @@
             leave-to="opacity-0 scale-95"
           >
             <HeadlessDialogPanel
-              class="w-full max-w-none sm:max-w-lg md:max-w-3xl lg:max-w-4xl bg-white rounded-2xl p-4 sm:p-6 pb-20 shadow-xl"
+              class="w-full max-w-none sm:max-w-lg md:max-w-3xl lg:max-w-4xl bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-6 pb-20 shadow-xl"
             >
               <HeadlessDialogTitle
-                class="text-lg sm:text-xl font-bold text-center bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent mb-4 sm:mb-6"
+                class="text-lg sm:text-xl font-bold text-center bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-400 dark:to-blue-400 bg-clip-text text-transparent mb-4 sm:mb-6"
               >
                 {{ editingPosition ? 'แก้ไขตำแหน่งงาน' : 'เพิ่มตำแหน่งงาน' }}
               </HeadlessDialogTitle>
@@ -39,7 +37,9 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                   <!-- Position -->
                   <div class="relative">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">ตำแหน่ง</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                      >ตำแหน่ง</label
+                    >
                     <div class="relative">
                       <input
                         type="text"
@@ -47,23 +47,25 @@
                         @click="showPositionList = true"
                         @blur="handleBlur"
                         readonly
-                        class="w-full px-4 py-2.5 border rounded-xl pr-8 focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all duration-300"
+                        class="w-full px-4 py-2.5 border dark:border-gray-600 rounded-xl pr-8 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-300"
                         placeholder="ตำแหน่งงาน"
                       />
-                      <i class="fas fa-user-tie absolute right-3 top-3 text-purple-400"></i>
+                      <i
+                        class="fas fa-user-tie absolute right-3 top-3 text-purple-400 dark:text-purple-300"
+                      ></i>
                     </div>
 
                     <!-- Position List Dropdown -->
                     <div
                       v-if="showPositionList"
-                      class="absolute z-10 w-full mt-1 bg-white rounded-xl shadow-lg border border-purple-100"
+                      class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 rounded-xl shadow-lg border border-purple-100 dark:border-gray-600"
                     >
                       <div class="p-2 space-y-1 max-h-48 overflow-y-auto scrollbar-thin">
                         <button
                           v-for="pos in positions"
                           :key="pos"
                           type="button"
-                          class="block w-full text-left px-4 py-2.5 hover:bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl text-sm transition-all duration-300"
+                          class="block w-full text-left px-4 py-2.5 text-gray-700 dark:text-gray-200 hover:bg-gradient-to-r from-purple-50 to-blue-50 dark:hover:bg-gradient-to-r dark:from-purple-900/30 dark:to-blue-900/30 rounded-xl text-sm transition-all duration-300"
                           @click="selectPosition(pos)"
                         >
                           {{ pos }}
@@ -74,51 +76,63 @@
 
                   <!-- Wage -->
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">ค่าแรง</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                      >ค่าแรง</label
+                    >
                     <div class="relative">
                       <input
                         type="number"
                         v-model="form.wage"
-                        class="w-full px-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all duration-300"
+                        class="w-full px-4 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-300"
                         placeholder="ค่าแรง"
                       />
-                      <i class="fa-solid fa-baht-sign absolute right-3 top-3 text-purple-400"></i>
+                      <i
+                        class="fa-solid fa-baht-sign absolute right-3 top-3 text-purple-400 dark:text-purple-300"
+                      ></i>
                     </div>
                   </div>
 
                   <!-- Required people -->
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">จำนวนคน</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                      >จำนวนคน</label
+                    >
                     <div class="relative">
                       <input
                         type="number"
                         v-model="form.requiredPeople"
-                        class="w-full px-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all duration-300"
+                        class="w-full px-4 py-2.5 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-300"
                         placeholder="จำนวนคนที่ต้องการ"
                       />
-                      <i class="fas fa-users absolute right-3 top-3 text-purple-400"></i>
+                      <i
+                        class="fas fa-users absolute right-3 top-3 text-purple-400 dark:text-purple-300"
+                      ></i>
                     </div>
                   </div>
                 </div>
 
                 <!-- Detail -->
                 <div class="mt-4 sm:mt-6">
-                  <label class="block text-sm font-medium text-gray-700 mb-2">รายละเอียด</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                    >รายละเอียด</label
+                  >
                   <div class="relative">
                     <textarea
                       v-model="form.detail"
                       rows="4"
-                      class="w-full px-4 py-2.5 pl-10 border rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all duration-300"
+                      class="w-full px-4 py-2.5 pl-10 border dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 resize-none transition-all duration-300"
                       placeholder="รายละเอียด"
                     ></textarea>
-                    <i class="fas fa-clipboard-list absolute left-3 top-3 text-purple-400"></i>
+                    <i
+                      class="fas fa-clipboard-list absolute left-3 top-3 text-purple-400 dark:text-purple-300"
+                    ></i>
                   </div>
                 </div>
 
                 <!-- Submit Button -->
                 <button
                   type="submit"
-                  class="w-full py-3 text-white rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg mt-6"
+                  class="w-full py-3 text-white rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-500 dark:to-blue-400 hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg mt-6"
                 >
                   {{ editingPosition ? 'อัพเดทตำแหน่ง' : 'เพิ่มตำแหน่ง' }}
                 </button>
@@ -265,7 +279,7 @@ input[type='number']::-webkit-outer-spin-button {
 }
 
 input[type='number'] {
-  -moz-appearance: textfield; /* Firefox */
+  -moz-appearance: textfield;
 }
 
 .scrollbar-thin::-webkit-scrollbar {
@@ -278,11 +292,26 @@ input[type='number'] {
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #e9d5ff; /* purple-200 */
+  background: #e9d5ff;
   border-radius: 3px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: #ddd6fe; /* purple-300 */
+  background: #ddd6fe;
+}
+
+/* Dark mode scrollbar */
+@media (prefers-color-scheme: dark) {
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #1f2937;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #9899ee;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #7677cc;
+  }
 }
 </style>

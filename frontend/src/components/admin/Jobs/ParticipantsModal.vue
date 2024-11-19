@@ -18,7 +18,9 @@
             class="w-full max-w-[90vw] h-[90vh] bg-white shadow-xl rounded-2xl flex flex-col overflow-hidden relative"
           >
             <!-- Header -->
-            <div class="bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] p-4 md:p-6 rounded-t-2xl">
+            <div
+              class="bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA] p-4 md:p-6 rounded-t-2xl"
+            >
               <div class="flex justify-between items-center">
                 <div>
                   <DialogTitle
@@ -45,117 +47,131 @@
             <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
               <!-- Left Sidebar - Stats & Filters -->
               <div
-                class="w-full lg:w-[300px] border-b lg:border-b-0 lg:border-r border-gray-200 bg-white"
+                class="w-full lg:w-[300px] border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
               >
                 <!-- Stats Cards -->
                 <div class="grid grid-cols-2 lg:grid-cols-1 gap-3 p-4">
-                  <!-- Filter Status Buttons -->
+                  <!-- Pending Filter -->
                   <div
                     @click="toggleFilter('pending')"
                     class="flex justify-between items-center p-3 rounded-lg cursor-pointer transition-all duration-200"
                     :class="[
                       statusFilter === 'pending'
-                        ? 'bg-yellow-100 ring-2 ring-yellow-200'
-                        : 'bg-yellow-50 hover:bg-yellow-100'
+                        ? 'bg-yellow-100 dark:bg-yellow-900/30 ring-2 ring-yellow-200 dark:ring-yellow-800'
+                        : 'bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/30'
                     ]"
                   >
-                    <div class="flex items-center gap-2 text-yellow-800">
+                    <div class="flex items-center gap-2 text-yellow-800 dark:text-yellow-300">
                       <i class="fas fa-clock"></i>
                       <span>รอดำเนินการ</span>
                     </div>
-                    <span class="bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded-full text-sm">
+                    <span
+                      class="bg-yellow-200 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300 px-2 py-0.5 rounded-full text-sm"
+                    >
                       {{ getStatusCount('pending') }}
                     </span>
                   </div>
 
+                  <!-- Approved Filter -->
                   <div
                     @click="toggleFilter('approved')"
                     class="flex justify-between items-center p-3 rounded-lg cursor-pointer transition-all duration-200"
                     :class="[
                       statusFilter === 'approved'
-                        ? 'bg-green-100 ring-2 ring-green-200'
-                        : 'bg-green-50 hover:bg-green-100'
+                        ? 'bg-green-100 dark:bg-green-900/30 ring-2 ring-green-200 dark:ring-green-800'
+                        : 'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30'
                     ]"
                   >
-                    <div class="flex items-center gap-2 text-green-800">
+                    <div class="flex items-center gap-2 text-green-800 dark:text-green-300">
                       <i class="fas fa-check"></i>
                       <span>อนุมัติแล้ว</span>
                     </div>
-                    <span class="bg-green-200 text-green-800 px-2 py-0.5 rounded-full text-sm">
+                    <span
+                      class="bg-green-200 dark:bg-green-900/50 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full text-sm"
+                    >
                       {{ getStatusCount('approved') }}
                     </span>
                   </div>
-
+                  <!-- Rejected Filter -->
                   <div
                     @click="toggleFilter('rejected')"
                     class="flex justify-between items-center p-3 rounded-lg cursor-pointer transition-all duration-200"
                     :class="[
                       statusFilter === 'rejected'
-                        ? 'bg-red-100 ring-2 ring-red-200'
-                        : 'bg-red-50 hover:bg-red-100'
+                        ? 'bg-red-100 dark:bg-red-900/30 ring-2 ring-red-200 dark:ring-red-800'
+                        : 'bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30'
                     ]"
                   >
-                    <div class="flex items-center gap-2 text-red-800">
+                    <div class="flex items-center gap-2 text-red-800 dark:text-red-300">
                       <i class="fas fa-times"></i>
                       <span>ไม่ผ่านการอนุมัติ</span>
                     </div>
-                    <span class="bg-red-200 text-red-800 px-2 py-0.5 rounded-full text-sm">
+                    <span
+                      class="bg-red-200 dark:bg-red-900/50 text-red-800 dark:text-red-300 px-2 py-0.5 rounded-full text-sm"
+                    >
                       {{ getStatusCount('rejected') }}
                     </span>
                   </div>
 
+                  <!-- Rated Filter -->
                   <div
                     @click="toggleRatingFilter('rated')"
                     class="flex justify-between items-center p-3 rounded-lg cursor-pointer transition-all duration-200"
                     :class="[
                       ratingFilter === 'rated'
-                        ? 'bg-[#E7F6F6] ring-2 ring-[#6ED7D1]'
-                        : 'bg-[#F5FAFA] hover:bg-[#E7F6F6]'
+                        ? 'bg-[#E7F6F6] dark:bg-[#4B9592]/30 ring-2 ring-[#6ED7D1] dark:ring-[#4B9592]'
+                        : 'bg-[#F5FAFA] dark:bg-[#4B9592]/20 hover:bg-[#E7F6F6] dark:hover:bg-[#4B9592]/30'
                     ]"
                   >
-                    <div class="flex items-center gap-2 text-[#5DA3A3]">
+                    <div class="flex items-center gap-2 text-[#5DA3A3] dark:text-[#6ED7D1]">
                       <i class="fas fa-star"></i>
                       <span>ประเมินแล้ว</span>
                     </div>
-                    <span class="bg-[#6ED7D1]/30 text-[#5DA3A3] px-2 py-0.5 rounded-full text-sm">
+                    <span
+                      class="bg-[#6ED7D1]/30 dark:bg-[#4B9592]/50 text-[#5DA3A3] dark:text-[#6ED7D1] px-2 py-0.5 rounded-full text-sm"
+                    >
                       {{ getRatedCount() }}
                     </span>
                   </div>
                 </div>
 
                 <!-- Filters -->
-                <div class="p-4 border-t border-gray-200">
-                  <h3 class="text-sm font-medium text-gray-700 mb-3">ตัวกรอง</h3>
+                <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+                  <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">ตัวกรอง</h3>
                   <!-- Search -->
                   <div class="relative mb-3">
                     <input
                       v-model="searchTerm"
                       type="text"
                       placeholder="ค้นหาผู้สมัคร..."
-                      class="w-full pl-9 pr-4 py-2 bg-gray-50 rounded-lg text-sm border-0 focus:ring-2 focus:ring-[#6ED7D1]"
+                      class="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg text-sm border-0 focus:ring-2 focus:ring-[#6ED7D1] dark:focus:ring-[#4B9592]"
                     />
-                    <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
+                    <i
+                      class="fas fa-search absolute left-3 top-2.5 text-gray-400 dark:text-gray-500"
+                    ></i>
                   </div>
                 </div>
               </div>
 
               <!-- Right Content - Positions & Participants -->
-              <div class="flex-1 overflow-auto bg-gray-50">
+              <div class="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900">
                 <div class="p-4 md:p-6">
                   <div v-for="position in job.JobPositions" :key="position.id" class="mb-8">
                     <!-- Position Header -->
                     <div class="flex items-center justify-between mb-4">
                       <div class="flex items-center gap-3">
                         <div
-                          class="w-10 h-10 rounded-full bg-[#E7F6F6] flex items-center justify-center"
+                          class="w-10 h-10 rounded-full bg-[#E7F6F6] dark:bg-[#4B9592]/30 flex items-center justify-center"
                         >
-                          <i class="fas fa-user-md text-[#5DA3A3]"></i>
+                          <i class="fas fa-user-md text-[#5DA3A3] dark:text-[#4B9592]"></i>
                         </div>
                         <div>
-                          <h3 class="text-lg font-semibold text-gray-800">
+                          <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
                             {{ position.position_name }}
                           </h3>
-                          <div class="flex items-center gap-2 text-sm text-gray-500">
+                          <div
+                            class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400"
+                          >
                             <span>จำนวนที่รับ: {{ position.required_people }} คน</span>
                             <span>•</span>
                             <span>สมัครแล้ว: {{ filteredParticipants(position).length }} คน</span>
@@ -169,23 +185,23 @@
                       <div
                         v-for="participant in filteredParticipants(position)"
                         :key="participant.id"
-                        class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200"
+                        class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200"
                       >
                         <div class="p-4">
                           <!-- User Info -->
                           <div class="flex items-center space-x-3 mb-4">
                             <img
                               :src="getProfileImage(participant.user.profile_image)"
-                              class="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
+                              class="w-12 h-12 rounded-full object-cover border-2 border-gray-100 dark:border-gray-700"
                               alt="Profile"
                             />
                             <div>
-                              <h4 class="font-medium text-gray-900">
+                              <h4 class="font-medium text-gray-900 dark:text-gray-100">
                                 {{ participant.user?.first_name }}
                                 {{ participant.user?.last_name }}
                               </h4>
-                              <p class="text-sm text-gray-500 flex items-center">
-                                <i class="fas fa-phone text-[#6ED7D1] mr-2"></i>
+                              <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                                <i class="fas fa-phone text-[#6ED7D1] dark:text-[#4B9592] mr-2"></i>
                                 {{ participant.user?.phone_number }}
                               </p>
                             </div>
@@ -210,16 +226,16 @@
                                   class="fas fa-star text-sm"
                                   :class="[
                                     n <= participant.workHistories[0].rating
-                                      ? 'text-yellow-400'
-                                      : 'text-gray-300'
+                                      ? 'text-yellow-400 dark:text-yellow-300'
+                                      : 'text-gray-300 dark:text-gray-600'
                                   ]"
                                 ></i>
                               </template>
-                              <span class="ml-2 text-sm text-gray-600">
+                              <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">
                                 {{ participant.workHistories[0].rating }}/5
                               </span>
                             </div>
-                            <p class="mt-2 text-sm text-gray-600 line-clamp-2">
+                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
                               {{ participant.workHistories[0].comment }}
                             </p>
                           </div>
@@ -229,7 +245,7 @@
                             <button
                               v-if="participant.status === 'pending'"
                               @click="handleApprove(participant.id)"
-                              class="flex-1 px-4 py-2 bg-[#6ED7D1] hover:bg-[#5DA3A3] text-white rounded-lg text-sm font-medium transition-colors"
+                              class="flex-1 px-4 py-2 bg-[#6ED7D1] dark:bg-[#4B9592] hover:bg-[#5DA3A3] dark:hover:bg-[#3D7A78] text-white rounded-lg text-sm font-medium transition-colors"
                             >
                               <i class="fas fa-check mr-2"></i>
                               อนุมัติ
@@ -237,7 +253,7 @@
                             <button
                               v-if="participant.status === 'pending'"
                               @click="handleReject(participant.id)"
-                              class="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors"
+                              class="flex-1 px-4 py-2 bg-red-500 dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
                             >
                               <i class="fas fa-times mr-2"></i>
                               ปฏิเสธ
@@ -249,10 +265,14 @@
                       <!-- Empty State -->
                       <div
                         v-if="filteredParticipants(position).length === 0"
-                        class="col-span-full text-center py-8 bg-white rounded-xl border border-dashed border-gray-300"
+                        class="col-span-full text-center py-8 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700"
                       >
-                        <i class="fas fa-users text-4xl text-[#EABF71] mb-3"></i>
-                        <p class="text-gray-500">ไม่พบผู้สมัคร ถ้ามีผู้สมัครจะแสดงที่นี่</p>
+                        <i
+                          class="fas fa-users text-4xl text-[#EABF71] dark:text-[#B38B4A] mb-3"
+                        ></i>
+                        <p class="text-gray-500 dark:text-gray-400">
+                          ไม่พบผู้สมัคร ถ้ามีผู้สมัครจะแสดงที่นี่
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -453,10 +473,10 @@ export default {
     getStatusClass(status) {
       return (
         {
-          pending: 'bg-yellow-100 text-yellow-800',
-          approved: 'bg-green-100 text-green-800',
-          rejected: 'bg-red-100 text-red-800'
-        }[status] || 'bg-gray-100 text-gray-800'
+          pending: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300',
+          approved: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
+          rejected: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+        }[status] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
       )
     },
 
@@ -528,32 +548,55 @@ select option:hover {
   @apply bg-gray-100;
 }
 
-.overflow-auto {
-  scrollbar-width: thin;
-  scrollbar-color: #c5c5c5 #f1f1f1;
-}
-
-.overflow-auto::-webkit-scrollbar {
-  width: 6px;
-}
-
-.overflow-auto::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-.overflow-auto::-webkit-scrollbar-thumb {
-  background: #c5c5c5;
-  border-radius: 3px;
-}
-
-.overflow-auto::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
-
 /* Responsive Transitions */
 @media (max-width: 1024px) {
   .lg\:flex-row {
     transition: all 0.3s ease-in-out;
+  }
+}
+
+/* Light mode scrollbar */
+.modal-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.modal-scroll::-webkit-scrollbar-thumb {
+  background: #c5c5c5;
+  border-radius: 4px;
+}
+
+.modal-scroll::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Dark mode scrollbar */
+@media (prefers-color-scheme: dark) {
+  .modal-scroll::-webkit-scrollbar-track {
+    background: #1f2937;
+  }
+
+  .modal-scroll::-webkit-scrollbar-thumb {
+    background: #4b9592;
+  }
+
+  .modal-scroll::-webkit-scrollbar-thumb:hover {
+    background: #3d7a78;
+  }
+
+  .overflow-auto::-webkit-scrollbar-track {
+    background: #1f2937;
+  }
+
+  .overflow-auto::-webkit-scrollbar-thumb {
+    background: #4b9592;
+  }
+
+  .overflow-auto::-webkit-scrollbar-thumb:hover {
+    background: #3d7a78;
   }
 }
 </style>

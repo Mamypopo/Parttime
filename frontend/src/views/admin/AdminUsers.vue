@@ -15,7 +15,7 @@
         <!-- Stats Cards -->
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div
-            class="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 p-4 rounded-xl shadow-sm"
+            class="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 p-4 rounded-xl shadow-sm dark:shadow-gray-900/10"
           >
             <div class="text-sm text-gray-500 dark:text-gray-400">ผู้ใช้ทั้งหมด</div>
             <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">
@@ -23,7 +23,7 @@
             </div>
           </div>
           <div
-            class="bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/30 dark:to-teal-900/30 p-4 rounded-xl shadow-sm"
+            class="bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/30 dark:to-teal-900/30 p-4 rounded-xl shadow-sm dark:shadow-gray-900/10"
           >
             <div class="text-sm text-gray-500 dark:text-gray-400">ยืนยันอีเมลแล้ว</div>
             <div class="text-2xl font-bold text-green-600 dark:text-green-400">
@@ -31,7 +31,7 @@
             </div>
           </div>
           <div
-            class="hidden md:block bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/30 dark:to-orange-900/30 p-4 rounded-xl shadow-sm"
+            class="hidden md:block bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/30 dark:to-orange-900/30 p-4 rounded-xl shadow-sm dark:shadow-gray-900/10"
           >
             <div class="text-sm text-gray-500 dark:text-gray-400">ออนไลน์</div>
             <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
@@ -48,14 +48,14 @@
             :filters="searchFilters"
             @search="handleSearch"
             @clear="handleClear"
-            class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+            class="bg-white dark:bg-gray-800/80 rounded-2xl shadow-lg dark:shadow-gray-950/20 hover:shadow-xl dark:hover:shadow-gray-950/30 transition-shadow duration-300"
           />
         </div>
 
         <!-- ปุ่ม Refresh -->
         <button
           @click="refreshData"
-          class="p-3 rounded-xl bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400"
+          class="p-3 rounded-xl bg-white dark:bg-gray-800/80 shadow-lg hover:shadow-xl transition-all duration-300 text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400"
           title="รีเฟรชข้อมูล"
         >
           <i class="fas fa-sync-alt"></i>
@@ -258,7 +258,9 @@
             </div>
             <div>
               <div class="font-medium text-gray-900 dark:text-gray-100">{{ user.fullName }}</div>
-              <div class="text-sm text-gray-500 dark:text-gray-400">{{ user.email }}</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400">
+                ID: {{ user.id }} : {{ user.email }}
+              </div>
             </div>
           </div>
 
@@ -294,9 +296,7 @@
           <!-- Date -->
           <div class="flex justify-between text-sm mb-4">
             <span class="text-gray-500 dark:text-gray-400">วันที่อนุมัติ:</span>
-            <span class="text-gray-900 dark:text-gray-100">{{
-              formatDate(user.approvedDate)
-            }}</span>
+            <span class="text-gray-900 dark:text-gray-100">{{ user.approvedDate }}</span>
           </div>
 
           <!-- Actions -->
@@ -646,6 +646,7 @@ export default {
 }
 
 <style scoped>
+
 /* Firefox */
 .max-h-\[70vh\] {
   scrollbar-width: thin;
@@ -683,11 +684,6 @@ export default {
   border-top: 3px solid #6366f1;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-}
-
-.dark .loading-spinner {
-  border-color: #374151;
-  border-top-color: #818cf8;
 }
 
 @keyframes spin {

@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import userRoutes from './routes/userRoutes.js';
 import jobRoutes from './routes/jobRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import dashboardRoutes from './routes/dashboardRoutes.js';
 import workHistoryRoutes from './routes/workHistoryRoutes.js';
 
 import { startNotificationCleanup, runCleanupNow } from './cron/notificationCleanup.js';
@@ -27,6 +28,9 @@ app.use('/api/users', userRoutes);
 app.use('/api/jobs', jobRoutes);
 
 app.use('/api/admin', adminRoutes);
+
+app.use('/api/dashboard', dashboardRoutes);
+
 
 app.use('/api/work-history', workHistoryRoutes);
 

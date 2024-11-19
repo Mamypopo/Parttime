@@ -5,37 +5,49 @@
       <div class="flex flex-col md:flex-row md:items-center md:justify-between">
         <div class="mb-4 md:mb-0">
           <h2
-            class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent"
+            class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-400 dark:to-blue-300 bg-clip-text text-transparent"
           >
             จัดการงาน
           </h2>
-          <p class="text-gray-500 mt-1">จัดการและดูรายละเอียดงานทั้งหมด</p>
+          <p class="text-gray-500 dark:text-gray-400 mt-1">จัดการและดูรายละเอียดงานทั้งหมด</p>
         </div>
 
         <router-link
           to="/admin/create-job"
-          class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-xl hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg whitespace-nowrap"
+          class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-500 dark:to-blue-400 text-white rounded-xl hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg whitespace-nowrap"
         >
           <i class="fas fa-plus mr-2"></i>สร้างงานใหม่
         </router-link>
       </div>
       <!-- Stats Cards -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-        <div class="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
-          <div class="text-sm text-gray-500">งานทั้งหมด</div>
-          <div class="text-2xl font-bold text-[#9333EA]">{{ totalJobs }}</div>
+        <div
+          class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
+        >
+          <div class="text-sm text-gray-500 dark:text-gray-400">งานทั้งหมด</div>
+          <div class="text-2xl font-bold text-[#9333EA] dark:text-purple-400">{{ totalJobs }}</div>
         </div>
-        <div class="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
-          <div class="text-sm text-gray-500">ประกาศรับสมัคร</div>
-          <div class="text-2xl font-bold text-[#3B82F6]">{{ pendingJobs }}</div>
+        <div
+          class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
+        >
+          <div class="text-sm text-gray-500 dark:text-gray-400">ประกาศรับสมัคร</div>
+          <div class="text-2xl font-bold text-[#3B82F6] dark:text-blue-400">{{ pendingJobs }}</div>
         </div>
-        <div class="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
-          <div class="text-sm text-gray-500">กำลังดำเนินการ</div>
-          <div class="text-2xl font-bold text-[#EAB308]">{{ inProgressJobs }}</div>
+        <div
+          class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
+        >
+          <div class="text-sm text-gray-500 dark:text-gray-400">กำลังดำเนินการ</div>
+          <div class="text-2xl font-bold text-[#EAB308] dark:text-yellow-400">
+            {{ inProgressJobs }}
+          </div>
         </div>
-        <div class="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
-          <div class="text-sm text-gray-500">เสร็จสิ้น</div>
-          <div class="text-2xl font-bold text-[#22C55E]">{{ completedJobs }}</div>
+        <div
+          class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
+        >
+          <div class="text-sm text-gray-500 dark:text-gray-400">เสร็จสิ้น</div>
+          <div class="text-2xl font-bold text-[#22C55E] dark:text-green-400">
+            {{ completedJobs }}
+          </div>
         </div>
       </div>
 
@@ -45,7 +57,7 @@
           <JobSearch
             @search="handleSearch"
             @clear="handleClear"
-            class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+            class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
           />
         </div>
       </div>
@@ -75,14 +87,14 @@
             v-else
             v-for="job in jobs"
             :key="job.id"
-            class="bg-white rounded-2xl hover:scale-[1.01]shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden"
+            class="bg-white dark:bg-gray-800 rounded-2xl hover:scale-[1.01]shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden"
           >
             <!-- Card Header -->
-            <div class="p-4 border-b">
+            <div class="p-4 border-b dark:border-gray-700">
               <div class="flex justify-between items-start flex-wrap sm:flex-nowrap">
                 <div>
-                  <h3 class="font-medium text-gray-900">{{ job.title }}</h3>
-                  <p class="text-sm text-gray-500 mt-1">
+                  <h3 class="font-medium text-gray-900 dark:text-gray-100">{{ job.title }}</h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                     <i class="fas fa-map-marker-alt mr-1"></i>
                     {{ job.location }}
                   </p>
@@ -90,19 +102,19 @@
                 <div class="flex gap-2">
                   <button
                     @click="viewJobDetails(job)"
-                    class="p-2 text-[#7BC4C4] hover:text-[#5DA3A3] rounded-full hover:bg-gray-50"
+                    class="p-2 text-[#7BC4C4] hover:text-[#5DA3A3] dark:text-[#7BC4C4] dark:hover:text-[#5DA3A3] rounded-full hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     <i class="fas fa-eye"></i>
                   </button>
                   <button
                     @click="handleOpenEditModal(job)"
-                    class="p-2 text-[#81E2C4] hover:text-[#5DC4A7] rounded-full hover:bg-gray-50"
+                    class="p-2 text-[#81E2C4] hover:text-[#5DC4A7] rounded-full dark:text-[#81E2C4] dark:hover:text-[#5DC4A7] hover:bg-gray-50"
                   >
                     <i class="fas fa-edit"></i>
                   </button>
                   <button
                     @click="confirmDelete(job)"
-                    class="p-2 text-[#E98585] hover:text-[#da7171] rounded-full hover:bg-gray-50"
+                    class="p-2 text-[#E98585] hover:text-[#da7171] dark:text-[#E98585] dark:hover:text-[#da7171] rounded-full hover:bg-gray-50"
                   >
                     <i class="fas fa-trash-alt"></i>
                   </button>
@@ -131,11 +143,11 @@
 
             <!-- Card Content -->
             <div class="p-4 space-y-3">
-              <div class="flex items-center text-sm text-gray-600">
+              <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
                 <i class="far fa-calendar-alt w-5"></i>
                 <span>{{ formatDate(job.work_date) }}</span>
               </div>
-              <div class="flex items-center text-sm text-gray-600">
+              <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
                 <i class="far fa-clock w-5"></i>
                 <span>{{ formatTime(job.start_time) }} - {{ formatTime(job.end_time) }}</span>
               </div>
@@ -144,11 +156,14 @@
               <div v-if="getJobStatus(job) === 'completed'" class="mt-4">
                 <button
                   @click="openWorkStatusModal(job)"
-                  class="w-full px-4 py-2 text-sm bg-[#81E2C4] text-white rounded-lg hover:bg-opacity-80"
+                  class="w-full px-4 py-2 text-sm bg-[#81E2C4] dark:bg-[#5DC4A7] text-white rounded-lg hover:bg-opacity-80 dark:hover:bg-opacity-90 transition-all duration-300"
                 >
                   <i class="fas fa-clipboard-check mr-2"></i>
                   อัพเดทสถานะการทำงาน
-                  <span v-if="getCompletedWorkCount(job) > 0" class="ml-1">
+                  <span
+                    v-if="getCompletedWorkCount(job) > 0"
+                    class="ml-1 text-white/90 dark:text-white/95"
+                  >
                     (ประเมินแล้ว {{ getCompletedWorkCount(job) }})
                   </span>
                 </button>
@@ -159,28 +174,28 @@
                 <span
                   v-for="position in job.JobPositions"
                   :key="position.id"
-                  class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-600"
+                  class="px-2 py-1 text-xs rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
                 >
                   {{ position.position_name }}
                 </span>
               </div>
 
-              <!--  แสดงจำนวนผู้สมัคร -->
+              <!-- Participants Info -->
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
                   <!-- แสดงจำนวนรอดำเนินการ -->
-                  <span class="text-sm text-gray-600">
+                  <span class="text-sm text-gray-600 dark:text-gray-400">
                     <i class="fas fa-user-clock text-yellow-500"></i>
                     รอดำเนินการ: {{ getPendingCount(job) }}
                     <span
                       v-if="hasNewParticipants(job) > 0"
-                      class="ml-1 px-2 py-0.5 text-xs bg-red-500 text-white rounded-full animate-pulse"
+                      class="ml-1 px-2 py-0.5 text-xs bg-red-500 dark:bg-red-600 text-white rounded-full animate-pulse"
                     >
                       ใหม่
                     </span>
                   </span>
                   <!-- แสดงจำนวนอนุมัติแล้ว -->
-                  <span class="text-sm text-gray-600">
+                  <span class="text-sm text-gray-600 dark:text-gray-400">
                     <i class="fas fa-user-check text-green-500"></i>
                     อนุมัติแล้ว: {{ getApprovedCount(job) }}
                   </span>
@@ -229,9 +244,9 @@
                   </button>
                 </div>
                 <div class="text-right">
-                  <p class="text-[#6ED7D1] font-medium">
+                  <p class="text-[#6ED7D1] dark:text-[#4CB3B3] font-medium">
                     {{ calculateTotalWage(job) }}
-                    <span class="text-[#969696]">บาท</span>
+                    <span class="text-[#969696] dark:text-gray-400">บาท</span>
                   </p>
                 </div>
               </div>
@@ -405,9 +420,9 @@ export default {
 
     getStatusClass(status) {
       const classes = {
-        published: 'text-blue-600 bg-blue-100',
-        in_progress: 'text-yellow-600 bg-yellow-100',
-        completed: 'text-green-600 bg-green-100'
+        published: 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30',
+        in_progress: 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30',
+        completed: 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30'
       }
       return `px-2 py-1 rounded-full text-xs ${classes[status]}`
     },
@@ -424,9 +439,9 @@ export default {
     getProgressBarClass(job) {
       const status = this.getJobStatus(job)
       const classes = {
-        published: 'bg-blue-500',
-        in_progress: 'bg-yellow-500',
-        completed: 'bg-green-500'
+        published: 'bg-blue-500 dark:bg-blue-400',
+        in_progress: 'bg-yellow-500 dark:bg-yellow-400',
+        completed: 'bg-green-500 dark:bg-green-400'
       }
       return classes[status]
     },
