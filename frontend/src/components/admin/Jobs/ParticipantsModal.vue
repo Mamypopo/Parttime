@@ -258,6 +258,15 @@
                               <i class="fas fa-times mr-2"></i>
                               ปฏิเสธ
                             </button>
+                            <!-- ปุ่มอนุมัติซ้ำ -->
+                            <button
+                              v-if="participant.status === 'rejected'"
+                              @click="handleApprove(participant.id)"
+                              class="flex-1 px-4 py-2 bg-green-500 dark:bg-green-600 hover:bg-green-600 dark:hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors"
+                            >
+                              <i class="fas fa-redo mr-2"></i>
+                              อนุมัติซ้ำ
+                            </button>
                           </div>
                         </div>
                       </div>

@@ -42,8 +42,8 @@ export const updateJobStatuses = async () => {
                     New Status: ${newStatus}
                     Work Date: ${job.work_date}
                 `);
-
-                await jobModel.updateJobStatus(job.id, newStatus);
+                // อัปเดตสถานะงานและรับข้อมูล job ที่อัปเดตแล้ว
+                const updatedJob = await jobModel.updateJobStatus(job.id, newStatus);
 
                 // สร้าง log
                 await createLog(

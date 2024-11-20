@@ -22,22 +22,50 @@ export const getDashboardStats = async (req, res) => {
         startOfMonth.setHours(0, 0, 0, 0)
 
         // ดึงข้อมูลการเงินและการสมัคร
-        const totalExpenses = await DashboardModel.getCurrentMonthExpenses(startOfMonth)
-        const monthlyApplications = await DashboardModel.getMonthlyApplications(startOfMonth)
+        const positions = await DashboardModel.getCurrentMonthExpenses(startOfMonth)
+        const totalExpenses = positions.reduce((sum, position) => {
+            const wage = Number(position.wage) || 0
+            const approvedCount = position.JobParticipation?.length || 0
+            return sum + (wage * approvedCount)
+        }, 0)
+
+
+        const applications = await DashboardModel.getMonthlyApplicationsWithStatus(startOfMonth)
+        const monthlyApplications = {
+            total: applications.length,
+            approved: applications.filter(app => app.status === 'approved').length,
+            rejected: applications.filter(app => app.status === 'rejected').length,
+            pending: applications.filter(app => app.status === 'pending').length
+        }
+
+
+        // ดึงข้อมูลผู้ใช้ที่ลงทะเบียนล่าสุด
+        const recentRegistrations = await DashboardModel.getRecentRegistrations()
+
+        const pendingRegistrations = recentRegistrations.map(user => ({
+            id: user.id,
+            name: `${user.first_name} ${user.last_name}`,
+            email: user.email,
+            avatar: user.profile_image,
+            registeredAt: user.created_at,
+            status: user.approved
+        }))
+
 
         // ดึงและคำนวณข้อมูลการให้คะแนน
         const workHistories = await DashboardModel.getRatedWorkHistories()
-
         // คำนวณคะแนนเฉลี่ยของแต่ละผู้ใช้
         const userRatings = workHistories.reduce((acc, history) => {
             const userId = history.jobParticipation.user.id
             if (!acc[userId]) {
                 acc[userId] = {
                     user: history.jobParticipation.user,
-                    ratings: []
+                    ratings: [],
+                    jobCount: 0
                 }
             }
             acc[userId].ratings.push(history.rating)
+            acc[userId].jobCount += 1
             return acc
         }, {})
 
@@ -47,7 +75,8 @@ export const getDashboardStats = async (req, res) => {
                 id: data.user.id,
                 name: `${data.user.first_name} ${data.user.last_name}`,
                 avatar: data.user.profile_image,
-                rating: +(data.ratings.reduce((a, b) => a + b, 0) / data.ratings.length).toFixed(1)
+                rating: +(data.ratings.reduce((a, b) => a + b, 0) / data.ratings.length).toFixed(1),
+                jobCount: data.jobCount
             }))
             .sort((a, b) => b.rating - a.rating)
             .slice(0, 5)
@@ -65,8 +94,14 @@ export const getDashboardStats = async (req, res) => {
                 openJobs: jobStats.open,
                 inProgressJobs: jobStats.inProgress,
                 completedJobs: jobStats.completed,
-                totalExpenses: totalExpenses._sum.wage || 0,
-                monthlyApplications
+                totalExpenses,
+                monthlyApplications: monthlyApplications.total,
+                monthlyApplicationsDetails: {
+                    approved: monthlyApplications.approved,
+                    rejected: monthlyApplications.rejected,
+                    pending: monthlyApplications.pending
+                },
+                recentRegistrations: pendingRegistrations
             },
             topUsers,
             averageRating
@@ -83,9 +118,14 @@ export const getDashboardStats = async (req, res) => {
 
 
 
+
 export const getCalendarEvents = async (req, res) => {
     try {
-        const events = await DashboardModel.getCalendarEvents()
+        const { month, year } = req.query
+        const events = await DashboardModel.getEvents(
+            month ? parseInt(month) : undefined,
+            year ? parseInt(year) : undefined
+        )
         res.json({ events })
     } catch (error) {
         console.error('Error fetching calendar events:', error)

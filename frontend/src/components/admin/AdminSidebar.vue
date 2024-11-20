@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-col min-h-screen bg-[#F2F5FF] dark:bg-gray-900 relative transition-colors duration-300 ease-in-out"
+    class="flex flex-col min-h-screen bg-gradient-to-br from-[#ece9e6] to-[##ffffff] dark:from-gray-900 dark:to-gray-800 relative transition-colors duration-300 ease-in-out"
   >
     <!-- Desktop/Tablet Sidebar -->
     <TransitionRoot
@@ -287,14 +287,10 @@ export default {
     MobileMoreSubmenu
   },
   data() {
-    const sidebarStore = useSidebarStore()
-    const jobStore = useJobStore()
-    const notificationStore = useNotificationStore()
-
     return {
-      sidebarStore,
-      jobStore,
-      notificationStore,
+      sidebarStore: useSidebarStore(),
+      jobStore: useJobStore(),
+      notificationStore: useNotificationStore(),
       isDarkMode: localStorage.getItem('darkMode') === 'true' || false
     }
   },

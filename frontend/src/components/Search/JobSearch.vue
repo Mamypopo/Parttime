@@ -231,7 +231,7 @@
           <div class="lg:col-span-2 flex gap-2 self-end">
             <button
               @click="handleSearch"
-              class="flex-1 py-1.5 text-sm bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-purple-500 text-white rounded-lg hover:opacity-90 flex items-center justify-center"
+              class="flex-1 py-1.5 text-sm bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 text-white rounded-lg hover:opacity-90 flex items-center justify-center"
             >
               <i class="fas fa-magnifying-glass mr-1"></i>ค้นหา
             </button>

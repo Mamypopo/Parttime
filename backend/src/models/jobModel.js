@@ -532,13 +532,55 @@ export const getJobApplicants = async (jobId) => {
 };
 
 // ฟังก์ชันสำหรับลบงาน
-export const deleteJobById = (jobId) =>
-    prisma.$transaction([
-        prisma.jobParticipation.deleteMany({ where: { jobPosition: { job_id: jobId } } }),
-        prisma.jobPosition.deleteMany({ where: { job_id: jobId } }),
-        prisma.job.delete({ where: { id: jobId } })
-    ]);
+export const deleteJobById = async (jobId) => {
+    try {
+        return await prisma.$transaction(async (tx) => {
+            // 1. ลบ work histories
+            await tx.workHistory.deleteMany({
+                where: {
+                    jobParticipation: {
+                        jobPosition: {
+                            job_id: jobId
+                        }
+                    }
+                }
+            });
 
+            // 2. ลบ notifications
+            await tx.notification.deleteMany({
+                where: {
+                    jobId: jobId
+                }
+            });
+
+            // 3. ลบ job participations
+            await tx.jobParticipation.deleteMany({
+                where: {
+                    jobPosition: {
+                        job_id: jobId
+                    }
+                }
+            });
+
+            // 4. ลบ job positions
+            await tx.jobPosition.deleteMany({
+                where: {
+                    job_id: jobId
+                }
+            });
+
+            // 5. ลบตัวงาน
+            return await tx.job.delete({
+                where: {
+                    id: jobId
+                }
+            });
+        });
+    } catch (error) {
+        console.error('Error in deleteJobById:', error);
+        throw error;
+    }
+};
 
 // ฟังก์ชันสำหรับการบันทึกการสมัครงาน
 export const createJobParticipation = async (userId, jobId, jobPositionId) => {
@@ -674,7 +716,7 @@ export const updateJobStatus = async (jobId, status) => {
         const updatedJob = await prisma.job.update({
             where: { id: jobId },
             data: {
-                status: { not: 'completed' },
+                status: status,
                 updated_at: new Date()
             },
             include: {

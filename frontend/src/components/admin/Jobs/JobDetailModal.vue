@@ -131,11 +131,11 @@
                         </div>
 
                         <div class="grid grid-cols-2 gap-2 text-sm">
-                          <div class="flex items-center text-gray-600 dark:text-gray-400">
+                          <div class="flex items-center text-gray-600 dark:text-gray-100">
                             <i class="fas fa-coins mr-2"></i>
                             <span>{{ position.wage }} บาท</span>
                           </div>
-                          <div class="flex items-center text-gray-600 dark:text-gray-400">
+                          <div class="flex items-center text-gray-600 dark:text-gray-100">
                             <i class="fas fa-user-friends mr-2"></i>
                             <span>ต้องการ {{ position.required_people }} คน</span>
                           </div>
@@ -241,15 +241,17 @@ export default {
 
   methods: {
     getStatusClass(status) {
-      switch (status) {
+      switch (status?.toLowerCase()) {
         case 'open':
-          return 'bg-[#E3F5E1] dark:bg-green-900/30 text-[#4CAF50] dark:text-green-400'
+          return 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
         case 'closed':
-          return 'bg-[#FFE7E7] dark:bg-red-900/30 text-[#FF5252] dark:text-red-400'
+          return 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
         case 'full':
-          return 'bg-[#FFF3E0] dark:bg-orange-900/30 text-[#FF9800] dark:text-orange-400'
+          return 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800'
+        case 'pending':
+          return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800'
         default:
-          return 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+          return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600'
       }
     },
 

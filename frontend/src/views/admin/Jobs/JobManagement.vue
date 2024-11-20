@@ -11,13 +11,24 @@
           </h2>
           <p class="text-gray-500 dark:text-gray-400 mt-1">จัดการและดูรายละเอียดงานทั้งหมด</p>
         </div>
+        <div class="flex gap-2">
+          <!-- เพิ่ม div ครอบปุ่ม -->
+          <!-- ปุ่มรีเฟรช -->
+          <button
+            @click="refreshJobs"
+            class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg"
+          >
+            <i class="fas fa-sync-alt mr-2"></i>รีเฟรช
+          </button>
 
-        <router-link
-          to="/admin/create-job"
-          class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-500 dark:to-blue-400 text-white rounded-xl hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg whitespace-nowrap"
-        >
-          <i class="fas fa-plus mr-2"></i>สร้างงานใหม่
-        </router-link>
+          <!-- ปุ่มสร้างงานใหม่ -->
+          <router-link
+            to="/admin/create-job"
+            class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-500 dark:to-blue-400 text-white rounded-xl hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg whitespace-nowrap"
+          >
+            <i class="fas fa-plus mr-2"></i>สร้างงานใหม่
+          </router-link>
+        </div>
       </div>
       <!-- Stats Cards -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
@@ -25,20 +36,24 @@
           class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
         >
           <div class="text-sm text-gray-500 dark:text-gray-400">งานทั้งหมด</div>
-          <div class="text-2xl font-bold text-[#9333EA] dark:text-purple-400">{{ totalJobs }}</div>
+          <div class="text-2xl font-bold text-[#9333EA] dark:text-purple-400">
+            {{ jobStore.totalJobs }}
+          </div>
         </div>
         <div
           class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
         >
           <div class="text-sm text-gray-500 dark:text-gray-400">ประกาศรับสมัคร</div>
-          <div class="text-2xl font-bold text-[#3B82F6] dark:text-blue-400">{{ pendingJobs }}</div>
+          <div class="text-2xl font-bold text-[#3B82F6] dark:text-blue-400">
+            {{ jobStore.pendingJobs }}
+          </div>
         </div>
         <div
           class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
         >
           <div class="text-sm text-gray-500 dark:text-gray-400">กำลังดำเนินการ</div>
           <div class="text-2xl font-bold text-[#EAB308] dark:text-yellow-400">
-            {{ inProgressJobs }}
+            {{ jobStore.inProgressJobs }}
           </div>
         </div>
         <div
@@ -46,7 +61,7 @@
         >
           <div class="text-sm text-gray-500 dark:text-gray-400">เสร็จสิ้น</div>
           <div class="text-2xl font-bold text-[#22C55E] dark:text-green-400">
-            {{ completedJobs }}
+            {{ jobStore.completedJobs }}
           </div>
         </div>
       </div>
@@ -264,6 +279,7 @@
       @close="closeParticipantsModal"
       @approve="handleApprove"
       @reject="handleReject"
+      @update="loadJobs"
     />
     <!-- Modals รายละเอียด -->
     <JobDetailsModal :is-open="showDetailsModal" :job="selectedJob" @close="closeDetailsModal" />
@@ -350,17 +366,6 @@ export default {
     },
     totalJobs() {
       return this.jobs.length
-    },
-    pendingJobs() {
-      return this.jobs.filter((job) => this.getJobStatus(job) === 'published').length
-    },
-
-    inProgressJobs() {
-      return this.jobs.filter((job) => this.getJobStatus(job) === 'in_progress').length
-    },
-
-    completedJobs() {
-      return this.jobs.filter((job) => this.getJobStatus(job) === 'completed').length
     }
   },
   // เรียกใช้ loadInitialData เพื่อโหลดข้อมูลเมื่อคอมโพเนนต์ถูกสร้างขึ้น
@@ -386,6 +391,14 @@ export default {
   },
 
   methods: {
+    // สำหรับโหลดข้อมูลครั้งแรก
+    async loadInitialData() {
+      try {
+        await this.jobStore.fetchJobsAndParticipants(this.searchFilters)
+      } catch (error) {
+        this.showError(error.message || 'ไม่สามารถโหลดข้อมูลงานได้')
+      }
+    },
     // ดึงข้อมูลงานและผู้สมัครจาก store
     async fetchJobsAndParticipants() {
       try {
@@ -394,6 +407,7 @@ export default {
         this.showError('ไม่สามารถโหลดข้อมูลงานได้')
       }
     },
+
     //คืนค่าสถานะของงานตามวันเวลาปัจจุบันและวันที่ทำงานของงาน
     getJobStatus(job) {
       // ดูสถานะจริงของงานก่อน
@@ -520,9 +534,7 @@ export default {
           showConfirmButton: false,
           timer: 1500
         })
-
-        // รีโหลดข้อมูลงานใหม่
-        await this.jobStore.fetchJobsAndParticipants()
+        await this.loadJobs()
       } catch (error) {
         Swal.fire({
           icon: 'error',
@@ -533,40 +545,97 @@ export default {
       }
     },
 
-    confirmDelete(job) {
-      Swal.fire({
-        title: 'ยืนยันการลบงาน',
-        text: `คุณต้องการลบงาน "${job.title}" ใช่หรือไม่?`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#EA6B6B',
-        cancelButtonColor: '#B5B5C3',
-        confirmButtonText: 'ลบ',
-        cancelButtonText: 'ยกเลิก'
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          try {
-            await this.jobStore.deleteJob(job.id)
+    async confirmDelete(job) {
+      try {
+        // แจ้งเตือนเกี่ยวกับประวัติงาน
+        const hasHistory = job.JobPositions?.some((pos) =>
+          pos.JobParticipation?.some((p) => p.status === 'approved' || p.work_status)
+        )
 
-            Swal.fire({
-              title: 'ลบงานสำเร็จ',
-              icon: 'success',
-              timer: 1500,
-              showConfirmButton: false
-            })
+        if (hasHistory) {
+          const firstAlert = await Swal.fire({
+            title: 'คำเตือน!',
+            html: `
+          <div class="text-left">
+            <p class="mb-3 text-red-500">⚠️ งานนี้มีประวัติการทำงานที่เกี่ยวข้อง:</p>
+            <ul class="list-disc pl-5 mb-3 text-gray-600">
+              <li>ประวัติการทำงานของผู้ใช้</li>
+              <li>ข้อมูลการประเมินผล</li>
+              <li>ประวัติการจ่ายค่าตอบแทน</li>
+            </ul>
+            <p class="font-semibold text-gray-700">คุณยังต้องการลบหรือไม่?</p>
+          </div>
+        `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#EF4444',
+            cancelButtonColor: '#3B82F6',
+            confirmButtonText: 'ดำเนินการต่อ',
+            cancelButtonText: 'ยกเลิก'
+          })
 
-            // รีโหลดข้อมูลงานใหม่
-            await this.jobStore.fetchJobsAndParticipants()
-          } catch (error) {
-            Swal.fire({
-              title: 'เกิดข้อผิดพลาด',
-              text: error.response?.data?.message || 'ไม่สามารถลบงานได้',
-              icon: 'error',
-              confirmButtonText: 'ตกลง'
-            })
-          }
+          if (!firstAlert.isConfirmed) return
+
+          // พิมพ์ยืนยัน
+          const confirmText = `DELETE-${job.id}`
+          const secondAlert = await Swal.fire({
+            title: 'ยืนยันการลบ',
+            html: `
+          <p class="mb-4">พิมพ์ <strong class="text-red-500">${confirmText}</strong> เพื่อยืนยันการลบ</p>
+          <p class="text-sm text-gray-500">การดำเนินการนี้ไม่สามารถย้อนกลับได้</p>
+        `,
+            input: 'text',
+            inputAttributes: {
+              autocapitalize: 'off'
+            },
+            showCancelButton: true,
+            confirmButtonColor: '#EF4444',
+            cancelButtonColor: '#3B82F6',
+            confirmButtonText: 'ลบถาวร',
+            cancelButtonText: 'ยกเลิก',
+            preConfirm: (text) => {
+              if (text !== confirmText) {
+                Swal.showValidationMessage('กรุณาพิมพ์ข้อความให้ถูกต้อง')
+              }
+              return text
+            }
+          })
+
+          if (!secondAlert.isConfirmed) return
+        } else {
+          // ถ้าไม่มีประวัติ ให้แสดงการยืนยันแบบปกติ
+          const result = await Swal.fire({
+            title: 'ยืนยันการลบงาน',
+            text: `คุณต้องการลบงาน "${job.title}" ใช่หรือไม่?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#EF4444',
+            cancelButtonColor: '#3B82F6',
+            confirmButtonText: 'ลบ',
+            cancelButtonText: 'ยกเลิก'
+          })
+
+          if (!result.isConfirmed) return
         }
-      })
+
+        // ดำเนินการลบ
+        await this.jobStore.deleteJob(job.id)
+
+        Swal.fire({
+          title: 'ลบงานสำเร็จ',
+          icon: 'success',
+          timer: 1500,
+          showConfirmButton: false
+        })
+
+        await this.jobStore.fetchJobsAndParticipants()
+      } catch (error) {
+        Swal.fire({
+          title: 'เกิดข้อผิดพลาด',
+          text: error.response?.data?.message || 'ไม่สามารถลบงานได้',
+          icon: 'error'
+        })
+      }
     },
 
     async handleSearch(filters) {
@@ -607,67 +676,76 @@ export default {
       }
     },
 
-    // สำหรับโหลดข้อมูลครั้งแรก
-    async loadInitialData() {
-      try {
-        await this.jobStore.fetchJobsAndParticipants(this.searchFilters)
-      } catch (error) {
-        this.showError(error.message || 'ไม่สามารถโหลดข้อมูลงานได้')
-      }
-    },
     changePage(page) {
       this.jobStore.changePage(page)
     },
 
-    // การนับต่าง ๆ
-    hasNewParticipants(job) {
-      return job.JobPositions?.some((position) =>
-        position.JobParticipation?.some((p) => this.jobStore.newParticipations.has(p.id))
-      )
-    },
+    // // การนับต่าง ๆ
+    // hasNewParticipants(job) {
+    //   return job.JobPositions?.some((position) =>
+    //     position.JobParticipation?.some((p) => this.jobStore.newParticipations.has(p.id))
+    //   )
+    // },
 
+    // getPendingCount(job) {
+    //   return (
+    //     job.JobPositions?.reduce((count, position) => {
+    //       return (
+    //         count + (position.JobParticipation?.filter((p) => p.status === 'pending').length || 0)
+    //       )
+    //     }, 0) || 0
+    //   )
+    // },
+
+    // // นับจำนวนผู้สมัครที่อนุมัติแล้ว
+    // getApprovedCount(job) {
+    //   return (
+    //     job.JobPositions?.reduce((count, position) => {
+    //       return (
+    //         count + (position.JobParticipation?.filter((p) => p.status === 'approved').length || 0)
+    //       )
+    //     }, 0) || 0
+    //   )
+    // },
+
+    // // นับจำนวนผู้สมัครทั้งหมด
+    // getTotalApplicants(job) {
+    //   return (
+    //     job.JobPositions?.reduce((count, position) => {
+    //       return count + (position.JobParticipation?.length || 0)
+    //     }, 0) || 0
+    //   )
+    // },
+    // // เพิ่มเมธอดสำหรับนับจำนวนคนที่ได้รับการประเมินแล้ว
+    // getCompletedWorkCount(job) {
+    //   return (
+    //     job.JobPositions?.reduce((count, position) => {
+    //       return (
+    //         count +
+    //         (position.JobParticipation?.filter((p) => p.status === 'approved' && p.work_status)
+    //           .length || 0)
+    //       )
+    //     }, 0) || 0
+    //   )
+    // },
     getPendingCount(job) {
-      return (
-        job.JobPositions?.reduce((count, position) => {
-          return (
-            count + (position.JobParticipation?.filter((p) => p.status === 'pending').length || 0)
-          )
-        }, 0) || 0
-      )
+      return this.jobStore.getPendingCount(job)
     },
-
-    // นับจำนวนผู้สมัครที่อนุมัติแล้ว
     getApprovedCount(job) {
-      return (
-        job.JobPositions?.reduce((count, position) => {
-          return (
-            count + (position.JobParticipation?.filter((p) => p.status === 'approved').length || 0)
-          )
-        }, 0) || 0
-      )
+      return this.jobStore.getApprovedCount(job)
     },
 
-    // นับจำนวนผู้สมัครทั้งหมด
     getTotalApplicants(job) {
-      return (
-        job.JobPositions?.reduce((count, position) => {
-          return count + (position.JobParticipation?.length || 0)
-        }, 0) || 0
-      )
-    },
-    // เพิ่มเมธอดสำหรับนับจำนวนคนที่ได้รับการประเมินแล้ว
-    getCompletedWorkCount(job) {
-      return (
-        job.JobPositions?.reduce((count, position) => {
-          return (
-            count +
-            (position.JobParticipation?.filter((p) => p.status === 'approved' && p.work_status)
-              .length || 0)
-          )
-        }, 0) || 0
-      )
+      return this.jobStore.getTotalApplicants(job)
     },
 
+    getCompletedWorkCount(job) {
+      return this.jobStore.getCompletedWorkCount(job)
+    },
+
+    hasNewParticipants(job) {
+      return this.jobStore.hasNewParticipants(job)
+    },
     openWorkStatusModal(job) {
       this.selectedJob = job
       this.showWorkStatusModal = true
@@ -755,6 +833,14 @@ export default {
 
     calculateTotalWage(job) {
       return this.jobStore.calculateTotalWage(job)
+    },
+    async refreshJobs() {
+      try {
+        // โหลดข้อมูลใหม่
+        await this.jobStore.fetchJobsAndParticipants()
+      } catch (error) {
+        console.error('Error refreshing jobs:', error)
+      }
     }
   }
 }

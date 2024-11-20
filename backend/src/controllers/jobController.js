@@ -273,6 +273,7 @@ export const deleteJob = async (req, res) => {
 
         const applicants = await jobModel.getJobApplicants(jobIdInt);
 
+        // ดำเนินการลบ
         await jobModel.deleteJobById(jobIdInt);
 
         const admin = await adminModel.findAdminById(adminId);

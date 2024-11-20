@@ -51,7 +51,34 @@ export const useJobStore = defineStore('job', {
             }
             return Math.max(1, Math.ceil(state.pagination.totalItems / state.pagination.perPage))
         },
-        hasMorePages: (state) => state.pagination.currentPage < state.totalPages
+        hasMorePages: (state) => state.pagination.currentPage < state.totalPages,
+
+        totalJobs: (state) => state.jobs?.length || 0,
+
+        pendingJobs: (state) => state.jobs?.filter(job => {
+            if (!job) return false
+            if (job.status === 'completed') return false
+            const now = new Date()
+            const workDate = new Date(job.work_date)
+            return workDate > now
+        }).length || 0,
+
+        inProgressJobs: (state) => state.jobs?.filter(job => {
+            if (!job) return false
+            if (job.status === 'completed') return false
+            const now = new Date()
+            const workDate = new Date(job.work_date)
+            return workDate.toDateString() === now.toDateString()
+        }).length || 0,
+
+        completedJobs: (state) => state.jobs?.filter(job => {
+            if (!job) return false
+            if (job.status === 'completed') return true
+            const now = new Date()
+            const workDate = new Date(job.work_date)
+            return workDate < now && workDate.toDateString() !== now.toDateString()
+        }).length || 0
+
     },
     actions: {
 
@@ -449,10 +476,10 @@ export const useJobStore = defineStore('job', {
             this.pagination.currentPage = 1
         },
         // รีเซ็ต pagination
-        resetPagination() {
-            this.pagination.currentPage = 1
-            this.pagination.totalPages = 1
-        },
+        // resetPagination() {
+        //     this.pagination.currentPage = 1
+        //     this.pagination.totalPages = 1
+        // },
         setPage(page) {
             this.pagination.currentPage = page
             window.scrollTo(0, 0)
@@ -460,6 +487,53 @@ export const useJobStore = defineStore('job', {
         // เคลียร์ข้อผิดพลาด
         clearError() {
             this.error = null
+        },
+
+        hasNewParticipants(job) {
+            if (!job?.JobPositions) return false
+            return job.JobPositions.some(position => {
+                if (!position?.JobParticipation) return false
+                return position.JobParticipation.some(p => this.newParticipations.has(p.id))
+            })
+        },
+        getPendingCount(job) {
+            if (!job?.JobPositions) return 0
+            return job.JobPositions.reduce((count, position) => {
+                if (!position?.JobParticipation) return count
+                return count + (position.JobParticipation.filter(p => p.status === 'pending').length || 0)
+            }, 0)
+        },
+
+        getApprovedCount(job) {
+            return job.JobPositions?.reduce((count, position) => {
+                return count + (position.JobParticipation?.filter(p => p.status === 'approved').length || 0)
+            }, 0) || 0
+        },
+
+        getTotalApplicants(job) {
+            return job.JobPositions?.reduce((count, position) => {
+                return count + (position.JobParticipation?.length || 0)
+            }, 0) || 0
+        },
+
+        getCompletedWorkCount(job) {
+            return job.JobPositions?.reduce((count, position) => {
+                return count + (position.JobParticipation?.filter(p =>
+                    p.status === 'approved' && p.work_status).length || 0)
+            }, 0) || 0
+        },
+
+        getJobStatus(job) {
+            if (!job) return null
+
+            if (job.status === 'completed') return 'completed'
+
+            const now = new Date()
+            const workDate = new Date(job.work_date)
+
+            if (workDate > now) return 'published'
+            if (workDate.toDateString() === now.toDateString()) return 'in_progress'
+            return 'completed'
         }
     }
 })
