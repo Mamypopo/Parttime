@@ -1,4 +1,6 @@
 import { defineStore } from 'pinia'
+import { useNotificationStore } from '@/stores/notificationStore'
+import { useSidebarStore } from '@/stores/sidebarStore'
 import axios from 'axios'
 
 export const useAdminStore = defineStore('admin', {
@@ -24,6 +26,7 @@ export const useAdminStore = defineStore('admin', {
         },
 
         logout() {
+            // Clear store data
             this.admin = {
                 id: null,
                 username: null,
@@ -34,9 +37,24 @@ export const useAdminStore = defineStore('admin', {
             }
             this.token = null
             this.isAuthenticated = false
+
+            // Clear localStorage
+            localStorage.removeItem('darkmode')
             localStorage.removeItem('admin_token')
 
+
+            // Clear axios header
             delete axios.defaults.headers.common['Authorization']
+            // Reset sidebar store (darkmode)
+            const sidebarStore = useSidebarStore()
+            if (sidebarStore?.resetDarkMode) {
+                sidebarStore.resetDarkMode()
+            }
+            // Reset other stores (e.g., notification store)
+            const notificationStore = useNotificationStore()
+            if (notificationStore?.resetStore) {
+                notificationStore.resetStore()
+            }
         },
 
         setAdmin(adminData) {

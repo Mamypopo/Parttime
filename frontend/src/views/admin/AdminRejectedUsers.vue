@@ -216,17 +216,26 @@
               <!-- การจัดการ -->
               <td class="px-6 py-4">
                 <div class="flex space-x-2">
+                  <!-- ปุ่มรายละเอียด -->
                   <button
                     @click="showUserDetails(user)"
-                    class="px-4 py-2 rounded-lg transition-all duration-300 bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 dark:bg-purple-400/10 dark:text-purple-400 dark:hover:bg-purple-400/20"
+                    class="group px-4 py-2 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center"
                   >
-                    รายละเอียด
+                    <i
+                      class="fas fa-info-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
+                    ></i>
+                    <span>รายละเอียด</span>
                   </button>
+
+                  <!-- ปุ่มอนุมัติ -->
                   <button
                     @click="handleApprove(user.id)"
-                    class="px-4 py-2 rounded-lg transition-all duration-300 bg-green-500/10 text-green-600 hover:bg-green-500/20 dark:bg-green-400/10 dark:text-green-400 dark:hover:bg-green-400/20"
+                    class="group px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center"
                   >
-                    อนุมัติ
+                    <i
+                      class="fas fa-check-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
+                    ></i>
+                    <span>อนุมัติ</span>
                   </button>
                 </div>
               </td>
@@ -305,19 +314,26 @@
 
           <!-- Actions -->
           <div class="flex gap-2">
+            <!-- ปุ่มรายละเอียด -->
             <button
               @click="showUserDetails(user)"
-              class="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:opacity-90 transition-opacity"
+              class="group flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
             >
-              <i class="fas fa-info-circle text-xs mr-1"></i>
-              รายละเอียด
+              <i
+                class="fas fa-info-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
+              ></i>
+              <span>รายละเอียด</span>
             </button>
+
+            <!-- ปุ่มอนุมัติ -->
             <button
               @click="handleApprove(user.id)"
-              class="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 dark:from-green-600 dark:to-teal-600 text-white text-sm hover:opacity-90 transition-opacity"
+              class="group flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
             >
-              <i class="fas fa-check-circle text-xs mr-1"></i>
-              อนุมัติ
+              <i
+                class="fas fa-check-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
+              ></i>
+              <span>อนุมัติ</span>
             </button>
           </div>
         </div>

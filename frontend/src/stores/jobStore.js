@@ -100,6 +100,7 @@ export const useJobStore = defineStore('job', {
         async fetchJobs() {
             this.loading = true
             try {
+                const headers = this.getAuthHeaders()
                 const params = {
                     page: this.pagination.currentPage,
                     limit: this.pagination.perPage,
@@ -116,7 +117,10 @@ export const useJobStore = defineStore('job', {
 
                 const response = await axios.get(
                     `${this.baseURL}/api/jobs?${params.toString()}`,
-                    { params }
+                    {
+                        params,
+                        headers
+                    }
                 )
 
 

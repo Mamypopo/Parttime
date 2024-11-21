@@ -15,6 +15,7 @@
       <div class="fixed inset-0 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
           <DialogPanel
+            tabindex="0"
             class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-xl transition-all"
           >
             <!-- Header -->

@@ -243,15 +243,15 @@ export default {
     getStatusClass(status) {
       switch (status?.toLowerCase()) {
         case 'open':
-          return 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
+          return 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30'
         case 'closed':
-          return 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
+          return 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30'
         case 'full':
-          return 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800'
+          return 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30'
         case 'pending':
-          return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800'
+          return 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30'
         default:
-          return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600'
+          return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
       }
     },
 
@@ -261,6 +261,8 @@ export default {
           return 'เปิดรับสมัคร'
         case 'CLOSED':
           return 'ปิดรับสมัคร'
+        case 'FULL':
+          return 'เต็มแล้ว'
         case 'PENDING':
           return 'รอดำเนินการ'
         default:

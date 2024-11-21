@@ -93,37 +93,7 @@ export const useSidebarStore = defineStore('sidebar', {
             }
         },
 
-        async handleLogout() {
-            const adminStore = useAdminStore()
-            try {
-                await Swal.fire({
-                    title: 'Logging out...',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading()
-                    }
-                })
 
-                await adminStore.logout()
-
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Logged out successfully!',
-                    showConfirmButton: false,
-                    timer: 1500
-                })
-
-                return true
-            } catch (error) {
-                console.error('Logout error:', error)
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Something went wrong! Please try again.'
-                })
-                return false
-            }
-        },
 
         toggleDarkMode() {
             this.isDarkMode = !this.isDarkMode
@@ -164,6 +134,11 @@ export const useSidebarStore = defineStore('sidebar', {
 
         cleanup() {
             window.removeEventListener('resize', this.handleResize)
+        },
+        resetDarkMode() {
+            this.isDarkMode = false
+            document.documentElement.classList.remove('dark')
+            localStorage.setItem('theme', 'light')
         }
     }
 })

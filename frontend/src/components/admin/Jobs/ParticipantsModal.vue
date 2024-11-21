@@ -188,11 +188,11 @@
                         class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200"
                       >
                         <div class="p-4">
-                          <!-- User Info -->
+                          <!-- User Info ในส่วนที่แสดงข้อมูลผู้สมัคร -->
                           <div class="flex items-center space-x-3 mb-4">
                             <img
                               :src="getProfileImage(participant.user.profile_image)"
-                              class="w-12 h-12 rounded-full object-cover border-2 border-gray-100 dark:border-gray-700"
+                              class="w-12 h-12 rounded-full object-cover"
                               alt="Profile"
                             />
                             <div>
@@ -200,10 +200,14 @@
                                 {{ participant.user?.first_name }}
                                 {{ participant.user?.last_name }}
                               </h4>
-                              <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                                <i class="fas fa-phone text-[#6ED7D1] dark:text-[#4B9592] mr-2"></i>
-                                {{ participant.user?.phone_number }}
-                              </p>
+                              <!-- แสดงเฉพาะปุ่มดูประวัติ -->
+                              <button
+                                @click="openHistory(participant.user)"
+                                class="text-sm text-[#6ED7D1] hover:text-[#4B9592] dark:text-[#4B9592] hover:underline mt-1"
+                              >
+                                <i class="fas fa-history mr-1"></i>
+                                ดูประวัติการทำงาน
+                              </button>
                             </div>
                           </div>
 
@@ -293,11 +297,22 @@
       </div>
     </Dialog>
   </TransitionRoot>
+  <!--  JobHistoryModal -->
+  <JobHistoryModal
+    v-if="showHistory"
+    :show="showHistory"
+    :user="selectedUser"
+    :jobs="userJobs"
+    @close="closeHistory"
+  />
 </template>
 
 <script>
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import Swal from 'sweetalert2'
+import JobHistoryModal from '@/components/Users/JobHistoryModal.vue'
+import { useUserHistoryStore } from '@/stores/userHistoryStore'
+
 import { useJobStore } from '@/stores/jobStore'
 
 export default {
@@ -306,7 +321,8 @@ export default {
     DialogPanel,
     DialogTitle,
     TransitionChild,
-    TransitionRoot
+    TransitionRoot,
+    JobHistoryModal
   },
   props: {
     show: {
@@ -318,14 +334,18 @@ export default {
       required: true
     }
   },
-  emits: ['close', 'update:job', 'approve', 'reject'],
+  emits: ['close', 'update', 'update:job', 'approve', 'reject'],
   data() {
     return {
       currentFilter: 'pending',
       loading: false,
       searchTerm: '',
       statusFilter: null,
-      ratingFilter: null
+      ratingFilter: null,
+      showHistory: false,
+      selectedUser: null,
+      userJobs: [],
+      userHistoryStore: useUserHistoryStore()
     }
   },
   setup() {
@@ -335,6 +355,11 @@ export default {
   computed: {
     isFilterActive() {
       return this.statusFilter !== null
+    }
+  },
+  async mounted() {
+    if (this.participant?.user?.id) {
+      await this.loadUserHistory(this.participant.user.id)
     }
   },
   methods: {
@@ -518,6 +543,58 @@ export default {
     toggleRatingFilter(rating) {
       this.ratingFilter = this.ratingFilter === rating ? null : rating
       this.statusFilter = null
+    },
+
+    async openHistory(user) {
+      if (!user?.id) return
+
+      this.selectedUser = user
+      try {
+        await this.userHistoryStore.fetchUserHistory(user.id)
+
+        // ตรวจสอบว่ามีประวัติการทำงานหรือไม่
+        if (!this.userHistoryStore.jobHistory?.data?.length) {
+          Swal.fire({
+            title: 'ไม่พบประวัติการทำงาน',
+            text: 'ผู้ใช้งานนี้ยังไม่มีประวัติการทำงาน',
+            icon: 'info',
+            confirmButtonText: 'ตกลง',
+            confirmButtonColor: '#6366f1'
+          })
+          return
+        }
+
+        this.userJobs = this.userHistoryStore.jobHistory.data
+        this.showHistory = true
+      } catch (error) {
+        // จัดการ error 404 แยกออกมา
+        if (error.response?.status === 404) {
+          Swal.fire({
+            title: 'ไม่พบประวัติการทำงาน',
+            text: 'ผู้ใช้งานนี้ยังไม่มีประวัติการทำงาน',
+            icon: 'info',
+            confirmButtonText: 'ตกลง',
+            confirmButtonColor: '#6366f1'
+          })
+          return
+        }
+
+        // กรณี error อื่นๆ
+        console.error('Error fetching user history:', error)
+        Swal.fire({
+          title: 'เกิดข้อผิดพลาด',
+          text: 'ไม่สามารถดึงข้อมูลประวัติการทำงานได้',
+          icon: 'error',
+          confirmButtonText: 'ตกลง'
+        })
+      }
+    },
+
+    closeHistory() {
+      this.showHistory = false
+      this.selectedUser = null
+      this.userJobs = []
+      this.userHistoryStore.clearHistory()
     }
   }
 }

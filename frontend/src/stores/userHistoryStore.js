@@ -61,5 +61,8 @@ export const useUserHistoryStore = defineStore('userHistory', {
             }
             this.error = null
         }
-    }
+    },
+
+
+
 })

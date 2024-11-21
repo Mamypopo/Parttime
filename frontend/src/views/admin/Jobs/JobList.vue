@@ -63,12 +63,13 @@
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="jobs.length === 0" class="flex flex-col items-center justify-center py-12">
-        <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-          <i class="fas fa-clipboard-list text-3xl text-[#EABF71]"></i>
-        </div>
-        <p class="text-gray-500 text-lg">ไม่พบข้อมูลงาน</p>
-        <p class="text-gray-400 text-sm mt-2">ลองปรับเงื่อนไขการค้นหาใหม่</p>
+      <div
+        v-else-if="jobs.length === 0"
+        class="flex flex-col items-center justify-center py-12 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-2xl dark:border dark:border-gray-700"
+      >
+        <i class="fas fa-clipboard-list text-4xl mb-4 text-[#EABF71] dark:text-[#D4A85C]"></i>
+        <p class="text-gray-500 dark:text-gray-400 text-lg">ไม่พบข้อมูลงาน</p>
+        <p class="text-gray-400 dark:text-gray-500 text-sm mt-2">ลองปรับเงื่อนไขการค้นหาใหม่</p>
       </div>
 
       <!-- Table -->
@@ -379,7 +380,8 @@ export default {
   async created() {
     try {
       this.jobStore.resetPagination()
-      await this.jobStore.fetchJobsAndParticipants()
+      // await this.jobStore.fetchJobsAndParticipants()
+      await this.jobStore.fetchJobs()
     } catch (error) {
       console.error('Error in created hook:', error)
     }

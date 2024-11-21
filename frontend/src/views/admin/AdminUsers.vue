@@ -211,19 +211,25 @@
               <!-- Actions -->
               <td class="px-6 py-4">
                 <div class="flex space-x-2">
+                  <!-- ปุ่มรายละเอียด -->
                   <button
                     @click="showUserDetails(user)"
-                    class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:opacity-90 transition-opacity"
+                    class="group px-4 py-2 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center"
                   >
-                    <i class="fas fa-info-circle text-xs mr-1"></i>
+                    <i
+                      class="fas fa-info-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
+                    ></i>
                     <span>รายละเอียด</span>
                   </button>
 
+                  <!-- ปุ่มประวัติ -->
                   <button
                     @click="handleViewHistory(user.id)"
-                    class="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 dark:from-green-600 dark:to-teal-600 text-white text-sm hover:opacity-90 transition-opacity"
+                    class="group px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center"
                   >
-                    <i class="fas fa-history text-xs mr-1"></i>
+                    <i
+                      class="fas fa-history text-xs mr-1.5 group-hover:scale-110 transition-transform"
+                    ></i>
                     <span>ประวัติ</span>
                   </button>
                 </div>
@@ -301,20 +307,26 @@
 
           <!-- Actions -->
           <div class="flex gap-2">
+            <!-- ปุ่มรายละเอียด -->
             <button
               @click="showUserDetails(user)"
-              class="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:opacity-90 transition-opacity"
+              class="group flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
             >
-              <i class="fas fa-info-circle text-xs mr-1"></i>
-              รายละเอียด
+              <i
+                class="fas fa-info-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
+              ></i>
+              <span>รายละเอียด</span>
             </button>
 
+            <!-- ปุ่มประวัติ -->
             <button
               @click="handleViewHistory(user.id)"
-              class="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 dark:from-green-600 dark:to-teal-600 text-white text-sm hover:opacity-90 transition-opacity"
+              class="group flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
             >
-              <i class="fas fa-history text-xs mr-1"></i>
-              ประวัติ
+              <i
+                class="fas fa-history text-xs mr-1.5 group-hover:scale-110 transition-transform"
+              ></i>
+              <span>ประวัติ</span>
             </button>
           </div>
         </div>

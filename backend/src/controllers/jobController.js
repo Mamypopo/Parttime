@@ -359,6 +359,12 @@ export const applyForJob = async (req, res) => {
                 message: 'บัญชีของคุณยังไม่ได้รับการอนุมัติ กรุณารอการอนุมัติจากแอดมิน',
             });
         }
+
+        const job = await jobModel.getJobById(jobId);
+        if (!job) {
+            return res.status(404).json({ message: 'ไม่พบงานที่ระบุ' });
+        }
+
         const jobPosition = await jobModel.findJobPositionById(jobPositionId);
         if (!jobPosition) {
             return res.status(404).json({ message: 'ตำแหน่งงานไม่ถูกต้อง' });
@@ -382,9 +388,11 @@ export const applyForJob = async (req, res) => {
         }
 
         // ตรวจสอบการสมัครงานในวันเดียวกัน
-        const existingDayApplication = await jobModel.findExistingDayApplication(userId);
+        const existingDayApplication = await jobModel.findExistingDayApplication(userId, job.work_date);
         if (existingDayApplication) {
-            return res.status(400).json({ message: 'คุณสามารถสมัครงานได้เพียงหนึ่งงานต่อวันเท่านั้น' });
+            return res.status(400).json({
+                message: `คุณมีงานในวันที่ ${new Date(job.work_date).toLocaleDateString('th-TH')} แล้ว (${existingDayApplication.job.title})`
+            });
         }
 
         if (!user.email_verified || !user.approved) {
@@ -393,11 +401,6 @@ export const applyForJob = async (req, res) => {
 
         // สร้างการสมัครงานใหม่ในตำแหน่งที่เลือก
         const jobParticipation = await jobModel.createJobParticipation(userId, jobId, jobPositionId);
-        // ดึงข้อมูลงานเพื่อดูว่าใครเป็นคนสร้างงาน
-        const job = await jobModel.getJobById(jobId);
-        if (!job) {
-            return res.status(404).json({ message: 'ไม่พบงานที่ระบุ' });
-        }
 
 
         await notificationController.createNewApplicationNotification(jobId, userId);

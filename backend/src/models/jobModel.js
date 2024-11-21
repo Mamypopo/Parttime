@@ -610,23 +610,27 @@ export const findExistingJobParticipation = (userId, jobId, jobPositionId) =>
 
 
 // ฟังก์ชันตรวจสอบการสมัครงานที่เกิดในวันเดียวกัน
-export const findExistingDayApplication = (userId) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
+export const findExistingDayApplication = async (userId, newJobWorkDate) => {
     return prisma.jobParticipation.findFirst({
         where: {
             user_id: userId,
-            created_at: {
-                gte: today,
-                lt: tomorrow
+            Job: {
+                work_date: newJobWorkDate
+            },
+            NOT: {
+                status: 'rejected' // ไม่นับงานที่ถูกปฏิเสธ
+            }
+        },
+        include: {
+            Job: {
+                select: {
+                    title: true,
+                    work_date: true
+                }
             }
         }
     });
 };
-
 
 
 // ฟังก์ชันเพื่ออัปเดตจำนวนคนที่เหลือใน JobPosition พร้อมอัปเดตสถานะ

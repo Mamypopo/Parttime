@@ -14,7 +14,9 @@
         <!-- แถวที่ 1: ID, ชื่องาน, สถานที่, ตำแหน่ง -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+            <span
+              class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500"
+            >
               <i class="fas fa-id-badge text-sm"></i>
             </span>
             <input
@@ -27,7 +29,9 @@
           </div>
 
           <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+            <span
+              class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500"
+            >
               <i class="fas fa-search text-sm"></i>
             </span>
             <input
@@ -40,7 +44,9 @@
           </div>
 
           <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+            <span
+              class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500"
+            >
               <i class="fas fa-location-dot text-sm"></i>
             </span>
             <input
@@ -53,7 +59,9 @@
           </div>
 
           <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+            <span
+              class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500"
+            >
               <i class="fas fa-users text-sm"></i>
             </span>
             <input
@@ -65,7 +73,9 @@
               class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
               placeholder="ตำแหน่ง"
             />
-            <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400">
+            <span
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500"
+            >
               <i class="fas fa-chevron-down text-sm"></i>
             </span>
 
@@ -93,7 +103,9 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3">
           <!-- สถานะ -->
           <div class="lg:col-span-2 relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+            <span
+              class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500"
+            >
               <i class="fas fa-filter text-sm"></i>
             </span>
             <input

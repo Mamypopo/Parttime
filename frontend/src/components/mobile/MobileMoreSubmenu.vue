@@ -15,6 +15,7 @@
       <div class="fixed inset-0 overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4">
           <DialogPanel
+            tabindex="0"
             class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-xl transition-all"
           >
             <!-- Header -->
@@ -93,7 +94,9 @@
 <script>
 import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { useSidebarStore } from '@/stores/sidebarStore'
+import { useAdminStore } from '@/stores/adminStore'
 
+import Swal from 'sweetalert2'
 export default {
   name: 'MobileMoreSubmenu',
 
@@ -107,15 +110,69 @@ export default {
   data() {
     return {
       sidebarStore: useSidebarStore(),
+      adminStore: useAdminStore(),
+
       isDarkMode: localStorage.getItem('darkMode') === 'true' || false
     }
   },
 
   methods: {
     async handleLogout() {
-      const success = await this.sidebarStore.handleLogout()
-      if (success) {
-        this.$router.push('/signin-admin')
+      try {
+        // ปิด mobile menu (ถ้ามี)
+        if (this.$emit) {
+          this.$emit('close')
+        }
+
+        // ถามยืนยันก่อน logout
+        const result = await Swal.fire({
+          title: 'ต้องการออกจากระบบ?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'ออกจากระบบ',
+          cancelButtonText: 'ยกเลิก',
+          confirmButtonColor: '#EA6B6B'
+        })
+
+        if (!result.isConfirmed) return
+
+        // เพิ่ม Loader ระหว่าง Logout
+        Swal.fire({
+          title: 'กำลังออกจากระบบ...',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading()
+          }
+        })
+
+        // ทำการ logout และ clear stores
+        this.adminStore.logout()
+
+        if (this.sidebarStore?.$reset) {
+          this.sidebarStore.$reset()
+        } else {
+          // หากไม่มี $reset, ให้เคลียร์ค่าเริ่มต้นเอง
+          this.sidebarStore.$patch({ isCollapsed: false, isMobile: false })
+        }
+
+        // แสดงข้อความสำเร็จ
+        await Swal.fire({
+          icon: 'success',
+          title: 'ออกจากระบบสำเร็จ!',
+          showConfirmButton: false,
+          timer: 1500
+        })
+
+        // Redirect ไปหน้า login
+        await this.$router.push('/signin-admin')
+      } catch (error) {
+        console.error('Logout error:', error)
+
+        await Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'กรุณาลองใหม่อีกครั้ง'
+        })
       }
     },
     toggleDarkMode() {

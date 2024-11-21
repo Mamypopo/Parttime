@@ -96,7 +96,7 @@
               <button
                 @click="showPositionModal = true"
                 type="button"
-                class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-500 dark:to-blue-400 text-white rounded-xl hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg"
+                class="px-4 py-2 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 text-white rounded-xl hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg"
               >
                 <i class="fas fa-plus mr-2"></i>เพิ่มตำแหน่ง
               </button>
@@ -165,7 +165,7 @@
             :class="[
               positions.length === 0
                 ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed'
-                : 'bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-500 dark:to-blue-400 hover:opacity-90'
+                : 'bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 hover:opacity-90'
             ]"
           >
             {{ positions.length === 0 ? 'กรุณาเพิ่มตำแหน่งงานอย่างน้อย 1 ตำแหน่ง' : 'สร้างงาน' }}

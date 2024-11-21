@@ -1,7 +1,12 @@
 <template>
   <div class="relative">
     <TransitionRoot appear :show="modelValue" as="template">
-      <Dialog as="div" class="relative z-50" @close="$emit('update:modelValue', false)">
+      <Dialog
+        as="div"
+        class="relative z-50"
+        @close="$emit('update:modelValue', false)"
+        :initial-focus="$refs.closeButton"
+      >
         <TransitionChild
           as="template"
           enter="transition-opacity duration-300"
@@ -44,6 +49,7 @@
                     </span>
                   </button>
                   <button
+                    tabindex="0"
                     @click="$emit('update:modelValue', false)"
                     class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center ml-2"
                   >

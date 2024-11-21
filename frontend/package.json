@@ -19,7 +19,6 @@
     "@fullcalendar/vue3": "^6.1.15",
     "@headlessui/vue": "^1.7.23",
     "@mdi/font": "^7.4.47",
-    "@popperjs/core": "^2.11.8",
     "@vuepic/vue-datepicker": "^9.0.3",
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",

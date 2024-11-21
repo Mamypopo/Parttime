@@ -116,6 +116,15 @@ export const getUserJobHistory = (userId, limit = 10, offset = 0) =>
             id: true,
             created_at: true,
             updated_at: true,
+            user: {  // เพิ่มข้อมูลผู้ใช้
+                select: {
+                    id: true,
+                    first_name: true,
+                    last_name: true,
+                    profile_image: true,
+                    email: true
+                }
+            },
             jobPosition: {
                 select: {
                     position_name: true,

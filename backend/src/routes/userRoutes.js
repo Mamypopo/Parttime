@@ -2,6 +2,8 @@ import express from 'express';
 import * as userController from '../controllers/userController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import { upload } from '../utils/fileUpload.js'
+import { trackUserActivity } from '../middleware/trackUserActivity.js'
+
 const router = express.Router();
 
 router.post('/register', upload, userController.registerUser);
@@ -12,6 +14,7 @@ router.get('/verify-email', userController.verifyEmail);
 
 // เส้นทางที่ต้องการการยืนยันตัวตน
 router.use(authMiddleware);
+router.use(trackUserActivity)
 
 router.get('/users', userController.getUser);
 

@@ -95,23 +95,23 @@
               v-if="hasEvents(date)"
             ></div>
 
-            <!-- Events -->
-            <div v-if="hasEvents(date)" class="mt-1 md:mt-2 space-y-1">
+            <div v-if="hasEvents(date)" class="mt-1 space-y-0.5">
+              <!-- แสดงงานแรก -->
               <div
-                v-for="event in getEvents(date)"
-                :key="event.id"
-                class="text-[10px] md:text-xs p-1 md:p-1.5 rounded-lg cursor-pointer transition-all duration-300 hover:translate-y-[-1px] hover:shadow-md"
-                :class="getEventClasses(event)"
-                @click.stop="showEventDetails(event)"
+                class="text-[10px] p-1 rounded-md cursor-pointer transition-all duration-300"
+                :class="getEventClasses(getEvents(date)[0])"
+                @click.stop="showEventDetails(getEvents(date)[0])"
               >
-                <div class="font-medium truncate">{{ event.title }}</div>
-                <div
-                  v-if="event.location"
-                  class="hidden md:block truncate opacity-75 text-[8px] md:text-[10px] mt-0.5"
-                >
-                  <i class="fas fa-map-marker-alt mr-0.5"></i>
-                  {{ event.location }}
-                </div>
+                <div class="font-medium truncate">{{ getEvents(date)[0].title }}</div>
+              </div>
+
+              <!-- ถ้ามีงานมากกว่า 1 ชิ้น -->
+              <div
+                v-if="getEvents(date).length > 1"
+                class="text-[9px] text-center py-0.5 px-1 bg-gray-100 dark:bg-gray-700 rounded-md cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+                @click.stop="showAllEvents(date)"
+              >
+                +{{ getEvents(date).length - 1 }} งาน
               </div>
             </div>
           </div>
@@ -120,18 +120,29 @@
     </div>
     <!-- Job Detail Modal -->
     <JobDetailModal :is-open="!!selectedEvent" :job="selectedEvent" @close="selectedEvent = null" />
+
+    <JobListModal
+      :is-open="showJobList"
+      :title="jobListTitle"
+      :events="jobListEvents"
+      @close="closeJobList"
+      @select-job="showEventDetails"
+    />
   </div>
 </template>
 
 <script>
 import { useDashboardStore } from '@/stores/dashboardStore'
 import JobDetailModal from '@/components/admin/Jobs/JobDetailModal.vue'
+import JobListModal from '@/components/admin/Jobs/JobListModal.vue'
+
 import { debounce } from 'lodash'
 
 export default {
   name: 'MiniCalendar',
   components: {
-    JobDetailModal
+    JobDetailModal,
+    JobListModal
   },
 
   data() {
@@ -139,8 +150,12 @@ export default {
       currentDate: new Date(),
       selectedDate: null,
       selectedEvent: null,
+      showMultipleJobs: false,
       weekDays: ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'],
-      store: useDashboardStore()
+      store: useDashboardStore(),
+      showJobList: false,
+      jobListTitle: '',
+      jobListEvents: []
     }
   },
 
@@ -288,6 +303,24 @@ export default {
 
     getStatusDot(date) {
       return this.store.getStatusDot(date)
+    },
+
+    showAllEvents(date) {
+      const events = this.getEvents(date)
+      const formattedDate = date.date.toLocaleDateString('th-TH', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+
+      this.jobListTitle = `งานทั้งหมดวันที่ ${formattedDate}`
+      this.jobListEvents = events
+      this.showJobList = true
+    },
+
+    closeJobList() {
+      this.showJobList = false
+      this.jobListEvents = []
     }
   }
 }

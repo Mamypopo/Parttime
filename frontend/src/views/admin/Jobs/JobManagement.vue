@@ -24,7 +24,7 @@
           <!-- ปุ่มสร้างงานใหม่ -->
           <router-link
             to="/admin/create-job"
-            class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-500 dark:to-blue-400 text-white rounded-xl hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg whitespace-nowrap"
+            class="px-4 py-2 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 text-white rounded-xl hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg whitespace-nowrap"
           >
             <i class="fas fa-plus mr-2"></i>สร้างงานใหม่
           </router-link>
@@ -90,11 +90,11 @@
 
           <!-- Empty State -->
           <div
-            v-else-if="!jobs.length"
-            class="col-span-full flex flex-col items-center justify-center py-12 bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl"
+            v-else-if="jobs.length === 0"
+            class="col-span-full flex flex-col shadow-lg items-center justify-center py-12 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-2xl dark:border dark:border-gray-700"
           >
-            <i class="fas fa-clipboard-list text-4xl mb-4 text-[#EABF71]"></i>
-            <p class="text-gray-500">ไม่พบข้อมูลงาน</p>
+            <i class="fas fa-clipboard-list text-4xl mb-4 text-[#EABF71] dark:text-[#D4A85C]"></i>
+            <p class="text-gray-500 dark:text-gray-400">ไม่พบข้อมูลงาน</p>
           </div>
 
           <!-- Job Cards -->
@@ -680,54 +680,6 @@ export default {
       this.jobStore.changePage(page)
     },
 
-    // // การนับต่าง ๆ
-    // hasNewParticipants(job) {
-    //   return job.JobPositions?.some((position) =>
-    //     position.JobParticipation?.some((p) => this.jobStore.newParticipations.has(p.id))
-    //   )
-    // },
-
-    // getPendingCount(job) {
-    //   return (
-    //     job.JobPositions?.reduce((count, position) => {
-    //       return (
-    //         count + (position.JobParticipation?.filter((p) => p.status === 'pending').length || 0)
-    //       )
-    //     }, 0) || 0
-    //   )
-    // },
-
-    // // นับจำนวนผู้สมัครที่อนุมัติแล้ว
-    // getApprovedCount(job) {
-    //   return (
-    //     job.JobPositions?.reduce((count, position) => {
-    //       return (
-    //         count + (position.JobParticipation?.filter((p) => p.status === 'approved').length || 0)
-    //       )
-    //     }, 0) || 0
-    //   )
-    // },
-
-    // // นับจำนวนผู้สมัครทั้งหมด
-    // getTotalApplicants(job) {
-    //   return (
-    //     job.JobPositions?.reduce((count, position) => {
-    //       return count + (position.JobParticipation?.length || 0)
-    //     }, 0) || 0
-    //   )
-    // },
-    // // เพิ่มเมธอดสำหรับนับจำนวนคนที่ได้รับการประเมินแล้ว
-    // getCompletedWorkCount(job) {
-    //   return (
-    //     job.JobPositions?.reduce((count, position) => {
-    //       return (
-    //         count +
-    //         (position.JobParticipation?.filter((p) => p.status === 'approved' && p.work_status)
-    //           .length || 0)
-    //       )
-    //     }, 0) || 0
-    //   )
-    // },
     getPendingCount(job) {
       return this.jobStore.getPendingCount(job)
     },

@@ -597,15 +597,12 @@ export const checkWeeklySkillRequest = async (userId) => {
 
 export const getOnlineUsersCount = async () => {
     try {
-        // นับผู้ใช้ที่ active ใน 5 นาทีล่าสุด
         const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-
         return await prisma.user.count({
             where: {
                 last_active: {
                     gte: fiveMinutesAgo
-                },
-                is_online: true
+                }
             }
         });
     } catch (error) {

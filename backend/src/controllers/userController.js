@@ -452,16 +452,11 @@ export const getUserHistory = async (req, res) => {
     try {
         const offset = (page - 1) * limit;
         const jobHistory = await userModel.getUserJobHistory(userId, parseInt(limit), offset);
-
-        if (!jobHistory || jobHistory.length === 0) {
-            return res.status(404).json({ message: 'ไม่พบประวัติการทำงานของผู้ใช้นี้' });
-        }
-
         const totalJobs = await userModel.getTotalJobHistoryCount(userId);
         const totalPages = Math.ceil(totalJobs / limit);
 
         res.status(200).json({
-            jobHistory,
+            jobHistory: jobHistory || [],
             currentPage: parseInt(page),
             totalPages,
             totalJobs

@@ -18,13 +18,22 @@ export const getAllJobs = () => {
 
 // ดึงค่าใช้จ่ายรวมของเดือนปัจจุบัน
 export const getCurrentMonthExpenses = (startOfMonth) => {
+    const endOfMonth = new Date(startOfMonth)
+    endOfMonth.setMonth(endOfMonth.getMonth() + 1)
+    endOfMonth.setDate(0)
+    endOfMonth.setHours(23, 59, 59, 999)
+
     return prisma.jobPosition.findMany({
         where: {
             job: {
-                work_date: { gte: startOfMonth }
+                work_date: {
+                    gte: startOfMonth,
+                    lte: endOfMonth
+                }
             }
         },
-        include: {
+        select: {
+            wage: true,
             JobParticipation: {
                 where: {
                     status: 'approved'

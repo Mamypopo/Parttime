@@ -1,4 +1,3 @@
-
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useAdminStore } from './adminStore'
@@ -9,6 +8,7 @@ export const useNotificationStore = defineStore('notification', {
         loading: false,
         error: null,
         baseURL: import.meta.env.VITE_API_URL,
+        adminStore: useAdminStore()
     }),
     getters: {
         unreadCount: (state) => state.notifications.filter(n => !n.read).length,
@@ -17,23 +17,23 @@ export const useNotificationStore = defineStore('notification', {
             (a, b) => new Date(b.created_at) - new Date(a.created_at)
         )
     },
-
     actions: {
         async fetchNotifications() {
             this.loading = true
             this.error = null
-            const adminStore = useAdminStore()
+            // ตรวจสอบ token ก่อนเรียก API
+            if (!this.adminStore.token) {
+                console.warn('No token available. Skipping fetchNotifications.')
+                return
+            }
 
             try {
                 const response = await axios.get(`${this.baseURL}/api/admin/notifications`, {
-
                     headers: {
-                        'Authorization': `Bearer ${adminStore.token}`
+                        'Authorization': `Bearer ${this.adminStore.token}`
                     }
                 })
 
-
-                //  check และ map data
                 if (response.data?.notifications && Array.isArray(response.data.notifications)) {
                     this.notifications = response.data.notifications.map(n => ({
                         id: n.id,
@@ -46,7 +46,6 @@ export const useNotificationStore = defineStore('notification', {
                         type: n.type || 'notification'
                     }))
                 } else if (Array.isArray(response.data)) {
-                    // กรณีที่ response.data เป็น array โดยตรง
                     this.notifications = response.data.map(n => ({
                         id: n.id,
                         message: n.message,
@@ -71,6 +70,12 @@ export const useNotificationStore = defineStore('notification', {
 
         async markAsRead(notificationId) {
             const adminStore = useAdminStore()
+
+            if (!adminStore.token) {
+                console.warn('No token available. Cannot mark notification as read.')
+                return
+            }
+
             try {
                 await axios.patch(`${this.baseURL}/api/admin/notifications/${notificationId}/read`, {}, {
                     headers: {
@@ -90,21 +95,34 @@ export const useNotificationStore = defineStore('notification', {
 
         async markAllAsRead() {
             const adminStore = useAdminStore()
-            try {
-                await axios.patch(`${this.baseURL}/api/admin/notifications/mark-all-read`, {}, {
 
+            if (!adminStore.token) {
+                console.warn('No token available. Cannot mark all notifications as read.')
+                return
+            }
+
+            try {
+                console.log('Marking all notifications as read...') // Debugging
+                await axios.patch(`${this.baseURL}/api/admin/notifications/mark-all-read`, {}, {
                     headers: {
                         'Authorization': `Bearer ${adminStore.token}`
                     }
                 })
-
+                console.log('Before update:', this.notifications) // Debugging
                 this.notifications.forEach(notification => {
                     notification.read = true
                 })
+                console.log('After update:', this.notifications) // Debugging
             } catch (error) {
                 console.error('Error marking all notifications as read:', error)
                 throw error
             }
+        },
+
+        resetStore() {
+            this.notifications = []
+            this.loading = false
+            this.error = null
         }
     }
 })
