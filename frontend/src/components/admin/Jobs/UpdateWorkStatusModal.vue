@@ -116,57 +116,139 @@
               <!-- Right Content - Evaluation Form -->
               <div class="w-2/3 p-6 overflow-y-auto bg-gray-50 dark:bg-gray-900">
                 <div v-if="selectedParticipant" class="space-y-6">
-                  <!-- Rating -->
+                  <!-- Rating Categories -->
                   <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
                   >
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
-                      คะแนนการทำงาน
-                    </label>
-                    <div class="flex items-center justify-center gap-3">
-                      <button
-                        v-for="n in 5"
-                        :key="n"
-                        @click="setRating(selectedParticipant.id, n)"
-                        class="text-3xl focus:outline-none transition-all duration-200 transform hover:scale-110"
+                    <h3
+                      class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center justify-between mb-2"
+                    >
+                      การประเมินผลการทำงาน
+                      <!-- Move Rating Legend Here -->
+                      <div class="mt-1 text-xs text-gray-500 flex items-center gap-2">
+                        <span class="flex items-center">
+                          <i class="fas fa-star text-yellow-400 mr-1"></i>
+                          <i class="fas fa-star text-yellow-400 mr-1"></i>
+                          = ดี (2 คะแนน)
+                        </span>
+                        <span class="flex items-center">
+                          <i class="fas fa-star text-yellow-400 mr-1"></i>
+                          = พอใช้ (1 คะแนน)
+                        </span>
+                      </div>
+                    </h3>
+
+                    <div class="space-y-6">
+                      <div
+                        v-for="(category, key) in ratingCategories"
+                        :key="key"
+                        class="border-b dark:border-gray-700 pb-4 last:border-0"
                       >
-                        <i
-                          class="fas fa-star"
-                          :class="getRatingStarClass(selectedParticipant.id, n)"
-                        ></i>
+                        <div class="flex justify-between items-center mb-2">
+                          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {{ category.label }}
+                          </label>
+                          <span
+                            class="text-sm font-medium"
+                            :class="
+                              getCategoryScoreColor(getRatingScore(selectedParticipant?.id, key))
+                            "
+                          >
+                            {{ getRatingScore(selectedParticipant?.id, key) }}/2 คะแนน
+                          </span>
+                        </div>
+
+                        <!-- Star Rating สำหรับ 2 คะแนน -->
+                        <div class="flex items-center gap-2">
+                          <button
+                            v-for="n in 2"
+                            :key="n"
+                            @click="setRating(selectedParticipant?.id, key, n)"
+                            class="text-2xl focus:outline-none transition-all duration-200 transform hover:scale-110"
+                          >
+                            <i
+                              class="fas fa-star"
+                              :class="[
+                                getRatingScore(selectedParticipant?.id, key) >= n
+                                  ? 'text-yellow-400'
+                                  : 'text-gray-300 hover:text-yellow-400'
+                              ]"
+                            ></i>
+                          </button>
+                          <!-- ปุ่มรีเซ็ตคะแนน -->
+                          <button
+                            v-if="getRatingScore(selectedParticipant?.id, key) > 0"
+                            @click="setRating(selectedParticipant?.id, key, 0)"
+                            class="ml-2 text-sm text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                          >
+                            <i class="fas fa-times"></i>
+                          </button>
+                        </div>
+
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                          {{ category.description }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- สรุปคะแนน -->
+                    <div class="mb-6">
+                      <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+                        สรุปการประเมิน
+                      </h4>
+                      <div
+                        class="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                      >
+                        <span class="font-medium text-gray-700 dark:text-gray-300"
+                          >คะแนนรวมทั้งหมด</span
+                        >
+                        <span
+                          class="text-2xl font-bold"
+                          :class="getTotalScoreColor(getTotalScore(selectedParticipant?.id))"
+                        >
+                          {{ getTotalScore(selectedParticipant?.id) }}/10
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Comment Field -->
+                    <div class="mb-6">
+                      <label
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                      >
+                        ความคิดเห็นเพิ่มเติม <span class="text-red-500">*</span>
+                      </label>
+                      <textarea
+                        v-model="comments[selectedParticipant.id]"
+                        rows="3"
+                        class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#6ED7D1] dark:focus:ring-[#4B9592] focus:border-transparent dark:bg-gray-800"
+                        placeholder="กรุณาใส่ความคิดเห็น..."
+                      ></textarea>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-4">
+                      <!-- ปุ่มไม่ผ่านงาน -->
+                      <button
+                        @click="confirmReject"
+                        class="flex items-center justify-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200"
+                      >
+                        <i class="fas fa-ban mr-2"></i>
+                        ไม่ผ่านงาน
+                      </button>
+
+                      <!-- ปุ่มบันทึกการประเมิน -->
+                      <button
+                        @click="submitEvaluation"
+                        :disabled="!isFormValid(selectedParticipant?.id)"
+                        class="flex-1 px-4 py-2 bg-[#6ED7D1] dark:bg-[#4B9592] text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                      >
+                        <i class="fas fa-check mr-2"></i>
+                        บันทึกการประเมิน
                       </button>
                     </div>
-                    <p class="text-center mt-2 text-gray-500 dark:text-gray-400">
-                      {{ ratings[selectedParticipant.id] || 0 }}/5 คะแนน
-                    </p>
                   </div>
-
-                  <!-- Comment -->
-                  <div
-                    class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
-                  >
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
-                      ความคิดเห็นเพิ่มเติม
-                    </label>
-                    <textarea
-                      v-model="comments[selectedParticipant.id]"
-                      rows="4"
-                      class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
-                      placeholder="เพิ่มความคิดเห็นเกี่ยวกับการทำงาน..."
-                    ></textarea>
-                  </div>
-
-                  <!-- Submit Button -->
-                  <button
-                    @click="updateStatus(selectedParticipant.id)"
-                    :disabled="!isFormValid(selectedParticipant.id)"
-                    class="w-full py-3 bg-[#81E2C4] dark:bg-[#4B9592] text-white rounded-xl hover:bg-opacity-90 dark:hover:bg-opacity-80 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center space-x-2"
-                  >
-                    <i class="fas fa-check"></i>
-                    <span>บันทึกการประเมิน</span>
-                  </button>
                 </div>
-
                 <!-- No Selection State -->
                 <div
                   v-else
@@ -192,6 +274,7 @@
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import { useJobStore } from '@/stores/jobStore'
 
+import Swal from 'sweetalert2'
 export default {
   components: {
     Dialog,
@@ -212,17 +295,35 @@ export default {
     }
   },
 
-  setup() {
-    const jobStore = useJobStore()
-    return { jobStore }
-  },
-
   data() {
     return {
+      jobStore: useJobStore(),
       ratings: {},
       comments: {},
       activeTab: null,
-      selectedParticipant: null
+      selectedParticipant: null,
+      ratingCategories: {
+        appearance: {
+          label: 'การแต่งกาย',
+          description: 'ความเรียบร้อย สะอาด เหมาะสมกับงาน'
+        },
+        quality: {
+          label: 'คุณภาพการตรวจ',
+          description: 'ความละเอียด ถูกต้อง ตรงตามมาตรฐาน'
+        },
+        quantity: {
+          label: 'ปริมาณ',
+          description: 'ความรวดเร็ว และปริมาณงานที่ทำได้'
+        },
+        manner: {
+          label: 'มารยาท',
+          description: 'การมีสัมมาคารวะ มนุษยสัมพันธ์ การสื่อสาร'
+        },
+        punctuality: {
+          label: 'ตรงเวลา',
+          description: 'มาทำงานตรงเวลา และอยู่จนงานเสร็จ'
+        }
+      }
     }
   },
 
@@ -245,6 +346,77 @@ export default {
   },
 
   methods: {
+    async submitEvaluation() {
+      if (!this.isFormValid(this.selectedParticipant.id)) return
+
+      try {
+        const ratings = {
+          appearance: parseInt(this.ratings[this.selectedParticipant.id].appearance),
+          quality: parseInt(this.ratings[this.selectedParticipant.id].quality),
+          quantity: parseInt(this.ratings[this.selectedParticipant.id].quantity),
+          manner: parseInt(this.ratings[this.selectedParticipant.id].manner),
+          punctuality: parseInt(this.ratings[this.selectedParticipant.id].punctuality)
+        }
+
+        await this.jobStore.updateWorkEvaluation({
+          participationId: this.selectedParticipant.id,
+          ratings,
+          comment: this.comments[this.selectedParticipant.id],
+          isRejected: false
+        })
+
+        Swal.fire({
+          icon: 'success',
+          title: 'สำเร็จ',
+          text: 'บันทึกการประเมินเรียบร้อยแล้ว'
+        })
+        this.$emit('close')
+        this.$emit('evaluation-updated')
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: error.response?.data?.message || 'ไม่สามารถบันทึกการประเมินได้'
+        })
+      }
+    },
+
+    async confirmReject() {
+      const result = await this.$swal({
+        title: 'ยืนยันการไม่ผ่านงาน',
+        html: `
+          <div class="text-left">
+            <p>คุณต้องการให้ <b>${this.selectedParticipant.user.first_name} ${this.selectedParticipant.user.last_name}</b> ไม่ผ่านงานใช่หรือไม่?</p>
+            <p class="text-red-500 text-sm mt-2">* การดำเนินการนี้จะทำให้ผู้ใช้ไม่สามารถสมัครงานได้อีก</p>
+          </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'ยืนยัน',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#dc2626',
+        reverseButtons: true
+      })
+
+      if (result.isConfirmed) {
+        try {
+          await this.jobStore.rejectParticipant(this.selectedParticipant.id)
+          this.$swal({
+            icon: 'success',
+            title: 'สำเร็จ',
+            text: 'บันทึกการไม่ผ่านงานเรียบร้อยแล้ว'
+          })
+          this.$emit('close')
+          this.$emit('participant-rejected')
+        } catch (error) {
+          this.$swal({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: error.response?.data?.message || 'ไม่สามารถบันทึกการไม่ผ่านงานได้'
+          })
+        }
+      }
+    },
     getPendingParticipants(position) {
       return (
         position.JobParticipation?.filter(
@@ -253,35 +425,61 @@ export default {
       )
     },
 
-    setRating(participationId, rating) {
-      this.ratings[participationId] = rating
+    getRatingScore(participationId, category) {
+      return this.ratings[participationId]?.[category] || 0
     },
+
+    setRating(participationId, category, rating) {
+      if (!this.ratings[participationId]) {
+        this.ratings[participationId] = {}
+      }
+      this.ratings[participationId][category] = rating
+    },
+
+    getTotalScore(participationId) {
+      if (!participationId) return 0
+
+      return Object.keys(this.ratingCategories).reduce((total, key) => {
+        return total + (this.getRatingScore(participationId, key) || 0)
+      }, 0)
+    },
+
+    getCategoryScoreColor(score) {
+      if (score === 2) return 'text-green-500'
+      if (score === 1) return 'text-yellow-500'
+      return 'text-gray-400'
+    },
+
+    getTotalScoreColor(score) {
+      if (score >= 8) return 'text-green-500'
+      if (score >= 5) return 'text-yellow-500'
+      return 'text-red-500'
+    },
+
+    // getRatingStarClass(participationId, category, number) {
+    //   const score = this.getRatingScore(participationId, category)
+    //   return {
+    //     'text-yellow-400': number <= score,
+    //     'text-gray-300': number > score,
+    //     'hover:text-yellow-400': true
+    //   }
+    // },
 
     isFormValid(participationId) {
-      return this.ratings[participationId] && this.comments[participationId]?.trim()
-    },
-
-    async updateStatus(participationId) {
-      if (!this.isFormValid(participationId)) return
-
-      this.$emit('update', {
-        participationId,
-        rating: this.ratings[participationId],
-        comment: this.comments[participationId]
-      })
+      return (
+        // ต้องให้คะแนนครบทุกด้าน
+        Object.keys(this.ratingCategories).every(
+          (category) => this.getRatingScore(participationId, category) > 0
+        ) &&
+        // ต้องมีความคิดเห็น
+        this.comments[participationId]?.trim()
+      )
     },
 
     getProfileImage(image) {
       return this.jobStore.getProfileImage(image)
     },
 
-    getRatingStarClass(participationId, number) {
-      return {
-        'text-yellow-400': number <= (this.ratings[participationId] || 0),
-        'text-gray-300': number > (this.ratings[participationId] || 0),
-        'hover:text-yellow-400': true
-      }
-    },
     selectParticipant(participant) {
       this.selectedParticipant = participant
     }

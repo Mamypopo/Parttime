@@ -10,6 +10,8 @@ export const useUserHistoryStore = defineStore('userHistory', {
             currentPage: 1,
             totalPages: 1
         },
+        topUsers: [],
+        averageRating: 0,
         loading: false,
         error: null
     }),
@@ -32,7 +34,10 @@ export const useUserHistoryStore = defineStore('userHistory', {
                         updated_at: job.updated_at,
                         wage: job.jobPosition?.wage || 0,
                         work_date: job.jobPosition?.job?.work_date || null,
-                        workHistories: job.workHistories || []
+                        workHistories: job.workHistories || [],
+                        user: {
+                            profile_image: job.jobParticipation?.user?.profile_image || 'default.png'
+                        }
                     }))
 
                     this.jobHistory = {
@@ -51,7 +56,26 @@ export const useUserHistoryStore = defineStore('userHistory', {
                 this.loading = false
             }
         },
+        async fetchTopUsersRatings() {
+            this.loading = true;
+            this.error = null;
 
+            try {
+                const response = await axios.get(`${this.baseURL}/api/work-history/users-ratings`);
+
+                if (response.data.data) {
+                    this.averageRating = response.data.data.averageRating;
+                    this.topUsers = response.data.data.topUsers;
+                }
+                return true;
+            } catch (error) {
+                console.error('Error fetching ratings:', error);
+                this.error = error.response?.data?.message || 'ไม่สามารถดึงข้อมูลคะแนนได้';
+                throw error;
+            } finally {
+                this.loading = false;
+            }
+        },
         clearHistory() {
             this.jobHistory = {
                 data: [],

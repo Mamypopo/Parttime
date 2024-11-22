@@ -66,7 +66,11 @@
               <i class="fas fa-medal"></i>
             </div>
             <img
-              :src="`${userHistoryStore.baseURL}/uploads/profiles/${user.profile_image}`"
+              :src="
+                user.profile_image
+                  ? `${userHistoryStore.baseURL}/uploads/profiles/${user.profile_image}`
+                  : '/default-avatar.png'
+              "
               class="w-12 h-12 rounded-xl object-cover border-2 transition-transform duration-300 group-hover:scale-105"
               :class="[getBorderClass(index)]"
               :alt="user.name"
@@ -93,25 +97,23 @@
     </div>
 
     <!-- Pagination -->
-    <div class="flex items-center justify-between mt-8 px-2">
+    <div class="flex justify-center gap-2 mt-4">
       <button
-        :disabled="currentPage === 1"
         @click="previousPage"
-        class="px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-300 hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 disabled:hover:from-gray-100 disabled:hover:to-gray-200 dark:disabled:hover:from-gray-700 dark:disabled:hover:to-gray-600"
+        class="px-3 py-1 text-sm rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+        :disabled="currentPage === 1"
       >
-        <i class="fas fa-chevron-left mr-2"></i>
         ก่อนหน้า
       </button>
-      <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
-        หน้า {{ currentPage }} จาก {{ totalPages }}
-      </div>
+
+      <span class="px-3 py-1 text-sm"> หน้า {{ currentPage }} จาก {{ totalPages }} </span>
+
       <button
-        :disabled="currentPage === totalPages"
         @click="nextPage"
-        class="px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-300 hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-500 disabled:hover:from-gray-100 disabled:hover:to-gray-200 dark:disabled:hover:from-gray-700 dark:disabled:hover:to-gray-600"
+        class="px-3 py-1 text-sm rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+        :disabled="currentPage === totalPages"
       >
         ถัดไป
-        <i class="fas fa-chevron-right ml-2"></i>
       </button>
     </div>
   </div>
@@ -126,16 +128,6 @@ export default {
   directives: {
     tippy
   },
-  props: {
-    averageRating: {
-      type: Number,
-      default: 0
-    },
-    topUsers: {
-      type: Array,
-      default: () => []
-    }
-  },
 
   data() {
     return {
@@ -145,7 +137,20 @@ export default {
       userHistoryStore: useUserHistoryStore()
     }
   },
+  async created() {
+    try {
+      await this.userHistoryStore.fetchTopUsersRatings()
+    } catch (error) {
+      console.error('Error loading ratings:', error)
+    }
+  },
   computed: {
+    averageRating() {
+      return this.userHistoryStore.averageRating
+    },
+    topUsers() {
+      return this.userHistoryStore.topUsers
+    },
     sortedUsers() {
       return [...this.topUsers].sort((a, b) => {
         if (this.sortOption === 'rating') {

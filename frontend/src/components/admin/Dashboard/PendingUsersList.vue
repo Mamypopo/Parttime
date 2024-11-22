@@ -18,8 +18,8 @@
       >
         <div class="flex items-center gap-3">
           <img
-            v-if="user.avatar"
-            :src="user.avatar"
+            v-if="user.profileImage"
+            :src="getProfileImage(user.profileImage)"
             :alt="`${user.name}'s avatar`"
             class="w-10 h-10 rounded-full object-cover"
           />
@@ -27,11 +27,9 @@
             <i class="fas fa-user text-gray-400"></i>
           </div>
           <div>
-            <div class="font-medium">{{ user.name }}</div>
+            <div class="font-medium">{{ user.fullName }}</div>
             <div class="text-sm text-gray-600 dark:text-gray-400">{{ user.email }}</div>
-            <div class="text-xs text-gray-500">
-              ลงทะเบียนเมื่อ: {{ formatDate(user.registeredAt) }}
-            </div>
+            <div class="text-xs text-gray-500">ลงทะเบียนเมื่อ: {{ user.registeredDate }}</div>
           </div>
         </div>
       </div>
@@ -42,20 +40,36 @@
 </template>
 
 <script>
+import { useAdminUserStore } from '@/stores/adminUserStore'
+
 export default {
   name: 'PendingUsersList',
+  data() {
+    return {
+      adminUserStore: useAdminUserStore()
+    }
+  },
 
-  props: {
-    users: {
-      type: Array,
-      default: () => [],
-      required: true
+  computed: {
+    users() {
+      return this.adminUserStore.pendingUsers.slice(0, 5) // แสดงแค่ 5 คนล่าสุด
+    }
+  },
+
+  async created() {
+    try {
+      await this.adminUserStore.fetchPendingUsers()
+    } catch (error) {
+      console.error('Error loading pending users:', error)
     }
   },
 
   methods: {
     formatDate(date) {
-      return new Date(date).toLocaleDateString('th-TH')
+      return this.adminUserStore.formatDate(date)
+    },
+    getProfileImage(image) {
+      return this.adminUserStore.getProfileImage(image)
     }
   }
 }

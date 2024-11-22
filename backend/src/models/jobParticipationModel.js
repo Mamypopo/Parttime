@@ -77,8 +77,14 @@ export const getJobsWithParticipants = async (adminId) => {
                                 workHistories: {
                                     select: {
                                         id: true,
-                                        rating: true,
+                                        appearance_score: true,
+                                        quality_score: true,
+                                        quantity_score: true,
+                                        manner_score: true,
+                                        punctuality_score: true,
+                                        total_score: true,
                                         comment: true,
+                                        is_rejected: true,
                                         created_at: true
                                     },
                                     orderBy: {

@@ -43,11 +43,11 @@
             <!-- Hamburger Button -->
             <button
               @click="sidebarStore.toggleSidebar"
-              class="relative group p-3 hover:bg-white/30 rounded-xl transition-all duration-300 backdrop-blur-sm"
+              class="relative group p-3 rounded-xl transition-all duration-300 backdrop-blur-sm"
             >
               <!-- Ripple Effect Background -->
               <div
-                class="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                class="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               ></div>
 
               <!-- Hamburger Icon -->

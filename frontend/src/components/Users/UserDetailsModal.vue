@@ -48,7 +48,8 @@
               <!-- Profile Image -->
               <div class="flex flex-col items-center">
                 <div
-                  class="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-lg ring-4 ring-[#9899ee]/30 dark:ring-[#6667AA]/30 mb-4"
+                  class="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-lg ring-4 ring-[#9899ee]/30 dark:ring-[#6667AA]/30 mb-4 cursor-pointer transform transition-transform hover:scale-105"
+                  @click="openImagePreview"
                 >
                   <img
                     v-if="user.profileImage"
@@ -132,6 +133,55 @@
       </div>
     </HeadlessDialog>
   </TransitionRoot>
+
+  <!-- Image Preview Modal -->
+  <TransitionRoot appear :show="isImagePreviewOpen" as="template">
+    <HeadlessDialog as="div" @close="closeImagePreview" class="relative modal">
+      <TransitionChild
+        enter="duration-300 ease-out"
+        enter-from="opacity-0"
+        enter-to="opacity-100"
+        leave="duration-200 ease-in"
+        leave-from="opacity-100"
+        leave-to="opacity-0"
+      >
+        <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" />
+      </TransitionChild>
+
+      <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+          <TransitionChild
+            enter="duration-300 ease-out"
+            enter-from="opacity-0 scale-95"
+            enter-to="opacity-100 scale-100"
+            leave="duration-200 ease-in"
+            leave-from="opacity-100 scale-100"
+            leave-to="opacity-0 scale-95"
+          >
+            <HeadlessDialogPanel class="relative w-full max-w-3xl mx-auto">
+              <!-- Close Button -->
+              <button
+                @click="closeImagePreview"
+                class="absolute -top-12 right-0 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg p-2"
+              >
+                <i class="fas fa-times text-xl"></i>
+              </button>
+
+              <!-- Image Container -->
+              <div class="relative max-h-[80vh] overflow-auto rounded-lg">
+                <img
+                  :src="adminUserStore.getProfileImage(user.profileImage)"
+                  :alt="user.fullName"
+                  class="w-full h-auto object-contain rounded-lg shadow-2xl"
+                  style="max-height: calc(80vh - 2rem)"
+                />
+              </div>
+            </HeadlessDialogPanel>
+          </TransitionChild>
+        </div>
+      </div>
+    </HeadlessDialog>
+  </TransitionRoot>
 </template>
 
 <script>
@@ -160,7 +210,8 @@ export default {
 
   data() {
     return {
-      baseURL: import.meta.env.VITE_API_URL
+      baseURL: import.meta.env.VITE_API_URL,
+      isImagePreviewOpen: false
     }
   },
   setup() {
@@ -204,6 +255,15 @@ export default {
   },
 
   methods: {
+    openImagePreview() {
+      if (this.user.profileImage) {
+        this.isImagePreviewOpen = true
+      }
+    },
+
+    closeImagePreview() {
+      this.isImagePreviewOpen = false
+    },
     closeModal() {
       this.$emit('close')
     },

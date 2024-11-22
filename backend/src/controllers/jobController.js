@@ -364,7 +364,12 @@ export const applyForJob = async (req, res) => {
         if (!job) {
             return res.status(404).json({ message: 'ไม่พบงานที่ระบุ' });
         }
-
+        // เพิ่มการเช็คสถานะงาน
+        if (job.status === 'completed') {
+            return res.status(400).json({
+                message: 'ไม่สามารถสมัครงานนี้ได้ เนื่องจากงานสำเร็จแล้ว'
+            });
+        }
         const jobPosition = await jobModel.findJobPositionById(jobPositionId);
         if (!jobPosition) {
             return res.status(404).json({ message: 'ตำแหน่งงานไม่ถูกต้อง' });

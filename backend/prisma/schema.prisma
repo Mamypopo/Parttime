@@ -111,10 +111,20 @@ model WorkHistory {
   id                 Int              @id @default(autoincrement())
   jobParticipation   JobParticipation @relation(fields: [jobParticipationId], references: [id])
   jobParticipationId Int              @unique
-  comment            String? // ความคิดเห็นเพิ่มเติม (ถ้ามี)
-  rating             Int? // คะแนนการประเมิน (เช่น 0-100)
-  created_at         DateTime         @default(now()) @db.Timestamptz
-  updated_at         DateTime         @updatedAt @db.Timestamptz
+
+  // คะแนนแต่ละด้าน
+  appearance_score  Int // คะแนนการแต่งกาย
+  quality_score     Int // คะแนนคุณภาพการตรวจ
+  quantity_score    Int // คะแนนปริมาณ
+  manner_score      Int // คะแนนมารยาท
+  punctuality_score Int // คะแนนตรงเวลา
+
+  total_score Int // คะแนนรวม
+  comment     String? // ความคิดเห็น
+  is_rejected Boolean @default(false) // สถานะ reject
+
+  created_at DateTime @default(now()) @db.Timestamptz
+  updated_at DateTime @updatedAt @db.Timestamptz
 
   @@map("work_histories")
 }

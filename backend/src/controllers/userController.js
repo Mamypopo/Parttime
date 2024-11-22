@@ -444,7 +444,9 @@ export const getUser = async (req, res) => {
     }
 };
 
-//อันเก่า ทีใช้อยู่
+
+
+
 export const getUserHistory = async (req, res) => {
     const { userId } = req.params;
     const { limit = 10, page = 1 } = req.query;

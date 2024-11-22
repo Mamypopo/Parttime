@@ -12,4 +12,6 @@ router.get('/user/:userId', workHistoryController.getUserWorkHistory);
 // ดึงประวัติการทำงานตาม participation ID
 router.get('/participation/:participationId', workHistoryController.getWorkHistoryByParticipationId);
 
+
+router.get('/users-ratings', workHistoryController.getTopUsersWithRatings);
 export default router;
