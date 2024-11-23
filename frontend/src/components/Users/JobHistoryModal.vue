@@ -15,7 +15,7 @@
         </TransitionChild>
 
         <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4 text-center">
+          <div class="flex min-h-full items-center justify-center p-4">
             <TransitionChild
               as="template"
               enter="duration-300 ease-out"
@@ -30,7 +30,7 @@
               >
                 <!-- Header -->
                 <div
-                  class="sticky top-0 z-10 flex justify-between items-center p-6 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA] rounded-t-xl"
+                  class="sticky top-0 z-10 flex justify-between items-center p-6 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA]"
                 >
                   <DialogTitle class="text-2xl font-semibold text-white">
                     ประวัติการทำงาน
@@ -40,7 +40,7 @@
                   </DialogTitle>
                   <button
                     @click="$emit('close')"
-                    class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
+                    class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg p-2 transition-colors"
                   >
                     <i class="fas fa-times text-xl"></i>
                   </button>
@@ -50,123 +50,138 @@
                 <div
                   class="p-6 bg-gray-50 dark:bg-gray-900 overflow-y-auto max-h-[calc(100vh-8rem)]"
                 >
-                  <div class="space-y-4">
-                    <!-- สรุปภาพรวม -->
+                  <!-- No data message -->
+                  <div v-if="!jobs?.length" class="text-center py-8">
                     <div
-                      class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border-l-4 border-purple-400 dark:border-purple-500"
+                      class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center"
                     >
-                      <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">
-                        สรุปการทำงาน
-                      </h3>
-                      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <!-- จำนวนงานทั้งหมด -->
-                        <div class="text-center p-3 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
-                          <p class="text-sm text-gray-500 dark:text-gray-400">งานทั้งหมด</p>
-                          <p class="text-2xl font-semibold text-purple-600 dark:text-purple-400">
-                            {{ jobs?.length || 0 }}
-                          </p>
-                        </div>
-
-                        <!-- คะแนนเฉลี่ย -->
-                        <div class="text-center p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
-                          <p class="text-sm text-gray-500 dark:text-gray-400">คะแนนเฉลี่ย</p>
-                          <div class="flex items-center justify-center gap-1">
-                            <p class="text-2xl font-semibold text-yellow-600 dark:text-yellow-400">
-                              {{ averageRating.toFixed(1) }}
-                            </p>
-                            <i class="fas fa-star text-yellow-400 dark:text-yellow-300 text-xl"></i>
-                          </div>
-                        </div>
-
-                        <!-- จำนวนรีวิว -->
-                        <div class="text-center p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                          <p class="text-sm text-gray-500 dark:text-gray-400">จำนวนรีวิว</p>
-                          <p class="text-2xl font-semibold text-blue-600 dark:text-blue-400">
-                            {{ totalReviews }}
-                          </p>
-                        </div>
-                      </div>
+                      <i class="fas fa-file-alt text-gray-400 text-xl"></i>
                     </div>
+                    <p class="text-gray-500 dark:text-gray-400">ไม่พบข้อมูลการประเมิน</p>
+                  </div>
 
-                    <!-- รายการงาน -->
-                    <div v-if="jobs?.length > 0">
-                      <div
-                        v-for="job in jobs"
-                        :key="job.id"
-                        class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-4"
-                      >
-                        <div class="flex justify-between items-start mb-3">
-                          <div class="flex items-center gap-3">
-                            <div
-                              class="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center"
-                            >
-                              <i
-                                class="fas fa-briefcase text-purple-600 dark:text-purple-400 text-xl"
-                              ></i>
-                            </div>
-                            <div>
-                              <h3 class="font-medium text-gray-900 dark:text-gray-100 text-lg">
-                                {{ job.title }}
-                              </h3>
-                              <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ job.position_name }}
-                              </p>
-                            </div>
-                          </div>
-
-                          <!-- แสดงคะแนน -->
-                          <div v-if="job.workHistories?.length" class="flex items-center gap-1">
-                            <span
-                              class="text-lg font-semibold text-yellow-500 dark:text-yellow-400"
-                            >
-                              {{ job.workHistories[0].rating }}
-                            </span>
-                            <i class="fas fa-star text-yellow-400 dark:text-yellow-300"></i>
-                          </div>
+                  <!-- Job History List -->
+                  <div v-else class="space-y-6">
+                    <div class="mb-6 bg-white dark:bg-gray-800 rounded-xl p-6">
+                      <div class="flex justify-between items-center">
+                        <div>
+                          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                            คะแนนรวมทั้งหมด
+                          </h3>
+                          <p class="text-sm text-gray-500 dark:text-gray-400">
+                            จากการประเมินทั้งหมด {{ jobs.length }} ครั้ง
+                          </p>
                         </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                          <div class="space-y-2">
-                            <div class="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                              <i
-                                class="fas fa-map-marker-alt w-5 text-gray-400 dark:text-gray-500"
-                              ></i>
-                              <span>{{ job.location }}</span>
-                            </div>
-                            <div class="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                              <i class="fas fa-calendar w-5 text-gray-400 dark:text-gray-500"></i>
-                              <span>วันที่ทำงาน: {{ formatDate(job.work_date) }}</span>
-                            </div>
-                            <div class="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                              <i class="fas fa-coins w-5 text-gray-400 dark:text-gray-500"></i>
-                              <span>ค่าตอบแทน: {{ job.wage.toLocaleString() }} บาท</span>
-                            </div>
-                          </div>
-
-                          <!-- ส่วนแสดงความคิดเห็น -->
-                          <div
-                            v-if="job.workHistories?.length"
-                            class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg"
+                        <div class="flex items-baseline">
+                          <span
+                            class="text-3xl font-bold mr-2"
+                            :class="getOverallScoreClass(getOverallScore())"
                           >
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                              ความคิดเห็นจากผู้ว่าจ้าง:
-                            </p>
-                            <p class="text-gray-700 dark:text-gray-300">
-                              {{ job.workHistories[0].comment || '-' }}
-                            </p>
-                          </div>
+                            {{ getOverallScore() }}
+                          </span>
+                          <span class="text-gray-500 dark:text-gray-400">/ 10</span>
                         </div>
                       </div>
                     </div>
+                    <div v-for="job in jobs" :key="job.id" class="mb-6">
+                      <div class="bg-white dark:bg-gray-800 rounded-xl p-6">
+                        <!-- Job Header -->
+                        <div class="flex justify-between items-center mb-4">
+                          <div>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                              {{ job.jobPosition?.job?.title }}
+                            </h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                              {{ job.jobPosition?.position_name }}
+                            </p>
+                          </div>
+                          <!-- สถานะงาน -->
+                          <div
+                            :class="{
+                              'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400':
+                                !job.workHistories?.[0]?.is_rejected,
+                              'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400':
+                                job.workHistories?.[0]?.is_rejected
+                            }"
+                            class="px-3 py-1 rounded-full text-sm font-medium"
+                          >
+                            {{
+                              job.workHistories?.[0]?.is_rejected
+                                ? 'ไม่ผ่านการประเมิน'
+                                : 'ผ่านการประเมิน'
+                            }}
+                          </div>
+                        </div>
 
-                    <!-- ข้อความเมื่อไม่มีข้อมูล -->
-                    <div v-else class="text-center py-12">
-                      <div
-                        class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center"
-                      >
-                        <i class="fas fa-history text-2xl text-gray-400 dark:text-gray-500"></i>
+                        <!-- คะแนนการประเมิน -->
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                          <div
+                            v-for="(score, index) in scoreItems"
+                            :key="index"
+                            class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg"
+                          >
+                            <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                              <i :class="score.icon" class="mr-2"></i>
+                              {{ score.title }}
+                            </div>
+                            <div
+                              class="text-xl font-bold"
+                              :class="getScoreClass(job.workHistories?.[0]?.[score.field])"
+                            >
+                              {{ job.workHistories?.[0]?.[score.field] || 0 }}/2
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- คะแนนรวม -->
+                        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-4">
+                          <div class="flex justify-between items-center">
+                            <div>
+                              <span class="text-gray-600 dark:text-gray-300 text-lg font-medium"
+                                >คะแนนรวม</span
+                              >
+                              <p class="text-sm text-gray-500 mt-1">คะแนนเต็ม 10 คะแนน</p>
+                            </div>
+                            <div class="flex items-baseline">
+                              <span
+                                class="text-3xl font-bold mr-2"
+                                :class="getTotalScoreClass(job)"
+                              >
+                                {{ getTotalScore(job) }}
+                              </span>
+                              <span class="text-gray-500 dark:text-gray-400">/ 10</span>
+                            </div>
+                          </div>
+
+                          <!-- แถบแสดงคะแนน -->
+                          <div
+                            class="mt-3 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden"
+                          >
+                            <div
+                              class="h-full rounded-full transition-all duration-300"
+                              :class="getProgressBarClass(job)"
+                              :style="{ width: `${(getTotalScore(job) / 10) * 100}%` }"
+                            ></div>
+                          </div>
+                        </div>
+
+                        <!-- ความคิดเห็น -->
+                        <div
+                          v-if="job.workHistories?.[0]?.comment"
+                          class="mt-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                        >
+                          <p class="text-sm text-gray-600 dark:text-gray-300">
+                            <i class="fas fa-comment-alt mr-2"></i>
+                            {{ job.workHistories[0].comment }}
+                          </p>
+                        </div>
+
+                        <!-- วันที่ประเมิน -->
+                        <div class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                          <i class="fas fa-calendar-alt mr-2"></i>
+                          ประเมินเมื่อ: {{ formatDate(job.workHistories?.[0]?.created_at) }}
+                        </div>
                       </div>
-                      <p class="text-gray-500 dark:text-gray-400">ไม่พบประวัติการทำงาน</p>
                     </div>
                   </div>
                 </div>
@@ -180,10 +195,11 @@
 </template>
 <script>
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
+import { mapState } from 'pinia'
+import { useUserHistoryStore } from '@/stores/userHistoryStore'
 
 export default {
   name: 'JobHistoryModal',
-
   components: {
     Dialog,
     DialogPanel,
@@ -191,99 +207,162 @@ export default {
     TransitionRoot,
     TransitionChild
   },
-  emits: ['close'],
   props: {
-    show: {
-      type: Boolean,
-      default: false
-    },
-    user: {
-      type: Object,
-      default: () => ({})
-    },
-    jobs: {
-      type: Array,
-      default: () => []
-    },
-    totalJobs: {
-      type: Number,
-      default: 0
+    show: Boolean,
+    user: Object
+  },
+  emits: ['close', 'onBeforeEnter', 'onAfterEnter', 'onBeforeLeave', 'onAfterLeave'],
+
+  data() {
+    return {
+      scoreItems: [
+        {
+          title: 'การแต่งกาย',
+          field: 'appearance_score',
+          icon: 'fas fa-tshirt'
+        },
+        {
+          title: 'คุณภาพงาน',
+          field: 'quality_score',
+          icon: 'fas fa-star'
+        },
+        {
+          title: 'ปริมาณงาน',
+          field: 'quantity_score',
+          icon: 'fas fa-chart-line'
+        },
+        {
+          title: 'มารยาท',
+          field: 'manner_score',
+          icon: 'fas fa-smile'
+        },
+        {
+          title: 'การตรงต่อเวลา',
+          field: 'punctuality_score',
+          icon: 'fas fa-clock'
+        }
+      ]
     }
   },
 
   computed: {
-    averageRating() {
-      const ratedJobs =
-        this.jobs?.filter(
-          (job) =>
-            job.workHistories &&
-            job.workHistories.length > 0 &&
-            job.workHistories[0].rating !== null
-        ) || []
-
-      if (!ratedJobs.length) return 0
-      const totalRating = ratedJobs.reduce((sum, job) => {
-        const rating = job.workHistories[0].rating
-        return sum + (rating || 0)
-      }, 0)
-
-      return totalRating / ratedJobs.length
-    },
-
-    totalReviews() {
-      // นับเฉพาะงานที่มีการให้คะแนนและความคิดเห็น
-      return (
-        this.jobs?.filter(
-          (job) =>
-            job.workHistories &&
-            job.workHistories.length > 0 &&
-            (job.workHistories[0].rating !== null || job.workHistories[0].comment)
-        ).length || 0
-      )
-    }
+    ...mapState(useUserHistoryStore, {
+      jobs: 'history'
+    })
   },
-
   methods: {
     handleClose() {
       this.$emit('close')
     },
+    hasScores(job) {
+      if (!job.workHistories?.[0]) return false
+      const scores = [
+        'appearance_score',
+        'quality_score',
+        'quantity_score',
+        'manner_score',
+        'punctuality_score'
+      ]
+      return scores.some((score) => job.workHistories[0][score] !== null)
+    },
+    getScore(job, field) {
+      const score = job.workHistories?.[0]?.[field]
+      return score !== null ? score : '-'
+    },
+    getScoreColor(job) {
+      if (!job.workHistories?.[0]) return 'gray'
+      return job.workHistories[0].is_rejected ? 'red' : 'green'
+    },
+    getStatusClass(status) {
+      switch (status) {
+        case 'approved':
+          return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+        case 'rejected':
+          return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+        default:
+          return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+      }
+    },
+    getScoreClass(score) {
+      const numScore = Number(score)
+      if (!numScore) return 'text-gray-400 dark:text-gray-500'
+      return numScore === 2
+        ? 'text-green-600 dark:text-green-400'
+        : numScore === 1
+          ? 'text-yellow-600 dark:text-yellow-400'
+          : 'text-red-600 dark:text-red-400'
+    },
+    getProgressBarClass(job) {
+      const score = this.getTotalScore(job)
+      if (score >= 8) return 'bg-green-500 dark:bg-green-400'
+      if (score >= 6) return 'bg-yellow-500 dark:bg-yellow-400'
+      return 'bg-red-500 dark:bg-red-400'
+    },
+    getTotalScore(job) {
+      if (!job.workHistories?.[0]) return 0
+      const scores = [
+        'appearance_score',
+        'quality_score',
+        'quantity_score',
+        'manner_score',
+        'punctuality_score'
+      ]
+      return scores.reduce((sum, field) => {
+        const score = Number(job.workHistories[0][field]) || 0
+        return sum + score
+      }, 0)
+    },
+    getTotalScoreClass(job) {
+      const total = this.getTotalScore(job)
+      if (total >= 8) return 'text-green-600 dark:text-green-400'
+      if (total >= 6) return 'text-yellow-600 dark:text-yellow-400'
+      return 'text-red-600 dark:text-red-400'
+    },
+    getOverallScore() {
+      if (!this.jobs?.length) return 0
+      const totalScores = this.jobs.reduce((sum, job) => {
+        return sum + this.getTotalScore(job)
+      }, 0)
+      return (totalScores / this.jobs.length).toFixed(1)
+    },
+    getOverallScoreClass(score) {
+      const numScore = parseFloat(score)
+      if (numScore >= 8) return 'text-green-600 dark:text-green-400'
+      if (numScore >= 6) return 'text-yellow-600 dark:text-yellow-400'
+      return 'text-red-600 dark:text-red-400'
+    },
+    getStatusText(status) {
+      switch (status) {
+        case 'approved':
+          return 'ผ่านการอนุมัติ'
+        case 'rejected':
+          return 'ไม่ผ่านการอนุมัติ'
+        default:
+          return 'รอดำเนินการ'
+      }
+    },
     formatDate(date) {
-      if (!date) return 'ไม่ระบุวันที่'
+      if (!date) return 'ไม่ระบุ'
       return new Date(date).toLocaleDateString('th-TH', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
       })
     },
 
-    getStatusClass(status) {
-      switch (status) {
-        case 'successful':
-          return 'bg-green-100 text-green-800'
-        case 'failed':
-          return 'bg-red-100 text-red-800'
-        case 'needs_improvement':
-          return 'bg-orange-100 text-orange-800'
-        case 'pending':
-          return 'bg-yellow-100 text-yellow-800'
-        default:
-          return 'bg-gray-100 text-gray-800'
-      }
+    onBeforeEnter() {
+      this.$emit('onBeforeEnter')
     },
-
-    getStatusText(status) {
-      switch (status) {
-        case 'successful':
-          return 'ทำงานสำเร็จ'
-        case 'failed':
-          return 'ไม่สำเร็จ'
-        case 'needs_improvement':
-          return 'ต้องปรับปรุง'
-        case 'pending':
-          return 'กำลังทำงาน'
-        default:
-          return 'ไม่ระบุสถานะ'
-      }
+    onAfterEnter() {
+      this.$emit('onAfterEnter')
+    },
+    onBeforeLeave() {
+      this.$emit('onBeforeLeave')
+    },
+    onAfterLeave() {
+      this.$emit('onAfterLeave')
     }
   }
 }
@@ -301,15 +380,18 @@ export default {
 
 .overflow-y-auto::-webkit-scrollbar-track {
   background: #f3f4f6;
+  border-radius: 3px;
 }
 
 .overflow-y-auto::-webkit-scrollbar-thumb {
   background-color: #c5b4e3;
-  border-radius: 20px;
-  border: 2px solid #f3f4f6;
+  border-radius: 3px;
 }
 
-/* Dark mode scrollbar */
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background-color: #9899ee;
+}
+
 @media (prefers-color-scheme: dark) {
   .overflow-y-auto {
     scrollbar-color: #9899ee #1f2937;
@@ -321,7 +403,6 @@ export default {
 
   .overflow-y-auto::-webkit-scrollbar-thumb {
     background-color: #9899ee;
-    border: 2px solid #1f2937;
   }
 }
 </style>

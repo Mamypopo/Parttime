@@ -116,6 +116,7 @@ export const getUserJobHistory = (userId, limit = 10, offset = 0) =>
             id: true,
             created_at: true,
             updated_at: true,
+            status: true,
             user: {  // เพิ่มข้อมูลผู้ใช้
                 select: {
                     id: true,
@@ -141,14 +142,20 @@ export const getUserJobHistory = (userId, limit = 10, offset = 0) =>
 
             workHistories: {
                 select: {
-                    rating: true,
+                    id: true,
+                    appearance_score: true,
+                    quality_score: true,
+                    quantity_score: true,
+                    manner_score: true,
+                    punctuality_score: true,
+                    total_score: true,
                     comment: true,
+                    is_rejected: true,
                     created_at: true
                 },
                 orderBy: {
                     created_at: 'desc'
-                },
-                take: 1 // เอาเฉพาะการประเมินล่าสุด
+                }
             }
         },
         orderBy: {

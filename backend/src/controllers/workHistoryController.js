@@ -111,7 +111,6 @@ export const getWorkHistoryByParticipationId = async (req, res) => {
 export const getTopUsersWithRatings = async (req, res) => {
     try {
         const data = await workHistoryModel.getTopUsersWithRatings();
-
         res.status(200).json({
             message: 'ดึงข้อมูลสำเร็จ',
             data: data

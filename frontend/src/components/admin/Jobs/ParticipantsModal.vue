@@ -202,7 +202,7 @@
                               </h4>
                               <!-- แสดงเฉพาะปุ่มดูประวัติ -->
                               <button
-                                @click="openHistory(participant.user)"
+                                @click="handleOpenHistory(participant.user)"
                                 class="text-sm text-[#6ED7D1] hover:text-[#4B9592] dark:text-[#4B9592] hover:underline mt-1"
                               >
                                 <i class="fas fa-history mr-1"></i>
@@ -223,25 +223,66 @@
                           </div>
 
                           <!-- Rating Display -->
-                          <div v-if="participant.workHistories?.length" class="mb-4">
-                            <div class="flex items-center gap-1">
-                              <template v-for="n in 5" :key="n">
-                                <i
-                                  class="fas fa-star text-sm"
-                                  :class="[
-                                    n <= participant.workHistories[0].rating
-                                      ? 'text-yellow-400 dark:text-yellow-300'
-                                      : 'text-gray-300 dark:text-gray-600'
-                                  ]"
-                                ></i>
-                              </template>
-                              <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                                {{ participant.workHistories[0].rating }}/5
+                          <div v-if="participant.workHistories?.length" class="mb-2">
+                            <!-- เพิ่มส่วนแสดงสถานะ -->
+                            <div class="mb-3">
+                              <span
+                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+                                :class="{
+                                  'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400':
+                                    !participant.workHistories[0].is_rejected,
+                                  'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400':
+                                    participant.workHistories[0].is_rejected
+                                }"
+                              >
+                                <i class="fas fa-circle text-[0.5rem] mr-1.5"></i>
+                                {{
+                                  participant.workHistories[0].is_rejected
+                                    ? 'ไม่ผ่านการประเมิน'
+                                    : 'ผ่านการประเมิน'
+                                }}
                               </span>
                             </div>
-                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                              {{ participant.workHistories[0].comment }}
-                            </p>
+
+                            <!-- ส่วนแสดงคะแนน -->
+                            <div class="grid grid-cols-2 gap-2 mb-2">
+                              <div
+                                v-for="(score, index) in scoreItems"
+                                :key="index"
+                                class="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg"
+                              >
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                                  <i :class="score.icon" class="mr-1"></i>
+                                  {{ score.title }}
+                                </div>
+                                <div
+                                  class="text-sm font-bold"
+                                  :class="getScoreClass(participant.workHistories[0][score.field])"
+                                >
+                                  {{ participant.workHistories[0][score.field] || 0 }}/2
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- คะแนนรวม -->
+                            <div class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <div class="flex justify-between items-center">
+                                <div>
+                                  <span class="text-gray-600 dark:text-gray-300 text-sm font-medium"
+                                    >คะแนนรวม</span
+                                  >
+                                </div>
+                                <div class="flex items-baseline">
+                                  <span
+                                    class="text-xl font-bold mr-1"
+                                    :class="getTotalScoreClass(participant.workHistories[0])"
+                                  >
+                                    {{ getTotalScore(participant.workHistories[0]) }}
+                                  </span>
+                                  <span class="text-sm text-gray-500 dark:text-gray-400">/ 10</span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
 
                           <!-- Action Buttons -->
@@ -297,13 +338,13 @@
       </div>
     </Dialog>
   </TransitionRoot>
-  <!--  JobHistoryModal -->
+
+  <!-- JobHistoryModal -->
   <JobHistoryModal
-    v-if="showHistory"
-    :show="showHistory"
+    v-if="showHistoryModal"
+    :show="showHistoryModal"
     :user="selectedUser"
-    :jobs="userJobs"
-    @close="closeHistory"
+    @close="closeHistoryModal"
   />
 </template>
 
@@ -342,10 +383,37 @@ export default {
       searchTerm: '',
       statusFilter: null,
       ratingFilter: null,
-      showHistory: false,
+      showHistoryModal: false,
       selectedUser: null,
       userJobs: [],
-      userHistoryStore: useUserHistoryStore()
+      userHistoryStore: useUserHistoryStore(),
+      scoreItems: [
+        {
+          title: 'การแต่งกาย',
+          field: 'appearance_score',
+          icon: 'fas fa-tshirt'
+        },
+        {
+          title: 'คุณภาพงาน',
+          field: 'quality_score',
+          icon: 'fas fa-star'
+        },
+        {
+          title: 'ปริมาณงาน',
+          field: 'quantity_score',
+          icon: 'fas fa-chart-line'
+        },
+        {
+          title: 'มารยาท',
+          field: 'manner_score',
+          icon: 'fas fa-smile'
+        },
+        {
+          title: 'การตรงต่อเวลา',
+          field: 'punctuality_score',
+          icon: 'fas fa-clock'
+        }
+      ]
     }
   },
   setup() {
@@ -456,6 +524,7 @@ export default {
         })
       }
     },
+
     async handleReject(participationId) {
       try {
         const confirm = await Swal.fire({
@@ -504,6 +573,7 @@ export default {
         })
       }
     },
+
     getStatusClass(status) {
       return (
         {
@@ -533,6 +603,37 @@ export default {
         }[status] || ''
       )
     },
+    getScoreClass(score) {
+      const numScore = Number(score)
+      if (!numScore) return 'text-gray-400 dark:text-gray-500'
+      return numScore === 2
+        ? 'text-green-600 dark:text-green-400'
+        : numScore === 1
+          ? 'text-yellow-600 dark:text-yellow-400'
+          : 'text-red-600 dark:text-red-400'
+    },
+
+    getTotalScore(workHistory) {
+      if (!workHistory) return 0
+      const scores = [
+        'appearance_score',
+        'quality_score',
+        'quantity_score',
+        'manner_score',
+        'punctuality_score'
+      ]
+      return scores.reduce((sum, field) => {
+        const score = Number(workHistory[field]) || 0
+        return sum + score
+      }, 0)
+    },
+
+    getTotalScoreClass(workHistory) {
+      const total = this.getTotalScore(workHistory)
+      if (total >= 8) return 'text-green-600 dark:text-green-400'
+      if (total >= 6) return 'text-yellow-600 dark:text-yellow-400'
+      return 'text-red-600 dark:text-red-400'
+    },
     getProfileImage(image) {
       return this.jobStore.getProfileImage(image)
     },
@@ -545,7 +646,7 @@ export default {
       this.statusFilter = null
     },
 
-    async openHistory(user) {
+    async handleOpenHistory(user) {
       if (!user?.id) return
 
       this.selectedUser = user
@@ -553,7 +654,7 @@ export default {
         await this.userHistoryStore.fetchUserHistory(user.id)
 
         // ตรวจสอบว่ามีประวัติการทำงานหรือไม่
-        if (!this.userHistoryStore.jobHistory?.data?.length) {
+        if (!this.userHistoryStore.history?.length) {
           Swal.fire({
             title: 'ไม่พบประวัติการทำงาน',
             text: 'ผู้ใช้งานนี้ยังไม่มีประวัติการทำงาน',
@@ -564,8 +665,7 @@ export default {
           return
         }
 
-        this.userJobs = this.userHistoryStore.jobHistory.data
-        this.showHistory = true
+        this.showHistoryModal = true
       } catch (error) {
         // จัดการ error 404 แยกออกมา
         if (error.response?.status === 404) {
@@ -590,10 +690,9 @@ export default {
       }
     },
 
-    closeHistory() {
-      this.showHistory = false
+    closeHistoryModal() {
+      this.showHistoryModal = false
       this.selectedUser = null
-      this.userJobs = []
       this.userHistoryStore.clearHistory()
     }
   }

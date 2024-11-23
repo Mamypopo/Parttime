@@ -1,7 +1,7 @@
 import express from 'express';
 import * as adminController from '../controllers/adminController.js';
 import { authMiddleware, checkAdminRole } from '../middleware/authMiddleware.js';
-
+import * as  jobParticipationController from '../controllers/jobParticipationController.js'
 const router = express.Router();
 
 // ไม่ต้องการการยืนยันตัวตน
@@ -25,6 +25,12 @@ router.get('/admin/:adminId', adminController.getAdminById);
 router.get('/profile', adminController.getAdminProfile)
 
 router.post('/approve-reject-user/:userId', checkAdminRole, adminController.approveUser);
+
+router.put(
+    '/jobs/work-history/:jobParticipationId',
+    checkAdminRole,
+    jobParticipationController.updateWorkHistory
+);
 
 router.get('/notifications', checkAdminRole, adminController.getAdminNotifications);
 

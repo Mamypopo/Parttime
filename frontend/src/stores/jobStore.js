@@ -269,26 +269,6 @@ export const useJobStore = defineStore('job', {
         },
 
 
-        // async updateWorkStatus(jobParticipationId, data) {
-        //     try {
-        //         const headers = this.getAuthHeaders();
-        //         await axios.put(
-        //             `${this.baseURL}/api/jobs/participations/${jobParticipationId}/evaluate`,
-        //             {
-        //                 rating: data.rating,
-        //                 comment: data.comment || ''
-        //             },
-        //             { headers }
-        //         );
-
-        //         await this.fetchJobsAndParticipants();
-
-        //     } catch (error) {
-        //         console.error('Error updating work status:', error);
-        //         throw new Error(error.response?.data?.message || 'ไม่สามารถอัพเดทสถานะได้');
-        //     }
-        // },
-
         async updateWorkEvaluation({ participationId, ratings, totalScore, comment, isRejected }) {
             try {
                 const headers = this.getAuthHeaders()
@@ -310,20 +290,7 @@ export const useJobStore = defineStore('job', {
         },
 
 
-        async rejectParticipant(participationId) {
-            try {
-                const headers = this.getAuthHeaders()
-                const response = await axios.post(
-                    `${this.baseURL}/api/jobs/reject-participant`,
-                    { participationId },
-                    { headers }
-                )
-                return response.data
-            } catch (error) {
-                console.error('Error rejecting participant:', error)
-                throw error
-            }
-        },
+
         //  สำหรับดึงประวัติการประเมิน
         async fetchEvaluationHistory(userId) {
             try {
@@ -528,11 +495,7 @@ export const useJobStore = defineStore('job', {
             }
             this.pagination.currentPage = 1
         },
-        // รีเซ็ต pagination
-        // resetPagination() {
-        //     this.pagination.currentPage = 1
-        //     this.pagination.totalPages = 1
-        // },
+
         setPage(page) {
             this.pagination.currentPage = page
             window.scrollTo(0, 0)

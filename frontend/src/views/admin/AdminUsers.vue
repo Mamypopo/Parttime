@@ -210,11 +210,11 @@
 
               <!-- Actions -->
               <td class="px-6 py-4">
-                <div class="flex space-x-2">
+                <div class="flex items-center gap-2">
                   <!-- ปุ่มรายละเอียด -->
                   <button
                     @click="showUserDetails(user)"
-                    class="group px-4 py-2 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center"
+                    class="group px-4 py-2 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 items-center"
                   >
                     <i
                       class="fas fa-info-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
@@ -224,12 +224,10 @@
 
                   <!-- ปุ่มประวัติ -->
                   <button
-                    @click="handleViewHistory(user.id)"
-                    class="group px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center"
+                    @click="handleViewHistory(user)"
+                    class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-orange-400 to-red-400 text-white hover:shadow-md hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 dark:from-orange-600 dark:to-red-500 dark:text-white items-center"
                   >
-                    <i
-                      class="fas fa-history text-xs mr-1.5 group-hover:scale-110 transition-transform"
-                    ></i>
+                    <i class="fas fa-history text-xs mr-1.5"></i>
                     <span>ประวัติ</span>
                   </button>
                 </div>
@@ -306,11 +304,11 @@
           </div>
 
           <!-- Actions -->
-          <div class="flex gap-2">
+          <div class="grid grid-cols-1 gap-2">
             <!-- ปุ่มรายละเอียด -->
             <button
               @click="showUserDetails(user)"
-              class="group flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
+              class="group w-full px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
             >
               <i
                 class="fas fa-info-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
@@ -320,8 +318,8 @@
 
             <!-- ปุ่มประวัติ -->
             <button
-              @click="handleViewHistory(user.id)"
-              class="group flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
+              @click="handleViewHistory(user)"
+              class="group w-full px-4 py-2.5 rounded-lg bg-gradient-to-r from-orange-400 to-red-400 text-white hover:shadow-md hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 dark:from-orange-600 dark:to-red-500 dark:text-white flex items-center justify-center"
             >
               <i
                 class="fas fa-history text-xs mr-1.5 group-hover:scale-110 transition-transform"
@@ -387,13 +385,7 @@
     </TransitionRoot>
 
     <TransitionRoot appear :show="showHistoryModal" as="template">
-      <JobHistoryModal
-        :show="showHistoryModal"
-        :user="selectedUser"
-        @close="closeHistoryModal"
-        :jobs="userHistoryStore.jobHistory.data"
-        :total-jobs="userHistoryStore.jobHistory.totalJobs"
-      />
+      <JobHistoryModal :show="showHistoryModal" :user="selectedUser" @close="closeHistoryModal" />
     </TransitionRoot>
   </div>
 </template>
@@ -429,18 +421,14 @@ export default {
     LoadingSpinner
   },
   data() {
-    const adminUserStore = useAdminUserStore()
-    const userHistoryStore = useUserHistoryStore()
-    const sidebarStore = useSidebarStore()
-
     return {
+      adminUserStore: useAdminUserStore(),
+      userHistoryStore: useUserHistoryStore(),
+      sidebarStore: useSidebarStore(),
       baseURL: import.meta.env.VITE_API_URL,
       showHistoryModal: false,
       showModal: false,
-      selectedUser: null,
-      adminUserStore,
-      userHistoryStore,
-      sidebarStore
+      selectedUser: null
     }
   },
 
@@ -525,28 +513,57 @@ export default {
         })
       }
     },
-    // User Actions
-    async handleViewHistory(userId) {
+    async handleViewHistory(user) {
       try {
-        this.selectedUser = this.formattedUsers.find((u) => u.id === userId)
-        await this.userHistoryStore.fetchUserHistory(userId)
+        this.selectedUser = user
+        await this.userHistoryStore.fetchUserHistory(user.id)
+
+        if (!this.userHistoryStore.history?.length) {
+          await Swal.fire({
+            icon: 'info',
+            title: 'ไม่พบประวัติการทำงาน',
+            text: `${user?.first_name || ''} ${user?.last_name || ''} ยังไม่มีประวัติการทำงานในระบบ`,
+            showConfirmButton: true,
+            confirmButtonText: 'ตกลง',
+            confirmButtonColor: '#6ED7D1',
+            background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#FFFFFF',
+            customClass: {
+              title: 'text-xl font-medium text-gray-800 dark:text-gray-100',
+              htmlContainer: 'text-base text-gray-600 dark:text-gray-300',
+              popup: 'dark:bg-gray-800 dark:text-gray-100 rounded-xl',
+              confirmButton: 'rounded-lg text-sm font-medium px-5 py-2.5'
+            }
+          })
+          return
+        }
+
         this.showHistoryModal = true
       } catch (error) {
+        console.error('Error fetching history:', error)
         Swal.fire({
-          title: 'ไม่พบประวัติการทำงาน',
-          text: 'ผู้ใช้งานนี้ยังไม่มีประวัติการทำงาน',
-          icon: 'info',
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'ไม่สามารถดึงข้อมูลประวัติการทำงานได้ กรุณาลองใหม่อีกครั้ง',
+          showConfirmButton: true,
           confirmButtonText: 'ตกลง',
-          confirmButtonColor: '#6366f1'
+          confirmButtonColor: '#EF4444',
+          background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#FFFFFF',
+          customClass: {
+            title: 'text-xl font-medium text-gray-800 dark:text-gray-100',
+            htmlContainer: 'text-base text-gray-600 dark:text-gray-300',
+            popup: 'dark:bg-gray-800 dark:text-gray-100 rounded-xl',
+            confirmButton: 'rounded-lg text-sm font-medium px-5 py-2.5'
+          }
         })
       }
     },
-    // Modal Management
+
     closeHistoryModal() {
       this.showHistoryModal = false
       this.selectedUser = null
       this.userHistoryStore.clearHistory()
     },
+
     async showUserDetails(user) {
       this.selectedUser = { ...user }
       this.showModal = true

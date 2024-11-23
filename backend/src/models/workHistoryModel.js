@@ -4,32 +4,43 @@ const prisma = new PrismaClient()
 
 // ฟังชั่นสร้างประวัติการทำงานหลังจาก ให้คะแนน
 export const createWorkHistory = async (data) => {
-    if (!data.jobParticipationId) {
-        throw new Error('jobParticipationId is required');
-    }
-
-    return prisma.workHistory.create({
-        data: {
-            jobParticipationId: parseInt(data.jobParticipationId),
-            appearance_score: parseInt(data.appearance_score),
-            quality_score: parseInt(data.quality_score),
-            quantity_score: parseInt(data.quantity_score),
-            manner_score: parseInt(data.manner_score),
-            punctuality_score: parseInt(data.punctuality_score),
-            total_score: parseInt(data.total_score),
-            comment: data.comment,
-            is_rejected: Boolean(data.is_rejected)
-        },
-        include: {
+    try {
+        const workHistoryData = {
             jobParticipation: {
-                include: {
-                    jobPosition: true,
-                    Job: true,
-                    user: true
+                connect: {
+                    id: data.jobParticipationId
+                }
+            },
+            comment: data.comment,
+            is_rejected: data.is_rejected
+        };
+
+        // เพิ่มคะแนนเฉพาะเมื่อไม่ใช่การ reject
+        if (!data.is_rejected) {
+            workHistoryData.appearance_score = data.appearance_score;
+            workHistoryData.quality_score = data.quality_score;
+            workHistoryData.quantity_score = data.quantity_score;
+            workHistoryData.manner_score = data.manner_score;
+            workHistoryData.punctuality_score = data.punctuality_score;
+            workHistoryData.total_score = data.total_score;
+        }
+
+        return await prisma.workHistory.create({
+            data: workHistoryData,
+            include: {
+                jobParticipation: {
+                    include: {
+                        jobPosition: true,
+                        Job: true,
+                        user: true
+                    }
                 }
             }
-        }
-    });
+        });
+    } catch (error) {
+        console.error('Error creating work history:', error);
+        throw error;
+    }
 };
 
 // ฟังชั่นดึงประวัติเป็นรายบุคคล
@@ -40,7 +51,17 @@ export const getWorkHistoryByUserId = async (userId) => {
                 user_id: userId
             }
         },
-        include: {
+        select: {
+            id: true,
+            // เพิ่มการดึงคะแนนแต่ละประเภท
+            appearance_score: true,
+            quality_score: true,
+            quantity_score: true,
+            manner_score: true,
+            punctuality_score: true,
+            total_score: true,
+            comment: true,
+            created_at: true,
             jobParticipation: {
                 include: {
                     user: {
@@ -82,16 +103,12 @@ export const findByJobParticipationId = async (jobParticipationId) => {
 
 
 
+// ฟังชั่นดึง Top Users ใหม่ โดยใช้ total_score
 export const getTopUsersWithRatings = async () => {
     // หาคะแนนเฉลี่ยรวมทั้งหมด
-    const averageRating = await prisma.workHistory.aggregate({
+    const averageScore = await prisma.workHistory.aggregate({
         _avg: {
-            rating: true
-        },
-        where: {
-            rating: {
-                not: null
-            }
+            total_score: true
         }
     });
 
@@ -104,9 +121,14 @@ export const getTopUsersWithRatings = async () => {
             profile_image: true,
             JobParticipation: {
                 include: {
-                    workHistories: {  // แก้จาก workHistory เป็น workHistories
+                    workHistories: {
                         select: {
-                            rating: true
+                            total_score: true,
+                            appearance_score: true,
+                            quality_score: true,
+                            quantity_score: true,
+                            manner_score: true,
+                            punctuality_score: true
                         }
                     }
                 }
@@ -114,29 +136,65 @@ export const getTopUsersWithRatings = async () => {
         }
     });
 
-    // คำนวณคะแนนเฉลี่ยต่อคนและจำนวนงาน
+
+    // คำนวณคะแนนเฉลี่ยของแต่ละคนและจำนวนงาน
     const topUsers = users
         .map(user => {
-            const ratings = user.JobParticipation
-                .map(jp => jp.workHistories[0]?.rating)  // แก้ตรงนี้ด้วย เพราะเป็น array
-                .filter(rating => rating != null);
+            // กรองเฉพาะงานที่มีการประเมินและไม่ถูก reject
+            const workHistories = user.JobParticipation
+                .flatMap(jp => jp.workHistories)
+                .filter(wh =>
+                    wh !== null &&
+                    wh.total_score !== null &&
+                    !wh.is_rejected // เพิ่มเงื่อนไขนี้
+                );
+
+            // ถ้าไม่มีงานที่ผ่านการประเมิน ให้คะแนนเป็น 0
+            if (workHistories.length === 0) {
+                return {
+                    id: user.id,
+                    name: `${user.first_name} ${user.last_name}`,
+                    profile_image: user.profile_image,
+                    averageScores: {
+                        appearance: 0,
+                        quality: 0,
+                        quantity: 0,
+                        manner: 0,
+                        punctuality: 0,
+                        total: 0
+                    },
+                    jobCount: 0
+                };
+            }
+
+            // คำนวณคะแนนเฉลี่ยแต่ละประเภท
+            const calculateAverage = (field) => {
+                const scores = workHistories
+                    .map(wh => wh[field])
+                    .filter(score => score != null);
+                return scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+            };
 
             return {
                 id: user.id,
                 name: `${user.first_name} ${user.last_name}`,
                 profile_image: user.profile_image,
-                rating: ratings.length > 0
-                    ? ratings.reduce((a, b) => a + b, 0) / ratings.length
-                    : 0,
-                jobCount: user.JobParticipation.length
+                averageScores: {
+                    appearance: calculateAverage('appearance_score'),
+                    quality: calculateAverage('quality_score'),
+                    quantity: calculateAverage('quantity_score'),
+                    manner: calculateAverage('manner_score'),
+                    punctuality: calculateAverage('punctuality_score'),
+                    total: calculateAverage('total_score')
+                },
+                jobCount: workHistories.length // นับเฉพาะงานที่ผ่านการประเมิน
             };
         })
-        .filter(user => user.rating > 0)
-        .sort((a, b) => b.rating - a.rating)
+        .filter(user => user.jobCount > 0) // กรองเฉพาะคนที่มีงานที่ผ่านการประเมิน
+        .sort((a, b) => b.averageScores.total - a.averageScores.total)
         .slice(0, 10);
-
     return {
-        averageRating: averageRating._avg.rating || 0,
+        averageScore: averageScore._avg.total_score || 0,
         topUsers: topUsers
     };
 };

@@ -27,6 +27,7 @@ export const useDashboardStore = defineStore('dashboard', {
         // ข้อมูลผู้ใช้ที่มีคะแนนสูงสุด
         topUsers: [],
         averageRating: 0
+
     }),
 
     actions: {
@@ -43,8 +44,6 @@ export const useDashboardStore = defineStore('dashboard', {
 
                 // อัพเดทข้อมูลทั่วไป
                 this.stats = dashboardResponse.data.stats
-                this.topUsers = dashboardResponse.data.topUsers
-                this.averageRating = dashboardResponse.data.averageRating
 
                 // อัพเดทข้อมูลปฏิทิน
                 this.calendarEvents = eventsResponse.data.events
@@ -80,7 +79,26 @@ export const useDashboardStore = defineStore('dashboard', {
                 throw error
             }
         },
+        async fetchTopUsersRatings() {
+            this.loading = true;
+            this.error = null;
 
+            try {
+                const response = await axios.get(`${this.baseURL}/api/work-history/users-ratings`);
+                console.log('API Response:', response.data); // เพิ่ม log ดูข้อมูลที่ได้
+                if (response.data.data) {
+                    this.averageRating = response.data.data.averageScore;
+                    this.topUsers = response.data.data.topUsers;
+                }
+                return true;
+            } catch (error) {
+                console.error('Error fetching ratings:', error);
+                this.error = error.response?.data?.message || 'ไม่สามารถดึงข้อมูลคะแนนได้';
+                throw error;
+            } finally {
+                this.loading = false;
+            }
+        },
         // จัดรูปแบบข้อมูลงาน
         formatEventDetails(event) {
             return {
@@ -143,7 +161,64 @@ export const useDashboardStore = defineStore('dashboard', {
                 return 'published'
             }
         },
+        getScoreItems(user) {
+            return [
+                {
+                    title: 'การแต่งกาย',
+                    value: user.appearance_score || 0,
+                    icon: 'fas fa-tshirt'
+                },
+                {
+                    title: 'คุณภาพงาน',
+                    value: user.quality_score || 0,
+                    icon: 'fas fa-star'
+                },
+                {
+                    title: 'ปริมาณงาน',
+                    value: user.quantity_score || 0,
+                    icon: 'fas fa-chart-line'
+                },
+                {
+                    title: 'มารยาท',
+                    value: user.manner_score || 0,
+                    icon: 'fas fa-smile'
+                },
+                {
+                    title: 'การตรงต่อเวลา',
+                    value: user.punctuality_score || 0,
+                    icon: 'fas fa-clock'
+                }
+            ]
+        },
 
+        getScoreClass(score) {
+            if (!score) return 'text-gray-400 dark:text-gray-500'
+            return score === 2
+                ? 'text-green-600 dark:text-green-400'
+                : score === 1
+                    ? 'text-yellow-600 dark:text-yellow-400'
+                    : 'text-red-600 dark:text-red-400'
+        },
+
+        getTotalScoreClass(rating) {
+            if (rating >= 8) return 'text-green-600 dark:text-green-400'
+            if (rating >= 6) return 'text-yellow-600 dark:text-yellow-400'
+            return 'text-red-600 dark:text-red-400'
+        },
+
+        getMedalClass(index) {
+            if (index === 0) return 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/50 dark:text-yellow-400'
+            if (index === 1) return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+            if (index === 2) return 'bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400'
+            return ''
+        },
+
+        getBorderClass(index) {
+            if (index === 0) return 'border-yellow-400 dark:border-yellow-500'
+            if (index === 1) return 'border-gray-300 dark:border-gray-500'
+            if (index === 2) return 'border-amber-400 dark:border-amber-500'
+            return 'border-transparent'
+        },
         getEventClasses(status) {
             const classes = {
                 completed: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
@@ -167,6 +242,10 @@ export const useDashboardStore = defineStore('dashboard', {
                 style: 'currency',
                 currency: 'THB'
             }).format(value)
+        },
+        getProfileImageUrl(profileImage) {
+            if (!profileImage) return '/default-avatar.png'
+            return `${this.baseURL}/uploads/profiles/${profileImage}`
         }
     },
 
@@ -176,6 +255,22 @@ export const useDashboardStore = defineStore('dashboard', {
 
 
     getters: {
+        sortedUsers: (state) => (sortOption) => {
+            if (!state.topUsers?.length) return []
+
+            return [...state.topUsers].sort((a, b) => {
+                if (sortOption === 'rating') {
+
+                    const scoreA = a.averageScores?.total || 0
+                    const scoreB = b.averageScores?.total || 0
+                    return scoreB - scoreA
+                }
+                if (sortOption === 'jobCount') {
+                    return (b.jobCount || 0) - (a.jobCount || 0)
+                }
+                return 0
+            })
+        },
         eventsByDate: (state) => {
             const eventMap = {}
             state.calendarEvents.forEach(event => {

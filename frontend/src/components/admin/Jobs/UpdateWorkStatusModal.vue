@@ -273,7 +273,7 @@
 <script>
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import { useJobStore } from '@/stores/jobStore'
-
+import { useAdminUserStore } from '@/stores/adminUserStore'
 import Swal from 'sweetalert2'
 export default {
   components: {
@@ -298,6 +298,7 @@ export default {
   data() {
     return {
       jobStore: useJobStore(),
+      adminStore: useAdminUserStore(),
       ratings: {},
       comments: {},
       activeTab: null,
@@ -382,14 +383,18 @@ export default {
     },
 
     async confirmReject() {
-      const result = await this.$swal({
+      const result = await Swal.fire({
         title: 'ยืนยันการไม่ผ่านงาน',
         html: `
-          <div class="text-left">
-            <p>คุณต้องการให้ <b>${this.selectedParticipant.user.first_name} ${this.selectedParticipant.user.last_name}</b> ไม่ผ่านงานใช่หรือไม่?</p>
-            <p class="text-red-500 text-sm mt-2">* การดำเนินการนี้จะทำให้ผู้ใช้ไม่สามารถสมัครงานได้อีก</p>
-          </div>
+            <div class="text-left">
+                <p>คุณต้องการให้ <b>${this.selectedParticipant.user.first_name} ${this.selectedParticipant.user.last_name}</b> ไม่ผ่านงานใช่หรือไม่?</p>
+                <p class="text-red-500 text-sm mt-2">* การดำเนินการนี้จะทำให้ผู้ใช้ไม่สามารถใช้งานระบบได้ชั่วคราว</p>
+                <p class="text-red-500 text-sm">* ผู้ใช้จะต้องติดต่อผู้ดูแลระบบเพื่อขออนุมัติการใช้งานใหม่</p>
+            </div>
         `,
+        input: 'textarea',
+        inputLabel: 'เหตุผลที่ไม่ผ่าน (ไม่บังคับ)',
+        inputPlaceholder: 'กรุณาระบุเหตุผล...',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'ยืนยัน',
@@ -400,16 +405,22 @@ export default {
 
       if (result.isConfirmed) {
         try {
-          await this.jobStore.rejectParticipant(this.selectedParticipant.id)
-          this.$swal({
+          await this.adminStore.rejectUserFromWorkEvaluation(
+            this.selectedParticipant.id,
+            result.value // ส่งเฉพาะ comment
+          )
+
+          Swal.fire({
             icon: 'success',
             title: 'สำเร็จ',
             text: 'บันทึกการไม่ผ่านงานเรียบร้อยแล้ว'
           })
+
           this.$emit('close')
-          this.$emit('participant-rejected')
+          this.$emit('evaluation-updated')
         } catch (error) {
-          this.$swal({
+          console.error('Error in confirmReject:', error)
+          Swal.fire({
             icon: 'error',
             title: 'เกิดข้อผิดพลาด',
             text: error.response?.data?.message || 'ไม่สามารถบันทึกการไม่ผ่านงานได้'

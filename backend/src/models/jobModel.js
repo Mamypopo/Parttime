@@ -250,9 +250,15 @@ export const getJobById = (jobId) =>
                     workHistories: {
                         select: {
                             id: true,
-                            rating: true,
+                            appearance_score: true,
+                            quality_score: true,
+                            quantity_score: true,
+                            manner_score: true,
+                            punctuality_score: true,
+                            total_score: true,
                             comment: true,
-                            created_at: true
+                            created_at: true,
+                            is_rejected: true
                         }
                     },
                     status: true,

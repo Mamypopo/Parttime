@@ -121,7 +121,7 @@
               <th
                 class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[300px]"
               >
-                ทักษะ
+                ตำแหน่ง
               </th>
               <th
                 class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[150px]"
@@ -215,26 +215,31 @@
 
               <!-- การจัดการ -->
               <td class="px-6 py-4">
-                <div class="flex space-x-2">
+                <div class="flex items-center gap-2">
                   <!-- ปุ่มรายละเอียด -->
                   <button
                     @click="showUserDetails(user)"
-                    class="group px-4 py-2 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center"
+                    class="px-3 py-1.5 text-sm rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white hover:shadow-md hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center"
                   >
-                    <i
-                      class="fas fa-info-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
-                    ></i>
+                    <i class="fas fa-info-circle text-xs mr-1.5"></i>
                     <span>รายละเอียด</span>
+                  </button>
+
+                  <!-- ปุ่มประวัติการทำงาน -->
+                  <button
+                    @click="handleViewHistory(user)"
+                    class="px-3 py-1.5 text-sm rounded-lg bg-gradient-to-r from-orange-400 to-red-400 text-white hover:shadow-md hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 dark:from-orange-600 dark:to-red-500 dark:text-white flex items-center"
+                  >
+                    <i class="fas fa-history text-xs mr-1.5"></i>
+                    <span>ประวัติ</span>
                   </button>
 
                   <!-- ปุ่มอนุมัติ -->
                   <button
                     @click="handleApprove(user.id)"
-                    class="group px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center"
+                    class="px-3 py-1.5 text-sm rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white hover:shadow-md hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center"
                   >
-                    <i
-                      class="fas fa-check-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
-                    ></i>
+                    <i class="fas fa-check-circle text-xs mr-1.5"></i>
                     <span>อนุมัติ</span>
                   </button>
                 </div>
@@ -313,11 +318,11 @@
           </div>
 
           <!-- Actions -->
-          <div class="flex gap-2">
-            <!-- ปุ่มรายละเอียด -->
+          <div class="grid grid-cols-2 gap-2">
+            <!-- Row 1: รายละเอียด + อนุมัติ -->
             <button
               @click="showUserDetails(user)"
-              class="group flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
+              class="group px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
             >
               <i
                 class="fas fa-info-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
@@ -325,15 +330,25 @@
               <span>รายละเอียด</span>
             </button>
 
-            <!-- ปุ่มอนุมัติ -->
             <button
               @click="handleApprove(user.id)"
-              class="group flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
+              class="group px-4 py-2.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
             >
               <i
                 class="fas fa-check-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
               ></i>
               <span>อนุมัติ</span>
+            </button>
+
+            <!-- Row 2: ประวัติ (ถ้ามี) -->
+            <button
+              @click="handleViewHistory(user)"
+              class="col-span-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-orange-400 to-red-400 text-white hover:shadow-md hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 dark:from-orange-600 dark:to-red-500 dark:text-white flex items-center justify-center"
+            >
+              <i
+                class="fas fa-history text-xs mr-1.5 group-hover:scale-110 transition-transform"
+              ></i>
+              <span>ประวัติ</span>
             </button>
           </div>
         </div>
@@ -395,12 +410,17 @@
       :user="selectedUser"
       @close="closeModal"
     />
+    <JobHistoryModal :show="showHistoryModal" :user="selectedUser" @close="closeHistoryModal" />
   </div>
 </template>
 <script>
 import { useAdminUserStore } from '@/stores/adminUserStore'
+import { useUserHistoryStore } from '@/stores/userHistoryStore'
+
 import SearchUsersBar from '@/components/Search/SearchUsersBar.vue'
 import UserDetailsModal from '@/components/Users/UserDetailsModal.vue'
+import JobHistoryModal from '@/components/Users/JobHistoryModal.vue'
+
 import Swal from 'sweetalert2'
 
 export default {
@@ -408,14 +428,17 @@ export default {
 
   components: {
     SearchUsersBar,
-    UserDetailsModal
+    UserDetailsModal,
+    JobHistoryModal
   },
 
   data() {
     return {
       adminUserStore: useAdminUserStore(),
+      userHistoryStore: useUserHistoryStore(),
       showModal: false,
-      selectedUser: null
+      selectedUser: null,
+      showHistoryModal: false
     }
   },
 
@@ -545,6 +568,58 @@ export default {
       this.showModal = false
       this.selectedUser = null
     },
+
+    async handleViewHistory(user) {
+      try {
+        this.selectedUser = user
+        await this.userHistoryStore.fetchUserHistory(user.id)
+
+        // ตรวจสอบว่ามีประวัติหรือไม่
+        if (!this.userHistoryStore.history?.length) {
+          await Swal.fire({
+            icon: 'info',
+            title: 'ไม่พบประวัติการทำงาน',
+            text: `${user?.first_name || ''} ${user?.last_name || ''} ยังไม่มีประวัติการทำงานในระบบ`,
+            showConfirmButton: true,
+            confirmButtonText: 'ตกลง',
+            confirmButtonColor: '#6ED7D1',
+            background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#FFFFFF',
+            customClass: {
+              title: 'text-xl font-medium text-gray-800 dark:text-gray-100',
+              htmlContainer: 'text-base text-gray-600 dark:text-gray-300',
+              popup: 'dark:bg-gray-800 dark:text-gray-100 rounded-xl',
+              confirmButton: 'rounded-lg text-sm font-medium px-5 py-2.5'
+            }
+          })
+          return
+        }
+
+        this.showHistoryModal = true
+      } catch (error) {
+        console.error('Error fetching history:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'ไม่สามารถดึงข้อมูลประวัติการทำงานได้ กรุณาลองใหม่อีกครั้ง',
+          showConfirmButton: true,
+          confirmButtonText: 'ตกลง',
+          confirmButtonColor: '#EF4444',
+          background: document.documentElement.classList.contains('dark') ? '#1F2937' : '#FFFFFF',
+          customClass: {
+            title: 'text-xl font-medium text-gray-800 dark:text-gray-100',
+            htmlContainer: 'text-base text-gray-600 dark:text-gray-300',
+            popup: 'dark:bg-gray-800 dark:text-gray-100 rounded-xl',
+            confirmButton: 'rounded-lg text-sm font-medium px-5 py-2.5'
+          }
+        })
+      }
+    },
+    closeHistoryModal() {
+      this.showHistoryModal = false
+      this.selectedUser = null
+      this.userHistoryStore.clearHistory()
+    },
+
     // Data Management
     formatDate(dateString) {
       return this.adminUserStore.formatDate(dateString)

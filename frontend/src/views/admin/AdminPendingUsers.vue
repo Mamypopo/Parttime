@@ -124,7 +124,7 @@
               <th
                 class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[300px]"
               >
-                ทักษะ
+                ตำแหน่ง
               </th>
               <th
                 class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[150px]"
@@ -218,11 +218,11 @@
 
               <!-- การจัดการ -->
               <td class="px-6 py-4">
-                <div class="flex space-x-2">
+                <div class="flex items-center gap-2">
                   <!-- ปุ่มรายละเอียด -->
                   <button
                     @click="showUserDetails(user)"
-                    class="group px-4 py-2 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200"
+                    class="group px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center min-w-[90px] justify-center"
                   >
                     <i
                       class="fas fa-info-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
@@ -233,7 +233,7 @@
                   <!-- ปุ่มอนุมัติ -->
                   <button
                     @click="handleApprove(user.id)"
-                    class="group px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200"
+                    class="group px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center min-w-[80px] justify-center"
                   >
                     <i
                       class="fas fa-check text-xs mr-1.5 group-hover:scale-110 transition-transform"
@@ -244,7 +244,7 @@
                   <!-- ปุ่มไม่อนุมัติ -->
                   <button
                     @click="handleReject(user.id)"
-                    class="group px-4 py-2 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 dark:from-rose-600 dark:to-pink-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200"
+                    class="group px-3 py-1.5 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 dark:from-rose-600 dark:to-pink-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center min-w-[90px] justify-center"
                   >
                     <i
                       class="fas fa-times text-xs mr-1.5 group-hover:scale-110 transition-transform"
@@ -325,14 +325,15 @@
           </div>
 
           <!-- Actions -->
-          <div class="flex gap-2">
+
+          <div class="grid grid-cols-1 gap-2 mt-4">
             <!-- ปุ่มรายละเอียด -->
             <button
               @click="showUserDetails(user)"
-              class="group flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
+              class="w-full px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
             >
               <i
-                class="fas fa-info-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
+                class="fas fa-info-circle text-sm mr-2 group-hover:scale-110 transition-transform"
               ></i>
               <span>รายละเอียด</span>
             </button>
@@ -340,18 +341,18 @@
             <!-- ปุ่มอนุมัติ -->
             <button
               @click="handleApprove(user.id)"
-              class="group flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
+              class="w-full px-4 py-2.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
             >
-              <i class="fas fa-check text-xs mr-1.5 group-hover:scale-110 transition-transform"></i>
+              <i class="fas fa-check text-sm mr-2 group-hover:scale-110 transition-transform"></i>
               <span>อนุมัติ</span>
             </button>
 
             <!-- ปุ่มไม่อนุมัติ -->
             <button
               @click="handleReject(user.id)"
-              class="group flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 dark:from-rose-600 dark:to-pink-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
+              class="w-full px-4 py-2.5 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 dark:from-rose-600 dark:to-pink-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
             >
-              <i class="fas fa-times text-xs mr-1.5 group-hover:scale-110 transition-transform"></i>
+              <i class="fas fa-times text-sm mr-2 group-hover:scale-110 transition-transform"></i>
               <span>ไม่อนุมัติ</span>
             </button>
           </div>

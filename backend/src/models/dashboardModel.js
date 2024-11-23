@@ -68,7 +68,13 @@ export const getMonthlyApplicationsWithStatus = (startOfMonth) => {
 export const getRatedWorkHistories = () => {
     return prisma.workHistory.findMany({
         where: {
-            rating: { not: null },
+            OR: [
+                { appearance_score: { not: null } },
+                { quality_score: { not: null } },
+                { quantity_score: { not: null } },
+                { manner_score: { not: null } },
+                { punctuality_score: { not: null } }
+            ],
             jobParticipation: {
                 status: 'approved'
             }

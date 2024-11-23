@@ -406,7 +406,32 @@ export const findRejectedUsers = (limit = 10, offset = 0, searchParams = {}) => 
 
     return prisma.user.findMany({
         where: whereClause,
-        select: baseUserSelect,
+        select: {
+            ...baseUserSelect,
+            JobParticipation: {
+                include: {
+                    workHistories: {
+                        select: {
+                            id: true,
+                            is_rejected: true,
+                            appearance_score: true,
+                            quality_score: true,
+                            quantity_score: true,
+                            manner_score: true,
+                            punctuality_score: true,
+                            total_score: true,
+                            comment: true,
+                            created_at: true
+                        }
+                    },
+                    jobPosition: {
+                        include: {
+                            job: true
+                        }
+                    }
+                }
+            }
+        },
         take: parseInt(limit),
         skip: parseInt(offset),
         orderBy: { created_at: 'desc' }
@@ -608,5 +633,24 @@ export const getOnlineUsersCount = async () => {
     } catch (error) {
         console.error('Error counting online users:', error);
         throw new Error('ไม่สามารถนับจำนวนผู้ใช้ออนไลน์ได้');
+    }
+};
+
+
+// ฟังก์ชันสำหรับ reject user จากการประเมินงาน
+export const rejectUserFromWorkEvaluation = async (userId) => {
+    try {
+        return await prisma.user.update({
+            where: {
+                id: userId
+            },
+            data: {
+                approved: 'rejected',
+                updated_at: new Date()
+            }
+        });
+    } catch (error) {
+        console.error('Error rejecting user:', error);
+        throw error;
     }
 };

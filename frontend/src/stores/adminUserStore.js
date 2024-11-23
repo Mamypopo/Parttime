@@ -62,7 +62,9 @@ export const useAdminUserStore = defineStore('adminUser', {
                 age: user.age || '0',
                 profileImage: user.profile_image,
                 educationCertificate: user.education_certificate,
-                documents: user.user_documents || '-'
+                documents: user.user_documents || '-',
+
+
             }
         },
 
@@ -170,6 +172,25 @@ export const useAdminUserStore = defineStore('adminUser', {
             }
         },
 
+
+        // ฟังก์ชันสำหรับ reject จากการประเมินงาน
+        async rejectUserFromWorkEvaluation(jobParticipationId, comment) {
+            try {
+                const response = await axios.put(
+                    // แก้ path ให้ตรงกับ backend
+                    `${this.baseURL}/api/admin/jobs/work-history/${jobParticipationId}`,
+                    {
+                        isRejected: true,
+                        comment: comment || 'ไม่ผ่านการประเมิน'
+                    }
+                );
+                return response.data;
+            } catch (error) {
+                console.error('Error rejecting user:', error);
+                throw error;
+            }
+        },
+
         async fetchRejectedUsers() {
             this.loading = true
             try {
@@ -209,6 +230,7 @@ export const useAdminUserStore = defineStore('adminUser', {
                 this.loading = false
             }
         },
+
         startOnlineTracking() {
             // ยกเลิก interval เก่าถ้ามี
             if (this.onlineTrackingInterval) {
@@ -249,6 +271,7 @@ export const useAdminUserStore = defineStore('adminUser', {
         getInitials(fullName) {
             return fullName ? fullName.trim().charAt(0).toUpperCase() : ''
         },
+
         setSearchFilters(filters) {
             this.searchFilters = { ...filters }
             this.pagination.currentPage = 1

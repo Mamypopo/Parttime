@@ -41,7 +41,6 @@ export const getDashboardStats = async (req, res) => {
 
         // ดึงข้อมูลผู้ใช้ที่ลงทะเบียนล่าสุด
         const recentRegistrations = await DashboardModel.getRecentRegistrations()
-
         const pendingRegistrations = recentRegistrations.map(user => ({
             id: user.id,
             name: `${user.first_name} ${user.last_name}`,
@@ -60,31 +59,64 @@ export const getDashboardStats = async (req, res) => {
             if (!acc[userId]) {
                 acc[userId] = {
                     user: history.jobParticipation.user,
-                    ratings: [],
-                    jobCount: 0
+                    totalScore: 0,
+                    jobCount: 0,
+                    scores: {
+                        appearance: 0,
+                        quality: 0,
+                        quantity: 0,
+                        manner: 0,
+                        punctuality: 0
+                    },
+                    ratingCount: 0
                 }
             }
-            acc[userId].ratings.push(history.rating)
+
+            // เพิ่มคะแนนแต่ละด้าน
+            if (history.appearance_score) {
+                acc[userId].scores.appearance += history.appearance_score
+            }
+            if (history.quality_score) {
+                acc[userId].scores.quality += history.quality_score
+            }
+            if (history.quantity_score) {
+                acc[userId].scores.quantity += history.quantity_score
+            }
+            if (history.manner_score) {
+                acc[userId].scores.manner += history.manner_score
+            }
+            if (history.punctuality_score) {
+                acc[userId].scores.punctuality += history.punctuality_score
+            }
+
             acc[userId].jobCount += 1
+            acc[userId].ratingCount += 1
             return acc
         }, {})
 
-        // จัดอันดับผู้ใช้ที่มีคะแนนสูงสุด
+        // คำนวณคะแนนเฉลี่ยและจัดอันดับ
         const topUsers = Object.values(userRatings)
             .map(data => ({
                 id: data.user.id,
                 name: `${data.user.first_name} ${data.user.last_name}`,
-                avatar: data.user.profile_image,
-                rating: +(data.ratings.reduce((a, b) => a + b, 0) / data.ratings.length).toFixed(1),
-                jobCount: data.jobCount
+                profile_image: data.user.profile_image,
+                jobCount: data.jobCount,
+                rating: data.ratingCount ?
+                    ((data.scores.appearance + data.scores.quality +
+                        data.scores.quantity + data.scores.manner +
+                        data.scores.punctuality) / (data.ratingCount * 5)) * 2 : 0,
+                appearance_score: data.ratingCount ? (data.scores.appearance / data.ratingCount) : 0,
+                quality_score: data.ratingCount ? (data.scores.quality / data.ratingCount) : 0,
+                quantity_score: data.ratingCount ? (data.scores.quantity / data.ratingCount) : 0,
+                manner_score: data.ratingCount ? (data.scores.manner / data.ratingCount) : 0,
+                punctuality_score: data.ratingCount ? (data.scores.punctuality / data.ratingCount) : 0
             }))
             .sort((a, b) => b.rating - a.rating)
-            .slice(0, 5)
+            .slice(0, 10)
 
         // คำนวณคะแนนเฉลี่ยรวม
-        const averageRating = workHistories.length
-            ? +(workHistories.reduce((sum, history) => sum + history.rating, 0) / workHistories.length).toFixed(1)
-            : 0
+        const averageRating = topUsers.length ?
+            topUsers.reduce((sum, user) => sum + user.rating, 0) / topUsers.length : 0
 
         // ส่งข้อมูลกลับ
         res.json({

@@ -27,9 +27,12 @@ router.get('/my-created-jobs', checkAdminRole, jobController.getMyCreatedJobs);
 router.get('/getJobsWithParticipants', checkAdminRole, jobParticipationController.getJobsWithParticipants);
 // อนุมัติการสมัครงาน
 router.put('/:id/approved-rejected', checkAdminRole, jobParticipationController.approveJobParticipation);
-// ให้คะแนนหลังจบงาน
-// router.put('/participations/:jobParticipationId/evaluate', checkAdminRole, jobParticipationController.updateWorkHistory);
 
+// ให้คะแนนหลังจบงาน
 router.post('/participation/:jobParticipationId/evaluate', checkAdminRole, jobParticipationController.updateWorkHistory);
 
+router.put(
+    '/work-history/:jobParticipationId', checkAdminRole,
+    jobParticipationController.updateWorkHistory
+);
 export default router;

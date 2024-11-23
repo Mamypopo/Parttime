@@ -168,7 +168,7 @@
               </div>
 
               <!-- เปิด modal อัพเดทสถานะ -->
-              <div v-if="getJobStatus(job) === 'completed'" class="mt-4">
+              <div v-if="['completed', 'in_progress'].includes(getJobStatus(job))" class="mt-4">
                 <button
                   @click="openWorkStatusModal(job)"
                   class="w-full px-4 py-2 text-sm bg-[#81E2C4] dark:bg-[#5DC4A7] text-white rounded-lg hover:bg-opacity-80 dark:hover:bg-opacity-90 transition-all duration-300"
