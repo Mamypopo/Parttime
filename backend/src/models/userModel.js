@@ -106,8 +106,6 @@ export const getUserJobHistory = (userId, limit = 10, offset = 0) =>
     prisma.jobParticipation.findMany({
         where: {
             user_id: parseInt(userId),
-            // เงื่อนไขให้ดึงเฉพาะงานที่เสร็จสิ้นแล้ว
-            status: 'approved',
             workHistories: {
                 some: {} // มีประวัติการทำงาน
             }
@@ -150,7 +148,7 @@ export const getUserJobHistory = (userId, limit = 10, offset = 0) =>
                     punctuality_score: true,
                     total_score: true,
                     comment: true,
-                    is_rejected: true,
+                    is_passed_evaluation: true,
                     created_at: true
                 },
                 orderBy: {
@@ -170,7 +168,6 @@ export const getTotalJobHistoryCount = (userId) =>
     prisma.jobParticipation.count({
         where: {
             user_id: parseInt(userId),
-            status: 'approved',
             workHistories: {
                 some: {} // มีประวัติการทำงาน
             }

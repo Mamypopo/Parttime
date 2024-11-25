@@ -6,15 +6,22 @@ import * as notificationModel from '../models/notificationModel.js';
 // ฟังก์ชันอัพเดทสถานะงานอัตโนมัติ
 export const updateJobStatuses = async () => {
     try {
+
         console.log('=== Job Status Update Started ===');
         console.log(`Time: ${new Date().toLocaleString()}`);
 
         const jobs = await jobModel.getAllJobsForStatusUpdate();
         console.log(`Found ${jobs.length} jobs to check`);
 
+
         let updatedCount = 0;
 
         for (const job of jobs) {
+            if (job.status === 'completed') {
+                continue; // ข้ามงานนี้ไป
+            }
+            console.log(`Processing job ID: ${job.id}`);
+
             const workDate = new Date(job.work_date);
             workDate.setHours(0, 0, 0, 0); // รีเซ็ตเวลาเป็น 00:00:00
 

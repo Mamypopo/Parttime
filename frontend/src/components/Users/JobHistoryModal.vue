@@ -99,22 +99,25 @@
                           <div
                             :class="{
                               'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400':
-                                !job.workHistories?.[0]?.is_rejected,
+                                job.workHistories?.[0]?.is_passed_evaluation,
                               'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400':
-                                job.workHistories?.[0]?.is_rejected
+                                !job.workHistories?.[0]?.is_passed_evaluation
                             }"
                             class="px-3 py-1 rounded-full text-sm font-medium"
                           >
                             {{
-                              job.workHistories?.[0]?.is_rejected
-                                ? 'ไม่ผ่านการประเมิน'
-                                : 'ผ่านการประเมิน'
+                              job.workHistories?.[0]?.is_passed_evaluation
+                                ? 'ผ่านการประเมิน'
+                                : 'ไม่ผ่านการประเมิน'
                             }}
                           </div>
                         </div>
 
                         <!-- คะแนนการประเมิน -->
-                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                        <div
+                          v-if="job.workHistories?.[0]?.is_passed_evaluation"
+                          class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4"
+                        >
                           <div
                             v-for="(score, index) in scoreItems"
                             :key="index"
@@ -271,7 +274,7 @@ export default {
     },
     getScoreColor(job) {
       if (!job.workHistories?.[0]) return 'gray'
-      return job.workHistories[0].is_rejected ? 'red' : 'green'
+      return job.workHistories[0].is_passed_evaluation ? 'green' : 'red'
     },
     getStatusClass(status) {
       switch (status) {
@@ -299,7 +302,10 @@ export default {
       return 'bg-red-500 dark:bg-red-400'
     },
     getTotalScore(job) {
+      // ถ้าไม่มีประวัติการทำงาน หรือไม่ผ่านการประเมิน ให้คะแนน 0
       if (!job.workHistories?.[0]) return 0
+      if (!job.workHistories[0].is_passed_evaluation) return 0
+
       const scores = [
         'appearance_score',
         'quality_score',
@@ -312,6 +318,7 @@ export default {
         return sum + score
       }, 0)
     },
+
     getTotalScoreClass(job) {
       const total = this.getTotalScore(job)
       if (total >= 8) return 'text-green-600 dark:text-green-400'
@@ -320,7 +327,9 @@ export default {
     },
     getOverallScore() {
       if (!this.jobs?.length) return 0
+      // รวมคะแนนทั้งหมด รวมถึงงานที่ไม่ผ่านการประเมิน (จะได้ 0 คะแนน)
       const totalScores = this.jobs.reduce((sum, job) => {
+        // หารด้วยจำนวนงานทั้งหมด ไม่ว่าจะผ่านหรือไม่ผ่าน
         return sum + this.getTotalScore(job)
       }, 0)
       return (totalScores / this.jobs.length).toFixed(1)

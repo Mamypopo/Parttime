@@ -4,7 +4,6 @@ import { authMiddleware, checkAdminRole } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
-// GET /api/admin/dashboard/stats
 router.get('/stats', authMiddleware, checkAdminRole, getDashboardStats)
 
 

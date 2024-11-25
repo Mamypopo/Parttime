@@ -145,10 +145,22 @@
                 </div>
               </td>
               <td class="px-6 py-4">
-                <span class="font-medium text-purple-600 dark:text-purple-400">
-                  {{ jobStore.calculateTotalWage(job) }}
-                  <span class="text-gray-500 dark:text-gray-400">บาท</span>
-                </span>
+                <div class="space-y-1">
+                  <!-- ประมาณการค่าใช้จ่าย -->
+                  <div class="text-sm text-gray-500 dark:text-gray-400">
+                    ประมาณการ:
+                    <span class="font-medium text-gray-600 dark:text-gray-300">
+                      {{ jobStore.calculateEstimatedCost(job) }} บาท
+                    </span>
+                  </div>
+                  <!-- ค่าจ้างจริง -->
+                  <div class="text-sm">
+                    จ่ายจริง:
+                    <span class="font-medium text-purple-600 dark:text-purple-400">
+                      {{ jobStore.calculateTotalWage(job) }} บาท
+                    </span>
+                  </div>
+                </div>
               </td>
               <td class="px-6 py-4 text-center">
                 <span
@@ -235,10 +247,20 @@
 
           <div class="flex items-start gap-2">
             <i class="fas fa-money-bill w-5 text-gray-400"></i>
-            <span class="font-medium text-purple-600 dark:text-purple-400">
-              {{ jobStore.calculateTotalWage(job) }}
-              <span class="text-gray-500 dark:text-gray-400">บาท</span>
-            </span>
+            <div class="space-y-1">
+              <div class="text-sm text-gray-500 dark:text-gray-400">
+                ประมาณการ:
+                <span class="font-medium text-gray-600 dark:text-gray-300">
+                  {{ jobStore.calculateEstimatedCost(job) }} บาท
+                </span>
+              </div>
+              <div class="text-sm">
+                จ่ายจริง:
+                <span class="font-medium text-purple-600 dark:text-purple-400">
+                  {{ jobStore.calculateTotalWage(job) }} บาท
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -375,6 +397,17 @@ export default {
     },
     totalPages() {
       return this.jobStore.totalPages
+    },
+    calculateEstimatedCost() {
+      return (job) => {
+        return this.jobStore.calculateEstimatedCost(job)
+      }
+    },
+
+    calculateTotalWage() {
+      return (job) => {
+        return this.jobStore.calculateTotalWage(job)
+      }
     }
   },
   async created() {
@@ -407,15 +440,15 @@ export default {
     // Pagination
     handlePrevPage() {
       if (this.currentPage > 1) {
-        this.jobStore.setPage(this.currentPage - 1) // ถูก
-        this.jobStore.fetchJobs() // ถูก
+        this.jobStore.setPage(this.currentPage - 1)
+        this.jobStore.fetchJobs()
       }
     },
 
     handleNextPage() {
       if (this.currentPage < this.totalPages) {
-        this.jobStore.setPage(this.currentPage + 1) // ถูก
-        this.jobStore.fetchJobs() // ถูก
+        this.jobStore.setPage(this.currentPage + 1)
+        this.jobStore.fetchJobs()
       }
     },
     // ใช้ utility functions จาก store
@@ -425,9 +458,7 @@ export default {
     formatTime(time) {
       return this.jobStore.formatTime(time)
     },
-    calculateTotalWage(job) {
-      return this.jobStore.calculateTotalWage(job)
-    },
+
     // Modal handlers
     openModal(job) {
       this.selectedJob = job

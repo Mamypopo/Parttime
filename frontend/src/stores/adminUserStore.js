@@ -173,24 +173,6 @@ export const useAdminUserStore = defineStore('adminUser', {
         },
 
 
-        // ฟังก์ชันสำหรับ reject จากการประเมินงาน
-        async rejectUserFromWorkEvaluation(jobParticipationId, comment) {
-            try {
-                const response = await axios.put(
-                    // แก้ path ให้ตรงกับ backend
-                    `${this.baseURL}/api/admin/jobs/work-history/${jobParticipationId}`,
-                    {
-                        isRejected: true,
-                        comment: comment || 'ไม่ผ่านการประเมิน'
-                    }
-                );
-                return response.data;
-            } catch (error) {
-                console.error('Error rejecting user:', error);
-                throw error;
-            }
-        },
-
         async fetchRejectedUsers() {
             this.loading = true
             try {

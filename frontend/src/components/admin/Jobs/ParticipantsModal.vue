@@ -211,35 +211,30 @@
                             </div>
                           </div>
 
-                          <!-- Status Badge -->
-                          <div class="mb-4">
-                            <span
-                              class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
-                              :class="getStatusClass(participant.status)"
-                            >
-                              <i class="fas fa-circle text-[0.5rem] mr-1.5"></i>
-                              {{ getStatusText(participant.status) }}
-                            </span>
-                          </div>
-
                           <!-- Rating Display -->
                           <div v-if="participant.workHistories?.length" class="mb-2">
                             <!-- เพิ่มส่วนแสดงสถานะ -->
                             <div class="mb-3">
                               <span
+                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium mr-4"
+                                :class="getStatusClass(participant.status)"
+                              >
+                                <i class="fas fa-circle text-[0.5rem] mr-1.5"></i>
+                                {{ getStatusText(participant.status) }}
+                              </span>
+                              <span
                                 class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
-                                :class="{
-                                  'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400':
-                                    !participant.workHistories[0].is_rejected,
-                                  'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400':
-                                    participant.workHistories[0].is_rejected
-                                }"
+                                :class="
+                                  participant.workHistories[0].is_passed_evaluation
+                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                                    : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                                "
                               >
                                 <i class="fas fa-circle text-[0.5rem] mr-1.5"></i>
                                 {{
-                                  participant.workHistories[0].is_rejected
-                                    ? 'ไม่ผ่านการประเมิน'
-                                    : 'ผ่านการประเมิน'
+                                  participant.workHistories[0].is_passed_evaluation
+                                    ? 'ผ่านการประเมิน'
+                                    : 'ไม่ผ่านการประเมิน'
                                 }}
                               </span>
                             </div>
@@ -281,6 +276,16 @@
                                   </span>
                                   <span class="text-sm text-gray-500 dark:text-gray-400">/ 10</span>
                                 </div>
+                              </div>
+                              <!-- แสดงความคิดเห็นทั้งกรณีผ่านและไม่ผ่าน -->
+                              <div
+                                v-if="participant.workHistories[0].comment"
+                                class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700"
+                              >
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                  <i class="fas fa-comment-alt mr-2"></i>
+                                  {{ participant.workHistories[0].comment }}
+                                </p>
                               </div>
                             </div>
                           </div>
@@ -339,13 +344,14 @@
     </Dialog>
   </TransitionRoot>
 
-  <!-- JobHistoryModal -->
-  <JobHistoryModal
-    v-if="showHistoryModal"
-    :show="showHistoryModal"
-    :user="selectedUser"
-    @close="closeHistoryModal"
-  />
+  <div>
+    <JobHistoryModal
+      v-if="showHistoryModal"
+      :show="showHistoryModal"
+      :user="selectedUser"
+      @close="closeHistoryModal"
+    />
+  </div>
 </template>
 
 <script>
@@ -501,7 +507,7 @@ export default {
               JobPositions: this.job.JobPositions.map((position) => ({
                 ...position,
                 JobParticipation: position.JobParticipation.map((p) =>
-                  p.id === participationId ? { ...p, status: 'rejected' } : p
+                  p.id === participationId ? { ...p, status: 'approved' } : p
                 )
               }))
             })
@@ -579,7 +585,9 @@ export default {
         {
           pending: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300',
           approved: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
-          rejected: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+          rejected: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300',
+          completed: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
+          in_progress: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300'
         }[status] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
       )
     },
@@ -589,8 +597,10 @@ export default {
         {
           pending: 'รอดำเนินการ',
           approved: 'อนุมัติแล้ว',
-          rejected: 'ไม่ผ่านการอนุมัติ'
-        }[status] || status
+          rejected: 'ไม่ผ่านการอนุมัติ',
+          completed: 'เสร็จสิ้น',
+          in_progress: 'กำลังดำเนินการ'
+        }[status] || 'ไม่ระบุสถานะ'
       )
     },
 
@@ -603,14 +613,12 @@ export default {
         }[status] || ''
       )
     },
+
     getScoreClass(score) {
-      const numScore = Number(score)
-      if (!numScore) return 'text-gray-400 dark:text-gray-500'
-      return numScore === 2
-        ? 'text-green-600 dark:text-green-400'
-        : numScore === 1
-          ? 'text-yellow-600 dark:text-yellow-400'
-          : 'text-red-600 dark:text-red-400'
+      score = Number(score) || 0
+      if (score === 2) return 'text-green-600 dark:text-green-400'
+      if (score === 1) return 'text-yellow-600 dark:text-yellow-400'
+      return 'text-red-600 dark:text-red-400'
     },
 
     getTotalScore(workHistory) {

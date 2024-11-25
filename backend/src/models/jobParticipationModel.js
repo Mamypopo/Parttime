@@ -3,26 +3,47 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // ฟังก์ชันเพื่อค้นหา Job Participation ตาม ID
-export const findJobParticipationById = (jobParticipationId) =>
-    prisma.jobParticipation.findUnique({
-        where: { id: jobParticipationId },
+export const findJobParticipationById = async (jobParticipationId) => {
+
+    const id = parseInt(jobParticipationId);
+
+    if (isNaN(id)) {
+        throw new Error('Invalid job participation ID');
+    }
+
+    return prisma.jobParticipation.findUnique({
+        where: {
+            id: id
+        },
         include: {
-            jobPosition: true,
+            jobPosition: {
+                include: {
+                    job: true
+                }
+            },
             user: true
         }
     });
+};
 
-// อัพเดทสถานะ JobParticipation เป็น approved
+// อัพเดทสถานะ JobParticipation
 export const updateJobParticipationStatus = async (jobParticipationId, status) => {
+    const id = parseInt(jobParticipationId);
+
+    if (isNaN(id)) {
+        throw new Error('Invalid job participation ID');
+    }
+
     try {
         return await prisma.jobParticipation.update({
-            where: { id: jobParticipationId },
+            where: { id: id },
             data: { status }
         });
     } catch (error) {
-        throw new Error('ไม่สามารถอัพเดทสถานะได้');
+        throw new Error(`ไม่สามารถอัพเดทสถานะได้: ${error.message}`);
     }
 };
+
 
 // ดึงข้อมูลผู้สมัครรายบุคคล
 export const getParticipationById = async (participationId) => {
@@ -84,7 +105,7 @@ export const getJobsWithParticipants = async (adminId) => {
                                         punctuality_score: true,
                                         total_score: true,
                                         comment: true,
-                                        is_rejected: true,
+                                        is_passed_evaluation: true,
                                         created_at: true
                                     },
                                     orderBy: {

@@ -413,7 +413,7 @@ export const findRejectedUsers = (limit = 10, offset = 0, searchParams = {}) => 
                     workHistories: {
                         select: {
                             id: true,
-                            is_rejected: true,
+                            is_passed_evaluation: true,
                             appearance_score: true,
                             quality_score: true,
                             quantity_score: true,

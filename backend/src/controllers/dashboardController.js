@@ -1,13 +1,59 @@
 import * as DashboardModel from '../models/dashboardModel.js'
 
 
+async function calculateExpenses() {
+    const now = new Date()
+    const startOfDay = new Date(now.setHours(0, 0, 0, 0))
+    const startOfWeek = new Date(now)
+    startOfWeek.setDate(now.getDate() - now.getDay()) // ย้อนไปวันอาทิตย์
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 
+    // ดึงข้อมูลตำแหน่งงานพร้อม JobParticipation
+    const [dailyJobs, weeklyJobs, monthlyJobs] = await Promise.all([
+        DashboardModel.getExpensesByDateRange(startOfDay, now),
+        DashboardModel.getExpensesByDateRange(startOfWeek, now),
+        DashboardModel.getExpensesByDateRange(startOfMonth, now)
+    ])
+    console.log('Monthly jobs:', monthlyJobs)
+    return {
+        daily: calculateTotalExpenses(dailyJobs),
+        weekly: calculateTotalExpenses(weeklyJobs),
+        monthly: calculateTotalExpenses(monthlyJobs)
+    }
+}
+
+function calculateTotalExpenses(positions) {
+    return positions.reduce((total, position) => {
+        const wage = Number(position.wage) || 0
+        // นับเฉพาะผู้สมัครที่ได้รับการอนุมัติหรือทำงานเสร็จแล้ว
+        const approvedParticipants = position.JobParticipation.filter(p => {
+            const isApprovedStatus = p.status === 'approved' || p.status === 'completed'
+            // เช็คว่ามีประวัติการทำงานหรือไม่
+            const hasWorkHistory = p.workHistories && p.workHistories.length > 0
+            return isApprovedStatus && hasWorkHistory
+        }).length
+
+        const expense = wage * approvedParticipants
+        console.log(`
+            Position: ${position.id}
+            Wage: ${wage}
+            Approved Participants: ${approvedParticipants}
+            Expense: ${expense}
+            Job Status: ${position.job?.status}
+            Work Date: ${position.job?.work_date}
+        `)
+
+        return total + expense
+    }, 0)
+}
 export const getDashboardStats = async (req, res) => {
     try {
         // ดึงข้อมูลพื้นฐาน
-        const totalUsers = await DashboardModel.getTotalUsers()
-        const jobs = await DashboardModel.getAllJobs()
-
+        const [totalUsers, jobs, expenses] = await Promise.all([
+            DashboardModel.getTotalUsers(),
+            DashboardModel.getAllJobs(),
+            calculateExpenses()
+        ])
         // คำนวณสถิติงาน
         const jobStats = {
             total: jobs.length,
@@ -23,11 +69,7 @@ export const getDashboardStats = async (req, res) => {
 
         // ดึงข้อมูลการเงินและการสมัคร
         const positions = await DashboardModel.getCurrentMonthExpenses(startOfMonth)
-        const totalExpenses = positions.reduce((sum, position) => {
-            const wage = Number(position.wage) || 0
-            const approvedCount = position.JobParticipation?.length || 0
-            return sum + (wage * approvedCount)
-        }, 0)
+
 
 
         const applications = await DashboardModel.getMonthlyApplicationsWithStatus(startOfMonth)
@@ -123,10 +165,11 @@ export const getDashboardStats = async (req, res) => {
             stats: {
                 totalUsers,
                 totalJobs: jobStats.total,
+                jobs: jobStats,
                 openJobs: jobStats.open,
                 inProgressJobs: jobStats.inProgress,
                 completedJobs: jobStats.completed,
-                totalExpenses,
+                expenses,
                 monthlyApplications: monthlyApplications.total,
                 monthlyApplicationsDetails: {
                     approved: monthlyApplications.approved,

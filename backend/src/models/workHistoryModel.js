@@ -12,17 +12,25 @@ export const createWorkHistory = async (data) => {
                 }
             },
             comment: data.comment,
-            is_rejected: data.is_rejected
+            is_passed_evaluation: data.is_passed_evaluation // ใช้ค่าที่ส่งมาจาก data โดยตรง
         };
 
-        // เพิ่มคะแนนเฉพาะเมื่อไม่ใช่การ reject
-        if (!data.is_rejected) {
+        // เพิ่มคะแนนเฉพาะเมื่อผ่านการประเมิน
+        if (data.is_passed_evaluation === true) {
             workHistoryData.appearance_score = data.appearance_score;
             workHistoryData.quality_score = data.quality_score;
             workHistoryData.quantity_score = data.quantity_score;
             workHistoryData.manner_score = data.manner_score;
             workHistoryData.punctuality_score = data.punctuality_score;
             workHistoryData.total_score = data.total_score;
+        } else {
+            // ถ้าไม่ผ่านการประเมิน ให้เซ็ตคะแนนเป็น null ทั้งหมด
+            workHistoryData.appearance_score = null;
+            workHistoryData.quality_score = null;
+            workHistoryData.quantity_score = null;
+            workHistoryData.manner_score = null;
+            workHistoryData.punctuality_score = null;
+            workHistoryData.total_score = null;
         }
 
         return await prisma.workHistory.create({
@@ -105,13 +113,6 @@ export const findByJobParticipationId = async (jobParticipationId) => {
 
 // ฟังชั่นดึง Top Users ใหม่ โดยใช้ total_score
 export const getTopUsersWithRatings = async () => {
-    // หาคะแนนเฉลี่ยรวมทั้งหมด
-    const averageScore = await prisma.workHistory.aggregate({
-        _avg: {
-            total_score: true
-        }
-    });
-
     // ดึงข้อมูลผู้ใช้พร้อมคะแนนและจำนวนงาน
     const users = await prisma.user.findMany({
         select: {
@@ -136,21 +137,19 @@ export const getTopUsersWithRatings = async () => {
         }
     });
 
-
     // คำนวณคะแนนเฉลี่ยของแต่ละคนและจำนวนงาน
     const topUsers = users
         .map(user => {
-            // กรองเฉพาะงานที่มีการประเมินและไม่ถูก reject
-            const workHistories = user.JobParticipation
+            // กรองเฉพาะงานที่มีการประเมิน
+            const passedEvaluationJobs = user.JobParticipation
                 .flatMap(jp => jp.workHistories)
                 .filter(wh =>
                     wh !== null &&
-                    wh.total_score !== null &&
-                    !wh.is_rejected // เพิ่มเงื่อนไขนี้
+                    wh.total_score !== null
                 );
 
             // ถ้าไม่มีงานที่ผ่านการประเมิน ให้คะแนนเป็น 0
-            if (workHistories.length === 0) {
+            if (passedEvaluationJobs.length === 0) {
                 return {
                     id: user.id,
                     name: `${user.first_name} ${user.last_name}`,
@@ -163,16 +162,16 @@ export const getTopUsersWithRatings = async () => {
                         punctuality: 0,
                         total: 0
                     },
-                    jobCount: 0
+                    jobCount: user.JobParticipation.length // นับจำนวนงานทั้งหมด
                 };
             }
 
             // คำนวณคะแนนเฉลี่ยแต่ละประเภท
             const calculateAverage = (field) => {
-                const scores = workHistories
+                const scores = passedEvaluationJobs
                     .map(wh => wh[field])
                     .filter(score => score != null);
-                return scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+                return scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / user.JobParticipation.length : 0;
             };
 
             return {
@@ -187,14 +186,19 @@ export const getTopUsersWithRatings = async () => {
                     punctuality: calculateAverage('punctuality_score'),
                     total: calculateAverage('total_score')
                 },
-                jobCount: workHistories.length // นับเฉพาะงานที่ผ่านการประเมิน
+                jobCount: user.JobParticipation.length // นับจำนวนงานทั้งหมด
             };
         })
-        .filter(user => user.jobCount > 0) // กรองเฉพาะคนที่มีงานที่ผ่านการประเมิน
+        .filter(user => user.jobCount > 0)
         .sort((a, b) => b.averageScores.total - a.averageScores.total)
         .slice(0, 10);
+
+    // คำนวณคะแนนเฉลี่ยรวมจากคะแนนที่คำนวณใหม่
+    const totalScores = topUsers.reduce((sum, user) => sum + user.averageScores.total, 0);
+    const averageScore = topUsers.length > 0 ? totalScores / topUsers.length : 0;
+
     return {
-        averageScore: averageScore._avg.total_score || 0,
-        topUsers: topUsers
+        averageScore,
+        topUsers
     };
 };

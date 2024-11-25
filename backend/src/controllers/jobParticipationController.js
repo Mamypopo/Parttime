@@ -116,7 +116,7 @@ export const approveJobParticipation = async (req, res) => {
 
 // ฟังก์ชันให้คะแนนการทำงาน
 export const updateWorkHistory = async (req, res) => {
-    const { comment, ratings, isRejected } = req.body;
+    const { comment, ratings, isPassedEvaluation } = req.body;
     const jobParticipationId = parseInt(req.params.jobParticipationId);
     const adminId = req.user?.role === 'admin' ? req.user.id : null;
 
@@ -125,6 +125,8 @@ export const updateWorkHistory = async (req, res) => {
     }
 
     try {
+
+
         // ตรวจสอบว่ามี jobParticipation อยู่จริง
         const currentJobParticipation = await jobParticipationModel.findJobParticipationById(jobParticipationId);
         if (!currentJobParticipation) {
@@ -148,11 +150,11 @@ export const updateWorkHistory = async (req, res) => {
         let workHistoryData = {
             jobParticipationId,
             comment: comment || null,
-            is_rejected: isRejected || false
+            is_passed_evaluation: isPassedEvaluation
         };
 
-        // ถ้าไม่ใช่การ reject ให้ตรวจสอบและเพิ่มคะแนน
-        if (!isRejected) {
+        // ถ้าผ่านการประเมิน ต้องมีคะแนน
+        if (isPassedEvaluation) {
             if (!ratings) {
                 return res.status(400).json({ message: 'กรุณาระบุคะแนนการประเมิน' });
             }
@@ -183,22 +185,25 @@ export const updateWorkHistory = async (req, res) => {
             };
         }
 
+
         // สร้าง WorkHistory
         const workHistory = await workHistoryModel.createWorkHistory(workHistoryData);
 
-        // ถ้าเป็นการ reject ให้อัพเดทสถานะ user
-        if (isRejected && currentJobParticipation.user) {
+        // อัพเดทสถานะ JobParticipation เป็น completed เสมอ
+        await jobParticipationModel.updateJobParticipationStatus(jobParticipationId, 'completed');
+
+        // ถ้าไม่ผ่านการประเมิน ให้อัพเดทสถานะ user
+        if (!isPassedEvaluation && currentJobParticipation.user) {
             try {
-                await adminModel.rejectUserFromWorkEvaluation(
-                    currentJobParticipation.user.id
-                );
+                await adminModel.rejectUserFromWorkEvaluation(currentJobParticipation.user.id);
             } catch (error) {
-                console.error('Error in reject process:', error);
+                console.error('Error updating user status:', error);
             }
         }
 
+
         // สร้างการแจ้งเตือน
-        const notificationMessage = isRejected
+        const notificationMessage = !isPassedEvaluation
             ? `คุณไม่ผ่านการประเมินงาน "${jobTitle}" ตำแหน่ง "${positionName}" และไม่สามารถใช้งานระบบได้ชั่วคราว`
             : `งาน "${jobTitle}" ตำแหน่ง "${positionName}" ได้รับการประเมินแล้ว คุณได้ ${workHistoryData.total_score || 0}/10 คะแนน`;
 
@@ -206,7 +211,7 @@ export const updateWorkHistory = async (req, res) => {
             await notificationModel.createUserNotification(
                 currentJobParticipation.user.id,
                 notificationMessage,
-                isRejected ? 'WORK_EVALUATION_REJECTED' : 'WORK_EVALUATION_COMPLETED'
+                !isPassedEvaluation ? 'WORK_EVALUATION_REJECTED' : 'WORK_EVALUATION_COMPLETED'
             );
         }
 
@@ -215,17 +220,17 @@ export const updateWorkHistory = async (req, res) => {
             await createLog(
                 currentJobParticipation.user.id,
                 adminId,
-                isRejected ? 'Work Evaluation Rejected' : 'Work Evaluation Completed',
+                !isPassedEvaluation ? 'Work Evaluation Rejected' : 'Work Evaluation Completed',
                 req.originalUrl,                    // requestUrl
                 req.method,                         // method
-                `User ${currentJobParticipation.user.email || 'Unknown'} was ${isRejected ? 'rejected' : 'evaluated'} for job: ${jobTitle} (${positionName})${!isRejected ? `. Score: ${workHistoryData.total_score}/10` : ''}`, // details
+                `User ${currentJobParticipation.user.email || 'Unknown'} was ${isPassedEvaluation ? 'rejected' : 'evaluated'} for job: ${jobTitle} (${positionName})${!isPassedEvaluation ? `. Score: ${workHistoryData.total_score}/10` : ''}`, // details
                 req.ip || 'Unknown IP',             // ip
                 req.headers['user-agent'] || 'Unknown User Agent' // userAgent
             );
         }
 
         res.status(200).json({
-            message: isRejected ? 'บันทึกการไม่ผ่านงานเรียบร้อยแล้ว' : 'บันทึกการประเมินเรียบร้อยแล้ว',
+            message: !isPassedEvaluation ? 'บันทึกการไม่ผ่านงานเรียบร้อยแล้ว' : 'บันทึกการประเมินเรียบร้อยแล้ว',
             data: {
                 ...workHistory,
                 jobTitle,

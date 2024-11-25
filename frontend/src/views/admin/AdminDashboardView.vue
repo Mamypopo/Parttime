@@ -109,16 +109,16 @@ export default {
       return this.dashboardStore.stats.totalUsers
     },
     totalJobs() {
-      return this.dashboardStore.stats.totalJobs
+      return this.dashboardStore.stats.jobs?.total || 0 // เพิ่ม jobs object
     },
     openJobs() {
-      return this.dashboardStore.stats.openJobs
+      return this.dashboardStore.stats.jobs?.open || 0
     },
     inProgressJobs() {
-      return this.dashboardStore.stats.inProgressJobs
+      return this.dashboardStore.stats.jobs?.inProgress || 0
     },
     completedJobs() {
-      return this.dashboardStore.stats.completedJobs
+      return this.dashboardStore.stats.jobs?.completed || 0
     },
 
     monthlyApplications() {

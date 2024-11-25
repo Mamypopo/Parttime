@@ -31,7 +31,7 @@
       class="space-y-3 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700/50 relative"
     >
       <div
-        v-for="(stat, index) in subStats"
+        v-for="(stat, index) in formattedSubStats"
         :key="index"
         class="flex items-center justify-between text-sm"
       >
@@ -80,6 +80,12 @@ export default {
     }
   },
   computed: {
+    mainValue() {
+      return this.value
+    },
+    formattedSubStats() {
+      return this.subStats
+    },
     getBackgroundClass() {
       const classes = {
         blue: 'bg-blue-100 dark:bg-blue-500/20',

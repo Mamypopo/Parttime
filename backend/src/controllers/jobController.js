@@ -364,16 +364,31 @@ export const applyForJob = async (req, res) => {
         if (!job) {
             return res.status(404).json({ message: 'ไม่พบงานที่ระบุ' });
         }
+
         // เพิ่มการเช็คสถานะงาน
         if (job.status === 'completed') {
             return res.status(400).json({
                 message: 'ไม่สามารถสมัครงานนี้ได้ เนื่องจากงานสำเร็จแล้ว'
             });
         }
+
+        // เช็ควันที่ทำงาน
+        const workDate = new Date(job.work_date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        workDate.setHours(0, 0, 0, 0);
+
+        if (workDate < today) {
+            return res.status(400).json({
+                message: 'ไม่สามารถสมัครงานที่ผ่านไปแล้วได้'
+            });
+        }
+
         const jobPosition = await jobModel.findJobPositionById(jobPositionId);
         if (!jobPosition) {
             return res.status(404).json({ message: 'ตำแหน่งงานไม่ถูกต้อง' });
         }
+
         // เพิ่มการตรวจสอบ skills
         const hasMatchingSkills = await jobModel.checkUserSkillsMatch(userId, jobPositionId);
         if (!hasMatchingSkills) {
@@ -382,6 +397,7 @@ export const applyForJob = async (req, res) => {
                 position: jobPosition.position_name
             });
         }
+
         if (jobPosition.required_people <= 0) {
             return res.status(400).json({ message: 'จำนวนผู้เข้าร่วมงานเต็มแล้ว' });
         }
@@ -400,9 +416,7 @@ export const applyForJob = async (req, res) => {
             });
         }
 
-        if (!user.email_verified || !user.approved) {
-            return res.status(400).json({ message: 'กรุณายืนยันอีเมลและรอการอนุมัติจากแอดมิน' });
-        }
+
 
         // สร้างการสมัครงานใหม่ในตำแหน่งที่เลือก
         const jobParticipation = await jobModel.createJobParticipation(userId, jobId, jobPositionId);

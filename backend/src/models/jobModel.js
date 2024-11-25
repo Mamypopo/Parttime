@@ -112,15 +112,23 @@ export const getAllJobs = async (page = 1, pageSize = 20, filters = {}) => {
                 }
             },
             JobPositions: {
-                select: {
-                    id: true,
-                    position_name: true,
-                    wage: true,
-                    details: true,
-                    required_people: true,
-                    status: true
+                include: {
+                    JobParticipation: {
+                        select: {
+                            id: true,
+                            status: true,
+                            created_at: true,
+                            workHistories: {
+                                select: {
+                                    id: true,
+                                    total_score: true,
+                                    is_passed_evaluation: true
+                                }
+                            }
+                        }
+                    }
                 }
-            }
+            },
         },
         orderBy: [
             { created_at: 'desc' },
@@ -258,7 +266,7 @@ export const getJobById = (jobId) =>
                             total_score: true,
                             comment: true,
                             created_at: true,
-                            is_rejected: true
+                            is_passed_evaluation: true
                         }
                     },
                     status: true,

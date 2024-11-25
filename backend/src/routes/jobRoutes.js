@@ -29,7 +29,7 @@ router.get('/getJobsWithParticipants', checkAdminRole, jobParticipationControlle
 router.put('/:id/approved-rejected', checkAdminRole, jobParticipationController.approveJobParticipation);
 
 // ให้คะแนนหลังจบงาน
-router.post('/participation/:jobParticipationId/evaluate', checkAdminRole, jobParticipationController.updateWorkHistory);
+router.put('/participation/:jobParticipationId/evaluate', checkAdminRole, jobParticipationController.updateWorkHistory);
 
 router.put(
     '/work-history/:jobParticipationId', checkAdminRole,

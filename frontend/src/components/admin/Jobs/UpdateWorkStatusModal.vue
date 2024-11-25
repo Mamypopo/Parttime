@@ -350,6 +350,27 @@ export default {
     async submitEvaluation() {
       if (!this.isFormValid(this.selectedParticipant.id)) return
 
+      // ยืนยันก่อนดำเนินการ
+      const confirmResult = await Swal.fire({
+        title: 'ยืนยันการบันทึกการประเมิน',
+        html: `
+      <div class="text-left">
+        <p class="text-gray-700">คุณต้องการบันทึกการประเมินสำหรับ</p>
+        <b>${this.selectedParticipant.user.first_name} ${this.selectedParticipant.user.last_name}</b>
+        <p class="text-sm text-gray-500 mt-2">โปรดตรวจสอบข้อมูลก่อนยืนยัน</p>
+      </div>
+    `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'ยืนยัน',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#4CAF50',
+        cancelButtonColor: '#F44336',
+        reverseButtons: true
+      })
+
+      if (!confirmResult.isConfirmed) return // ยกเลิกถ้าผู้ใช้ไม่ยืนยัน
+
       try {
         const ratings = {
           appearance: parseInt(this.ratings[this.selectedParticipant.id].appearance),
@@ -363,7 +384,7 @@ export default {
           participationId: this.selectedParticipant.id,
           ratings,
           comment: this.comments[this.selectedParticipant.id],
-          isRejected: false
+          isPassedEvaluation: true
         })
 
         Swal.fire({
@@ -405,10 +426,11 @@ export default {
 
       if (result.isConfirmed) {
         try {
-          await this.adminStore.rejectUserFromWorkEvaluation(
-            this.selectedParticipant.id,
-            result.value // ส่งเฉพาะ comment
-          )
+          await this.jobStore.updateWorkEvaluation({
+            participationId: this.selectedParticipant.id,
+            comment: result.value,
+            isPassedEvaluation: false
+          })
 
           Swal.fire({
             icon: 'success',

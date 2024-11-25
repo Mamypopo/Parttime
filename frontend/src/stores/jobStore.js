@@ -269,19 +269,24 @@ export const useJobStore = defineStore('job', {
         },
 
 
-        async updateWorkEvaluation({ participationId, ratings, totalScore, comment, isRejected }) {
+        async updateWorkEvaluation({ participationId, ratings, totalScore, comment, isPassedEvaluation }) {
             try {
                 const headers = this.getAuthHeaders()
-                const response = await axios.post(
+
+
+                const response = await axios.put(
                     `${this.baseURL}/api/jobs/participation/${participationId}/evaluate`,
                     {
-                        ratings,
-                        totalScore,
-                        comment,
-                        isRejected
+                        ...(isPassedEvaluation ? {
+                            ratings,
+                            totalScore,
+                        } : {}),
+                        comment: comment || 'ไม่ผ่านการประเมิน',
+                        isPassedEvaluation,
                     },
                     { headers }
-                )
+                );
+
                 return response.data
             } catch (error) {
                 console.error('Error updating work evaluation:', error)
@@ -403,22 +408,80 @@ export const useJobStore = defineStore('job', {
         getProfileImage(image) {
             return image ? `${this.baseURL}/uploads/profiles/${image}` : '/default-avatar.png'
         },
+        calculateEstimatedCost(job) {
+            try {
+                if (!job?.JobPositions) return 0;
+
+                const total = job.JobPositions.reduce((sum, position) => {
+                    const approvedCount = position.JobParticipation?.filter(
+                        p => p.status === 'approved'
+                    ).length || 0;
+                    return sum + (approvedCount * Number(position.wage));
+                }, 0);
+
+                return total;
+            } catch (error) {
+                console.error('Error calculating estimated cost:', error);
+                return 0;
+            }
+        },
+
+        calculateActualCost(job) {
+            try {
+                if (!job?.JobPositions) return 0;
+
+                const total = job.JobPositions.reduce((sum, position) => {
+                    const completedCount = position.JobParticipation?.filter(
+                        p => p.status === 'completed'
+                    ).length || 0;
+                    return sum + (completedCount * Number(position.wage));
+                }, 0);
+
+                return total;
+            } catch (error) {
+                console.error('Error calculating actual cost:', error);
+                return 0;
+            }
+        },
+
+
+        formatNumber(value) {
+            try {
+                // ตรวจสอบว่าเป็นตัวเลขหรือไม่
+                const number = Number(value);
+                if (isNaN(number)) return '0';
+
+                // format เป็นเลขไทย
+                return new Intl.NumberFormat('th-TH').format(number);
+            } catch (error) {
+                console.error('Error formatting number:', error);
+                return '0';
+            }
+        },
 
         calculateTotalWage(job) {
-            if (!job.JobPositions?.length) return 0;
+            try {
+                if (!job?.JobPositions) return '0';
 
-            return job.JobPositions.reduce((sum, position) => {
-                // แปลงค่าจ้างต่อคน
-                const wage = Number(position.wage) || 0;
+                const total = job.JobPositions.reduce((sum, position) => {
+                    // แปลงค่าจ้างต่อคน
+                    const wage = Number(position.wage) || 0;
 
-                // คำนวณจำนวนคนที่ได้รับการอนุมัติ
-                const approvedCount = position.JobParticipation
-                    ? position.JobParticipation.filter(participant => participant.status === 'approved').length
-                    : 0;
+                    // นับทั้งคนที่ approved และ completed
+                    const participantCount = position.JobParticipation
+                        ? position.JobParticipation.filter(p =>
+                            p.status === 'approved' || p.status === 'completed'
+                        ).length
+                        : 0;
 
-                // เพิ่มค่าใช้จ่ายของตำแหน่งนี้เข้าไปในผลรวม
-                return sum + (wage * approvedCount);
-            }, 0).toLocaleString('th-TH');
+                    return sum + (wage * participantCount);
+                }, 0);
+
+                return this.formatNumber(total);
+            } catch (error) {
+                console.error('Error calculating total wage:', error);
+                return '0';
+            }
         },
 
         // Utility functions
@@ -469,6 +532,7 @@ export const useJobStore = defineStore('job', {
                 totalPages: 0
             }
         },
+
         resetPagination() {
             this.pagination = {
                 currentPage: 1,
@@ -476,6 +540,7 @@ export const useJobStore = defineStore('job', {
                 totalItems: 0
             }
         },
+
         updateSearchFilters(filters) {
             this.searchFilters = { ...filters }
         },
@@ -531,14 +596,56 @@ export const useJobStore = defineStore('job', {
                 return count + (position.JobParticipation?.length || 0)
             }, 0) || 0
         },
+        getTotalParticipants(job) {
+            if (!job?.JobPositions) return 0;
 
+            return job.JobPositions.reduce((total, position) => {
+                return total + (position.JobParticipation?.length || 0);
+            }, 0);
+        },
+        getAllParticipants(job) {
+            if (!job?.JobPositions) return [];
+
+            // รวมผู้สมัครจากทุกตำแหน่งและเรียงตามวันที่
+            const allParticipants = job.JobPositions.reduce((participants, position) => {
+                if (position.JobParticipation?.length) {
+                    return [...participants, ...position.JobParticipation];
+                }
+                return participants;
+            }, []);
+
+            // เรียงตามวันที่สมัครล่าสุด
+            return allParticipants.sort((a, b) =>
+                new Date(b.created_at) - new Date(a.created_at)
+            );
+        },
         getCompletedWorkCount(job) {
             return job.JobPositions?.reduce((count, position) => {
                 return count + (position.JobParticipation?.filter(p =>
-                    p.status === 'approved' && p.work_status).length || 0)
-            }, 0) || 0
+                    p.status === 'completed'
+                ).length || 0);
+            }, 0) || 0;
         },
+        getWorkEvaluationCount(job) {
+            // นับจำนวนคนที่ได้รับการประเมินแล้ว (ทั้งผ่านและไม่ผ่าน)
+            const evaluatedCount = job.JobPositions?.reduce((count, position) => {
+                return count + (position.JobParticipation?.filter(p =>
+                    p.workHistories?.length > 0 // มีประวัติการประเมิน
+                ).length || 0);
+            }, 0) || 0;
 
+            // นับจำนวนคนทั้งหมดที่ได้รับอนุมัติ
+            const totalApprovedCount = job.JobPositions?.reduce((count, position) => {
+                return count + (position.JobParticipation?.filter(p =>
+                    p.status === 'approved' || p.status === 'completed' || p.status === 'rej'
+                ).length || 0);
+            }, 0) || 0;
+
+            return {
+                evaluated: evaluatedCount,
+                total: totalApprovedCount
+            };
+        },
         getJobStatus(job) {
             if (!job) return null
 

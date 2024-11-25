@@ -9,11 +9,17 @@ export const useDashboardStore = defineStore('dashboard', {
         // ข้อมูลสถิติต่างๆ
         stats: {
             totalUsers: 0,
-            totalJobs: 0,
-            openJobs: 0,
-            inProgressJobs: 0,
-            completedJobs: 0,
-            totalExpenses: 0,
+            jobs: {           // เปลี่ยนโครงสร้างเป็น jobs object
+                total: 0,
+                open: 0,
+                inProgress: 0,
+                completed: 0
+            },
+            expenses: {
+                daily: 0,
+                weekly: 0,
+                monthly: 0
+            },
             monthlyApplications: 0,
             monthlyApplicationsDetails: {
                 approved: 0,
@@ -21,6 +27,7 @@ export const useDashboardStore = defineStore('dashboard', {
                 pending: 0
             }
         },
+
         // ข้อมูลงานในปฏิทิน
         calendarEvents: [],
         selectedEvent: null,
@@ -43,11 +50,32 @@ export const useDashboardStore = defineStore('dashboard', {
                 ])
 
                 // อัพเดทข้อมูลทั่วไป
-                this.stats = dashboardResponse.data.stats
+                const stats = dashboardResponse.data.stats
+                // ตรวจสอบและแปลงข้อมูลให้ถูกต้อง
+                this.stats = {
+                    totalUsers: Number(stats.totalUsers) || 0,
+                    jobs: {
+                        total: Number(stats.jobs?.total) || 0,
+                        open: Number(stats.jobs?.open) || 0,
+                        inProgress: Number(stats.jobs?.inProgress) || 0,
+                        completed: Number(stats.jobs?.completed) || 0
+                    },
+                    expenses: {
+                        daily: Number(stats.expenses?.daily) || 0,
+                        weekly: Number(stats.expenses?.weekly) || 0,
+                        monthly: Number(stats.expenses?.monthly) || 0
+                    },
+                    monthlyApplications: Number(stats.monthlyApplications) || 0,
+                    monthlyApplicationsDetails: {
+                        approved: Number(stats.monthlyApplicationsDetails?.approved) || 0,
+                        rejected: Number(stats.monthlyApplicationsDetails?.rejected) || 0,
+                        pending: Number(stats.monthlyApplicationsDetails?.pending) || 0
+                    }
+                }
 
-                // อัพเดทข้อมูลปฏิทิน
-                this.calendarEvents = eventsResponse.data.events
+                console.log('Updated stats:', this.stats) // เพิ่ม log เพื่อตรวจสอบ
 
+                this.calendarEvents = eventsResponse.data.events || []
                 this.error = null
             } catch (error) {
                 console.error('Error fetching dashboard data:', error)
@@ -55,17 +83,6 @@ export const useDashboardStore = defineStore('dashboard', {
             } finally {
                 this.loading = false
             }
-        },
-        // ดึงข้อมูลสถิติ
-        async fetchStats() {
-            return await axios.get(`${this.baseURL}/api/dashboard/stats`)
-        },
-
-        // ดึงข้อมูลงานในปฏิทิน
-        async fetchCalendarEvents(month, year) {
-            return await axios.get(`${this.baseURL}/api/dashboard/calendar-events`, {
-                params: { month, year }
-            })
         },
 
         // ดึงรายละเอียดงาน
@@ -85,10 +102,25 @@ export const useDashboardStore = defineStore('dashboard', {
 
             try {
                 const response = await axios.get(`${this.baseURL}/api/work-history/users-ratings`);
-                console.log('API Response:', response.data); // เพิ่ม log ดูข้อมูลที่ได้
                 if (response.data.data) {
+                    // รับค่า averageScore จาก API โดยตรง
                     this.averageRating = response.data.data.averageScore;
-                    this.topUsers = response.data.data.topUsers;
+
+                    // แปลงข้อมูล topUsers ให้ตรงกับโครงสร้างที่ต้องการ
+                    this.topUsers = response.data.data.topUsers.map(user => ({
+                        id: user.id,
+                        name: user.name,
+                        profile_image: user.profile_image,
+                        jobCount: user.jobCount,
+                        averageScores: {
+                            appearance: user.averageScores.appearance,
+                            manner: user.averageScores.manner,
+                            punctuality: user.averageScores.punctuality,
+                            quality: user.averageScores.quality,
+                            quantity: user.averageScores.quantity,
+                            total: user.averageScores.total
+                        }
+                    }));
                 }
                 return true;
             } catch (error) {
@@ -144,6 +176,7 @@ export const useDashboardStore = defineStore('dashboard', {
             if (!position) return 'PENDING'
             return position.status?.toUpperCase() || 'PENDING'
         },
+
         getJobStatus(date) {
             const now = new Date()
             const workDate = new Date(date)
@@ -161,64 +194,9 @@ export const useDashboardStore = defineStore('dashboard', {
                 return 'published'
             }
         },
-        getScoreItems(user) {
-            return [
-                {
-                    title: 'การแต่งกาย',
-                    value: user.appearance_score || 0,
-                    icon: 'fas fa-tshirt'
-                },
-                {
-                    title: 'คุณภาพงาน',
-                    value: user.quality_score || 0,
-                    icon: 'fas fa-star'
-                },
-                {
-                    title: 'ปริมาณงาน',
-                    value: user.quantity_score || 0,
-                    icon: 'fas fa-chart-line'
-                },
-                {
-                    title: 'มารยาท',
-                    value: user.manner_score || 0,
-                    icon: 'fas fa-smile'
-                },
-                {
-                    title: 'การตรงต่อเวลา',
-                    value: user.punctuality_score || 0,
-                    icon: 'fas fa-clock'
-                }
-            ]
-        },
 
-        getScoreClass(score) {
-            if (!score) return 'text-gray-400 dark:text-gray-500'
-            return score === 2
-                ? 'text-green-600 dark:text-green-400'
-                : score === 1
-                    ? 'text-yellow-600 dark:text-yellow-400'
-                    : 'text-red-600 dark:text-red-400'
-        },
 
-        getTotalScoreClass(rating) {
-            if (rating >= 8) return 'text-green-600 dark:text-green-400'
-            if (rating >= 6) return 'text-yellow-600 dark:text-yellow-400'
-            return 'text-red-600 dark:text-red-400'
-        },
 
-        getMedalClass(index) {
-            if (index === 0) return 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/50 dark:text-yellow-400'
-            if (index === 1) return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
-            if (index === 2) return 'bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400'
-            return ''
-        },
-
-        getBorderClass(index) {
-            if (index === 0) return 'border-yellow-400 dark:border-yellow-500'
-            if (index === 1) return 'border-gray-300 dark:border-gray-500'
-            if (index === 2) return 'border-amber-400 dark:border-amber-500'
-            return 'border-transparent'
-        },
         getEventClasses(status) {
             const classes = {
                 completed: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
@@ -237,12 +215,7 @@ export const useDashboardStore = defineStore('dashboard', {
             }
             return colors[status]
         },
-        formatCurrency(value) {
-            return new Intl.NumberFormat('th-TH', {
-                style: 'currency',
-                currency: 'THB'
-            }).format(value)
-        },
+
         getProfileImageUrl(profileImage) {
             if (!profileImage) return '/default-avatar.png'
             return `${this.baseURL}/uploads/profiles/${profileImage}`
@@ -282,35 +255,18 @@ export const useDashboardStore = defineStore('dashboard', {
             })
             return eventMap
         },
-        // แปลงค่าเงินเป็นรูปแบบสกุลเงินบาท
-        formattedTotalExpenses: (state) => {
-            return new Intl.NumberFormat('th-TH', {
+        formattedExpenses: (state) => {
+            const formatter = new Intl.NumberFormat('th-TH', {
                 style: 'currency',
                 currency: 'THB'
-            }).format(state.stats.totalExpenses)
-        },
-
-        // คำนวณเปอร์เซ็นต์งานแต่ละสถานะ
-        jobStatusPercentages: (state) => {
-            const total = state.stats.totalJobs
-            if (total === 0) return { open: 0, inProgress: 0, completed: 0 }
-
+            })
             return {
-                open: Math.round((state.stats.openJobs / total) * 100),
-                inProgress: Math.round((state.stats.inProgressJobs / total) * 100),
-                completed: Math.round((state.stats.completedJobs / total) * 100)
+                daily: formatter.format(state.stats.expenses.daily),
+                weekly: formatter.format(state.stats.expenses.weekly),
+                monthly: formatter.format(state.stats.expenses.monthly)
             }
-        },
+        }
 
-        // จัดรูปแบบคะแนนเฉลี่ย
-        formattedAverageRating: (state) => {
-            return state.averageRating.toFixed(1)
-        },
-
-        // เช็คว่ามีข้อมูลพร้อมแสดงผลหรือยัง
-        isDataReady: (state) => {
-            return !state.loading && !state.error
-        },
 
     }
 })
