@@ -22,21 +22,25 @@ export const updateJobStatuses = async () => {
             }
             console.log(`Processing job ID: ${job.id}`);
 
+            const now = new Date();
             const workDate = new Date(job.work_date);
-            workDate.setHours(0, 0, 0, 0); // รีเซ็ตเวลาเป็น 00:00:00
 
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // รีเซ็ตเวลาเป็น 00:00:00
+            // รีเซ็ตเวลาให้เป็น 00:00:00 เพื่อเปรียบเทียบเฉพาะวัน
+            now.setHours(0, 0, 0, 0);
+            workDate.setHours(0, 0, 0, 0);
 
             let newStatus = job.status;
 
-            // กำหนดสถานะตามวันที่
-            if (workDate.getTime() > today.getTime()) {
-                newStatus = 'published'; // งานที่ยังไม่ถึงวันทำงาน
-            } else if (workDate.getTime() === today.getTime()) {
-                newStatus = 'in_progress';  // งานที่กำลังดำเนินการในวันนี้
+            // กำหนดสถานะตามวันที่:
+            // 1. ถ้าวันทำงานยังมาไม่ถึง = เปิดรับสมัคร (published)
+            // 2. ถ้าเป็นวันเดียวกับวันทำงาน = กำลังดำเนินการ (in_progress)
+            // 3. ถ้าวันทำงานผ่านไปแล้ว = เสร็จสิ้น (completed)
+            if (workDate > now) {
+                newStatus = 'published';
+            } else if (workDate.getTime() === now.getTime()) {
+                newStatus = 'in_progress';
             } else {
-                newStatus = 'completed'; // งานที่ผ่านวันทำงานไปแล้ว
+                newStatus = 'completed';
             }
 
             // อัพเดทเฉพาะงานที่สถานะเปลี่ยน
@@ -49,8 +53,10 @@ export const updateJobStatuses = async () => {
                     New Status: ${newStatus}
                     Work Date: ${job.work_date}
                 `);
-                // อัปเดตสถานะงานและรับข้อมูล job ที่อัปเดตแล้ว
-                const updatedJob = await jobModel.updateJobStatus(job.id, newStatus);
+                // อัพเดทเฉพาะเมื่อสถานะเปลี่ยน
+                if (newStatus !== job.status) {
+                    await jobModel.updateJobStatus(job.id, newStatus);
+                }
 
                 // สร้าง log
                 await createLog(

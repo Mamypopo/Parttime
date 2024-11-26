@@ -2,46 +2,77 @@ import * as DashboardModel from '../models/dashboardModel.js'
 
 
 async function calculateExpenses() {
+    // 1. ดึงวันที่ปัจจุบัน
     const now = new Date()
-    const startOfDay = new Date(now.setHours(0, 0, 0, 0))
-    const startOfWeek = new Date(now)
-    startOfWeek.setDate(now.getDate() - now.getDay()) // ย้อนไปวันอาทิตย์
+    const todayStr = now.toISOString().split('T')[0] // เช่น "2024-11-26"
+
+    // 2. คำนวณวันแรกของเดือน
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 
-    // ดึงข้อมูลตำแหน่งงานพร้อม JobParticipation
-    const [dailyJobs, weeklyJobs, monthlyJobs] = await Promise.all([
-        DashboardModel.getExpensesByDateRange(startOfDay, now),
-        DashboardModel.getExpensesByDateRange(startOfWeek, now),
-        DashboardModel.getExpensesByDateRange(startOfMonth, now)
-    ])
-    console.log('Monthly jobs:', monthlyJobs)
-    return {
-        daily: calculateTotalExpenses(dailyJobs),
-        weekly: calculateTotalExpenses(weeklyJobs),
-        monthly: calculateTotalExpenses(monthlyJobs)
+    // 3. ดึงข้อมูลงานทั้งหมดในเดือนนี้
+    const jobs = await DashboardModel.getExpensesByDateRange(startOfMonth, now)
+
+    // 4. คำนวณค่าใช้จ่าย
+    const expenses = {
+        daily: 0,
+        weekly: 0,
+        monthly: 0
     }
+
+    jobs.forEach(job => {
+        // แปลงวันที่งานเป็น string format เดียวกัน
+        const workDateStr = new Date(job.work_date).toISOString().split('T')[0]
+
+        // คำนวณค่าใช้จ่ายของงาน
+        const jobExpense = job.JobPositions.reduce((total, position) => {
+            const wage = Number(position.wage) || 0
+            const approvedParticipants = position.JobParticipation.filter(p =>
+                p.workHistories?.length > 0
+            ).length
+            return total + (wage * approvedParticipants)
+        }, 0)
+
+
+
+        // ถ้าเป็นงานวันนี้
+        if (workDateStr === todayStr) {
+            expenses.daily += jobExpense
+        }
+
+        // ถ้าเป็นงาน 7 วันย้อนหลัง
+        const workDate = new Date(job.work_date)
+        const daysDiff = Math.floor((now - workDate) / (1000 * 60 * 60 * 24))
+        if (daysDiff < 7) {
+            expenses.weekly += jobExpense
+        }
+
+        // รวมทั้งเดือน
+        expenses.monthly += jobExpense
+    })
+
+    return expenses
 }
+
 
 function calculateTotalExpenses(positions) {
     return positions.reduce((total, position) => {
         const wage = Number(position.wage) || 0
-        // นับเฉพาะผู้สมัครที่ได้รับการอนุมัติหรือทำงานเสร็จแล้ว
+
+
+
+        // นับเฉพาะผู้สมัครที่ได้รับการอนุมัติหรือทำงานเสร็จแล้ว และมีประวัติการทำงาน
         const approvedParticipants = position.JobParticipation.filter(p => {
-            const isApprovedStatus = p.status === 'approved' || p.status === 'completed'
-            // เช็คว่ามีประวัติการทำงานหรือไม่
-            const hasWorkHistory = p.workHistories && p.workHistories.length > 0
+            const isApprovedStatus = ['approved', 'completed'].includes(p.status)
+            const hasWorkHistory = p.workHistories?.length > 0
+
+
+
             return isApprovedStatus && hasWorkHistory
         }).length
 
         const expense = wage * approvedParticipants
-        console.log(`
-            Position: ${position.id}
-            Wage: ${wage}
-            Approved Participants: ${approvedParticipants}
-            Expense: ${expense}
-            Job Status: ${position.job?.status}
-            Work Date: ${position.job?.work_date}
-        `)
+
+
 
         return total + expense
     }, 0)
@@ -49,7 +80,7 @@ function calculateTotalExpenses(positions) {
 export const getDashboardStats = async (req, res) => {
     try {
         // ดึงข้อมูลพื้นฐาน
-        const [totalUsers, jobs, expenses] = await Promise.all([
+        const [userStats, jobs, expenses] = await Promise.all([
             DashboardModel.getTotalUsers(),
             DashboardModel.getAllJobs(),
             calculateExpenses()
@@ -74,10 +105,11 @@ export const getDashboardStats = async (req, res) => {
 
         const applications = await DashboardModel.getMonthlyApplicationsWithStatus(startOfMonth)
         const monthlyApplications = {
-            total: applications.length,
-            approved: applications.filter(app => app.status === 'approved').length,
-            rejected: applications.filter(app => app.status === 'rejected').length,
-            pending: applications.filter(app => app.status === 'pending').length
+            total: applications.total,
+            approved: applications.approved,
+            rejected: applications.rejected,
+            pending: applications.pending,
+            completed: applications.completed
         }
 
 
@@ -160,21 +192,65 @@ export const getDashboardStats = async (req, res) => {
         const averageRating = topUsers.length ?
             topUsers.reduce((sum, user) => sum + user.rating, 0) / topUsers.length : 0
 
+
+
+        // เพิ่มการดึงข้อมูลรายงานค่าใช้จ่าย
+        const jobExpenses = await DashboardModel.getJobExpensesReport(
+            new Date().getMonth(),
+            new Date().getFullYear()
+        )
+
+        // แปลงข้อมูลให้เหมาะกับการใช้งาน
+        const formattedJobExpenses = jobExpenses.map(job => {
+            let totalPeople = 0
+            let totalExpense = 0
+
+            const positions = job.JobPositions.map(position => {
+                const approvedWorkers = position.JobParticipation.length
+
+                totalPeople += position.required_people
+                const positionExpense = position.wage * approvedWorkers
+                totalExpense += positionExpense
+
+                return {
+                    position_name: position.position_name,
+                    required_people: position.required_people,
+                    approved_workers: approvedWorkers,
+                    wage: position.wage,
+                    subtotal: positionExpense
+                }
+            })
+
+            return {
+                id: job.id,
+                title: job.title,
+                location: job.location,
+                work_date: job.work_date,
+                start_time: job.start_time,
+                end_time: job.end_time,
+                positions,
+                total_people: totalPeople,
+                total_expense: totalExpense
+            }
+        })
         // ส่งข้อมูลกลับ
         res.json({
             stats: {
-                totalUsers,
+                totalUsers: userStats.total,
+                userDetails: userStats.userDetails,
                 totalJobs: jobStats.total,
                 jobs: jobStats,
                 openJobs: jobStats.open,
                 inProgressJobs: jobStats.inProgress,
                 completedJobs: jobStats.completed,
                 expenses,
+                jobExpenses: formattedJobExpenses,
                 monthlyApplications: monthlyApplications.total,
                 monthlyApplicationsDetails: {
                     approved: monthlyApplications.approved,
                     rejected: monthlyApplications.rejected,
-                    pending: monthlyApplications.pending
+                    pending: monthlyApplications.pending,
+                    completed: monthlyApplications.completed
                 },
                 recentRegistrations: pendingRegistrations
             },

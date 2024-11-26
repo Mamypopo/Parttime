@@ -354,11 +354,22 @@ export const applyForJob = async (req, res) => {
         }
 
 
-        if (!user.approved) {
-            return res.status(400).json({
-                message: 'บัญชีของคุณยังไม่ได้รับการอนุมัติ กรุณารอการอนุมัติจากแอดมิน',
-            });
+        // แก้ไขการตรวจสอบสถานะการอนุมัติ
+        if (user.approved !== 'approved') {
+            let message = 'ไม่สามารถสมัครงานได้ เนื่องจาก';
+            switch (user.approved) {
+                case 'pending':
+                    message += 'บัญชีของคุณยังอยู่ระหว่างการตรวจสอบ';
+                    break;
+                case 'rejected':
+                    message += 'บัญชีของคุณไม่ได้รับการอนุมัติ';
+                    break;
+                default:
+                    message += 'บัญชีของคุณยังไม่ได้รับการอนุมัติ';
+            }
+            return res.status(400).json({ message });
         }
+
 
         const job = await jobModel.getJobById(jobId);
         if (!job) {
@@ -411,10 +422,15 @@ export const applyForJob = async (req, res) => {
         // ตรวจสอบการสมัครงานในวันเดียวกัน
         const existingDayApplication = await jobModel.findExistingDayApplication(userId, job.work_date);
         if (existingDayApplication) {
+            const status = existingDayApplication.status === 'approved' ? 'ได้รับการอนุมัติ' : 'รอการอนุมัติ';
+            const jobTitle = existingDayApplication.Job?.title || 'ไม่ระบุชื่องาน';
+            const positionName = existingDayApplication.jobPosition?.position_name || 'ไม่ระบุตำแหน่ง';
             return res.status(400).json({
-                message: `คุณมีงานในวันที่ ${new Date(job.work_date).toLocaleDateString('th-TH')} แล้ว (${existingDayApplication.job.title})`
+                success: false,
+                message: `คุณมีงานในวันที่ ${new Date(job.work_date).toLocaleDateString('th-TH')} ที่${status}แล้ว (${jobTitle} - ตำแหน่ง: ${positionName})`
             });
         }
+
 
 
 

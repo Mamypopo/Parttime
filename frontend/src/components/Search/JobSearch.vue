@@ -297,13 +297,23 @@ export default {
       selectedPosition: '',
       positionOptions: [
         { value: '', label: 'ทั้งหมด' },
-        { value: 'X-ray', label: 'X-ray' },
-        { value: 'Nurse', label: 'Nurse' },
-        { value: 'Medic', label: 'Medic' },
-        { value: 'Register', label: 'Register' },
-        { value: 'Blood test', label: 'Blood test' },
-        { value: 'Blowing lungs', label: 'Blowing lungs' },
-        { value: 'Ear exam', label: 'Ear exam' }
+        { value: 'เอกซเรย์', label: 'เอกซเรย์' },
+        { value: 'พยาบาล', label: 'พยาบาล' },
+        { value: 'น้ำหนัก ส่วนสูง', label: 'น้ำหนัก ส่วนสูง' },
+        { value: 'ทะเบียน', label: 'ทะเบียน' },
+        { value: 'การได้ยิน', label: 'การได้ยิน' },
+        { value: 'เจาะเลือด', label: 'เจาะเลือด' },
+        { value: 'เป่าปอด', label: 'เป่าปอด' },
+        { value: 'ตาอาชีวะ', label: 'ตาอาชีวะ' },
+        { value: 'ตาทั่วไป', label: 'ตาทั่วไป' },
+        { value: 'มวลกระดูก', label: 'มวลกระดูก' },
+        { value: 'เก็บปัสสาวะ', label: 'เก็บปัสสาวะ' },
+        { value: 'คลื่นไฟฟ้าหัวใจ', label: 'คลื่นไฟฟ้าหัวใจ' },
+        { value: 'กล้ามเนื้อ', label: 'กล้ามเนื้อ' },
+        { value: 'มะเร็งปากมดลูก', label: 'มะเร็งปากมดลูก' },
+        { value: 'อัลตร้าซาวด์', label: 'อัลตร้าซาวด์' },
+        { value: 'ผู้ช่วยแพทย์', label: 'ผู้ช่วยแพทย์' },
+        { value: 'วัดความดัน', label: 'วัดความดัน' }
         // เพิ่มตำแหน่งอื่นๆ ตามที่มีในระบบ
       ]
     }

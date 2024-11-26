@@ -2,8 +2,46 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 // ดึงจำนวนผู้ใช้งานทั้งหมด
-export const getTotalUsers = () => {
-    return prisma.user.count()
+export const getTotalUsers = async () => {
+    const [admins, users] = await Promise.all([
+        // นับ admin จาก admin table
+        prisma.admin.count(),
+        // นับ user จาก user table พร้อมแยกตามสถานะ
+        Promise.all([
+            // นับ user ทั้งหมด
+            prisma.user.count(),
+            // นับ user ที่อนุมัติแล้ว
+            prisma.user.count({
+                where: {
+                    approved: 'approved'
+                }
+            }),
+            // นับ user ที่รอการอนุมัติ
+            prisma.user.count({
+                where: {
+                    approved: 'pending'
+                }
+            }),
+            // นับ user ที่ไม่อนุมัติ
+            prisma.user.count({
+                where: {
+                    approved: 'rejected'
+                }
+            })
+        ])
+    ])
+
+    const [totalUsers, normalUsers, pendingUsers, rejectedUsers] = users
+
+    return {
+        total: totalUsers + admins, // รวมจำนวนทั้งหมด
+        userDetails: {
+            normal: normalUsers,
+            admin: admins,
+            pending: pendingUsers,
+            rejected: rejectedUsers
+        }
+    }
 }
 
 // ดึงข้อมูลงานทั้งหมดพร้อมความสัมพันธ์
@@ -45,46 +83,99 @@ export const getCurrentMonthExpenses = (startOfMonth) => {
     })
 }
 
-// เพิ่มฟังก์ชันดึงค่าใช้จ่ายตามช่วงเวลา
+// ฟังก์ชันดึงค่าใช้จ่ายตามช่วงเวลา
 export const getExpensesByDateRange = async (startDate, endDate) => {
-    return prisma.jobPosition.findMany({
+    return prisma.job.findMany({
         where: {
-            job: {
-                work_date: {
-                    gte: startDate,
-                    lte: endDate
-                },
-
+            work_date: {
+                gte: startDate,
+                lte: endDate
+            },
+            status: {
+                in: ['in_progress', 'completed']
             }
         },
-        include: {
-            JobParticipation: {
-                where: {
-                    status: {
-                        in: ['approved', 'completed']
-                    }
-                },
-                include: {
-                    workHistories: true, // แก้จาก workHistory เป็น workHistories
-                    user: {  // เพิ่มข้อมูลผู้ใช้
+        select: {
+            id: true,
+            work_date: true,
+            JobPositions: {
+                select: {
+                    id: true,
+                    wage: true,
+                    JobParticipation: {
+                        where: {
+                            status: {
+                                in: ['approved', 'completed']
+                            }
+                        },
                         select: {
                             id: true,
-                            first_name: true,
-                            last_name: true
+                            workHistories: {
+                                select: {
+                                    id: true
+                                }
+                            }
                         }
                     }
-                }
-            },
-            job: {
-                select: {
-                    status: true,
-                    work_date: true
                 }
             }
         }
     })
 }
 
+// ฟังก์ชันใหม่สำหรับรายงานค่าใช้จ่าย
+export const getJobExpensesReport = async (month = new Date().getMonth(), year = new Date().getFullYear()) => {
+    try {
+        const startDate = new Date(year, month, 1)
+        const endDate = new Date(year, month + 1, 0)
+
+        return prisma.job.findMany({
+            where: {
+                work_date: {
+                    gte: startDate,
+                    lte: endDate
+                },
+                status: {
+                    in: ['in_progress', 'completed']
+                }
+            },
+            select: {
+                id: true,
+                title: true,
+                location: true,
+                work_date: true,
+                start_time: true,
+                end_time: true,
+                JobPositions: {
+                    select: {
+                        id: true,
+                        position_name: true,
+                        wage: true,
+                        required_people: true,
+                        JobParticipation: {
+                            where: {
+                                status: {
+                                    in: ['approved', 'completed']
+                                }
+                            },
+                            select: {
+                                id: true,
+                                status: true,
+
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: {
+                work_date: 'asc'
+            }
+        })
+    } catch (error) {
+        console.error('Error in getJobExpensesReport:', error)
+        throw new Error('ไม่สามารถดึงข้อมูลรายงานค่าใช้จ่ายได้')
+    }
+}
 
 // ดึงจำนวนการสมัครงานในเดือนปัจจุบัน
 export const getMonthlyApplications = (startOfMonth) => {
@@ -96,15 +187,71 @@ export const getMonthlyApplications = (startOfMonth) => {
 }
 
 // เพิ่มฟังก์ชันใหม่สำหรับดึงข้อมูลการสมัครพร้อมสถานะ
-export const getMonthlyApplicationsWithStatus = (startOfMonth) => {
-    return prisma.jobParticipation.findMany({
-        where: {
-            created_at: { gte: startOfMonth }
-        },
-        select: {
-            status: true
-        }
-    })
+export const getMonthlyApplicationsWithStatus = async (startOfMonth) => {
+    const endOfMonth = new Date(startOfMonth)
+    endOfMonth.setMonth(endOfMonth.getMonth() + 1)
+    endOfMonth.setDate(0)
+
+    // แก้ไขการ query เพื่อนับจำนวนตามสถานะโดยตรง
+    const [total, approved, rejected, pending, completed] = await Promise.all([
+        // นับทั้งหมด
+        prisma.jobParticipation.count({
+            where: {
+                created_at: {
+                    gte: startOfMonth,
+                    lte: endOfMonth
+                }
+            }
+        }),
+        // นับที่อนุมัติแล้ว
+        prisma.jobParticipation.count({
+            where: {
+                created_at: {
+                    gte: startOfMonth,
+                    lte: endOfMonth
+                },
+                status: 'approved'
+            }
+        }),
+        // นับที่ไม่อนุมัติ
+        prisma.jobParticipation.count({
+            where: {
+                created_at: {
+                    gte: startOfMonth,
+                    lte: endOfMonth
+                },
+                status: 'rejected'
+            }
+        }),
+        // นับที่รอพิจารณา
+        prisma.jobParticipation.count({
+            where: {
+                created_at: {
+                    gte: startOfMonth,
+                    lte: endOfMonth
+                },
+                status: 'pending'
+            }
+        }),
+        // นับที่รอพิจารณา
+        prisma.jobParticipation.count({
+            where: {
+                created_at: {
+                    gte: startOfMonth,
+                    lte: endOfMonth
+                },
+                status: 'completed'
+            }
+        })
+    ])
+
+    return {
+        total,
+        approved,
+        rejected,
+        pending,
+        completed
+    }
 }
 
 // ดึงประวัติการทำงานที่มีการให้คะแนน
@@ -269,6 +416,7 @@ export const getRecentRegistrations = () => {
             approved: 'pending'
         },
         select: {
+            id: true,
             first_name: true,
             last_name: true,
             email: true,

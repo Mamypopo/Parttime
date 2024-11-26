@@ -106,7 +106,7 @@
           >
             <!-- Card Header -->
             <div class="p-4 border-b dark:border-gray-700">
-              <div class="flex justify-between items-start flex-wrap sm:flex-nowrap">
+              <div class="flex justify-between items-start">
                 <div>
                   <h3 class="font-medium text-gray-900 dark:text-gray-100">{{ job.title }}</h3>
                   <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -117,19 +117,19 @@
                 <div class="flex gap-2">
                   <button
                     @click="viewJobDetails(job)"
-                    class="p-2 text-[#7BC4C4] hover:text-[#5DA3A3] dark:text-[#7BC4C4] dark:hover:text-[#5DA3A3] rounded-full hover:bg-gray-50 dark:hover:bg-gray-700"
+                    class="p-2 text-[#7BC4C4] hover:text-[#5DA3A3] rounded-full hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     <i class="fas fa-eye"></i>
                   </button>
                   <button
                     @click="handleOpenEditModal(job)"
-                    class="p-2 text-[#81E2C4] hover:text-[#5DC4A7] rounded-full dark:text-[#81E2C4] dark:hover:text-[#5DC4A7] hover:bg-gray-50"
+                    class="p-2 text-[#81E2C4] hover:text-[#5DC4A7] rounded-full hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     <i class="fas fa-edit"></i>
                   </button>
                   <button
                     @click="confirmDelete(job)"
-                    class="p-2 text-[#E98585] hover:text-[#da7171] dark:text-[#E98585] dark:hover:text-[#da7171] rounded-full hover:bg-gray-50"
+                    class="p-2 text-[#E98585] hover:text-[#da7171] rounded-full hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     <i class="fas fa-trash-alt"></i>
                   </button>
@@ -157,91 +157,118 @@
             </div>
 
             <!-- Card Content -->
-            <div class="p-4 space-y-3">
-              <div class="flex items-center justify-between">
-                <!-- วันที่และเวลา -->
-                <div class="flex items-center gap-4">
-                  <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <i class="far fa-calendar-alt w-5"></i>
-                    <span>{{ formatDate(job.work_date) }}</span>
-                  </div>
-                  <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <i class="far fa-clock w-5"></i>
-                    <span>{{ formatTime(job.start_time) }} - {{ formatTime(job.end_time) }}</span>
-                  </div>
+            <div class="p-4 space-y-4">
+              <!-- วันและเวลา -->
+              <div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                <div class="flex items-center">
+                  <i class="far fa-calendar-alt w-5"></i>
+                  <span>{{ formatDate(job.work_date) }}</span>
+                </div>
+                <div class="flex items-center">
+                  <i class="far fa-clock w-5"></i>
+                  <span>{{ formatTime(job.start_time) }} - {{ formatTime(job.end_time) }}</span>
                 </div>
               </div>
 
-              <!-- ตำแหน่ง -->
-              <div class="flex flex-wrap gap-1">
+              <!-- ตำแหน่งงาน -->
+              <div class="flex flex-wrap gap-2">
                 <span
                   v-for="position in job.JobPositions"
                   :key="position.id"
-                  class="px-2 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
+                  class="px-3 py-1 text-sm rounded-full bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
                 >
                   {{ position.position_name }}
+                  <span class="text-xs ml-1 text-purple-500"> ({{ position.wage }} บาท) </span>
                 </span>
               </div>
 
-              <!-- เปิด modal อัพเดทสถานะ -->
-              <div v-if="['completed', 'in_progress'].includes(getJobStatus(job))" class="mt-4">
-                <button
-                  @click="openWorkStatusModal(job)"
-                  class="w-full px-4 py-2 text-sm bg-gradient-to-r from-[#81E2C4] via-[#70D5B6] to-[#5DC4A7] dark:from-[#5DC4A7] dark:via-[#4BB99A] dark:to-[#3A8F7F] text-white rounded-lg hover:bg-opacity-80 dark:hover:bg-opacity-90 transition-all duration-300"
-                >
-                  <i class="fas fa-clipboard-check mr-2"></i>
-                  ประเมินผลงาน
-                  <span
-                    v-if="getCompletedWorkCount(job) > 0"
-                    class="ml-1 text-white/90 dark:text-white/95"
-                  >
-                    (ประเมินแล้ว {{ jobStore.getWorkEvaluationCount(job).evaluated }}/{{
-                      jobStore.getWorkEvaluationCount(job).total
-                    }})
-                  </span>
-                </button>
-              </div>
-
-              <!-- Participants Info -->
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3 mt-3">
-                  <!-- แสดงจำนวนรอดำเนินการ -->
+              <!-- ค่าใช้จ่าย -->
+              <div class="space-y-2 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                <div class="flex items-center justify-between">
                   <span class="text-sm text-gray-600 dark:text-gray-400">
-                    <i class="fas fa-user-clock text-yellow-500"></i>
-                    รอดำเนินการ: {{ getPendingCount(job) }}
-                    <span
-                      v-if="hasNewParticipants(job) > 0"
-                      class="ml-1 px-2 py-0.5 text-xs bg-red-500 dark:bg-red-600 text-white rounded-full animate-pulse"
-                    >
-                      ใหม่
-                    </span>
+                    <i class="fas fa-calculator text-blue-500 mr-2"></i>
+                    ค่าใช้จ่ายประมาณการ
                   </span>
-
-                  <!-- แสดงจำนวนอนุมัติแล้ว -->
-                  <span class="text-sm text-gray-600 dark:text-gray-400">
-                    <i class="fas fa-user-check text-green-500"></i>
-                    อนุมัติแล้ว: {{ getApprovedCount(job) }}
+                  <span class="font-medium text-gray-900 dark:text-gray-100">
+                    {{ calculateEstimatedCost(job).toLocaleString() }} บาท
                   </span>
+                </div>
 
-                  <!-- เพิ่มจำนวนประเมินแล้ว -->
+                <div class="flex items-center justify-between">
                   <span class="text-sm text-gray-600 dark:text-gray-400">
-                    <i class="fas fa-clipboard-check text-blue-500"></i>
-                    ประเมินแล้ว: {{ getCompletedWorkCount(job) }}
+                    <i class="fas fa-coins text-yellow-500 mr-2"></i>
+                    ค่าใช้จ่ายจริง
                   </span>
-
-                  <!-- เพิ่มจำนวนรวมทั้งหมด -->
-                  <span class="text-sm text-gray-600 dark:text-gray-400">
-                    <i class="fas fa-users text-purple-500"></i>
-                    ทั้งหมด: {{ getTotalParticipants(job) }}
+                  <span class="font-medium text-gray-900 dark:text-gray-100">
+                    {{ calculateActualCost(job).toLocaleString() }} บาท
                   </span>
                 </div>
               </div>
 
-              <!-- Participants -->
-              <!-- Participants และ ค่าใช้จ่าย -->
-              <div class="flex flex-col sm:flex-row gap-4 mt-4">
-                <!-- ส่วนแสดงผู้สมัคร -->
-                <div class="flex items-center flex-1">
+              <!-- สถานะผู้สมัคร -->
+              <div class="flex flex-wrap gap-3">
+                <!-- รอดำเนินการ -->
+                <div class="flex items-center">
+                  <span
+                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-yellow-50 dark:bg-yellow-900/20"
+                  >
+                    <i class="fas fa-user-clock text-yellow-500 mr-2"></i>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                      รอดำเนินการ:
+                      <span class="font-medium">{{ getPendingCount(job) }}</span>
+                      <span
+                        v-if="hasNewParticipants(job)"
+                        class="ml-1.5 px-1.5 py-0.5 text-xs bg-red-500 text-white rounded-full animate-pulse"
+                      >
+                        ใหม่
+                      </span>
+                    </span>
+                  </span>
+                </div>
+
+                <!-- อนุมัติแล้ว -->
+                <div class="flex items-center">
+                  <span
+                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-green-50 dark:bg-green-900/20"
+                  >
+                    <i class="fas fa-user-check text-green-500 mr-2"></i>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                      อนุมัติแล้ว:
+                      <span class="font-medium">{{ getApprovedCount(job) }}</span>
+                    </span>
+                  </span>
+                </div>
+
+                <!-- ประเมินแล้ว -->
+                <div class="flex items-center">
+                  <span
+                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/20"
+                  >
+                    <i class="fas fa-clipboard-check text-blue-500 mr-2"></i>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                      ประเมินแล้ว:
+                      <span class="font-medium">{{ getCompletedWorkCount(job) }}</span>
+                    </span>
+                  </span>
+                </div>
+
+                <!-- จำนวนทั้งหมด -->
+                <div class="flex items-center">
+                  <span
+                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-purple-50 dark:bg-purple-900/20"
+                  >
+                    <i class="fas fa-users text-purple-500 mr-2"></i>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                      ทั้งหมด:
+                      <span class="font-medium">{{ getTotalParticipants(job) }}</span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+
+              <!-- รูปและปุ่มจัดการผู้สมัคร -->
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
                   <div
                     class="flex -space-x-2 overflow-hidden"
                     v-if="getAllParticipants(job).length"
@@ -251,30 +278,33 @@
                       :key="participant.user.id"
                       :src="getProfileImage(participant.user.profile_image)"
                       :alt="participant.user.first_name"
-                      class="w-8 h-8 rounded-full border-2 border-white"
+                      class="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 shadow-sm"
                     />
                     <span
                       v-if="getAllParticipants(job).length > 3"
-                      class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 border-2 border-white"
+                      class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 border-2 border-white dark:border-gray-800 shadow-sm"
                     >
-                      <span class="text-xs text-gray-600">
+                      <span class="text-xs text-gray-600 dark:text-gray-300">
                         +{{ getAllParticipants(job).length - 3 }}
                       </span>
                     </span>
                   </div>
+
                   <button
                     @click="openParticipantsModal(job)"
-                    class="ml-3 text-sm whitespace-nowrap"
+                    class="ml-3 px-4 py-2 text-sm rounded-lg transition-all duration-300"
                     :class="[
-                      getTotalParticipants(job) > 0 && getPendingCount(job) > 0
-                        ? 'bg-[#7BC4C4] text-white px-3 py-1 rounded-lg hover:bg-[#5DA3A3]'
+                      getPendingCount(job) > 0
+                        ? 'bg-[#7BC4C4] hover:bg-[#5DA3A3] text-white shadow-sm hover:shadow-md'
                         : 'text-[#7BC4C4] hover:text-[#5DA3A3]'
                     ]"
                   >
                     <template v-if="getPendingCount(job) > 0">
+                      <i class="fas fa-user-edit mr-2"></i>
                       จัดการผู้สมัคร ({{ getPendingCount(job) }})
                     </template>
                     <template v-else-if="getTotalParticipants(job) > 0">
+                      <i class="fas fa-users mr-2"></i>
                       ผู้สมัครทั้งหมด ({{ getTotalParticipants(job) }})
                     </template>
                     <template v-else>
@@ -282,41 +312,6 @@
                       ยังไม่มีผู้สมัคร
                     </template>
                   </button>
-                </div>
-
-                <!-- ส่วนแสดงค่าใช้จ่าย -->
-                <div class="flex flex-col gap-2 sm:text-right">
-                  <!-- ยอดเงินประมาณการ -->
-                  <div
-                    v-if="getApprovedCount(job) > 0"
-                    class="flex items-center justify-between sm:justify-end gap-2 bg-purple-50 dark:bg-purple-900/20 px-3 py-1.5 rounded-lg"
-                  >
-                    <div class="flex items-center gap-2 whitespace-nowrap">
-                      <i class="fas fa-calculator text-purple-500 dark:text-purple-400"></i>
-                      <span class="text-xs font-medium text-gray-600 dark:text-gray-300">
-                        ประมาณการ:
-                      </span>
-                    </div>
-                    <span class="text-xs font-semibold text-purple-600 dark:text-purple-400">
-                      ฿{{ jobStore.formatNumber(jobStore.calculateEstimatedCost(job)) }}
-                    </span>
-                  </div>
-
-                  <!-- ยอดเงินที่ต้องจ่ายจริง -->
-                  <div
-                    v-if="getCompletedWorkCount(job) > 0"
-                    class="flex items-center justify-between sm:justify-end gap-2 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-lg"
-                  >
-                    <div class="flex items-center gap-2 whitespace-nowrap">
-                      <i class="fas fa-wallet text-green-500 dark:text-green-400"></i>
-                      <span class="text-xs font-medium text-gray-600 dark:text-gray-300">
-                        สรุปรายจ่าย:
-                      </span>
-                    </div>
-                    <span class="text-xs font-semibold text-green-600 dark:text-green-400">
-                      ฿{{ jobStore.formatNumber(jobStore.calculateActualCost(job)) }}
-                    </span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -425,13 +420,6 @@ export default {
     totalJobs() {
       return this.jobs.length
     },
-    calculateEstimatedCost(job) {
-      return this.jobStore.calculateEstimatedCost(job)
-    },
-
-    calculateActualCost(job) {
-      return this.jobStore.calculateActualCost(job)
-    },
 
     formatNumber(number) {
       return this.jobStore.formatNumber(number)
@@ -480,13 +468,13 @@ export default {
     //คืนค่าสถานะของงานตามวันเวลาปัจจุบันและวันที่ทำงานของงาน
     getJobStatus(job) {
       // ถ้ามีผู้สมัครที่ completed แล้ว ให้ถือว่างานเสร็จสิ้น
-      // const hasCompletedParticipants = job.JobPositions?.some(position =>
-      //     position.JobParticipation?.some(p => p.status === 'completed')
-      // );
+      const hasCompletedParticipants = job.JobPositions?.some((position) =>
+        position.JobParticipation?.some((p) => p.status === 'completed')
+      )
 
-      // if (hasCompletedParticipants) {
-      //     return 'completed';
-      // }
+      if (hasCompletedParticipants) {
+        return 'completed'
+      }
 
       // ดูสถานะจริงของงานก่อน
       if (job.status === 'completed') {
@@ -607,19 +595,24 @@ export default {
       try {
         await this.jobStore.editJob(jobData.id, jobData)
 
-        Swal.fire({
+        // ปิด modal
+        this.handleCloseModal()
+
+        await Swal.fire({
           icon: 'success',
           title: 'แก้ไขงานสำเร็จ',
-          showConfirmButton: false,
-          timer: 1500
+          showConfirmButton: true,
+          confirmButtonText: 'ตกลง'
         })
+
+        // โหลดข้อมูลใหม่
         await this.loadJobs()
       } catch (error) {
+        console.error('Error editing job:', error)
         Swal.fire({
           icon: 'error',
           title: 'เกิดข้อผิดพลาด',
-          text: error.response?.data?.message || 'ไม่สามารถแก้ไขงานได้',
-          confirmButtonText: 'ตกลง'
+          text: error.message || 'ไม่สามารถแก้ไขงานได้'
         })
       }
     },
@@ -863,7 +856,13 @@ export default {
     getProfileImage(image) {
       return this.jobStore.getProfileImage(image)
     },
+    calculateEstimatedCost(job) {
+      return this.jobStore.calculateEstimatedCost(job)
+    },
 
+    calculateActualCost(job) {
+      return this.jobStore.calculateActualCost(job)
+    },
     calculateTotalWage(job) {
       return this.jobStore.calculateTotalWage(job)
     },

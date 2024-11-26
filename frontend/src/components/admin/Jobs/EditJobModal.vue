@@ -463,6 +463,7 @@ export default {
         })
 
         if (!result.isConfirmed) return
+
         // ลบสถานะ isNew ทั้งหมดก่อนส่งข้อมูล
         this.formData.positions = this.formData.positions.map((pos) => ({
           ...pos,
@@ -486,17 +487,11 @@ export default {
           }))
         }
 
-        await jobStore.editJob(this.job.id, jobData)
+        // ส่งข้อมูลไปยัง parent component
+        this.$emit('submit', jobData)
 
-        await Swal.fire({
-          icon: 'success',
-          title: 'แก้ไขงานสำเร็จ',
-          text: 'ข้อมูลงานถูกอัพเดทเรียบร้อยแล้ว',
-          confirmButtonText: 'ตกลง'
-        })
-
-        this.$emit('close')
-        await jobStore.fetchJobs()
+        // ปิด modal
+        this.closeModal()
       } catch (error) {
         console.error('เกิดข้อผิดพลาดในการแก้ไขงาน:', error)
         Swal.fire({

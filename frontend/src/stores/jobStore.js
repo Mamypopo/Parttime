@@ -77,7 +77,10 @@ export const useJobStore = defineStore('job', {
             const now = new Date()
             const workDate = new Date(job.work_date)
             return workDate < now && workDate.toDateString() !== now.toDateString()
-        }).length || 0
+        }).length || 0,
+
+
+
 
     },
     actions: {
@@ -160,7 +163,6 @@ export const useJobStore = defineStore('job', {
 
                 const queryString = params.toString();
                 const endpoint = queryString ? `?${queryString}` : '';
-
                 // เรียก API พร้อมกัน
                 const [jobsResponse, participantsResponse] = await Promise.all([
                     axios.get(`${this.baseURL}/api/jobs/my-created-jobs${endpoint}`, { headers }),
@@ -350,19 +352,22 @@ export const useJobStore = defineStore('job', {
         async editJob(jobId, jobData) {
             this.loading = true
             try {
-                // ตรวจสอบข้อมูลก่อนส่ง
-                if (!jobData.start_time || !jobData.end_time) {
-                    throw new Error('กรุณาระบุเวลาเริ่มต้นและสิ้นสุด')
-                }
+
                 const headers = this.getAuthHeaders()
                 const response = await axios.put(`${this.baseURL}/api/jobs/editJob/${jobId}`, jobData, { headers })
 
-                // อัพเดท state
-                const index = this.jobs.findIndex(job => job.id === jobId)
-                if (index !== -1) {
-                    this.jobs[index] = response.data.job
+                // อัพเดท state ทันทีหลังจากแก้ไข
+                const updatedJobIndex = this.jobs.findIndex(job => job.id === jobId)
+                if (updatedJobIndex !== -1) {
+                    // สร้าง object ใหม่เพื่อให้ Vue รับรู้การเปลี่ยนแปลง
+                    this.jobs = [
+                        ...this.jobs.slice(0, updatedJobIndex),
+                        response.data.job,
+                        ...this.jobs.slice(updatedJobIndex + 1)
+                    ]
                 }
-
+                // โหลดข้อมูลใหม่ทันทีหลังจากแก้ไข
+                await this.fetchJobsAndParticipants()
                 return response.data
             } catch (error) {
                 console.error('Error editing job:', error)

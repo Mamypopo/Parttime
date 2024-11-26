@@ -9,7 +9,14 @@ export const useDashboardStore = defineStore('dashboard', {
         // ข้อมูลสถิติต่างๆ
         stats: {
             totalUsers: 0,
-            jobs: {           // เปลี่ยนโครงสร้างเป็น jobs object
+            userDetails: {
+                normal: 0,
+                admin: 0,
+                pending: 0,
+                rejected: 0
+            },
+            jobExpenses: [],
+            jobs: {
                 total: 0,
                 open: 0,
                 inProgress: 0,
@@ -24,10 +31,11 @@ export const useDashboardStore = defineStore('dashboard', {
             monthlyApplicationsDetails: {
                 approved: 0,
                 rejected: 0,
-                pending: 0
+                pending: 0,
+                completed: 0
             }
-        },
 
+        },
         // ข้อมูลงานในปฏิทิน
         calendarEvents: [],
         selectedEvent: null,
@@ -42,7 +50,7 @@ export const useDashboardStore = defineStore('dashboard', {
         async fetchDashboardData(month, year) {
             try {
                 this.loading = true
-                const [dashboardResponse, eventsResponse] = await Promise.all([
+                const [dashboardResponse, eventsResponse,] = await Promise.all([
                     axios.get(`${this.baseURL}/api/dashboard/stats`),
                     axios.get(`${this.baseURL}/api/dashboard/calendar-events`, {
                         params: { month, year }
@@ -54,6 +62,12 @@ export const useDashboardStore = defineStore('dashboard', {
                 // ตรวจสอบและแปลงข้อมูลให้ถูกต้อง
                 this.stats = {
                     totalUsers: Number(stats.totalUsers) || 0,
+                    userDetails: {  // เพิ่มการแปลงข้อมูลผู้ใช้
+                        normal: Number(stats.userDetails?.normal) || 0,
+                        admin: Number(stats.userDetails?.admin) || 0,
+                        pending: Number(stats.userDetails?.pending) || 0,
+                        rejected: Number(stats.userDetails?.rejected) || 0
+                    },
                     jobs: {
                         total: Number(stats.jobs?.total) || 0,
                         open: Number(stats.jobs?.open) || 0,
@@ -65,15 +79,17 @@ export const useDashboardStore = defineStore('dashboard', {
                         weekly: Number(stats.expenses?.weekly) || 0,
                         monthly: Number(stats.expenses?.monthly) || 0
                     },
+                    jobExpenses: stats.jobExpenses || [],
                     monthlyApplications: Number(stats.monthlyApplications) || 0,
                     monthlyApplicationsDetails: {
                         approved: Number(stats.monthlyApplicationsDetails?.approved) || 0,
                         rejected: Number(stats.monthlyApplicationsDetails?.rejected) || 0,
-                        pending: Number(stats.monthlyApplicationsDetails?.pending) || 0
+                        pending: Number(stats.monthlyApplicationsDetails?.pending) || 0,
+                        completed: Number(stats.monthlyApplicationsDetails?.completed) || 0
                     }
                 }
 
-                console.log('Updated stats:', this.stats) // เพิ่ม log เพื่อตรวจสอบ
+
 
                 this.calendarEvents = eventsResponse.data.events || []
                 this.error = null
@@ -260,10 +276,31 @@ export const useDashboardStore = defineStore('dashboard', {
                 style: 'currency',
                 currency: 'THB'
             })
+            // สร้างชื่อเดือนภาษาไทย
+            const currentDate = new Date()
+            const thaiYear = currentDate.getFullYear() + 543
+            const thaiMonth = new Intl.DateTimeFormat('th-TH', { month: 'long' }).format(currentDate)
+            const monthYear = `${thaiMonth} ${thaiYear}`
             return {
-                daily: formatter.format(state.stats.expenses.daily),
-                weekly: formatter.format(state.stats.expenses.weekly),
-                monthly: formatter.format(state.stats.expenses.monthly)
+                daily: {
+                    amount: formatter.format(state.stats.expenses.daily),
+                    date: new Date().toLocaleDateString('th-TH', { day: 'numeric' })
+                },
+                weekly: {
+                    amount: formatter.format(state.stats.expenses.weekly),
+                    week: `สัปดาห์ที่ ${Math.ceil(currentDate.getDate() / 7)}`
+                },
+                monthly: {
+                    amount: formatter.format(state.stats.expenses.monthly),
+                    month: monthYear
+                },
+                raw: { // เก็บข้อมูลดิบสำหรับ export
+                    daily: state.stats.expenses.daily,
+                    weekly: state.stats.expenses.weekly,
+                    monthly: state.stats.expenses.monthly,
+                    date: currentDate,
+                    monthYear: monthYear
+                }
             }
         }
 

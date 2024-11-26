@@ -13,12 +13,27 @@
         </div>
         {{ title }}
       </h3>
+      <!-- เพิ่มปุ่ม Export สำหรับการ์ดค่าใช้จ่าย -->
+      <button
+        v-if="title === 'ค่าใช้จ่าย'"
+        @click="$emit('export')"
+        class="p-2 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 transition-colors duration-200"
+        title="Export รายงานค่าใช้จ่าย"
+      >
+        <i class="fas fa-file-export"></i>
+      </button>
     </div>
 
     <!-- Main Value -->
     <div class="flex items-baseline gap-2 relative mb-2">
-      <div class="text-3xl font-semibold" :class="getTextClass">
-        {{ value }}
+      <div class="flex flex-col">
+        <div class="text-3xl font-semibold" :class="getTextClass">
+          {{ value }}
+        </div>
+        <!-- การแสดงเดือนเมื่อเป็นค่าใช้จ่าย -->
+        <div v-if="title === 'ค่าใช้จ่าย'" class="text-sm text-gray-500 dark:text-gray-400">
+          เดือน {{ subStats[1].month }}
+        </div>
       </div>
       <div v-if="unit" class="text-sm text-gray-700 dark:text-gray-300 font-medium">
         {{ unit }}
@@ -46,6 +61,7 @@
 <script>
 export default {
   name: 'StatsCard',
+  emits: ['export'],
   props: {
     title: {
       type: String,
