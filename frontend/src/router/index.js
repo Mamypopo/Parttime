@@ -96,38 +96,24 @@ const router = createRouter({
       ]
     },
 
+    {
+      path: '/user',
+      component: () => import('@/components/Users/UserSidebar.vue'),
+      meta: { requiresAuth: true },
+      children: [
+        {
+          path: 'dashboard',
+          name: 'UserDashboard',
+          component: () => import('@/views/user/DashboardView.vue')
+        },
+        {
+          path: 'jobs-view',
+          name: 'JobsView',
+          component: () => import('@/views/user/JobsView.vue')
+        },
 
-
-    // {
-    //   path: '/admin/skills-pending',
-    //   name: 'AdminSkillsPending',
-    //   component: AdminSkillsPending,
-    //   meta: { requiresAdmin: true }
-    // },
-    // {
-    //   path: '/admin/work-history',
-    //   name: 'AdminWorkHistory',
-    //   component: AdminWorkHistory,
-    //   meta: { requiresAdmin: true }
-    // },
-    // {
-    //   path: '/admin/jobs',
-    //   name: 'AdminJobs',
-    //   component: AdminJobs,
-    //   meta: { requiresAdmin: true }
-    // },
-    // {
-    //   path: '/admin/my-jobs',
-    //   name: 'AdminMyJobs',
-    //   component: AdminMyJobs,
-    //   meta: { requiresAdmin: true }
-    // },
-    // {
-    //   path: '/admin/create-job',
-    //   name: 'AdminCreateJob',
-    //   component: AdminCreateJob,
-    //   meta: { requiresAdmin: true }
-    // },
+      ]
+    }
   ]
 })
 

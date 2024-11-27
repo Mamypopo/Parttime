@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { useAdminStore } from './adminStore'
+import { useUserStore } from './userStore'
 export const useJobStore = defineStore('job', {
     state: () => ({
         baseURL: import.meta.env.VITE_API_URL,
@@ -87,7 +88,8 @@ export const useJobStore = defineStore('job', {
 
         getAuthHeaders() {
             const adminStore = useAdminStore()
-            const token = adminStore.token
+            const userStore = useUserStore()
+            const token = userStore.token || adminStore.token
 
             if (!token) {
                 throw new Error('กรุณาเข้าสู่ระบบใหม่')
@@ -125,8 +127,6 @@ export const useJobStore = defineStore('job', {
                         headers
                     }
                 )
-
-
                 if (response.data) {
                     this.jobs = response.data.jobs
                     if (response.data.pagination) {
@@ -387,6 +387,45 @@ export const useJobStore = defineStore('job', {
 
             } catch (error) {
                 console.error('Error deleting job:', error)
+                throw error
+            } finally {
+                this.loading = false
+            }
+        },
+
+        // สมัครงาน
+        async applyForJob(jobId, jobPositionId) {
+            this.loading = true
+            this.error = null
+
+            try {
+                const headers = this.getAuthHeaders()
+                const response = await axios.post(
+                    `${this.baseURL}/api/jobs/apply`,
+                    {
+                        jobId,
+                        jobPositionId
+                    },
+                    { headers }
+                )
+
+                // อัพเดท state หลังจากสมัครงานสำเร็จ
+                const jobIndex = this.jobs.findIndex(job => job.id === jobId)
+                if (jobIndex !== -1) {
+                    const positionIndex = this.jobs[jobIndex].JobPositions.findIndex(
+                        pos => pos.id === jobPositionId
+                    )
+                    if (positionIndex !== -1) {
+                        // เพิ่มจำนวนผู้สมัคร
+                        const position = this.jobs[jobIndex].JobPositions[positionIndex]
+                        position.application_count = (position.application_count || 0) + 1
+                    }
+                }
+
+                return response.data
+            } catch (error) {
+                this.error = error.response?.data?.message || 'เกิดข้อผิดพลาดในการสมัครงาน'
+                console.error('Error applying for job:', error)
                 throw error
             } finally {
                 this.loading = false

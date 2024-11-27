@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { useSidebarStore } from './sidebarStore'
 import axios from 'axios'
 export const useUserStore = defineStore('user', {
     state: () => ({
@@ -52,8 +53,22 @@ export const useUserStore = defineStore('user', {
             }
             this.token = null
             this.isAuthenticated = false
+
+
+            this.token = null
+            this.isAuthenticated = false
+
+            // Clear localStorage
+            localStorage.removeItem('darkmode')
             localStorage.removeItem('token')
+            // Reset sidebar store (darkmode)
+            const sidebarStore = useSidebarStore()
+            if (sidebarStore?.resetDarkMode) {
+                sidebarStore.resetDarkMode()
+            }
             delete axios.defaults.headers.common['Authorization']
+
+
         },
         setUser(userData) {
             this.user = {

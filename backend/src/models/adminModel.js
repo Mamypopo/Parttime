@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 // ฟังก์ชันสำหรับสร้างแอดมินใหม่
 export const createAdmin = async (adminData) => {
-    const { email, password, first_name, last_name } = adminData;
+    const { email, password, first_name, last_name, phone, profile_pic } = adminData;
     const hashedPassword = await bcrypt.hash(password, 10);
     return prisma.admin.create({
         data: {
@@ -12,10 +12,19 @@ export const createAdmin = async (adminData) => {
             password: hashedPassword,
             first_name,
             last_name,
+            phone,
+            profile_pic
         },
     });
 };
 
+// เพิ่มฟังก์ชันอัพเดทรูปโปรไฟล์
+export const updateAdminProfilePic = async (adminId, profilePicUrl) => {
+    return prisma.admin.update({
+        where: { id: adminId },
+        data: { profile_pic: profilePicUrl }
+    });
+};
 export const verifyPassword = (password, hashedPassword) => bcrypt.compare(password, hashedPassword);
 
 

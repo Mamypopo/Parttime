@@ -19,7 +19,7 @@ export const useSidebarStore = defineStore('sidebar', {
         showNotificationSubmenu: false,
         showAllNotifications: false,
 
-
+        // เมนูสำหรับแอดมิน
         mainMenuItems: [
             { name: 'หน้าหลัก', path: '/admin/dashboard', icon: 'fas fa-home' },
             { name: 'ผู้ใช้', path: '/admin/alluser', icon: 'fas fa-users' },
@@ -45,6 +45,69 @@ export const useSidebarStore = defineStore('sidebar', {
             { name: 'งาน', icon: 'fas fa-briefcase', hasSubmenu: true },
             { name: 'การแจ้งเตือน', icon: 'fas fa-bell', hasSubmenu: true },
             { name: 'เพิ่มเติม', icon: 'fas fa-ellipsis-h', hasSubmenu: true }
+        ],
+
+
+        // เมนูสำหรับ User
+        userMenuItems: [
+            {
+                path: '/user/dashboard',
+                name: 'หน้าหลัก',
+                icon: 'fa-solid fa-house'
+            },
+            {
+                path: '/user/jobs-view',
+                name: 'งาน',
+                icon: 'fas fa-briefcase'
+            },
+            {
+                path: '/user/my-jobs',
+                name: 'งานของฉัน',
+                icon: 'fas fa-tasks',
+                badge: true,
+                badgeCount: 0  // จะอัพเดทจาก API
+            },
+            {
+                path: '/user/notifications',
+                name: 'แจ้งเตือน',
+                icon: 'fas fa-bell',
+                badge: true,
+                badgeCount: 0  // จะอัพเดทจาก API
+            },
+            {
+                path: '/user/profile',
+                name: 'โปรไฟล์',
+                icon: 'fas fa-user'
+            }
+        ],
+
+        // เมนูมือถือ
+        userMobileItems: [
+            {
+                path: '/user/jobs',
+                name: 'งาน',
+                icon: 'fas fa-briefcase'
+            },
+            {
+                path: '/user/my-jobs',
+                name: 'งานของฉัน',
+                icon: 'fas fa-tasks',
+                badge: true,
+                badgeCount: 0
+            },
+            {
+                path: '/user/notifications',
+                name: 'แจ้งเตือน',
+                icon: 'fas fa-bell',
+                badge: true,
+                badgeCount: 0
+            },
+            {
+                path: '/user/profile',
+                name: 'โปรไฟล์',
+                icon: 'fas fa-user',
+                isProfile: true
+            }
         ]
     }),
 

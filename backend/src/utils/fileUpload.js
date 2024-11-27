@@ -10,12 +10,21 @@ const storage = multer.diskStorage({
     destination: async (req, file, cb) => {
         try {
             let uploadPath;
-            if (file.fieldname === 'profile_image') {
-                uploadPath = path.join(__dirname, '../../uploads/profiles/');
-            } else if (file.fieldname === 'education_certificate') {
-                uploadPath = path.join(__dirname, '../../uploads/certificates/');
-            } else if (file.fieldname === 'user_documents') {
-                uploadPath = path.join(__dirname, '../../uploads/documents/');
+            switch (file.fieldname) {
+                case 'profile_pic':
+                    uploadPath = path.join(__dirname, '../../uploads/admin-profiles/');
+                    break;
+                case 'profile_image':
+                    uploadPath = path.join(__dirname, '../../uploads/profiles/');
+                    break;
+                case 'education_certificate':
+                    uploadPath = path.join(__dirname, '../../uploads/certificates/');
+                    break;
+                case 'user_documents':
+                    uploadPath = path.join(__dirname, '../../uploads/documents/');
+                    break;
+                default:
+                    return cb(new Error('Invalid field name'), null);
             }
 
             // สร้างโฟลเดอร์หากไม่มี
@@ -33,24 +42,50 @@ const storage = multer.diskStorage({
     }
 });
 
+
+
 const fileFilter = (req, file, cb) => {
+    // ตรวจสอบ fieldname ที่ถูกส่งมา
+    if (file.fieldname === 'profile_pic') {
+        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+            return cb(new Error('อนุญาตเฉพาะไฟล์ .jpg .jpeg และ .png เท่านั้น'), false);
+        }
+        cb(null, true); // อนุญาตให้อัปโหลดไฟล์
+        return;
+    }
+
     if (file.fieldname === 'profile_image') {
         if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-            return cb(new Error('โปรดอัปโหลดรูปภาพเท่านั้น'));
+            return cb(new Error('โปรดอัปโหลดรูปภาพเท่านั้น'), false);
         }
-    } else if (file.fieldname === 'education_certificate') {
-        if (!file.originalname.match(/\.(pdf|jpg|jpeg|png)$/)) {
-            return cb(new Error('โปรดอัปโหลดไฟล์ PDF หรือรูปภาพเท่านั้นสำหรับวุฒิการศึกษา'));
-        }
-    } else if (file.fieldname === 'user_documents') {
-        if (!file.originalname.match(/\.(pdf|jpg|jpeg|png)$/)) {  // อนุญาตให้ใช้ PDF หรือไฟล์รูปภาพใน user_documents
-            return cb(new Error('โปรดอัปโหลดไฟล์ PDF หรือรูปภาพเท่านั้นใน user_documents'));
-        }
-    } else {
-        return cb(new Error('Unexpected field'), false);
+        cb(null, true);
+        return;
     }
-    cb(null, true);
+
+    if (file.fieldname === 'education_certificate') {
+        if (!file.originalname.match(/\.(pdf|jpg|jpeg|png)$/)) {
+            return cb(new Error('โปรดอัปโหลดไฟล์ PDF หรือรูปภาพเท่านั้นสำหรับวุฒิการศึกษา'), false);
+        }
+        cb(null, true);
+        return;
+    }
+
+    if (file.fieldname === 'user_documents') {
+        if (!file.originalname.match(/\.(pdf|jpg|jpeg|png)$/)) {
+            return cb(new Error('โปรดอัปโหลดไฟล์ PDF หรือรูปภาพเท่านั้นใน user_documents'), false);
+        }
+        cb(null, true);
+        return;
+    }
+
+    // ถ้าไม่ตรงกับ fieldname ใดๆ
+    cb(new Error('Unexpected field'), false);
 };
+export const adminUpload = multer({
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: { fileSize: 2 * 1024 * 1024 } // จำกัดขนาด 2MB
+}).single('profile_pic');
 
 
 export const upload = multer({
@@ -68,11 +103,30 @@ export const deleteFile = (filePath) => {
     if (fs.existsSync(filePath)) {
         try {
             fs.unlinkSync(filePath);
-            console.log(`ลบไฟล์ ${filePath} สำเร็จ`);
+            // console.log(`ลบไฟล์ ${filePath} สำเร็จ`);
         } catch (error) {
             console.error(`เกิดข้อผิดพลาดในการลบไฟล์ ${filePath}:`, error);
         }
     } else {
         console.log(`ไม่พบไฟล์ที่ต้องการลบ: ${filePath}`);
     }
+};
+
+// middleware จัดการ error จาก multer
+export const handleMulterError = (err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({
+                message: 'ไฟล์มีขนาดใหญ่เกินไป (ไม่เกิน 2MB)'
+            });
+        }
+        return res.status(400).json({
+            message: `เกิดข้อผิดพลาดในการอัพโหลดไฟล์: ${err.message}`
+        });
+    } else if (err) {
+        return res.status(400).json({
+            message: err.message
+        });
+    }
+    next();
 };

@@ -4,29 +4,53 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { createLog } from '../models/logModel.js';
 import * as notificationModel from '../models/notificationModel.js';
-
+import { deleteFile } from '../utils/fileUpload.js';
 
 // register admin
 export const registerAdmin = async (req, res) => {
-    const { email, password, first_name, last_name, admin_secret } = req.body;
     const { ip, headers: { 'user-agent': userAgent } } = req;
+    let uploadedFile = null;
     try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'กรุณาอัปโหลดรูปโปรไฟล์' });
+        }
+        uploadedFile = req.file;
+        const { email, password, first_name, last_name, admin_secret, phone } = req.body;
+
+        // ตรวจสอบข้อมูลที่จำเป็น
+        if (!email || !password || !first_name || !last_name || !admin_secret || !phone) {
+            // ลบไฟล์ถ้าข้อมูลไม่ครบ
+            deleteFile(`uploads/admin-profiles/${uploadedFile.filename}`);
+            return res.status(400).json({
+                message: "กรุณากรอกข้อมูลให้ครบถ้วน"
+            });
+        }
 
         if (admin_secret !== process.env.ADMIN_SECRET) {
+            deleteFile(`uploads/admin-profiles/${uploadedFile.filename}`);
             return res.status(403).json({ message: "รหัสลับของผู้ดูแลระบบไม่ถูกต้อง" });
         }
 
         const existingAdmin = await adminModel.checkExistingAdmin(email);
         if (existingAdmin) {
+            deleteFile(`uploads/admin-profiles/${uploadedFile.filename}`);
             return res.status(400).json({ message: "อีเมลนี้มีอยู่ในระบบแล้ว" });
         }
 
+        if (!/^[0-9]{10}$/.test(phone)) {
+            deleteFile(`uploads/admin-profiles/${uploadedFile.filename}`);
+            return res.status(400).json({ message: "รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง" });
+        }
 
+
+        // สร้างแอดมินใหม่
         const newAdmin = await adminModel.createAdmin({
             email,
             password,
             first_name,
-            last_name
+            last_name,
+            phone,
+            profile_pic: uploadedFile.filename
         });
 
 
@@ -46,10 +70,16 @@ export const registerAdmin = async (req, res) => {
                 id: newAdmin.id,
                 email: newAdmin.email,
                 first_name: newAdmin.first_name,
-                last_name: newAdmin.last_name
+                last_name: newAdmin.last_name,
+                phone: newAdmin.phone,
+                profile_pic: uploadedFile.filename
             }
         });
     } catch (error) {
+        if (uploadedFile) {
+            deleteFile(`uploads/admin-profiles/${uploadedFile.filename}`);
+        }
+
         try {
             await createLog(
                 null,
@@ -161,6 +191,21 @@ export const getAdminProfile = async (req, res) => {
     }
 }
 
+// เพิ่มเอนด์พอยต์สำหรับดึงรูปโปรไฟล์
+export const getAdminProfilePic = (req, res) => {
+    try {
+        const { filename } = req.params;
+        const filePath = path.join(__dirname, '../../uploads/admin-profiles', filename);
+
+        if (fs.existsSync(filePath)) {
+            res.sendFile(filePath);
+        } else {
+            res.status(404).json({ message: 'ไม่พบรูปโปรไฟล์' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการเข้าถึงรูปโปรไฟล์' });
+    }
+};
 // getadmin ตาม id
 export const getAdminById = async (req, res) => {
     const { adminId } = req.params;

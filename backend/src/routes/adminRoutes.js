@@ -2,12 +2,14 @@ import express from 'express';
 import * as adminController from '../controllers/adminController.js';
 import { authMiddleware, checkAdminRole } from '../middleware/authMiddleware.js';
 import * as  jobParticipationController from '../controllers/jobParticipationController.js'
+import { adminUpload, handleMulterError } from '../utils/fileUpload.js'
+
 const router = express.Router();
 
 // ไม่ต้องการการยืนยันตัวตน
 router.post('/login-admin', adminController.loginAdmin);
 
-router.post('/register-admin', adminController.registerAdmin);
+router.post('/register-admin', adminUpload, handleMulterError, adminController.registerAdmin);
 
 
 router.use(authMiddleware);

@@ -120,11 +120,14 @@ export const getAllJobs = async (page = 1, pageSize = 20, filters = {}) => {
             details: true,
             created_by: true,
             created_at: true,
+            status: true,
             creator: {
                 select: {
                     id: true,
                     first_name: true,
-                    last_name: true
+                    last_name: true,
+                    phone: true,
+                    profile_pic: true,
                 }
             },
             JobPositions: {

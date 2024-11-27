@@ -155,6 +155,8 @@ model Admin {
   role         String         @default("admin") // กำหนด role ให้เป็น admin
   created_at   DateTime       @default(now()) @db.Timestamptz
   updated_at   DateTime       @updatedAt @db.Timestamptz
+  phone        String? // เพิ่มเบอร์โทร
+  profile_pic  String? // เพิ่มรูปโปรไฟล์
   Job          Job[]
   Log          Log[]
   Notification Notification[]

@@ -306,11 +306,15 @@ export default {
       sidebarStore: useSidebarStore(),
       jobStore: useJobStore(),
       adminStore: useAdminStore(),
-      notificationStore: useNotificationStore(),
-      isDarkMode: localStorage.getItem('darkMode') === 'true' || false
+      notificationStore: useNotificationStore()
     }
   },
-
+  computed: {
+    // เพิ่ม computed property สำหรับ isDarkMode
+    isDarkMode() {
+      return this.sidebarStore.isDarkMode
+    }
+  },
   methods: {
     async handleLogout() {
       try {
@@ -371,23 +375,7 @@ export default {
       }
     },
     toggleDarkMode() {
-      this.isDarkMode = !this.isDarkMode
-
-      if (this.isDarkMode) {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
-      }
-
-      localStorage.setItem('darkMode', this.isDarkMode)
-    }
-  },
-
-  mounted() {
-    this.sidebarStore.initializeResponsive()
-    if (localStorage.getItem('darkMode') === 'true') {
-      document.documentElement.classList.add('dark')
-      this.isDarkMode = true
+      this.sidebarStore.toggleDarkMode()
     }
   },
 

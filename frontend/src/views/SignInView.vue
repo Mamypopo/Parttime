@@ -161,7 +161,7 @@ export default {
           timer: 1500
         })
 
-        this.$router.push('/')
+        this.$router.push('/user/dashboard')
       } catch (err) {
         Swal.fire({
           icon: 'error',
