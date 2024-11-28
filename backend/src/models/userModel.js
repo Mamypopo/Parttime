@@ -174,6 +174,41 @@ export const getTotalJobHistoryCount = (userId) =>
         },
     });
 
+// export const getJobEvaluation = async (jobParticipationId) => {
+//     try {
+//         return await prisma.workHistory.findFirst({
+//             where: {
+//                 jobParticipationId: parseInt(jobParticipationId)
+//             },
+//             select: {
+//                 appearance_score: true,
+//                 quality_score: true,
+//                 quantity_score: true,
+//                 manner_score: true,
+//                 punctuality_score: true,
+//                 comment: true,
+//                 is_passed_evaluation: true,
+//                 total_score: true,
+//                 jobParticipation: {
+//                     select: {
+//                         jobPosition: {
+//                             select: {
+//                                 job: {
+//                                     select: {
+//                                         title: true
+//                                     }
+//                                 }
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         })
+//     } catch (error) {
+//         console.error('Error in getJobEvaluation:', error)
+//         throw error
+//     }
+// }
 
 // สร้าง pending skill ใหม่
 export const createPendingSkill = async (userId, skill) => {

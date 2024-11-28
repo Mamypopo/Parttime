@@ -794,3 +794,217 @@ export const updateJobStatus = async (jobId, status) => {
         throw error;
     }
 };
+
+
+// ค้นหางานสำหรับ User
+export const searchJobs = async (page = 1, pageSize = 10, filters = {}) => {
+    const skip = (page - 1) * pageSize;
+
+    const where = {
+        AND: []
+    };
+
+    // กรองตามสถานะ
+    if (filters.status && filters.status !== 'all') {
+        where.AND.push({ status: filters.status });
+    }
+
+    // ค้นหาตามชื่องาน
+    if (filters.title) {
+        where.AND.push({
+            title: { contains: filters.title, mode: 'insensitive' }
+        });
+    }
+
+    // ค้นหาตามสถานที่
+    if (filters.location) {
+        where.AND.push({
+            location: { contains: filters.location, mode: 'insensitive' }
+        });
+    }
+
+    // ค้นหาตามตำแหน่ง
+    if (filters.position) {
+        where.AND.push({
+            JobPositions: {
+                some: {
+                    position_name: { contains: filters.position, mode: 'insensitive' }
+                }
+            }
+        });
+    }
+
+    // กรองตามค่าจ้าง
+    if (filters.minWage || filters.maxWage) {
+        where.AND.push({
+            JobPositions: {
+                some: {
+                    wage: {
+                        gte: filters.minWage || 0,
+                        lte: filters.maxWage || 999999
+                    }
+                }
+            }
+        });
+    }
+
+    // กรองตามวันที่
+    if (filters.workDate) {
+        where.AND.push({
+            work_date: new Date(filters.workDate)
+        });
+    }
+
+    // ถ้าต้องการค้นหาเฉพาะงานที่ตรงกับทักษะ
+    if (filters.matchSkills && filters.userId) {
+        const userSkills = await getUserSkills(filters.userId);
+        if (userSkills?.length > 0) {
+            where.AND.push({
+                JobPositions: {
+                    some: {
+                        OR: userSkills.map(skill => ({
+                            position_name: { contains: skill, mode: 'insensitive' }
+                        }))
+                    }
+                }
+            });
+        }
+    }
+
+    return prisma.job.findMany({
+        skip,
+        take: pageSize,
+        where,
+        select: {
+            id: true,
+            title: true,
+            work_date: true,
+            location: true,
+            start_time: true,
+            end_time: true,
+            details: true,
+            status: true,
+            creator: {
+                select: {
+                    id: true,
+                    first_name: true,
+                    last_name: true,
+                    phone: true,
+                    profile_pic: true,
+                }
+            },
+            JobPositions: {
+                select: {
+                    id: true,
+                    position_name: true,
+                    wage: true,
+                    required_people: true,
+                    details: true,
+                    status: true,
+                    JobParticipation: {
+                        where: {
+                            user_id: filters.userId
+                        },
+                        select: {
+                            id: true,
+                            status: true
+                        }
+                    }
+                }
+            }
+        },
+        orderBy: [
+            { work_date: 'asc' },
+            { created_at: 'desc' }
+        ]
+    });
+};
+
+// Helper function สำหรับดึงทักษะของ user
+const getUserSkills = async (userId) => {
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { skills: true }
+    });
+
+    if (!user?.skills) return [];
+
+    return Array.isArray(user.skills) ? user.skills : JSON.parse(user.skills);
+};
+
+// นับจำนวนงานที่ค้นหาเจอ
+export const searchJobsCount = async (filters = {}) => {
+    const where = {
+        AND: []
+    };
+
+    // กรองตามสถานะ
+    if (filters.status && filters.status !== 'all') {
+        where.AND.push({ status: filters.status });
+    }
+
+    // ค้นหาตามชื่องาน
+    if (filters.title) {
+        where.AND.push({
+            title: { contains: filters.title, mode: 'insensitive' }
+        });
+    }
+
+    // ค้นหาตามสถานที่
+    if (filters.location) {
+        where.AND.push({
+            location: { contains: filters.location, mode: 'insensitive' }
+        });
+    }
+
+    // ค้นหาตามตำแหน่ง
+    if (filters.position) {
+        where.AND.push({
+            JobPositions: {
+                some: {
+                    position_name: { contains: filters.position, mode: 'insensitive' }
+                }
+            }
+        });
+    }
+
+    // กรองตามค่าจ้าง
+    if (filters.minWage || filters.maxWage) {
+        where.AND.push({
+            JobPositions: {
+                some: {
+                    wage: {
+                        gte: filters.minWage || 0,
+                        lte: filters.maxWage || 999999
+                    }
+                }
+            }
+        });
+    }
+
+    // กรองตามวันที่
+    if (filters.workDate) {
+        where.AND.push({
+            work_date: new Date(filters.workDate)
+        });
+    }
+
+    // ถ้าต้องการค้นหาเฉพาะงานที่ตรงกับทักษะ
+    if (filters.matchSkills && filters.userId) {
+        const userSkills = await getUserSkills(filters.userId);
+        if (userSkills?.length > 0) {
+            where.AND.push({
+                JobPositions: {
+                    some: {
+                        OR: userSkills.map(skill => ({
+                            position_name: { contains: skill, mode: 'insensitive' }
+                        }))
+                    }
+                }
+            });
+        }
+    }
+    return prisma.job.count({
+        where: where.AND.length > 0 ? where : undefined
+    });
+};

@@ -3,6 +3,7 @@ import * as userController from '../controllers/userController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import { upload } from '../utils/fileUpload.js'
 import { trackUserActivity } from '../middleware/trackUserActivity.js'
+import * as userJobController from '../controllers/userJobController.js';
 
 const router = express.Router();
 
@@ -27,6 +28,10 @@ router.post('/skills', userController.addUserSkills);
 router.post('heartbeat', userController.updateUserOnlineStatus);
 
 router.get('/history/:userId', userController.getUserHistory);
+
+router.get('/my-jobs', userJobController.getMyJobs);
+
+router.get('/evaluation/:jobId/:userId', userController.getJobEvaluation);
 
 router.get('/notifications', userController.getUserNotifications);
 

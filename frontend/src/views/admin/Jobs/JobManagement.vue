@@ -290,28 +290,49 @@
                     </span>
                   </div>
 
-                  <button
-                    @click="openParticipantsModal(job)"
-                    class="ml-3 px-4 py-2 text-sm rounded-lg transition-all duration-300"
-                    :class="[
-                      getPendingCount(job) > 0
-                        ? 'bg-[#7BC4C4] hover:bg-[#5DA3A3] text-white shadow-sm hover:shadow-md'
-                        : 'text-[#7BC4C4] hover:text-[#5DA3A3]'
-                    ]"
-                  >
-                    <template v-if="getPendingCount(job) > 0">
-                      <i class="fas fa-user-edit mr-2"></i>
-                      จัดการผู้สมัคร ({{ getPendingCount(job) }})
-                    </template>
-                    <template v-else-if="getTotalParticipants(job) > 0">
-                      <i class="fas fa-users mr-2"></i>
-                      ผู้สมัครทั้งหมด ({{ getTotalParticipants(job) }})
-                    </template>
-                    <template v-else>
-                      <i class="fas fa-user-plus mr-2"></i>
-                      ยังไม่มีผู้สมัคร
-                    </template>
-                  </button>
+                  <div class="flex items-center gap-2">
+                    <!-- ปุ่มจัดการผู้สมัคร -->
+                    <button
+                      @click="openParticipantsModal(job)"
+                      class="px-4 py-2 text-sm rounded-lg transition-all duration-300"
+                      :class="[
+                        getPendingCount(job) > 0
+                          ? 'bg-[#7BC4C4] hover:bg-[#5DA3A3] text-white shadow-sm hover:shadow-md'
+                          : 'text-[#7BC4C4] hover:text-[#5DA3A3]'
+                      ]"
+                    >
+                      <template v-if="getPendingCount(job) > 0">
+                        <i class="fas fa-user-edit mr-2"></i>
+                        จัดการผู้สมัคร ({{ getPendingCount(job) }})
+                      </template>
+                      <template v-else-if="getTotalParticipants(job) > 0">
+                        <i class="fas fa-users mr-2"></i>
+                        ผู้สมัครทั้งหมด ({{ getTotalParticipants(job) }})
+                      </template>
+                      <template v-else>
+                        <i class="fas fa-user-plus mr-2"></i>
+                        ยังไม่มีผู้สมัคร
+                      </template>
+                    </button>
+
+                    <!-- ปุ่มประเมิน -->
+                    <button
+                      v-if="
+                        ['in_progress', 'completed'].includes(getJobStatus(job)) &&
+                        getTotalParticipants(job) > 0
+                      "
+                      @click="openWorkStatusModal(job)"
+                      class="px-4 py-2 text-sm rounded-lg transition-all duration-300"
+                      :class="[
+                        getJobStatus(job) === 'completed'
+                          ? 'bg-purple-100 text-purple-600 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-400'
+                          : 'bg-yellow-100 text-yellow-600 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400'
+                      ]"
+                    >
+                      <i class="fas fa-star mr-2"></i>
+                      {{ getJobStatus(job) === 'completed' ? 'ดูผลประเมิน' : 'ประเมินผลงาน' }}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -784,9 +805,21 @@ export default {
 
     async handleUpdateWorkStatus(data) {
       try {
-        await this.jobStore.updateWorkStatus(data.participationId, {
-          rating: data.rating,
-          comment: data.comment
+        // เพิ่ม log เพื่อดูข้อมูลที่ส่งไป
+        console.log('Sending evaluation data:', {
+          participationId: data.participationId,
+          ratings: data.ratings,
+          totalScore: data.totalScore,
+          comment: data.comment,
+          isPassedEvaluation: data.isPassedEvaluation
+        })
+
+        await this.jobStore.updateWorkEvaluation({
+          participationId: data.participationId,
+          ratings: data.ratings,
+          totalScore: data.totalScore,
+          comment: data.comment,
+          isPassedEvaluation: data.isPassedEvaluation // ต้องส่งค่านี้ด้วย
         })
 
         this.closeWorkStatusModal()
@@ -797,6 +830,7 @@ export default {
           timer: 1500
         })
       } catch (error) {
+        console.error('Error details:', error.response?.data) // เพิ่ม log error
         Swal.fire({
           icon: 'error',
           title: 'เกิดข้อผิดพลาด',

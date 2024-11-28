@@ -378,7 +378,10 @@ export default {
       this.sidebarStore.toggleDarkMode()
     }
   },
-
+  mounted() {
+    this.sidebarStore.initializeResponsive()
+    this.sidebarStore.initializeTheme()
+  },
   beforeUnmount() {
     this.sidebarStore.cleanup()
   }

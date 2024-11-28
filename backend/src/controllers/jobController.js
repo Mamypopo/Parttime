@@ -540,6 +540,46 @@ export const updateJobStatus = async (req, res) => {
 };
 
 
+// ฟังก์ชันค้นหางานสำหรับ User
+export const searchJobs = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 10;
+        const userId = req.user?.id; // ดึง user ID จาก token
+
+        // สร้าง filters object จาก query parameters
+        const filters = {
+            title: req.query.title,
+            location: req.query.location,
+            position: req.query.position,
+            minWage: req.query.minWage ? parseInt(req.query.minWage) : undefined,
+            maxWage: req.query.maxWage ? parseInt(req.query.maxWage) : undefined,
+            workDate: req.query.workDate,
+            status: req.query.status, // 'all', 'published', 'in_progress', 'completed'
+            matchSkills: req.query.matchSkills === 'true', // ค้นหาเฉพาะงานที่ตรงกับทักษะ
+            userId: userId // ส่ง userId ไปด้วยถ้าต้องการกรองตามทักษะ
+        };
+
+        // เรียกใช้ฟังก์ชันจาก Model
+        const jobs = await jobModel.searchJobs(page, pageSize, filters);
+        const totalCount = await jobModel.searchJobsCount(filters);
+
+        return res.status(200).json({
+            jobs,
+            page,
+            pageSize,
+            totalPages: Math.ceil(totalCount / pageSize),
+            totalCount
+        });
+
+    } catch (error) {
+        console.error('Error searching jobs:', error);
+        return res.status(500).json({
+            message: "เกิดข้อผิดพลาดในการค้นหางาน",
+            error: error.message
+        });
+    }
+};
 
 
 

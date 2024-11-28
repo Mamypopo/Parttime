@@ -9,7 +9,7 @@
     </div>
 
     <!-- Search Component -->
-    <JobSearch @search="handleSearch" @clear="fetchJobs" />
+    <JobSearchFilters @search="handleSearch" @clear="fetchJobs" />
 
     <!-- Jobs Grid -->
     <div class="mt-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -70,7 +70,8 @@
         </div>
 
         <!-- Job Details -->
-        <div class="p-5 space-y-4">
+        <!-- Job Details -->
+        <div class="p-5 flex flex-col flex-1">
           <!-- Date and Time -->
           <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
             <span class="flex items-center">
@@ -84,7 +85,7 @@
           </div>
 
           <!-- Positions -->
-          <div class="space-y-3" v-if="job?.JobPositions?.length">
+          <div class="space-y-3 mt-4" v-if="job?.JobPositions?.length">
             <!-- แสดงสรุปตำแหน่ง -->
             <div class="flex flex-wrap gap-2">
               <span
@@ -106,7 +107,8 @@
           </div>
 
           <!-- Action Buttons -->
-          <div class="flex gap-2 pt-2">
+          <div class="flex gap-2 mt-auto pt-4">
+            <!-- ปุ่มดูรายละเอียด -->
             <button
               @click="openJobDetail(job)"
               class="flex-1 py-2 px-4 rounded-lg font-medium bg-white dark:bg-gray-700 text-cyan-600 dark:text-cyan-400 border-2 border-cyan-500 dark:border-cyan-400 hover:bg-cyan-50 dark:hover:bg-gray-600 transition-colors duration-200"
@@ -114,26 +116,23 @@
               <i class="fas fa-info-circle mr-2"></i>
               รายละเอียด
             </button>
-            <!-- ถ้างานเสร็จสิ้นแล้ว แสดงปุ่มดูคะแนนประเมิน -->
-            <button
-              v-if="job.status === 'completed'"
-              @click="viewEvaluation(job)"
-              class="flex-1 py-2 px-4 rounded-lg font-medium bg-purple-500 hover:bg-purple-600 text-white transition-all duration-200"
-              :disabled="!hasEvaluation(job)"
-            >
-              <i class="fas fa-star mr-2"></i>
-              ดูผลประเมิน
-            </button>
 
-            <!-- ถ้างานยังไม่เสร็จสิ้น แสดงปุ่มสมัครงาน -->
+            <!-- ปุ่มสมัครงาน -->
             <button
-              v-else
               @click="openApplyModal(job)"
-              class="flex-1 py-2 px-4 rounded-lg font-medium bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-600 hover:to-blue-600 transition-all duration-200"
-              :disabled="!canApply(job)"
+              class="flex-1 py-2 px-4 rounded-lg font-medium"
+              :class="
+                hasApplied(job) || !canApply(job)
+                  ? 'bg-gray-500 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600'
+              "
+              :disabled="hasApplied(job) || !canApply(job)"
             >
               <i class="fas fa-paper-plane mr-2"></i>
-              สมัครงาน
+              <span v-if="hasApplied(job)">สมัครแล้ว</span>
+              <span v-else-if="getJobStatus(job) === 'in_progress'">กำลังดำเนินงาน</span>
+              <span v-else-if="getJobStatus(job) === 'completed'">งานเสร็จสิ้น</span>
+              <span v-else>สมัครงาน</span>
             </button>
           </div>
         </div>
@@ -166,10 +165,11 @@
       @close="closeApplyModal"
     />
 
-    <JobHistoryModal
-      :show="showHistoryModal"
-      :user="selectedUser"
-      @close="showHistoryModal = false"
+    <JobEvaluationModal
+      :show="showEvaluationModal"
+      :job="selectedJob"
+      :evaluation="evaluation"
+      @close="showEvaluationModal = false"
     />
   </div>
 </template>
@@ -181,31 +181,33 @@ import { useUserHistoryStore } from '@/stores/userHistoryStore'
 
 import JobDetailModal from '@/components/admin/Jobs/JobDetailModal.vue'
 import JobApplyModal from '@/components/Users/JobApplyModal.vue'
-import JobHistoryModal from '@/components/Users/JobHistoryModal.vue'
-
-import JobSearch from '@/components/Search/JobSearch.vue'
+import JobEvaluationModal from '@/components/Users/JobEvaluationModal.vue'
+import JobSearchFilters from '@/components/Search/JobSearchFilters.vue'
 import Swal from 'sweetalert2'
 
 export default {
   name: 'JobsView',
 
   components: {
-    JobSearch,
+    JobSearchFilters,
     JobDetailModal,
     JobApplyModal,
-    JobHistoryModal
+    JobEvaluationModal
   },
 
   data() {
     return {
       jobStore: useJobStore(),
       userStore: useUserStore(),
+      userHistoryStore: useUserHistoryStore(),
       searchQuery: '',
       isModalOpen: false,
       selectedJob: null,
       selectedUser: null,
       showAllPositions: false,
       showHistoryModal: false,
+      showEvaluationModal: false,
+      evaluation: null,
       showApplyModal: false,
       positionsPerPage: 5,
       expandedJobs: new Set()
@@ -236,10 +238,44 @@ export default {
     //   return true
     // },
 
+    hasApplied(job) {
+      if (!this.userStore.user?.id) return false
+      if (!job.JobPositions) return false
+
+      const isApplied = job.JobPositions.some((position) =>
+        position.JobParticipation?.some((p) => p.user_id === this.userStore.user.id)
+      )
+
+      return isApplied
+    },
+    canApply(job) {
+      // แปลง string เป็น Date object ให้ถูกต้อง
+      const now = new Date()
+      const workDate = new Date(job.work_date.split('T')[0])
+
+      // เช็คว่ามีตำแหน่งว่างไหม
+      const hasAvailablePosition = job.JobPositions?.some((position) => {
+        const participantsCount = position.JobParticipation?.length || 0
+        const hasSpace = participantsCount < position.required_people
+
+        return hasSpace
+      })
+
+      const canApply = workDate > now && hasAvailablePosition
+
+      return canApply
+    },
+    getApplyButtonTooltip(job) {
+      if (this.getJobStatus(job) === 'in_progress') {
+        return 'งานกำลังดำเนินการอยู่ ไม่สามารถสมัครได้'
+      }
+      if (!this.canApply(job)) {
+        return 'ตำแหน่งงานเต็มแล้ว หรือปิดรับสมัคร'
+      }
+      return ''
+    },
     handleJobApplied() {
-      // Handle successful application
       this.closeApplyModal()
-      // Maybe show success message
     },
     async handleSearch(query) {
       this.jobStore.searchFilters = { title: query }
@@ -263,50 +299,7 @@ export default {
       this.showApplyModal = false
       this.selectedJob = null
     },
-    canApply(job) {
-      // เช็คว่าสามารถสมัครงานได้หรือไม่
-      if (job.status === 'completed') return false
 
-      const now = new Date()
-      const workDate = new Date(job.work_date)
-
-      // ถ้าวันทำงานผ่านไปแล้ว ไม่สามารถสมัครได้
-      if (workDate < now) return false
-
-      // เช็คเงื่อนไขอื่นๆ เช่น จำนวนที่รับสมัครเต็มหรือยัง
-      return true
-    },
-
-    hasEvaluation(job) {
-      const userStore = useUserStore()
-      // เช็คว่าผู้ใช้มีการประเมินในงานนี้หรือไม่
-      return job.JobPositions?.some((position) =>
-        position.JobParticipation?.some(
-          (p) => p.user_id === userStore.user?.id && p.evaluation !== null
-        )
-      )
-    },
-
-    async viewEvaluation(job) {
-      const userHistoryStore = useUserHistoryStore()
-
-      try {
-        // โหลดประวัติการทำงานของ user สำหรับงานนี้
-        await userHistoryStore.fetchUserHistory(job.creator.id)
-
-        // เปิด modal
-        this.showHistoryModal = true
-        this.selectedUser = job.creator
-      } catch (error) {
-        console.error('Error loading user history:', error)
-        Swal.fire({
-          icon: 'error',
-          title: 'เกิดข้อผิดพลาด',
-          text: 'ไม่สามารถโหลดประวัติการทำงานได้',
-          confirmButtonText: 'ตกลง'
-        })
-      }
-    },
     formatCurrency(amount) {
       return new Intl.NumberFormat('th-TH', {
         style: 'currency',
@@ -390,34 +383,20 @@ export default {
       }
     },
     getJobStatus(job) {
-      // ถ้ามีผู้สมัครที่ completed แล้ว ให้ถือว่างานเสร็จสิ้น
-      const hasCompletedParticipants = job.JobPositions?.some((position) =>
-        position.JobParticipation?.some((p) => p.status === 'completed')
-      )
-
-      if (hasCompletedParticipants) {
-        return 'completed'
-      }
-
-      // ดูสถานะจริงของงานก่อน
-      if (job.status === 'completed') {
-        return 'completed'
-      }
-
       const now = new Date()
       const workDate = new Date(job.work_date)
 
-      // ถ้ายังไม่ถึงวันทำงาน = ประกาศรับสมัคร
+      // ฝั่ง user ดูแค่:
+      // 1. ถ้ายังไม่ถึงวันงาน = published
+      // 2. ถ้าถึงวันงาน = in_progress
+      // 3. ถ้าผ่านวันงาน = completed
+
       if (workDate > now) {
-        return 'published'
-      }
-      // ถ้าเป็นวันเดียวกัน = กำลังดำเนินงาน
-      else if (workDate.toDateString() === now.toDateString()) {
-        return 'in_progress'
-      }
-      // ถ้าผ่านวันทำงานมาแล้ว = เสร็จสิ้น
-      else {
-        return 'completed'
+        return 'published' // ยังไม่ถึงวันงาน
+      } else if (workDate.toDateString() === now.toDateString()) {
+        return 'in_progress' // วันนี้
+      } else {
+        return 'completed' // ผ่านไปแล้ว
       }
     }
   },

@@ -1,6 +1,6 @@
 <template>
   <TransitionRoot appear :show="isOpen" as="template">
-    <Dialog as="div" @close="closeModal" class="relative z-50">
+    <Dialog as="div" @close="closeModal" class="relative modal">
       <!-- Backdrop -->
       <TransitionChild
         as="template"
@@ -11,7 +11,7 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity" />
+        <div class="fixed inset-0 bg-black/25 backdrop-blur-sm" />
       </TransitionChild>
 
       <div class="fixed inset-0 overflow-y-auto">
@@ -342,12 +342,17 @@ export default {
         } catch (error) {
           // กรณี error ให้แสดง error message
           await Swal.fire({
-            icon: 'error',
-            title: 'เกิดข้อผิดพลาด!',
+            icon: 'info',
+            title: 'ไม่สามารถสมัครได้',
             text: error.response?.data?.message || 'ไม่สามารถสมัครงานได้ในขณะนี้',
-            confirmButtonText: 'ปิด',
-            confirmButtonColor: '#EF4444'
+            footer: error.response?.data?.position
+              ? `ตำแหน่ง: ${error.response.data.position}`
+              : '',
+            confirmButtonText: 'เข้าใจแล้ว',
+            confirmButtonColor: '#06B6D4'
           })
+          // ปิด modal หลังกดปุ่ม
+          this.closeModal()
         }
       } else {
         this.currentStep++

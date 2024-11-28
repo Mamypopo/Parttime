@@ -8,6 +8,7 @@ export const useJobStore = defineStore('job', {
         jobs: [],
         jobParticipants: [],
         jobsWithParticipants: [],
+        myJobs: [],
         newParticipations: new Set(),
         loading: false,
         error: null,
@@ -23,6 +24,16 @@ export const useJobStore = defineStore('job', {
             minWage: null,
             maxWage: null,
             peopleCount: ''
+        },
+        userSearchFilters: {
+            title: '',
+            location: '',
+            position: '',
+            minWage: null,
+            maxWage: null,
+            workDate: '',
+            status: '',
+            matchSkills: false
         },
         pagination: {
             currentPage: 1,
@@ -89,7 +100,7 @@ export const useJobStore = defineStore('job', {
         getAuthHeaders() {
             const adminStore = useAdminStore()
             const userStore = useUserStore()
-            const token = userStore.token || adminStore.token
+            const token = adminStore.token || userStore.token
 
             if (!token) {
                 throw new Error('กรุณาเข้าสู่ระบบใหม่')
@@ -274,8 +285,6 @@ export const useJobStore = defineStore('job', {
         async updateWorkEvaluation({ participationId, ratings, totalScore, comment, isPassedEvaluation }) {
             try {
                 const headers = this.getAuthHeaders()
-
-
                 const response = await axios.put(
                     `${this.baseURL}/api/jobs/participation/${participationId}/evaluate`,
                     {
@@ -432,6 +441,85 @@ export const useJobStore = defineStore('job', {
             }
         },
 
+        async fetchMyJobs() {
+            this.loading = true
+            try {
+                const headers = this.getAuthHeaders()
+                const response = await axios.get(
+                    `${this.baseURL}/api/users/my-jobs`,
+                    { headers }
+                )
+
+                if (response.data.success) {
+                    this.myJobs = response.data.jobs
+                    return response.data
+                }
+
+                throw new Error('Failed to fetch my jobs')
+            } catch (error) {
+                console.error('Error fetching my jobs:', error)
+                throw error
+            } finally {
+                this.loading = false
+            }
+        },
+
+        // สำหรับ user
+        async searchJobs() {
+            this.loading = true
+            try {
+                const params = {
+                    ...this.userSearchFilters,
+                    page: this.pagination.currentPage,
+                    limit: this.pagination.perPage,
+                }
+
+                const response = await axios.get(
+                    `${this.baseURL}/api/jobs/search`,
+                    {
+                        params,
+                        headers: this.getAuthHeaders()
+                    }
+                )
+
+                if (response.data) {
+                    this.jobs = response.data.jobs
+                    this.pagination.totalItems = parseInt(response.data.pagination?.total || 0)
+                }
+
+                return response.data
+            } catch (error) {
+                console.error('Error searching jobs:', error)
+                this.jobs = []
+                this.pagination.totalItems = 0
+                throw error
+            } finally {
+                this.loading = false
+            }
+        },
+
+        // แยก method สำหรับ set filters
+        setUserSearchFilters(filters) {
+            this.userSearchFilters = { ...filters }
+        },
+
+        clearUserSearchFilters() {
+            this.userSearchFilters = {
+                title: '',
+                location: '',
+                position: '',
+                minWage: null,
+                maxWage: null,
+                workDate: '',
+                status: '',
+                matchSkills: false
+            }
+            this.pagination.currentPage = 1
+        },
+        // เซ็ต filters
+        setSearchFilters(filters) {
+            this.searchFilters = filters
+        },
         // Utility functions
         formatDate(date) {
             return new Date(date).toLocaleDateString('th-TH', {

@@ -51,45 +51,7 @@ export const createWorkHistory = async (data) => {
     }
 };
 
-// ฟังชั่นดึงประวัติเป็นรายบุคคล
-export const getWorkHistoryByUserId = async (userId) => {
-    return prisma.workHistory.findMany({
-        where: {
-            jobParticipation: {
-                user_id: userId
-            }
-        },
-        select: {
-            id: true,
-            // เพิ่มการดึงคะแนนแต่ละประเภท
-            appearance_score: true,
-            quality_score: true,
-            quantity_score: true,
-            manner_score: true,
-            punctuality_score: true,
-            total_score: true,
-            comment: true,
-            created_at: true,
-            jobParticipation: {
-                include: {
-                    user: {
-                        select: {
-                            id: true,
-                            first_name: true,
-                            last_name: true,
-                            profile_image: true
-                        }
-                    },
-                    jobPosition: true,
-                    Job: true
-                }
-            }
-        },
-        orderBy: {
-            created_at: 'desc'
-        }
-    });
-};
+
 
 // ฟังชั่นตรวจสอบว่ามี WorkHistory อยู่แล้วหรือไม่
 export const findByJobParticipationId = async (jobParticipationId) => {

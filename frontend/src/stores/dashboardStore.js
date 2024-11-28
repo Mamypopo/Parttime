@@ -112,12 +112,13 @@ export const useDashboardStore = defineStore('dashboard', {
                 throw error
             }
         },
+
         async fetchTopUsersRatings() {
             this.loading = true;
             this.error = null;
 
             try {
-                const response = await axios.get(`${this.baseURL}/api/work-history/users-ratings`);
+                const response = await axios.get(`${this.baseURL}/api/dashboard/users-ratings`);
                 if (response.data.data) {
                     // รับค่า averageScore จาก API โดยตรง
                     this.averageRating = response.data.data.averageScore;

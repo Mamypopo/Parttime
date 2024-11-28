@@ -69,12 +69,16 @@
             >
               <i :class="[item.icon, 'text-xl']"></i>
               <span v-if="!sidebarStore.isCollapsed" class="font-medium">{{ item.name }}</span>
-              <span
-                v-if="!sidebarStore.isCollapsed && item.badge"
-                class="ml-auto bg-cyan-100 text-cyan-600 px-2 py-0.5 rounded-full text-xs"
+              <!-- Badge -->
+              <div
+                v-if="item.badge && item.badgeCount > 0"
+                class="ml-auto flex items-center"
+                :class="{ 'absolute -top-1 -right-1': sidebarStore.isCollapsed }"
               >
-                {{ item.badgeCount }}
-              </span>
+                <span class="bg-red-500 text-white text-xs font-medium px-2 py-0.5 rounded-full">
+                  {{ item.badgeCount }}
+                </span>
+              </div>
             </router-link>
           </nav>
 
@@ -116,19 +120,28 @@
 
           <!-- User Profile Section -->
           <div class="border-t pt-4 px-3">
-            <div class="flex items-center gap-3 px-4 py-2">
+            <router-link
+              to="/user/profile"
+              class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
+            >
               <img
-                :src="userStore.user?.profile_image || defaultAvatar"
-                class="w-10 h-10 rounded-full object-cover"
+                :src="userStore.getUser.profile_image"
+                class="w-10 h-10 rounded-full object-cover ring-2 ring-transparent group-hover:ring-cyan-500 transition-all"
                 alt="Profile"
               />
               <div v-if="!sidebarStore.isCollapsed">
-                <h3 class="font-medium text-gray-700 dark:text-gray-300">
-                  {{ userStore.user?.first_name }}
+                <h3
+                  class="font-medium text-gray-700 dark:text-gray-300 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors"
+                >
+                  {{ userStore.getUser.first_name }}
+                  <!-- ใช้ getter แทน -->
                 </h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ userStore.user?.email }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ userStore.getUser.email }}
+                  <!-- ใช้ getter แทน -->
+                </p>
               </div>
-            </div>
+            </router-link>
 
             <!-- Logout Button -->
             <button
@@ -158,29 +171,40 @@
 
     <!-- Mobile Navigation -->
     <MobileNavigation v-if="sidebarStore.isMobile" />
+
+    <!-- Mobile Dialogs -->
   </div>
 </template>
 
 <script>
+import { Dialog, DialogPanel, TransitionRoot, TransitionChild } from '@headlessui/vue'
+
+import { useNotificationStore } from '@/stores/notificationStore'
 import { useUserStore } from '@/stores/userStore'
 import { useSidebarStore } from '@/stores/sidebarStore'
-import { TransitionRoot } from '@headlessui/vue'
+import { useJobStore } from '@/stores/jobStore'
 import MobileNavigation from '@/components/Users/mobile/MobileNavigation.vue'
+
 import Swal from 'sweetalert2'
 
 export default {
   name: 'UserSidebar',
 
   components: {
+    Dialog,
+    DialogPanel,
+    TransitionChild,
     TransitionRoot,
     MobileNavigation
   },
 
   data() {
     return {
-      userStore: useUserStore(),
       sidebarStore: useSidebarStore(),
-      defaultAvatar: '/path/to/default-avatar.png'
+      jobStore: useJobStore(),
+      userStore: useUserStore(),
+      notificationStore: useNotificationStore(),
+      defaultAvatar: `${import.meta.env.VITE_API_URL}/images/default-avatar.png`
     }
   },
 
@@ -245,7 +269,7 @@ export default {
 
   mounted() {
     this.sidebarStore.initializeResponsive()
-    // ไม่ต้อง initialize dark mode ที่นี่แล้ว เพราะทำที่ App.vue แล้ว
+    this.sidebarStore.initializeTheme()
   },
 
   beforeUnmount() {

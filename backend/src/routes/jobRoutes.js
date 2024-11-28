@@ -15,6 +15,8 @@ router.use(authMiddleware);
 router.post('/apply', jobController.applyForJob);
 // เส้นทางสำหรับแอดมิน
 router.post('/create', checkAdminRole, jobController.createJob);
+// ค้นหางาน
+router.get('/search', jobController.searchJobs);
 // ลบงาน
 router.delete('/delete-job/:jobId', checkAdminRole, jobController.deleteJob);
 // แก้ไขงาน

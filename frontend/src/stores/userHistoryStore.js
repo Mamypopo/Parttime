@@ -10,12 +10,13 @@ export const useUserHistoryStore = defineStore('userHistory', {
             currentPage: 1,
             totalPages: 1
         },
-
+        history: [],
         loading: false,
         error: null
     }),
 
     actions: {
+        // สำหรับดูประวัติทั้งหมด
         async fetchUserHistory(userId) {
             this.loading = true
             this.error = null
@@ -46,6 +47,44 @@ export const useUserHistoryStore = defineStore('userHistory', {
                 console.error('Error fetching job history:', error)
                 this.error = error.response?.data?.message || 'ไม่สามารถดึงข้อมูลประวัติการทำงานได้'
                 throw error
+            } finally {
+                this.loading = false
+            }
+        },
+
+        // สำหรับดูผลประเมินเฉพาะงาน 
+        async fetchJobEvaluation(userId, jobId) {
+            try {
+                this.loading = true
+                const response = await axios.get(
+                    `${this.baseURL}/api/users/evaluation/${jobId}/${userId}`
+                )
+                console.log('Evaluation Response:', response.data);
+                if (!response.data) {
+                    throw new Error('ไม่พบข้อมูลการประเมิน')
+                }
+
+                // รับ format ใหม่จาก API
+                const { scores, comment, isPassed, jobTitle } = response.data
+
+                return {
+                    appearance_score: Number(scores.appearance || 0),
+                    quality_score: Number(scores.quality || 0),
+                    quantity_score: Number(scores.quantity || 0),
+                    manner_score: Number(scores.manner || 0),
+                    punctuality_score: Number(scores.punctuality || 0),
+                    total_score: Number(scores.total || 0),
+                    comment: comment || '',
+                    is_passed_evaluation: Boolean(isPassed),
+                    job_title: jobTitle || 'ไม่ระบุชื่องาน'
+                }
+
+            } catch (error) {
+                console.error('Error:', error)
+                throw new Error(
+                    error.response?.data?.message ||
+                    'ไม่สามารถดึงข้อมูลการประเมินได้'
+                )
             } finally {
                 this.loading = false
             }

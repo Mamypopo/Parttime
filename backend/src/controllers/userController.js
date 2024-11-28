@@ -1,11 +1,13 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';  // เพิ่มการใช้งาน bcrypt สำหรับ hash password
-import jwt from 'jsonwebtoken';  // เพิ่มการใช้งาน JWT
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import * as userModel from '../models/userModel.js';
+import * as notificationModel from '../models/notificationModel.js'
+import * as jobParticipationModel from '../models/jobParticipationModel.js'
 import { calculateAge } from '../utils/calculateAge.js';
 import { sendVerificationEmail } from '../utils/email.js';
 import { createLog } from '../models/logModel.js';
-import * as notificationModel from '../models/notificationModel.js'
+
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
@@ -469,6 +471,61 @@ export const getUserHistory = async (req, res) => {
     }
 };
 
+export const getJobEvaluation = async (req, res) => {
+    try {
+        const { jobId, userId } = req.params;
+
+        // ตรวจสอบว่า jobId และ userId ถูกส่งมาหรือไม่
+        if (!jobId || !userId) {
+            return res.status(400).json({
+                status: 'INVALID_REQUEST',
+                message: 'กรุณาระบุ jobId และ userId ให้ครบถ้วน'
+            });
+        }
+
+        // หา participation
+        const participation = await jobParticipationModel.findParticipationByUserAndJob(userId, jobId);
+
+        if (!participation) {
+            return res.status(404).json({
+                status: 'NO_PARTICIPATION',
+                message: 'ไม่พบประวัติการเข้าร่วมงานนี้'
+            });
+        }
+
+        // ตรวจสอบว่ามีผลการประเมินใน workHistories หรือไม่
+        if (!participation.workHistories || participation.workHistories.length === 0) {
+            return res.status(404).json({
+                status: 'NO_EVALUATION',
+                message: 'ยังไม่มีผลการประเมินสำหรับงานนี้'
+            });
+        }
+
+        // ดึงข้อมูลการประเมินจาก workHistories
+        const evaluation = participation.workHistories[0];
+
+        res.json({
+            scores: {
+                appearance: evaluation.appearance_score || 0,
+                quality: evaluation.quality_score || 0,
+                quantity: evaluation.quantity_score || 0,
+                manner: evaluation.manner_score || 0,
+                punctuality: evaluation.punctuality_score || 0,
+                total: evaluation.total_score || 0
+            },
+            comment: evaluation.comment || 'ไม่มีความคิดเห็น',
+            isPassed: evaluation.is_passed_evaluation || false,
+            jobTitle: participation.jobPosition?.job?.title || 'ไม่ระบุชื่องาน'
+        });
+    } catch (error) {
+        console.error('Error in getJobEvaluation:', error);
+        res.status(500).json({
+            status: 'ERROR',
+            message: 'ไม่สามารถดึงข้อมูลการประเมินได้'
+        });
+    }
+};
+
 export const getUserNotifications = async (req, res) => {
     try {
 
@@ -490,7 +547,7 @@ export const getUserNotifications = async (req, res) => {
 export const getProfile = async (req, res) => {
     try {
         const userId = req.user.id;
-        const fields = req.query.fields; // ถ้าต้องการให้ผู้ใช้สามารถเลือกฟิลด์ที่ต้องการได้
+        const fields = req.query.fields;
 
         const user = await userModel.getUserById(userId, fields);
 
@@ -545,7 +602,7 @@ export const updateUserOnlineStatus = async (req, res) => {
     }
 };
 
-// เพิ่ม endpoint สำหรับ offline
+//  endpoint สำหรับ offline
 export const updateUserOfflineStatus = async (req, res) => {
     const userId = req.user.id;
     try {

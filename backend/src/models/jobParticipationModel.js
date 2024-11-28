@@ -26,6 +26,38 @@ export const findJobParticipationById = async (jobParticipationId) => {
     });
 };
 
+export const findParticipationByUserAndJob = async (userId, jobId) => {
+    try {
+        return await prisma.jobParticipation.findFirst({
+            where: {
+                user_id: parseInt(userId),
+                jobPosition: {
+                    job_id: parseInt(jobId)
+                },
+                status: 'completed', // เพิ่มเงื่อนไข completed
+                workHistories: {
+                    some: {} // ต้องมี workHistory
+                }
+            },
+            include: {
+                workHistories: true,
+                jobPosition: {
+                    include: {
+                        job: {
+                            select: {
+                                title: true
+                            }
+                        }
+                    }
+                }
+            }
+        })
+    } catch (error) {
+        console.error('Error in findParticipationByUserAndJob:', error)
+        throw error
+    }
+}
+
 // อัพเดทสถานะ JobParticipation
 export const updateJobParticipationStatus = async (jobParticipationId, status) => {
     const id = parseInt(jobParticipationId);

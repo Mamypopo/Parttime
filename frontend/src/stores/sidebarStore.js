@@ -74,11 +74,7 @@ export const useSidebarStore = defineStore('sidebar', {
                 badge: true,
                 badgeCount: 0  // จะอัพเดทจาก API
             },
-            {
-                path: '/user/profile',
-                name: 'โปรไฟล์',
-                icon: 'fas fa-user'
-            }
+
         ],
 
         // เมนูมือถือ
@@ -112,6 +108,12 @@ export const useSidebarStore = defineStore('sidebar', {
     }),
 
     actions: {
+        updateMyJobsBadge(count) {
+            const myJobsMenu = this.userMenuItems.find(item => item.path === '/user/my-jobs')
+            if (myJobsMenu) {
+                myJobsMenu.badgeCount = count
+            }
+        },
         closeAllSubmenus() {
             this.showUserSubmenu = false
             this.showJobSubmenu = false

@@ -1,12 +1,13 @@
 import express from 'express'
-import { getDashboardStats, getCalendarEvents } from '../controllers/dashboardController.js'
+import * as dashboardController from '../controllers/dashboardController.js'
 import { authMiddleware, checkAdminRole } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
-router.get('/stats', authMiddleware, checkAdminRole, getDashboardStats)
 
+router.get('/stats', authMiddleware, checkAdminRole, dashboardController.getDashboardStats)
 
+router.get('/calendar-events', authMiddleware, checkAdminRole, dashboardController.getCalendarEvents)
 
-router.get('/calendar-events', authMiddleware, checkAdminRole, getCalendarEvents)
+router.get('/users-ratings', authMiddleware, checkAdminRole, dashboardController.getTopUsersWithRatings);
 export default router
