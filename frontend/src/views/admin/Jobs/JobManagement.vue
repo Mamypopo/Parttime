@@ -317,20 +317,11 @@
 
                     <!-- ปุ่มประเมิน -->
                     <button
-                      v-if="
-                        ['in_progress', 'completed'].includes(getJobStatus(job)) &&
-                        getTotalParticipants(job) > 0
-                      "
                       @click="openWorkStatusModal(job)"
-                      class="px-4 py-2 text-sm rounded-lg transition-all duration-300"
-                      :class="[
-                        getJobStatus(job) === 'completed'
-                          ? 'bg-purple-100 text-purple-600 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-400'
-                          : 'bg-yellow-100 text-yellow-600 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400'
-                      ]"
+                      class="px-4 py-2 text-sm rounded-lg transition-all duration-300 bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600 shadow-md dark:shadow-none dark:from-purple-600 dark:to-indigo-700 dark:hover:from-purple-700 dark:hover:to-indigo-800"
                     >
                       <i class="fas fa-star mr-2"></i>
-                      {{ getJobStatus(job) === 'completed' ? 'ดูผลประเมิน' : 'ประเมินผลงาน' }}
+                      ประเมินผลงาน
                     </button>
                   </div>
                 </div>

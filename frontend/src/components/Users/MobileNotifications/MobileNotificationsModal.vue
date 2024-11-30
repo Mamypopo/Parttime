@@ -1,8 +1,9 @@
 <template>
   <TransitionRoot appear :show="isOpen" as="template">
-    <HeadlessDialog as="div" @close="closeModal" class="relative modal">
+    <Dialog as="div" @close="handleClose" class="relative z-[950]">
       <!-- Backdrop -->
       <TransitionChild
+        as="template"
         enter="duration-300 ease-out"
         enter-from="opacity-0"
         enter-to="opacity-100"
@@ -10,13 +11,14 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-black/25 backdrop-blur-sm" @click="closeModal" />
+        <div class="fixed inset-0 bg-black/25 backdrop-blur-sm" @click="handleClose" />
       </TransitionChild>
 
       <!-- Modal Container -->
-      <div class="fixed inset-0">
+      <div class="fixed inset-0 modal">
         <div class="flex min-h-full">
           <TransitionChild
+            as="template"
             enter="duration-300 ease-out"
             enter-from="opacity-0 translate-y-full"
             enter-to="opacity-100 translate-y-0"
@@ -24,18 +26,17 @@
             leave-from="opacity-100 translate-y-0"
             leave-to="opacity-0 translate-y-full"
           >
-            <HeadlessDialogPanel
-              class="w-[300px] max-w-md h-full bg-white dark:bg-gray-800 shadow-xl relative"
+            <DialogPanel
+              class="w-[300px] max-w-md h-screen bg-white dark:bg-gray-800 shadow-xl relative"
+              tabindex="0"
             >
               <!-- Header -->
               <div
-                class="sticky top-0 modal flex justify-between items-center p-4 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA] border-b dark:border-gray-700"
+                class="sticky top-0 z-10 flex justify-between items-center p-4 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA]"
               >
-                <HeadlessDialogTitle
-                  class="text-base font-medium text-[#EA6B6B] dark:text-[#FF8F8F]"
-                >
+                <DialogTitle class="text-base font-medium text-[#EA6B6B] dark:text-[#FF8F8F]">
                   การแจ้งเตือนทั้งหมด
-                </HeadlessDialogTitle>
+                </DialogTitle>
                 <div class="flex items-center gap-4">
                   <button
                     v-if="hasUnread"
@@ -48,7 +49,7 @@
                     </span>
                   </button>
                   <button
-                    @click="closeModal"
+                    @click="handleClose"
                     class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
                   >
                     <i class="fas fa-times text-xl"></i>
@@ -94,6 +95,7 @@
                     ยังไม่มีการแจ้งเตือนใหม่ในขณะนี้
                   </p>
                 </div>
+
                 <div
                   v-else
                   v-for="notification in filteredNotifications"
@@ -135,31 +137,28 @@
                   </div>
                 </div>
               </div>
-            </HeadlessDialogPanel>
+            </DialogPanel>
           </TransitionChild>
         </div>
       </div>
-    </HeadlessDialog>
+    </Dialog>
   </TransitionRoot>
 </template>
 
 <script>
-import {
-  Dialog as HeadlessDialog,
-  DialogPanel as HeadlessDialogPanel,
-  DialogTitle as HeadlessDialogTitle,
-  TransitionRoot,
-  TransitionChild
-} from '@headlessui/vue'
-import { useNotificationStore } from '@/stores/notificationStore'
-
+import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
+import { useUserNotificationStore } from '@/stores/userNotificationStore'
+import { FocusTrap } from '@headlessui/vue'
 export default {
+  name: 'MobileNotificationsModal',
+
   components: {
-    HeadlessDialog,
-    HeadlessDialogPanel,
-    HeadlessDialogTitle,
+    Dialog,
+    DialogPanel,
+    DialogTitle,
     TransitionRoot,
-    TransitionChild
+    TransitionChild,
+    FocusTrap
   },
 
   props: {
@@ -169,62 +168,36 @@ export default {
     }
   },
 
-  setup() {
-    const notificationStore = useNotificationStore()
-    return { notificationStore }
-  },
+  emits: ['close'],
 
   data() {
     return {
+      notificationStore: useUserNotificationStore(),
       currentFilter: 'all',
       filters: [
         { label: 'ทั้งหมด', value: 'all' },
         { label: 'ยังไม่ได้อ่าน', value: 'unread' }
-        // { label: 'ผู้ใช้งาน', value: 'user' },
-        // { label: 'ทักษะ', value: 'skill' },
-        // { label: 'งาน', value: 'job' }
       ]
     }
   },
 
   computed: {
-    notifications() {
-      return this.notificationStore.sortedNotifications
+    filteredNotifications() {
+      if (this.currentFilter === 'all') return this.notificationStore.notifications
+      if (this.currentFilter === 'unread') {
+        return this.notificationStore.notifications.filter((n) => !n.read)
+      }
+      return this.notificationStore.notifications
     },
 
     hasUnread() {
       return this.notificationStore.hasUnread
-    },
-
-    filteredNotifications() {
-      if (this.currentFilter === 'all') return this.notifications
-      if (this.currentFilter === 'unread') return this.notifications.filter((n) => !n.read)
-      return this.notifications.filter((n) => n.type === this.currentFilter)
     }
   },
 
   methods: {
-    closeModal() {
-      this.$emit('close')
-    },
-    async handleSelect(notification) {
-      try {
-        await this.notificationStore.markAsRead(notification.id)
-      } catch (error) {
-        console.error('Error marking as read:', error)
-      }
-    },
-    async markAllAsRead() {
-      try {
-        await this.notificationStore.markAllAsRead()
-      } catch (error) {
-        console.error('Error marking all as read:', error)
-      }
-    },
     getIconClass(type) {
       const classes = {
-        // user: 'text-[#CDE45F]',
-        // skill: 'bg-green-100 text-green-600',
         job: 'bg-purple-100 text-purple-600',
         default: 'bg-gray-100 text-gray-600'
       }
@@ -233,32 +206,27 @@ export default {
 
     getIcon(type) {
       const icons = {
-        // user: 'fas fa-user-clock',
-        // skill: 'fas fa-tasks',
-        job: 'fas fa-briefcase ',
+        job: 'fas fa-briefcase',
         default: 'fas fa-bell text-[#EABF71]'
       }
       return icons[type] || icons.default
     },
+
     getFilterIcon(value) {
       const icons = {
-        all: 'fas fa-th-list  text-[#81E2C4]',
-        unread: 'fas fa-envelope text-[#81E2C4]',
-        // user: 'fas fa-users',
-        // skill: 'fas fa-tools',
-        job: 'fas fa-briefcase'
+        all: 'fas fa-th-list text-[#81E2C4]',
+        unread: 'fas fa-envelope text-[#81E2C4]'
       }
       return icons[value]
     },
+
     formatTime(date) {
       if (!date) return 'ไม่ระบุเวลา'
-
       try {
         const dateObj = new Date(date)
         if (isNaN(dateObj.getTime())) {
           return 'ไม่ระบุเวลา'
         }
-
         return new Intl.DateTimeFormat('th-TH', {
           year: 'numeric',
           month: 'long',
@@ -271,6 +239,25 @@ export default {
         console.error('Error formatting date:', error)
         return 'ไม่ระบุเวลา'
       }
+    },
+
+    async handleSelect(notification) {
+      try {
+        await this.notificationStore.markAsRead(notification.id)
+      } catch (error) {
+        console.error('Error marking as read:', error)
+      }
+    },
+
+    async markAllAsRead() {
+      try {
+        await this.notificationStore.markAllAsRead()
+      } catch (error) {
+        console.error('Error marking all as read:', error)
+      }
+    },
+    handleClose() {
+      this.$emit('close')
     }
   }
 }

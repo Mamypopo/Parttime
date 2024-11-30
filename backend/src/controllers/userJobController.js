@@ -16,9 +16,16 @@ export const getMyJobs = async (req, res) => {
             position: participation.jobPosition.position_name,
             wage: participation.jobPosition.wage,
             status: participation.status,
+            job_details: participation.jobPosition.job.details,
+            position_details: participation.jobPosition.details,
             job_status: participation.jobPosition.job.status,
             evaluation: participation.workHistories[0] || null,
-            applied_at: participation.created_at
+            applied_at: participation.created_at,
+            creator: {
+                phone: participation.jobPosition.job.creator.phone,
+                first_name: participation.jobPosition.job.creator.first_name,
+                last_name: participation.jobPosition.job.creator.last_name
+            }
         }));
 
         res.json({

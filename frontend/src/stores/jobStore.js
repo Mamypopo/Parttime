@@ -445,6 +445,7 @@ export const useJobStore = defineStore('job', {
             this.loading = true
             try {
                 const headers = this.getAuthHeaders()
+
                 const response = await axios.get(
                     `${this.baseURL}/api/users/my-jobs`,
                     { headers }

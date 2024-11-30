@@ -3,7 +3,16 @@
     class="flex flex-col min-h-screen bg-gradient-to-br from-[#ece9e6] to-[##ffffff] dark:from-gray-900 dark:to-gray-800 relative transition-colors duration-300 ease-in-out"
   >
     <!-- Desktop/Tablet Sidebar -->
-    <TransitionRoot :show="!sidebarStore.isMobile" as="template">
+    <TransitionRoot
+      :show="!sidebarStore.isMobile"
+      as="template"
+      enter="transition-all duration-300 ease-in-out"
+      enter-from="opacity-0 -translate-x-full"
+      enter-to="opacity-100 translate-x-0"
+      leave="transition-all duration-300 ease-in-out"
+      leave-from="opacity-100 translate-x-0"
+      leave-to="opacity-0 -translate-x-full"
+    >
       <nav
         class="sidebar h-screen fixed bg-white border-r shadow-lg transition-all duration-500 ease-in-out"
         :class="[
@@ -17,7 +26,14 @@
         >
           <div class="absolute inset-0 flex items-center justify-between px-4">
             <!-- Logo & Text -->
-            <Transition>
+            <Transition
+              enter-active-class="transition-all duration-300 ease-in-out"
+              enter-from-class="opacity-0 -translate-x-4"
+              enter-to-class="opacity-100 translate-x-0"
+              leave-active-class="transition-all duration-300 ease-in-out"
+              leave-from-class="opacity-100 translate-x-0"
+              leave-to-class="opacity-0 -translate-x-4"
+            >
               <div v-if="!sidebarStore.isCollapsed" class="flex items-center gap-3">
                 <img src="@/assets/logo.svg" alt="Logo" class="w-8 h-8 rounded-lg" />
                 <h1 class="text-lg font-bold text-white">My Workspace</h1>
@@ -80,6 +96,19 @@
                 </span>
               </div>
             </router-link>
+
+            <div class="mt-4">
+              <h2
+                v-if="!sidebarStore.isCollapsed"
+                class="text-xs font-semibold text-gray-400 mt-6 mb-4 px-4"
+              >
+                การแจ้งเตือน
+              </h2>
+              <NotificationsPanel
+                :is-collapsed="sidebarStore.isCollapsed"
+                :is-mobile="sidebarStore.isMobile"
+              />
+            </div>
           </nav>
 
           <!-- Dark Mode Toggle -->
@@ -122,7 +151,7 @@
           <div class="border-t pt-4 px-3">
             <router-link
               to="/user/profile"
-              class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
+              class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
             >
               <img
                 :src="userStore.getUser.profile_image"
@@ -171,8 +200,6 @@
 
     <!-- Mobile Navigation -->
     <MobileNavigation v-if="sidebarStore.isMobile" />
-
-    <!-- Mobile Dialogs -->
   </div>
 </template>
 
@@ -184,6 +211,7 @@ import { useUserStore } from '@/stores/userStore'
 import { useSidebarStore } from '@/stores/sidebarStore'
 import { useJobStore } from '@/stores/jobStore'
 import MobileNavigation from '@/components/Users/mobile/MobileNavigation.vue'
+import NotificationsPanel from '@/components/Users/Notifications/NotificationsPanel.vue'
 
 import Swal from 'sweetalert2'
 
@@ -195,7 +223,8 @@ export default {
     DialogPanel,
     TransitionChild,
     TransitionRoot,
-    MobileNavigation
+    MobileNavigation,
+    NotificationsPanel
   },
 
   data() {
@@ -221,7 +250,7 @@ export default {
   },
 
   methods: {
-    // ใช้ toggleDarkMode จาก sidebarStore โดยตรง
+    // ใช้ toggleDarkMode จาก sidebarStore
     toggleDarkMode() {
       this.sidebarStore.toggleDarkMode()
     },
@@ -291,5 +320,39 @@ button:hover .hamburger-line {
 .sidebar {
   @apply backdrop-blur-lg bg-white/80 dark:bg-gray-800/95;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar {
+  @apply backdrop-blur-lg bg-white/80 dark:bg-gray-800/95;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Optional: Add hover animation for the button */
+@keyframes subtle-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.group:hover {
+  animation: subtle-pulse 2s infinite;
+}
+
+/* Mobile Navigation Animation */
+.mobile-bottom-nav {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 </style>

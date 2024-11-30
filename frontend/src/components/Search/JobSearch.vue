@@ -1,98 +1,80 @@
 <template>
-  <div class="p-4 border-b dark:border-gray-700">
-    <!-- ปุ่มแว่นขยายสำหรับหน้าจอเล็ก -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+    <!-- ปุ่มแสดง/ซ่อนสำหรับมือถือ -->
     <button
-      class="lg:hidden mb-4 p-2 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-purple-500 text-white rounded-lg flex items-center"
+      class="lg:hidden w-full p-4 text-left bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-purple-500 text-white rounded-lg flex items-center"
       @click="toggleSearch"
     >
-      <i class="fas fa-search mr-1"></i> ค้นหา
+      <i class="fas fa-search mr-2"></i>
+      {{ isSearchVisible ? 'ซ่อนการค้นหา' : 'แสดงการค้นหา' }}
     </button>
 
     <!-- คอมโพเนนต์ค้นหาหลัก -->
     <transition name="fade" mode="out-in">
-      <div v-if="isSearchVisible" class="space-y-3">
+      <div v-if="isSearchVisible" class="p-4 space-y-4">
         <!-- แถวที่ 1: ID, ชื่องาน, สถานที่, ตำแหน่ง -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <!-- ID -->
           <div class="relative">
-            <span
-              class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500"
-            >
-              <i class="fas fa-id-badge text-sm"></i>
-            </span>
             <input
               v-model="filters.id"
-              type="text"
-              class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
+              type="number"
+              class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="ID"
-              @keydown.enter="handleSearch"
+              @input="debouncedSearch"
             />
+            <i class="fas fa-id-badge absolute left-3.5 top-3 text-gray-400 dark:text-gray-500"></i>
           </div>
 
+          <!-- ชื่องาน -->
           <div class="relative">
-            <span
-              class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500"
-            >
-              <i class="fas fa-search text-sm"></i>
-            </span>
             <input
               v-model="filters.title"
               type="text"
-              class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
+              class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="ชื่องาน"
-              @keydown.enter="handleSearch"
+              @input="debouncedSearch"
             />
+            <i class="fas fa-search absolute left-3.5 top-3 text-gray-400 dark:text-gray-500"></i>
           </div>
 
+          <!-- สถานที่ -->
           <div class="relative">
-            <span
-              class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500"
-            >
-              <i class="fas fa-location-dot text-sm"></i>
-            </span>
             <input
               v-model="filters.location"
               type="text"
-              class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
+              class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="สถานที่"
-              @keydown.enter="handleSearch"
+              @input="debouncedSearch"
             />
+            <i
+              class="fas fa-location-dot absolute left-3.5 top-3 text-gray-400 dark:text-gray-500"
+            ></i>
           </div>
 
+          <!-- ตำแหน่ง -->
           <div class="relative">
-            <span
-              class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500"
-            >
-              <i class="fas fa-users text-sm"></i>
-            </span>
-            <input
-              type="text"
-              v-model="selectedPosition"
-              @click="showPositionList = true"
+            <button
+              @click="showPositionList = !showPositionList"
               @blur="handlePositionBlur"
-              readonly
-              class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
-              placeholder="ตำแหน่ง"
-            />
-            <span
-              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 dark:text-gray-500"
+              class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-left text-gray-900 dark:text-gray-100 flex justify-between items-center"
             >
-              <i class="fas fa-chevron-down text-sm"></i>
-            </span>
-
-            <!-- Position List Dropdown -->
+              <span>{{ selectedPosition || 'ตำแหน่ง' }}</span>
+              <i class="fas fa-chevron-down text-gray-400 dark:text-gray-500"></i>
+            </button>
+            <!-- Dropdown -->
             <div
               v-if="showPositionList"
-              class="absolute z-[9999] w-full mt-1 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-lg border border-purple-100 dark:border-gray-700"
+              class="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
             >
-              <div class="p-2 space-y-1 max-h-[200px] overflow-y-auto">
+              <div class="p-1 max-h-[240px] overflow-y-auto">
                 <button
-                  v-for="position in positionOptions"
-                  :key="position.value"
-                  type="button"
-                  class="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#C5B4E3] hover:bg-opacity-40 dark:hover:bg-purple-600 dark:hover:bg-opacity-20 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
-                  @click="selectPosition(position)"
+                  v-for="pos in positionOptions"
+                  :key="pos.value"
+                  @click="selectPosition(pos)"
+                  class="w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 rounded text-gray-900 dark:text-gray-100"
                 >
-                  {{ position.label }}
+                  {{ pos.label }}
                 </button>
               </div>
             </div>
@@ -100,35 +82,28 @@
         </div>
 
         <!-- แถวที่ 2: สถานะ, ค่าจ้าง, วันที่, ปุ่มค้นหา -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3">
+        <div class="flex flex-wrap items-center gap-2">
           <!-- สถานะ -->
-          <div class="lg:col-span-2 relative">
-            <span
-              class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500"
-            >
-              <i class="fas fa-filter text-sm"></i>
-            </span>
-            <input
-              type="text"
-              v-model="selectedStatus"
-              @click="showStatusList = true"
+          <div class="relative min-w-[150px]">
+            <button
+              @click="showStatusList = !showStatusList"
               @blur="handleStatusBlur"
-              readonly
-              class="block w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-500 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 cursor-pointer"
-              placeholder="สถานะ"
-            />
-            <!-- Status List Dropdown -->
+              class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-left text-gray-900 dark:text-gray-100 flex justify-between items-center"
+            >
+              <span>{{ selectedStatus || 'สถานะ' }}</span>
+              <i class="fas fa-chevron-down text-gray-400 dark:text-gray-500"></i>
+            </button>
+            <!-- Dropdown -->
             <div
               v-if="showStatusList"
-              class="absolute z-10 w-full mt-1 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-lg border border-purple-100 dark:border-gray-700"
+              class="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
             >
-              <div class="p-2 space-y-1">
+              <div class="p-1">
                 <button
                   v-for="status in statusOptions"
                   :key="status.value"
-                  type="button"
-                  class="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-[#C5B4E3] hover:bg-opacity-40 dark:hover:bg-purple-600 dark:hover:bg-opacity-20 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
                   @click="selectStatus(status)"
+                  class="w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 rounded text-gray-900 dark:text-gray-100"
                 >
                   {{ status.label }}
                 </button>
@@ -137,134 +112,51 @@
           </div>
 
           <!-- ค่าจ้าง -->
-          <div class="lg:col-span-3">
-            <div class="flex gap-1">
-              <div class="relative flex-1">
-                <span
-                  class="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-400 dark:text-gray-500"
-                >
-                  <i class="fas fa-baht-sign text-sm"></i>
-                </span>
-                <input
-                  v-model.number="filters.minWage"
-                  type="number"
-                  class="w-full pl-7 pr-2 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
-                  placeholder="ค่าจ้างต่ำสุด"
-                  @keydown.enter="handleSearch"
-                />
-              </div>
-              <span class="text-gray-500 dark:text-gray-40 self-center">-</span>
-              <div class="relative flex-1">
-                <span
-                  class="absolute inset-y-0 left-0 pl-2 flex items-center text-gray-400 dark:text-gray-500"
-                >
-                  <i class="fas fa-baht-sign text-sm"></i>
-                </span>
-                <input
-                  v-model.number="filters.maxWage"
-                  type="number"
-                  class="w-full pl-7 pr-2 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
-                  placeholder="สูงสุด"
-                  @keydown.enter="handleSearch"
-                />
-              </div>
-            </div>
+          <div class="relative min-w-[120px]">
+            <input
+              v-model.number="filters.minWage"
+              type="number"
+              class="w-full pl-8 pr-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              placeholder="ค่าจ้าง"
+              @input="debouncedSearch"
+            />
+            <i class="fas fa-baht-sign absolute left-3 top-3 text-gray-400 dark:text-gray-500"></i>
           </div>
 
-          <!-- จำนวนคน -->
-          <div class="lg:col-span-3">
-            <div class="relative">
-              <span
-                class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500"
-              >
-                <i class="fas fa-users text-sm"></i>
-              </span>
-              <input
-                type="text"
-                v-model="selectedPeopleCount"
-                @click="showPeopleCountList = true"
-                @blur="handlePeopleCountBlur"
-                readonly
-                class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 cursor-pointer"
-                placeholder="จำนวนคน"
-              />
-
-              <!-- People Count Dropdown -->
-              <div
-                v-if="showPeopleCountList"
-                class="absolute z-10 w-full mt-1 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-lg border border-purple-100 dark:border-gray-700"
-              >
-                <div class="p-2 space-y-1">
-                  <button
-                    v-for="option in peopleCountOptions"
-                    :key="option.value"
-                    type="button"
-                    class="block w-full text-left px-3 py-2 hover:bg-[#C5B4E3] hover:bg-opacity-40 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
-                    @click="selectPeopleCount(option)"
-                  >
-                    {{ option.label }}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
           <!-- วันที่ -->
-          <div class="lg:col-span-5">
-            <div class="flex flex-col sm:flex-row gap-2">
-              <div class="relative flex-1">
-                <span
-                  class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500"
-                >
-                  <i class="fas fa-calendar-day text-sm"></i>
-                </span>
-                <input
-                  v-model="filters.dateFrom"
-                  type="date"
-                  class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
-                  @keydown.enter="handleSearch"
-                />
-              </div>
-              <span class="hidden sm:block text-gray-500 dark:text-gray-400 self-center">-</span>
-              <div class="relative flex-1">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                  <i class="fas fa-calendar-day text-sm"></i>
-                </span>
-                <input
-                  v-model="filters.dateTo"
-                  type="date"
-                  class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
-                  @keydown.enter="handleSearch"
-                />
-              </div>
-            </div>
-          </div>
+          <input
+            v-model="filters.workDate"
+            type="date"
+            class="min-w-[120px] px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100"
+          />
 
-          <!-- ปุ่มค้นหาและล้างข้อมูล -->
-          <div class="lg:col-span-2 flex gap-2 self-end">
-            <button
-              @click="handleSearch"
-              class="flex-1 py-1.5 text-sm bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 text-white rounded-lg hover:opacity-90 flex items-center justify-center"
-            >
-              <i class="fas fa-magnifying-glass mr-1"></i>ค้นหา
-            </button>
-            <button
-              @click="handleClear"
-              class="flex-1 py-1.5 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center justify-center"
-            >
-              <i class="fas fa-xmark mr-1"></i>ล้าง
-            </button>
-          </div>
+          <!-- ค้นหา -->
+          <button
+            @click="handleSearch"
+            class="px-6 py-2.5 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-purple-500 text-white rounded-lg ml-auto hover:opacity-90 transition-opacity duration-200"
+          >
+            <i class="fas fa-search mr-2"></i>
+            ค้นหา
+          </button>
+
+          <!-- ล้าง -->
+          <button
+            @click="handleClear"
+            class="p-2.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-200"
+          >
+            <i class="fas fa-undo"></i>
+          </button>
         </div>
       </div>
     </transition>
   </div>
 </template>
-
 <script>
 export default {
   data() {
     return {
       isSearchVisible: true, // ค่าเริ่มต้นให้แสดงในจอปกติ
+      searchTimeout: null,
       filters: {
         id: '',
         title: '',
@@ -319,21 +211,17 @@ export default {
     }
   },
 
-  watch: {
-    filters: {
-      deep: true,
-      handler() {
-        this.handleSearch()
-      }
-    }
-  },
   mounted() {
     this.isSearchVisible = window.innerWidth >= 1024
     window.addEventListener('resize', this.handleResize)
+
+    clearTimeout(this.searchTimeout)
+    window.removeEventListener('resize', this.handleResize)
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.handleResize)
   },
+
   methods: {
     toggleSearch() {
       this.isSearchVisible = !this.isSearchVisible
@@ -357,7 +245,12 @@ export default {
         }, {})
       this.$emit('search', queryParams)
     },
-
+    debouncedSearch() {
+      clearTimeout(this.searchTimeout)
+      this.searchTimeout = setTimeout(() => {
+        this.handleSearch()
+      }, 200)
+    },
     handlePeopleCountBlur() {
       setTimeout(() => {
         this.showPeopleCountList = false
@@ -422,24 +315,44 @@ export default {
 .fade-leave-active {
   transition: all 0.3s ease;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
   transform: translateY(-10px);
 }
 
-/* เพิ่ม hover effects */
+/* Hover effects */
 input:hover,
 button:hover {
   transition: all 0.2s ease;
 }
-/* ปรับแต่ง dropdown animation */
+
+/* Dropdown animation */
 [v-if] {
   transition: all 0.2s ease-in-out;
 }
-/* เพิ่ม loading indicator styles ถ้าต้องการ */
-.loading {
-  opacity: 0.7;
-  pointer-events: none;
+
+/* Custom scrollbar for dropdowns */
+.overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #c5b4e3 transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: #c5b4e3;
+  border-radius: 3px;
+}
+
+.dark .overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: #6b46c1;
 }
 </style>

@@ -1,84 +1,72 @@
 <template>
-  <div class="p-4 border-b dark:border-gray-700">
-    <!-- ปุ่มแว่นขยายสำหรับหน้าจอเล็ก -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+    <!-- ปุ่มแสดง/ซ่อนสำหรับมือถือ -->
     <button
-      class="lg:hidden mb-4 p-2 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 text-white rounded-lg flex items-center"
+      class="lg:hidden w-full p-4 text-left bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-purple-500 text-white rounded-lg flex items-center"
       @click="toggleSearch"
     >
-      <i class="fas fa-search mr-1"></i> ค้นหา
+      <i class="fas fa-search mr-2"></i>
+      {{ isSearchVisible ? 'ซ่อนการค้นหา' : 'แสดงการค้นหา' }}
     </button>
 
     <!-- คอมโพเนนต์ค้นหาหลัก -->
     <transition name="fade" mode="out-in">
-      <div v-if="isSearchVisible" class="grid grid-cols-12 gap-4">
-        <!-- User ID Search -->
-        <div v-if="showUserId" class="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3">
-          <div class="relative">
-            <span
-              class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500"
-            >
-              <i class="fas fa-id-badge text-sm"></i>
-            </span>
+      <div v-if="isSearchVisible" class="p-4 space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <!-- User ID -->
+          <div v-if="showUserId" class="relative">
             <input
               v-model="localFilters.userId"
-              type="text"
-              placeholder="ค้นหาด้วย User ID"
-              class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
-              @keydown.enter="handleSearch"
+              type="number"
+              class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              placeholder="User ID"
+              @input="debouncedSearch"
             />
+            <i class="fas fa-id-badge absolute left-3.5 top-3 text-gray-400 dark:text-gray-500"></i>
           </div>
-        </div>
 
-        <!-- Name Search -->
-        <div v-if="showName" class="col-span-12 sm:col-span-6 md:col-span-6 lg:col-span-4">
-          <div class="relative">
-            <span
-              class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500"
-            >
-              <i class="fas fa-search text-sm"></i>
-            </span>
+          <!-- ชื่อ-นามสกุล -->
+          <div v-if="showName" class="relative">
             <input
               v-model="localFilters.name"
               type="text"
-              placeholder="ค้นหาด้วยชื่อ-นามสกุล"
-              class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
-              @keydown.enter="handleSearch"
+              class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              placeholder="ชื่อ-นามสกุล"
+              @input="debouncedSearch"
             />
+            <i class="fas fa-user absolute left-3.5 top-3 text-gray-400 dark:text-gray-500"></i>
           </div>
-        </div>
 
-        <!-- ID Card Search -->
-        <div v-if="showIdCard" class="col-span-12 sm:col-span-6 md:col-span-6 lg:col-span-3">
-          <div class="relative">
-            <span
-              class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500"
-            >
-              <i class="fa-regular fa-address-card text-sm"></i>
-            </span>
+          <!-- เลขบัตรประชาชน -->
+          <div v-if="showIdCard" class="relative">
             <input
               v-model="localFilters.idCard"
               type="text"
-              placeholder="ค้นหาด้วยเลขบัตรประชาชน"
-              class="w-full pl-9 pr-3 py-1.5 text-sm border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800"
-              @keydown.enter="handleSearch"
+              class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              placeholder="เลขบัตรประชาชน"
+              @input="debouncedSearch"
             />
+            <i
+              class="fa-regular fa-address-card absolute left-3.5 top-3 text-gray-400 dark:text-gray-500"
+            ></i>
           </div>
-        </div>
 
-        <!-- Search Buttons -->
-        <div class="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-2 flex items-end gap-2">
-          <button
-            @click="handleSearch"
-            class="flex-1 py-1.5 px-4 text-sm bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 text-white rounded-lg hover:opacity-90 flex items-center justify-center"
-          >
-            <i class="fas fa-magnifying-glass mr-1.5"></i>ค้นหา
-          </button>
-          <button
-            @click="handleClear"
-            class="flex-1 py-1.5 px-4 text-sm border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg flex items-center justify-center"
-          >
-            <i class="fas fa-xmark mr-1.5"></i>ล้าง
-          </button>
+          <!-- ปุ่มค้นหาและล้าง -->
+          <div class="flex items-center gap-2">
+            <button
+              @click="handleSearch"
+              class="flex-1 px-6 py-2.5 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-purple-500 text-white rounded-lg hover:opacity-90 transition-opacity duration-200"
+            >
+              <i class="fas fa-search mr-2"></i>
+              ค้นหา
+            </button>
+            <button
+              @click="handleClear"
+              class="p-2.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-200"
+            >
+              <i class="fas fa-undo"></i>
+            </button>
+          </div>
         </div>
       </div>
     </transition>
@@ -113,22 +101,13 @@ export default {
 
   data() {
     return {
-      isSearchVisible: true, // ค่าเริ่มต้นให้แสดงในจอปกติ
+      isSearchVisible: true,
       localFilters: {
         userId: '',
         name: '',
         idCard: ''
-      }
-    }
-  },
-
-  watch: {
-    filters: {
-      handler(newFilters) {
-        this.localFilters = { ...newFilters }
       },
-      deep: true,
-      immediate: true
+      searchTimeout: null
     }
   },
 
@@ -137,10 +116,17 @@ export default {
     window.addEventListener('resize', this.handleResize)
   },
   beforeUnmount() {
+    clearTimeout(this.searchTimeout)
     window.removeEventListener('resize', this.handleResize)
   },
 
   methods: {
+    debouncedSearch() {
+      clearTimeout(this.searchTimeout)
+      this.searchTimeout = setTimeout(() => {
+        this.handleSearch()
+      }, 200)
+    },
     toggleSearch() {
       this.isSearchVisible = !this.isSearchVisible
     },
@@ -148,7 +134,20 @@ export default {
       this.isSearchVisible = window.innerWidth >= 1024
     },
     handleSearch() {
-      this.$emit('search', this.localFilters)
+      // กรองเฉพาะค่าที่มีข้อมูล
+      const validFilters = Object.entries(this.localFilters)
+        .filter(([key, value]) => {
+          if (value === null || value === undefined) return false
+          if (typeof value === 'string' && value.trim() === '') return false
+          if (typeof value === 'number' && isNaN(value)) return false
+          return true
+        })
+        .reduce((acc, [key, value]) => {
+          acc[key] = value
+          return acc
+        }, {})
+
+      this.$emit('search', validFilters)
     },
     handleClear() {
       this.localFilters = {
@@ -163,16 +162,48 @@ export default {
 </script>
 
 <style scoped>
-/* เพิ่ม transition แบบ fade */
 .fade-enter-active,
 .fade-leave-active {
-  transition:
-    opacity 0.5s ease,
-    transform 0.5s ease;
+  transition: all 0.3s ease;
 }
-.fade-enter,
+
+.fade-enter-from,
 .fade-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+
+/* Hover effects */
+input:hover,
+button:hover {
+  transition: all 0.2s ease;
+}
+
+/* Dropdown animation */
+[v-if] {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Custom scrollbar for dropdowns */
+.overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #c5b4e3 transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: #c5b4e3;
+  border-radius: 3px;
+}
+
+.dark .overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: #6b46c1;
 }
 </style>

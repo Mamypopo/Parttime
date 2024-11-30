@@ -233,11 +233,6 @@ export default {
       }
     },
 
-    // hasMatchingSkills(job) {
-    //   // ให้ผ่านไปก่อน เพราะมีการเช็คที่ backend อยู่แล้ว
-    //   return true
-    // },
-
     hasApplied(job) {
       if (!this.userStore.user?.id) return false
       if (!job.JobPositions) return false

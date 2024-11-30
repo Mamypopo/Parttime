@@ -67,20 +67,18 @@ export const useSidebarStore = defineStore('sidebar', {
                 badge: true,
                 badgeCount: 0  // จะอัพเดทจาก API
             },
-            {
-                path: '/user/notifications',
-                name: 'แจ้งเตือน',
-                icon: 'fas fa-bell',
-                badge: true,
-                badgeCount: 0  // จะอัพเดทจาก API
-            },
-
         ],
 
-        // เมนูมือถือ
+
+        // เมนูมือถือสำหรับ User
         userMobileItems: [
             {
-                path: '/user/jobs',
+                path: '/user/dashboard',
+                name: 'หน้าหลัก',
+                icon: 'fa-solid fa-house'
+            },
+            {
+                path: '/user/jobs-view',
                 name: 'งาน',
                 icon: 'fas fa-briefcase'
             },
@@ -92,27 +90,26 @@ export const useSidebarStore = defineStore('sidebar', {
                 badgeCount: 0
             },
             {
-                path: '/user/notifications',
                 name: 'แจ้งเตือน',
                 icon: 'fas fa-bell',
-                badge: true,
-                badgeCount: 0
+                isComponent: true,
+                hasNotification: true
             },
             {
-                path: '/user/profile',
                 name: 'โปรไฟล์',
                 icon: 'fas fa-user',
-                isProfile: true
+                isComponent: true
             }
         ]
+
     }),
 
     actions: {
         updateMyJobsBadge(count) {
             const myJobsMenu = this.userMenuItems.find(item => item.path === '/user/my-jobs')
-            if (myJobsMenu) {
-                myJobsMenu.badgeCount = count
-            }
+            const myJobsMobile = this.userMobileItems.find(item => item.path === '/user/my-jobs')
+            if (myJobsMenu) myJobsMenu.badgeCount = count
+            if (myJobsMobile) myJobsMobile.badgeCount = count
         },
         closeAllSubmenus() {
             this.showUserSubmenu = false
@@ -156,6 +153,10 @@ export const useSidebarStore = defineStore('sidebar', {
                     this.showMoreSubmenu = true
                     break
             }
+        },
+
+        toggleUserSubmenu() {
+            this.showUserSubmenu = !this.showUserSubmenu
         },
 
 

@@ -50,6 +50,35 @@ export const getUserNotifications = (userId) =>
         orderBy: { createdAt: 'desc' },
     });
 
+// อ่าน 1 การแจ้งเตือน
+export const markUserNotificationAsRead = async (notificationId, userId) => {
+    const notification = await Notification.findOne({
+        where: {
+            id: notificationId,
+            userId: userId
+        }
+    });
+
+    if (!notification) {
+        throw new Error('ไม่พบการแจ้งเตือน');
+    }
+
+    await notification.update({ read: true });
+    return notification;
+};
+
+// อ่านการแจ้งเตือนทั้งหมด
+export const markAllUserNotificationsAsRead = async (userId) => {
+    await Notification.update(
+        { read: true },
+        {
+            where: {
+                userId: userId,
+                read: false
+            }
+        }
+    );
+};
 
 export const getAdminNotifications = (adminId) =>
     prisma.notification.findMany({

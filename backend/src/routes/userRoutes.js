@@ -35,4 +35,8 @@ router.get('/evaluation/:jobId/:userId', userController.getJobEvaluation);
 
 router.get('/notifications', userController.getUserNotifications);
 
+router.patch('/notifications/:id/read', userController.markNotificationAsRead);
+
+
+router.patch('/notifications/mark-all-read', userController.markAllNotificationsAsRead);
 export default router;

@@ -542,8 +542,32 @@ export const getUserNotifications = async (req, res) => {
     }
 };
 
+// อ่าน 1 การแจ้งเตือน
+export const markNotificationAsRead = async (req, res) => {
+    try {
+        const notificationId = parseInt(req.params.id, 10);
+        const userId = req.user.id;
 
+        await notificationModel.markAsRead(notificationId, userId);
+        res.status(200).json({ message: 'อัพเดทสถานะการอ่านเรียบร้อย' });
+    } catch (error) {
+        console.error('Error in markNotificationAsRead:', error);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการอัพเดทสถานะการอ่าน' });
+    }
+};
 
+// อ่านการแจ้งเตือนทั้งหมด
+export const markAllNotificationsAsRead = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        await notificationModel.markAllAsRead(userId);
+        res.status(200).json({ message: 'อัพเดทสถานะการอ่านทั้งหมดเรียบร้อย' });
+    } catch (error) {
+        console.error('Error in markAllNotificationsAsRead:', error);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการอัพเดทสถานะการอ่าน' });
+    }
+};
 export const getProfile = async (req, res) => {
     try {
         const userId = req.user.id;

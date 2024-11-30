@@ -16,14 +16,25 @@ export const getMyJobs = async (userId) => {
                     select: {
                         position_name: true,
                         wage: true,
+                        details: true,
                         job: {
                             select: {
                                 id: true,
                                 title: true,
                                 location: true,
                                 work_date: true,
-                                status: true
+                                status: true,
+                                details: true,
+                                created_by: true,
+                                creator: {
+                                    select: {
+                                        phone: true,
+                                        first_name: true,
+                                        last_name: true
+                                    }
+                                }
                             }
+
                         }
                     }
                 },

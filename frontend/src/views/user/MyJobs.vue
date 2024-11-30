@@ -41,9 +41,18 @@
       >
         <div class="space-y-2">
           <!-- ชื่อและรายละเอียดงาน -->
-          <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
-            {{ job.title }}
-          </h3>
+          <div class="flex justify-between items-start">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
+              {{ job.title }}
+            </h3>
+            <button
+              class="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center"
+              @click="showAdminContact(job.creator)"
+            >
+              <i class="fas fa-headset mr-1"></i>
+              ติดต่อ
+            </button>
+          </div>
           <p class="text-gray-500 dark:text-gray-400">
             <i class="fas fa-map-marker-alt text-indigo-500 mr-2"></i>
             {{ job.location }}
@@ -51,6 +60,9 @@
           <p class="text-sm text-gray-500 dark:text-gray-400">
             <i class="fas fa-calendar-alt text-indigo-500 mr-2"></i>
             {{ jobStore.formatDate(job.work_date) }}
+            <span class="mx-2">•</span>
+            <i class="fa-solid fa-circle-info text-indigo-500 mr-2"></i>
+            {{ job.job_details }}
           </p>
           <p class="text-sm text-gray-500 dark:text-gray-400">
             <i class="fas fa-user-tie text-indigo-500 mr-2"></i>
@@ -58,6 +70,10 @@
             <span class="mx-2">•</span>
             <i class="fas fa-coins text-indigo-500 mr-2"></i>
             ค่าจ้าง: {{ jobStore.formatNumber(job.wage) }} บาท
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            <i class="fa-solid fa-circle-info text-indigo-500 mr-2"></i>
+            {{ job.position_details }}
           </p>
 
           <!-- สถานะ -->
@@ -89,7 +105,33 @@
       </div>
     </div>
   </div>
-
+  <!-- เพิ่ม Modal สำหรับแสดงข้อมูลติดต่อ -->
+  <div
+    v-if="showContactModal"
+    class="fixed inset-0 bg-black/25 bg-opacity-50 flex items-center justify-center modal backdrop-blur-sm"
+  >
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4">
+      <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
+        ข้อมูลติดต่อผู้ประสานงาน
+      </h3>
+      <div class="space-y-3">
+        <p class="text-gray-600 dark:text-gray-400">
+          <i class="fas fa-user text-indigo-500 mr-2"></i>
+          {{ selectedAdmin?.first_name }} {{ selectedAdmin?.last_name }}
+        </p>
+        <p class="text-gray-600 dark:text-gray-400">
+          <i class="fas fa-phone-alt text-indigo-500 mr-2"></i>
+          {{ selectedAdmin?.phone }}
+        </p>
+      </div>
+      <button
+        @click="closeAdminContact"
+        class="mt-6 w-full py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
+      >
+        ปิด
+      </button>
+    </div>
+  </div>
   <JobEvaluationModal
     :show="showEvaluationModal"
     :job="selectedJob"
@@ -112,7 +154,9 @@ export default {
       selectedStatus: 'all',
       jobStore: useJobStore(),
       showEvaluationModal: false,
-      selectedJob: null
+      selectedJob: null,
+      showContactModal: false,
+      selectedAdmin: null
     }
   },
 
@@ -213,7 +257,15 @@ export default {
       this.showEvaluationModal = false
       this.selectedJob = null
     },
+    showAdminContact(admin) {
+      this.selectedAdmin = admin
+      this.showContactModal = true
+    },
 
+    closeAdminContact() {
+      this.showContactModal = false
+      this.selectedAdmin = null
+    },
     getScoreLabel(type) {
       return (
         {
