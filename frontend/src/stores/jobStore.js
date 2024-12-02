@@ -450,7 +450,7 @@ export const useJobStore = defineStore('job', {
                     `${this.baseURL}/api/users/my-jobs`,
                     { headers }
                 )
-
+                console.log(response)
                 if (response.data.success) {
                     this.myJobs = response.data.jobs
                     return response.data
@@ -537,7 +537,33 @@ export const useJobStore = defineStore('job', {
                 hour12: false
             })
         },
+        formatTimeRange(startTime, endTime) {
+            try {
+                const start = new Date(startTime);
+                const end = new Date(endTime);
 
+                if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                    return '08:00 - 17:00'; // ค่าเริ่มต้นถ้าเกิดข้อผิดพลาด
+                }
+
+                const startStr = start.toLocaleTimeString('th-TH', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                });
+
+                const endStr = end.toLocaleTimeString('th-TH', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                });
+
+                return `${startStr} - ${endStr}`;
+            } catch (error) {
+                console.error('Error formatting time range:', error);
+                return '08:00 - 17:00'; // ค่าเริ่มต้นถ้าเกิดข้อผิดพลาด
+            }
+        },
         getProfileImage(image) {
             return image ? `${this.baseURL}/uploads/profiles/${image}` : '/default-avatar.png'
         },

@@ -8,7 +8,15 @@ export const useNotificationStore = defineStore('notification', {
         loading: false,
         error: null,
         baseURL: import.meta.env.VITE_API_URL,
-        adminStore: useAdminStore()
+        adminStore: useAdminStore(),
+        checkInterval: null,
+        NOTIFICATION_TYPES: {
+            JOB_APPLICATION: 'job_application',      // มีคนสมัครงานใหม่
+            JOB_STATUS_UPDATE: 'job_status_update',  // สถานะงานเปลี่ยน
+            USER_VERIFICATION: 'user_verification',   // มีการยืนยันตัวตนใหม่
+            EVALUATION: 'evaluation',                // มีการประเมินงาน
+            SYSTEM: 'system'                         // แจ้งเตือนจากระบบ
+        }
     }),
     getters: {
         unreadCount: (state) => state.notifications.filter(n => !n.read).length,
@@ -102,23 +110,38 @@ export const useNotificationStore = defineStore('notification', {
             }
 
             try {
-                console.log('Marking all notifications as read...') // Debugging
+
                 await axios.patch(`${this.baseURL}/api/admin/notifications/mark-all-read`, {}, {
                     headers: {
                         'Authorization': `Bearer ${adminStore.token}`
                     }
                 })
-                console.log('Before update:', this.notifications) // Debugging
+
                 this.notifications.forEach(notification => {
                     notification.read = true
                 })
-                console.log('After update:', this.notifications) // Debugging
+
             } catch (error) {
                 console.error('Error marking all notifications as read:', error)
                 throw error
             }
         },
+        startChecking() {
+            // เช็คทุก 30 วินาที
+            this.checkInterval = setInterval(() => {
+                if (this.adminStore.isLoggedIn) {
+                    this.fetchNotifications()
+                }
+            }, 30000)
+        },
 
+        // เพิ่ม action สำหรับหยุดการตรวจสอบ
+        stopChecking() {
+            if (this.checkInterval) {
+                clearInterval(this.checkInterval)
+                this.checkInterval = null
+            }
+        },
         resetStore() {
             this.notifications = []
             this.loading = false

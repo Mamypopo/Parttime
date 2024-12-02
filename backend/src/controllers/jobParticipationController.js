@@ -72,7 +72,11 @@ export const approveJobParticipation = async (req, res) => {
             : `คำขอเข้าร่วมงาน ${job.title} ในตำแหน่ง ${jobPosition.position_name} ของคุณไม่ได้รับการอนุมัติ`;
 
         // สร้างการแจ้งเตือนสำหรับผู้ใช้
-        await notificationModel.createUserNotification(user.id, notificationMessage, 'JOB_APPLICATION_STATUS');
+        await notificationModel.createUserNotification(
+            user.id,
+            notificationMessage,
+            notificationModel.NOTIFICATION_TYPES.JOB_APPLICATION_STATUS
+        );
 
         // บันทึก log การอนุมัติการเข้าร่วมงาน พร้อมชื่อและอีเมลของผู้ใช้
         await createLog(user.id, adminId, 'Approve Job Participation successfully', '/api/jobs/approve', 'PUT',
@@ -211,7 +215,9 @@ export const updateWorkHistory = async (req, res) => {
             await notificationModel.createUserNotification(
                 currentJobParticipation.user.id,
                 notificationMessage,
-                !isPassedEvaluation ? 'WORK_EVALUATION_REJECTED' : 'WORK_EVALUATION_COMPLETED'
+                !isPassedEvaluation
+                    ? notificationModel.NOTIFICATION_TYPES.WORK_EVALUATION_REJECTED
+                    : notificationModel.NOTIFICATION_TYPES.WORK_EVALUATION
             );
         }
 
@@ -221,11 +227,11 @@ export const updateWorkHistory = async (req, res) => {
                 currentJobParticipation.user.id,
                 adminId,
                 !isPassedEvaluation ? 'Work Evaluation Rejected' : 'Work Evaluation Completed',
-                req.originalUrl,                    // requestUrl
-                req.method,                         // method
+                req.originalUrl,
+                req.method,
                 `User ${currentJobParticipation.user.email || 'Unknown'} was ${isPassedEvaluation ? 'rejected' : 'evaluated'} for job: ${jobTitle} (${positionName})${!isPassedEvaluation ? `. Score: ${workHistoryData.total_score}/10` : ''}`, // details
-                req.ip || 'Unknown IP',             // ip
-                req.headers['user-agent'] || 'Unknown User Agent' // userAgent
+                req.ip || 'Unknown IP',
+                req.headers['user-agent'] || 'Unknown User Agent'
             );
         }
 

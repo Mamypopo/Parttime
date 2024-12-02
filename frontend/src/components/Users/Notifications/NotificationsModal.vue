@@ -29,7 +29,7 @@
             >
               <!-- Header -->
               <div
-                class="flex justify-between items-center p-6 bg-gradient-to-r from-[#A8E6E2] to-[#C3E8D5] dark:from-[#4a9490] dark:to-[#6ED7D1] border-b"
+                class="flex justify-between items-center p-6 bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] dark:from-[#feac5e]/80 dark:via-[#c779d0]/80 dark:to-[#4bc0c8]/80"
               >
                 <HeadlessDialogTitle class="text-lg font-semibold text-[#3A3A49] dark:text-white">
                   การแจ้งเตือนทั้งหมด
@@ -38,7 +38,7 @@
                   <button
                     v-if="hasUnread"
                     @click="markAllAsRead"
-                    class="text-sm text-[#6ED7D1] hover:text-[#4bb3af] dark:text-[#A8E6E2] dark:hover:text-[#6ED7D1] transition-colors duration-200"
+                    class="text-sm text-white/80 hover:text-white transition-colors duration-200"
                   >
                     <span class="flex items-center gap-2">
                       <i class="fas fa-check-double"></i>
@@ -64,8 +64,8 @@
                     class="px-4 py-2 text-sm rounded-full transition-all duration-200 flex items-center gap-2"
                     :class="[
                       currentFilter === filter.value
-                        ? 'bg-[#6ED7D1] text-white shadow-md'
-                        : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                        ? 'bg-[#babbec] dark:bg-[#6667AA] text-white shadow-md'
+                        : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-[#5D5FEF]/5 dark:hover:bg-[#5D5FEF]/20'
                     ]"
                   >
                     <i :class="getFilterIcon(filter.value)"></i>
@@ -93,8 +93,8 @@
                   class="p-6 border-b last:border-b-0 transition-colors duration-200 cursor-pointer dark:border-gray-700"
                   :class="[
                     !notification.read
-                      ? 'bg-[#A8E6E2]/10 dark:bg-[#6ED7D1]/20'
-                      : 'hover:bg-[#A8E6E2]/5 dark:hover:bg-[#6ED7D1]/10'
+                      ? 'bg-gradient-to-r from-[#feac5e]/10 via-[#c779d0]/10 to-[#4bc0c8]/10 dark:from-[#feac5e]/20 dark:via-[#c779d0]/20 dark:to-[#4bc0c8]/20'
+                      : 'hover:bg-gradient-to-r hover:from-[#feac5e]/5 hover:via-[#c779d0]/5 hover:to-[#4bc0c8]/5'
                   ]"
                   @click="handleNotificationClick(notification)"
                 >
@@ -113,7 +113,11 @@
                     <div class="flex-1">
                       <p
                         class="font-medium text-lg mb-1"
-                        :class="!notification.read ? 'text-[#3A3A49]' : 'text-gray-600'"
+                        :class="
+                          !notification.read
+                            ? 'text-[#CDE45F] dark:text-[#A4B83C]'
+                            : 'text-[#94A3B8] dark:text-[#64748B]'
+                        "
                       >
                         {{ notification.message }}
                       </p>
@@ -124,7 +128,9 @@
 
                     <!-- Unread Indicator -->
                     <div v-if="!notification.read" class="flex-shrink-0">
-                      <div class="h-3 w-3 rounded-full bg-[#f76363] animate-ping"></div>
+                      <div
+                        class="h-3 w-3 rounded-full bg-[#EA6B6B] dark:bg-[#FF8F8F] animate-ping"
+                      ></div>
                     </div>
                   </div>
                 </div>
@@ -174,17 +180,20 @@ export default {
       filters: [
         { label: 'ทั้งหมด', value: 'all' },
         { label: 'ยังไม่ได้อ่าน', value: 'unread' },
-        { label: 'งาน', value: 'job' }
+        { label: 'งาน', value: 'job_status' },
+        { label: 'การประเมิน', value: 'evaluation' },
+        { label: 'ระบบ', value: 'system' }
       ]
     }
   },
 
   computed: {
     filteredNotifications() {
-      const notifications = this.notificationStore.notifications
-      if (this.currentFilter === 'all') return notifications
-      if (this.currentFilter === 'unread') return notifications.filter((n) => !n.read)
-      return notifications.filter((n) => n.type === this.currentFilter)
+      if (this.currentFilter === 'all') return this.notificationStore.notifications
+      if (this.currentFilter === 'unread') {
+        return this.notificationStore.notifications.filter((n) => !n.read)
+      }
+      return this.notificationStore.getNotificationsByType(this.currentFilter)
     },
 
     hasUnread() {
@@ -207,27 +216,35 @@ export default {
 
     getIconClass(type) {
       const classes = {
-        job: 'bg-purple-100 text-purple-600',
-        default: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+        job_status: 'bg-gradient-to-br from-[#6ED7D1] to-[#9899ee]', // สถานะงาน
+        evaluation: 'bg-gradient-to-br from-[#CDE45F] to-[#A4B83C]', // ผลการประเมิน
+        rejected: 'bg-gradient-to-br from-[#EA6B6B] to-[#FF8F8F]', // ไม่ผ่านการประเมิน
+        system: 'bg-gradient-to-br from-[#9899ee] to-[#6667AA]', // ระบบ
+        general: 'bg-[#EABF71] dark:bg-[#C69B4F]' // ทั่วไป
       }
-      return classes[type] || classes.default
+      return classes[type] || classes.general
     },
 
     getFilterIcon(value) {
       const icons = {
-        all: 'fas fa-th-list text-[#EABF71]',
-        unread: 'fas fa-envelope text-[#EABF71]',
-        job: 'fas fa-briefcase text-[#EABF71]'
+        all: 'fas fa-th-list text-[#c779d0]',
+        unread: 'fas fa-envelope text-[#feac5e]',
+        job_status: 'fas fa-briefcase text-[#4bc0c8]',
+        evaluation: 'fas fa-star text-[#c779d0]',
+        system: 'fas fa-cog text-[#feac5e]'
       }
-      return icons[value]
+      return icons[value] || icons.all
     },
 
     getIcon(type) {
       const icons = {
-        job: 'fas fa-briefcase',
-        default: 'fas fa-bell text-[#EABF71]'
+        job_status: 'fas fa-briefcase',
+        evaluation: 'fas fa-star',
+        rejected: 'fas fa-times-circle',
+        system: 'fas fa-cog',
+        general: 'fas fa-bell'
       }
-      return icons[type] || icons.default
+      return `${icons[type] || icons.general} text-white`
     },
 
     formatTime(date) {

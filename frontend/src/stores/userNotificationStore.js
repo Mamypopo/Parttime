@@ -8,8 +8,14 @@ export const useUserNotificationStore = defineStore('userNotification', {
         loading: false,
         error: null,
         baseURL: import.meta.env.VITE_API_URL,
-        userStore: useUserStore(),
-        isModalOpen: false
+        NOTIFICATION_TYPES: {
+            JOB_APPLICATION_STATUS: 'job_status',    // แจ้งเตือนสถานะการสมัครงาน
+            WORK_EVALUATION: 'evaluation',           // แจ้งเตือนผลการประเมิน
+            WORK_EVALUATION_REJECTED: 'rejected',    // แจ้งเตือนไม่ผ่านการประเมิน
+            SYSTEM: 'system',                        // แจ้งเตือนจากระบบ
+            GENERAL: 'general'                       // แจ้งเตือนทั่วไป
+        }
+
     }),
 
     getters: {
@@ -17,23 +23,22 @@ export const useUserNotificationStore = defineStore('userNotification', {
         hasUnread: (state) => state.notifications.some(n => !n.read),
         sortedNotifications: (state) => [...state.notifications].sort(
             (a, b) => new Date(b.created_at) - new Date(a.created_at)
-        )
+        ),
+        getNotificationsByType: (state) => (type) => {
+            return state.notifications.filter(n => n.type === type)
+        }
     },
 
     actions: {
         async fetchNotifications() {
             this.loading = true
             this.error = null
-
-            if (!this.userStore.token) {
-                console.warn('No token available. Skipping fetchNotifications.')
-                return
-            }
-
+            const userStore = useUserStore()
+            if (!userStore.token) return
             try {
                 const response = await axios.get(`${this.baseURL}/api/users/notifications`, {
                     headers: {
-                        'Authorization': `Bearer ${this.userStore.token}`
+                        'Authorization': `Bearer ${userStore.token}`
                     }
                 })
 
@@ -44,7 +49,7 @@ export const useUserNotificationStore = defineStore('userNotification', {
                         created_at: n.createdAt,
                         read: n.read || false,
                         jobId: n.jobId,
-                        type: n.type || 'notification'
+                        type: n.type || 'default'
                     }))
                 }
             } catch (error) {
@@ -55,67 +60,64 @@ export const useUserNotificationStore = defineStore('userNotification', {
                 this.loading = false
             }
         },
+
         async markAsRead(notificationId) {
-            if (!this.userStore.token) {
-                console.warn('No token available. Cannot mark notification as read.')
-                return
-            }
+            const userStore = useUserStore()
+            if (!userStore.token || !notificationId) return
 
             try {
-                const response = await axios({
-                    method: 'PATCH',
-                    url: `${this.baseURL}/api/users/notifications/${notificationId}/read`,
-                    headers: {
-                        'Authorization': `Bearer ${this.userStore.token}`
-                    }
-                })
+                const response = await axios.patch(
+                    `${this.baseURL}/api/users/notifications/${notificationId}/read`,
+                    {},
+                    { headers: { 'Authorization': `Bearer ${userStore.token}` } }
+                )
 
+
+                // ตรวจสอบการตอบกลับจาก API
                 if (response.status === 200) {
+                    // อัพเดทสถานะในแอพทันที
                     const notification = this.notifications.find(n => n.id === notificationId)
                     if (notification) {
                         notification.read = true
+                        // เพิ่มการอัพเดท state เพื่อให้ Vue รับรู้การเปลี่ยนแปลง
+                        this.notifications = [...this.notifications]
                     }
+
                 }
             } catch (error) {
-                console.error('Error details:', {
-                    notificationId,
-                    baseURL: this.baseURL,
-                    fullURL: `${this.baseURL}/api/users/notifications/${notificationId}/read`,
-                    token: this.userStore.token ? 'exists' : 'missing',
-                    error: error.response?.data || error.message,
-                    status: error.response?.status
-                })
-                throw error
+                console.error('Error marking notification as read:', error)
             }
         },
 
         async markAllAsRead() {
-            if (!this.userStore.token) {
-                console.warn('No token available. Skipping markAllAsRead.')
-                return
-            }
+            const userStore = useUserStore()
+            if (!userStore.token) return
 
             try {
-                // แก้ไข URL path ให้ถูกต้อง
-                const response = await axios.patch(
-                    `/api/users/notifications/mark-all-read`,
+                await axios.patch(
+                    `${this.baseURL}/api/users/notifications/mark-all-read`,
                     {},
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${this.userStore.token}`,
-                            'Content-Type': 'application/json'
-                        }
-                    }
+                    { headers: { 'Authorization': `Bearer ${userStore.token}` } }
                 )
 
-                if (response.status === 200) {
-                    this.notifications.forEach(notification => {
-                        notification.read = true
-                    })
-                }
+                // อัพเดทสถานะทั้งหมดในแอพทันที
+                this.notifications.forEach(n => n.read = true)
+
             } catch (error) {
                 console.error('Error marking all notifications as read:', error)
-                throw error
+            }
+        },
+        startChecking() {
+            // เช็คทุก 30 วินาที
+            this.checkInterval = setInterval(() => {
+                this.fetchNotifications()
+            }, 30000)
+        },
+
+        // เพิ่ม action สำหรับหยุดการตรวจสอบ
+        stopChecking() {
+            if (this.checkInterval) {
+                clearInterval(this.checkInterval)
             }
         },
         setModalOpen(value) {

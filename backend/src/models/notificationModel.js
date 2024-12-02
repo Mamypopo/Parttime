@@ -1,15 +1,36 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
+export const NOTIFICATION_TYPES = {
+    JOB_APPLICATION_STATUS: 'job_status',    // แจ้งเตือนสถานะการสมัครงาน
+    WORK_EVALUATION: 'evaluation',           // แจ้งเตือนผลการประเมิน
+    WORK_EVALUATION_REJECTED: 'rejected',    // แจ้งเตือนไม่ผ่านการประเมิน
+    SYSTEM: 'system',                        // แจ้งเตือนจากระบบ
+    GENERAL: 'general'                       // แจ้งเตือนทั่วไป
+}
 
+export const NOTIFICATIONADMIN_TYPES = {
+    JOB_APPLICATION: 'job_application',
+    JOB_STATUS_UPDATE: 'job_status_update',
+    USER_VERIFICATION: 'user_verification',
+    EVALUATION: 'evaluation',
+    SYSTEM: 'system'
+};
 // สร้างการแจ่้งเตือนสำหรับ users
-export const createUserNotification = (userId, message) =>
-    prisma.notification.create({
-        data: {
-            message,
-            user: { connect: { id: userId } },
-        },
-    });
+export const createUserNotification = async (userId, message, type = NOTIFICATION_TYPES.GENERAL) => {
+    try {
+        return await prisma.notification.create({
+            data: {
+                message,
+                type,
+                user: { connect: { id: userId } },
+            },
+        });
+    } catch (error) {
+        console.error('Error creating notification:', error);
+        throw error;
+    }
+};
 
 // สร้างการแจ่้งเตือนสำหรับแอดมิน
 export const createAdminNotification = async ({ userId, content, jobId, adminId, type }) => {
@@ -20,6 +41,10 @@ export const createAdminNotification = async ({ userId, content, jobId, adminId,
     if (!content) {
         throw new Error('ต้องระบุเนื้อหาการแจ้งเตือน');
     }
+    // ตรวจสอบ type ที่ถูกส่งมา
+    if (type && !Object.values(NOTIFICATIONADMIN_TYPES).includes(type)) {
+        type = NOTIFICATIONADMIN_TYPES.SYSTEM; // ถ้าไม่ตรงกับที่กำหนด ให้เป็น system
+    }
 
     try {
         const notification = await prisma.notification.create({
@@ -28,7 +53,7 @@ export const createAdminNotification = async ({ userId, content, jobId, adminId,
                 adminId,
                 message: content,
                 jobId,
-                type: type || 'notification',
+                type: type || NOTIFICATIONADMIN_TYPES.SYSTEM,
                 createdAt: new Date()
             }
         });
@@ -40,7 +65,7 @@ export const createAdminNotification = async ({ userId, content, jobId, adminId,
 };
 
 
-
+// ของ user 
 export const getUserNotifications = (userId) =>
     prisma.notification.findMany({
         where: {
@@ -52,10 +77,11 @@ export const getUserNotifications = (userId) =>
 
 // อ่าน 1 การแจ้งเตือน
 export const markUserNotificationAsRead = async (notificationId, userId) => {
-    const notification = await Notification.findOne({
+    const notification = await prisma.notification.findFirst({
         where: {
             id: notificationId,
-            userId: userId
+            userId: userId,
+            adminId: null
         }
     });
 
@@ -63,23 +89,32 @@ export const markUserNotificationAsRead = async (notificationId, userId) => {
         throw new Error('ไม่พบการแจ้งเตือน');
     }
 
-    await notification.update({ read: true });
-    return notification;
+    return await prisma.notification.update({
+        where: {
+            id: notificationId
+        },
+        data: {
+            read: true
+        }
+    });
 };
 
 // อ่านการแจ้งเตือนทั้งหมด
 export const markAllUserNotificationsAsRead = async (userId) => {
-    await Notification.update(
-        { read: true },
-        {
-            where: {
-                userId: userId,
-                read: false
-            }
+    return await prisma.notification.updateMany({
+        where: {
+            userId: userId,
+            adminId: null,
+            read: false
+        },
+        data: {
+            read: true
         }
-    );
+    });
 };
 
+
+// ของแอดมิน
 export const getAdminNotifications = (adminId) =>
     prisma.notification.findMany({
         where: { adminId },
@@ -88,7 +123,7 @@ export const getAdminNotifications = (adminId) =>
 
 
 
-// อ่านการแจ้งเตือน
+// อ่านการแจ้งเตือนแอดมิน
 export const markAsRead = (notificationId, adminId) =>
     prisma.notification.updateMany({
         where: {
@@ -100,7 +135,7 @@ export const markAsRead = (notificationId, adminId) =>
         }
     });
 
-// อ่านการแจ้งเตือนทั้งหมด
+// อ่านการแจ้งเตือนแอดมินทั้งหมด
 export const markAllAsRead = (adminId) =>
     prisma.notification.updateMany({
         where: {

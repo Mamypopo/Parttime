@@ -1,7 +1,7 @@
 <template>
   <div class="relative">
     <TransitionRoot appear :show="modelValue" as="template">
-      <Dialog as="div" class="relative z-[900]" @click="closeModal">
+      <Dialog as="div" class="relative z-[900]" @close="$emit('update:modelValue', false)">
         <TransitionChild
           as="template"
           enter="transition-opacity duration-300"
@@ -11,7 +11,7 @@
           leave-from="opacity-100"
           leave-to="opacity-0"
         >
-          <div class="fixed inset-0 bg-black/25 backdrop-blur-sm" @click="closeModal" />
+          <div class="fixed inset-0 bg-black/25 backdrop-blur-sm" />
         </TransitionChild>
 
         <div class="fixed inset-x-0 bottom-[80px] overflow-y-auto">
@@ -24,19 +24,20 @@
             leave-from="transform translate-y-0 opacity-100"
             leave-to="transform translate-y-full opacity-0"
           >
-            <DialogPanel class="bg-white dark:bg-gray-800 border-t dark:border-gray-700 shadow-lg">
+            <DialogPanel
+              class="bg-white dark:bg-gray-800 border-t dark:border-gray-700 shadow-lg"
+              @click.stop
+            >
               <!-- Header -->
               <div
-                class="sticky top-0 z-10 flex justify-between items-center p-4 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA]"
+                class="sticky top-0 z-10 flex justify-between items-center p-4 bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] dark:from-[#feac5e]/80 dark:via-[#c779d0]/80 dark:to-[#4bc0c8]/80"
               >
-                <DialogTitle class="text-base font-medium text-[#EA6B6B] dark:text-[#FF8F8F]">
-                  การแจ้งเตือน
-                </DialogTitle>
+                <DialogTitle class="text-base font-medium text-white"> การแจ้งเตือน </DialogTitle>
                 <div class="flex items-center gap-4">
                   <button
                     v-if="hasUnread"
                     @click="markAllAsRead"
-                    class="text-sm text-[#6ED7D1] dark:text-[#4B9592] hover:text-[#4bb3af] dark:hover:text-[#3D7A78] transition-colors duration-200"
+                    class="text-sm text-white/80 hover:text-white transition-colors duration-200"
                   >
                     <span class="flex items-center gap-2">
                       <i class="fas fa-check-double"></i>
@@ -55,16 +56,25 @@
               <!-- Notifications List -->
               <div class="overflow-y-auto" style="max-height: calc(80vh - 130px)">
                 <div v-if="notifications.length === 0" class="p-8 text-center">
-                  <i class="fas fa-bell-slash text-3xl text-[#EABF71] dark:text-[#B38B4A] mb-3"></i>
-                  <p class="text-[#3A3A49] dark:text-gray-300">ไม่มีการแจ้งเตือน</p>
+                  <div
+                    class="bg-gradient-to-r from-[#feac5e]/10 via-[#c779d0]/10 to-[#4bc0c8]/10 dark:from-[#feac5e]/20 dark:via-[#c779d0]/20 dark:to-[#4bc0c8]/20 rounded-full p-6 mb-4 inline-block"
+                  >
+                    <i class="fas fa-bell-slash text-3xl text-[#c779d0] dark:text-[#c779d0]/70"></i>
+                  </div>
+                  <p class="text-gray-600 dark:text-gray-300">ไม่มีการแจ้งเตือน</p>
                 </div>
 
+                <!-- Notification Items -->
                 <div
                   v-else
                   v-for="notification in notifications"
                   :key="notification.id"
-                  class="p-4 hover:bg-[#5D5FEF]/5 dark:hover:bg-[#5D5FEF]/20 border-b dark:border-gray-700 last:border-b-0 transition-colors duration-200"
-                  :class="!notification.read ? 'bg-[#5D5FEF]/10 dark:bg-[#5D5FEF]/20' : ''"
+                  class="p-4 border-b dark:border-gray-700 last:border-b-0 transition-colors duration-200"
+                  :class="[
+                    !notification.read
+                      ? 'bg-gradient-to-r from-[#feac5e]/10 via-[#c779d0]/10 to-[#4bc0c8]/10 dark:from-[#feac5e]/20 dark:via-[#c779d0]/20 dark:to-[#4bc0c8]/20'
+                      : 'hover:bg-gradient-to-r hover:from-[#feac5e]/5 hover:via-[#c779d0]/5 hover:to-[#4bc0c8]/5 dark:hover:from-[#feac5e]/10 dark:hover:via-[#c779d0]/10 dark:hover:to-[#4bc0c8]/10'
+                  ]"
                   @click="handleSelect(notification)"
                 >
                   <!-- เนื้อหาการแจ้งเตือน -->
@@ -80,8 +90,8 @@
                         class="text-sm font-medium"
                         :class="
                           !notification.read
-                            ? 'text-[#CDE45F] dark:text-[#A4B83C]'
-                            : 'text-[#888888] dark:text-gray-400'
+                            ? 'text-[#CDE45F] dark:text-[#A4B83C]/90'
+                            : 'text-gray-600 dark:text-gray-400'
                         "
                       >
                         {{ notification.message }}
@@ -95,7 +105,7 @@
                     </div>
                     <div v-if="!notification.read" class="flex-shrink-0">
                       <div
-                        class="h-3 w-3 rounded-full bg-[#EA6B6B] dark:bg-[#FF8F8F] animate-ping"
+                        class="h-3 w-3 rounded-full bg-gradient-to-r from-[#feac5e] to-[#c779d0] animate-pulse"
                       ></div>
                     </div>
                   </div>
@@ -103,9 +113,9 @@
               </div>
 
               <!-- Footer -->
-              <div class="p-3 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+              <div class="p-3 border-t dark:border-gray-700 bg-white dark:bg-gray-800">
                 <button
-                  class="w-full text-center text-sm text-[#EA6B6B] dark:text-[#FF8F8F] hover:text-[#d95151] dark:hover:text-[#ff7070] transition-colors duration-200"
+                  class="w-full text-center text-sm text-[#c779d0] hover:text-[#4bc0c8] dark:text-[#c779d0]/70 dark:hover:text-[#4bc0c8]/70 transition-colors duration-200"
                   @click="openAllNotifications"
                 >
                   ดูการแจ้งเตือนทั้งหมด
@@ -171,18 +181,24 @@ export default {
   methods: {
     getIconClass(type) {
       const classes = {
-        job: 'bg-purple-100 text-purple-600',
-        default: 'bg-gray-100 text-gray-600'
+        job_status: 'bg-gradient-to-br from-[#6ED7D1] to-[#9899ee]', // สถานะงาน
+        evaluation: 'bg-gradient-to-br from-[#CDE45F] to-[#A4B83C]', // ผลการประเมิน
+        rejected: 'bg-gradient-to-br from-[#EA6B6B] to-[#FF8F8F]', // ไม่ผ่านการประเมิน
+        system: 'bg-gradient-to-br from-[#9899ee] to-[#6667AA]', // ระบบ
+        general: 'bg-[#EABF71] dark:bg-[#C69B4F]' // ทั่วไป
       }
-      return classes[type] || classes.default
+      return classes[type] || classes.general
     },
 
     getIcon(type) {
       const icons = {
-        job: 'fas fa-briefcase',
-        default: 'fas fa-bell text-[#EABF71]'
+        job_status: 'fas fa-briefcase text-white',
+        evaluation: 'fas fa-star text-white',
+        rejected: 'fas fa-times-circle text-white',
+        system: 'fas fa-cog text-white',
+        general: 'fas fa-bell text-white'
       }
-      return icons[type] || icons.default
+      return icons[type] || icons.general
     },
 
     formatTime(date) {
@@ -239,27 +255,27 @@ export default {
 <style scoped>
 .overflow-y-auto {
   scrollbar-width: thin;
-  scrollbar-color: #c5b4e3 #f3f4f6;
+  scrollbar-color: #c779d0 #f3f4f6;
 }
 
 .overflow-y-auto::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 .overflow-y-auto::-webkit-scrollbar-track {
-  background: #f3f4f6;
+  background: transparent;
 }
 
 .overflow-y-auto::-webkit-scrollbar-thumb {
-  background-color: #c5b4e3;
-  border-radius: 20px;
-  border: 2px solid #f3f4f6;
+  background-color: #c779d0;
+  background-image: linear-gradient(to bottom, #feac5e, #c779d0, #4bc0c8);
+  border-radius: 4px;
 }
 
 /* Dark mode scrollbar */
 @media (prefers-color-scheme: dark) {
   .overflow-y-auto {
-    scrollbar-color: #4b9592 #1f2937;
+    scrollbar-color: #c779d0 #1f2937;
   }
 
   .overflow-y-auto::-webkit-scrollbar-track {
@@ -267,7 +283,7 @@ export default {
   }
 
   .overflow-y-auto::-webkit-scrollbar-thumb {
-    background-color: #4b9592;
+    background-image: linear-gradient(to bottom, #feac5e80, #c779d080, #4bc0c880);
     border: 2px solid #1f2937;
   }
 }

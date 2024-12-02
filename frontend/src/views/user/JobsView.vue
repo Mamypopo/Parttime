@@ -2,24 +2,38 @@
   <div class="p-4 md:p-6 transition-all duration-300 ease-in-out">
     <!-- Header -->
     <div class="mb-6">
-      <h1 class="text-2xl sm:text-3xl font-semibold text-gray-800 dark:text-gray-100">
-        งานทั้งหมด
+      <h1 class="text-2xl sm:text-3xl font-bold">
+        <span
+          class="bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] text-transparent bg-clip-text"
+        >
+          งานทั้งหมด
+        </span>
       </h1>
       <p class="mt-2 text-gray-500 dark:text-gray-400">งานที่ทักษะตรงกับคุณจะสามารถสมัครได้</p>
     </div>
 
     <!-- Search Component -->
-    <JobSearchFilters @search="handleSearch" @clear="fetchJobs" />
+    <div class="mt-6 flex items-center gap-2">
+      <div class="flex-1 transform transition-all duration-300 hover:scale-[1.01]">
+        <JobSearchFilters
+          @search="handleSearch"
+          @clear="fetchJobs"
+          class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+        />
+      </div>
+    </div>
 
     <!-- Jobs Grid -->
     <div class="mt-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
       <div
         v-for="job in jobs"
         :key="job.id"
-        class="group bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300"
+        class="group bg-white dark:bg-gray-800 rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-[#c779d0]/50 dark:hover:border-[#4bc0c8]/50 hover:shadow-lg hover:shadow-[#c779d0]/10 dark:hover:shadow-[#4bc0c8]/10"
       >
         <!-- Job Header -->
-        <div class="p-5 border-b dark:border-gray-700">
+        <div
+          class="p-5 border-b border-gray-200 dark:border-gray-700/50 bg-gradient-to-r from-[#feac5e]/5 via-[#c779d0]/5 to-[#4bc0c8]/5 dark:from-[#feac5e]/10 dark:via-[#c779d0]/10 dark:to-[#4bc0c8]/10"
+        >
           <div class="flex justify-between items-start gap-4 mb-3">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 line-clamp-2">
               {{ job.title }}
@@ -56,7 +70,7 @@
                 {{ job.creator?.first_name }} {{ job.creator?.last_name }}
               </span>
               <span class="text-xs text-gray-500 dark:text-gray-500">
-                <i class="fas fa-phone-alt mr-1 text-cyan-500/70"></i>
+                <i class="fas fa-phone-alt mr-1 text-[#4bc0c8] dark:text-[#4bc0c8]/70"></i>
                 {{ job.creator?.phone || 'ไม่ระบุเบอร์โทร' }}
               </span>
             </div>
@@ -64,22 +78,21 @@
 
           <!-- Location -->
           <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-            <i class="fas fa-map-marker-alt mr-2 text-cyan-500 dark:text-cyan-400"></i>
+            <i class="fas fa-map-marker-alt mr-2 text-[#c779d0] dark:text-[#c779d0]/70"></i>
             {{ job.location }}
           </p>
         </div>
 
         <!-- Job Details -->
-        <!-- Job Details -->
         <div class="p-5 flex flex-col flex-1">
           <!-- Date and Time -->
           <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
             <span class="flex items-center">
-              <i class="fas fa-calendar mr-2 text-cyan-500 dark:text-cyan-400"></i>
+              <i class="fas fa-calendar mr-2 text-[#feac5e] dark:text-[#feac5e]/70"></i>
               {{ formatDate(job.work_date) }}
             </span>
             <span class="flex items-center">
-              <i class="fas fa-clock mr-2 text-cyan-500 dark:text-cyan-400"></i>
+              <i class="fas fa-clock mr-2 text-[#4bc0c8] dark:text-[#4bc0c8]/70"></i>
               {{ formatTime(job.start_time) }} - {{ formatTime(job.end_time) }}
             </span>
           </div>
@@ -111,21 +124,21 @@
             <!-- ปุ่มดูรายละเอียด -->
             <button
               @click="openJobDetail(job)"
-              class="flex-1 py-2 px-4 rounded-lg font-medium bg-white dark:bg-gray-700 text-cyan-600 dark:text-cyan-400 border-2 border-cyan-500 dark:border-cyan-400 hover:bg-cyan-50 dark:hover:bg-gray-600 transition-colors duration-200"
+              class="flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 border-2 hover:scale-[1.02] bg-white dark:bg-gray-800 border-[#4bc0c8]/50 dark:border-[#4bc0c8]/50 text-[#4bc0c8] dark:text-[#4bc0c8] hover:bg-gradient-to-r hover:from-[#4bc0c8]/10 hover:to-[#c779d0]/10 dark:hover:from-[#4bc0c8]/20 dark:hover:to-[#c779d0]/20"
             >
-              <i class="fas fa-info-circle mr-2"></i>
+              <i class="fas fa-info-circle mr-2 text-[#c779d0] dark:text-[#c779d0]/70"></i>
               รายละเอียด
             </button>
 
             <!-- ปุ่มสมัครงาน -->
             <button
               @click="openApplyModal(job)"
-              class="flex-1 py-2 px-4 rounded-lg font-medium"
-              :class="
+              class="flex-1 py-2 px-4 rounded-lg font-medium text-white transition-all duration-200 hover:scale-[1.02]"
+              :class="[
                 hasApplied(job) || !canApply(job)
-                  ? 'bg-gray-500 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600'
-              "
+                  ? 'bg-gray-500 dark:bg-gray-600 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] hover:opacity-90'
+              ]"
               :disabled="hasApplied(job) || !canApply(job)"
             >
               <i class="fas fa-paper-plane mr-2"></i>
@@ -142,7 +155,7 @@
     <!-- Loading State -->
     <div v-if="jobStore.loading" class="flex justify-center items-center py-12">
       <div
-        class="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500 border-t-transparent"
+        class="animate-spin rounded-full h-12 w-12 border-4 border-[#4bc0c8] dark:border-[#4bc0c8]/70 border-t-transparent dark:border-t-transparent border-b-[#c779d0] dark:border-b-[#c779d0]/70"
       ></div>
     </div>
 
@@ -151,7 +164,9 @@
       v-if="!jobStore.loading && jobs.length === 0"
       class="text-center py-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
     >
-      <i class="fas fa-search text-5xl text-gray-400 dark:text-gray-600 mb-4"></i>
+      <i
+        class="fas fa-search text-5xl bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] text-transparent bg-clip-text mb-4"
+      ></i>
       <p class="text-gray-500 dark:text-gray-400">ไม่พบงานที่คุณค้นหา</p>
     </div>
 
@@ -402,9 +417,25 @@ export default {
 }
 </script>
 <style scoped>
+.group {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ปรับ Disabled State */
 button:disabled {
-  opacity: 0.5;
+  opacity: 0.7;
   cursor: not-allowed;
-  pointer-events: none;
+  transform: none !important;
 }
 </style>

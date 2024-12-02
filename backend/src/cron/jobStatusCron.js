@@ -89,7 +89,7 @@ export const updateJobStatuses = async () => {
                         await notificationModel.createAdminNotification({
                             adminId: job.created_by,
                             content: adminMessage,
-                            type: 'JOB_STATUS_AUTO_UPDATED',
+                            type: 'job_status_update',
                             jobId: job.id,
                             userId: null
                         });

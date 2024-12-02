@@ -184,17 +184,24 @@ export default {
   methods: {
     getIconClass(type) {
       const classes = {
-        user: 'text-[#CDE45F]',
-        job: 'bg-purple-100 text-purple-600',
-        default: 'bg-gray-100 text-gray-600'
+        job_application: 'text-[#A8E6E2] dark:text-[#6ED7D1]',
+        job_status_update: 'text-[#CDE45F] dark:text-[#9AB52D]',
+        user_verification: 'text-[#EABF71] dark:text-[#D99F41]',
+        evaluation: 'text-[#9899ee] dark:text-[#6667AA]',
+        system: 'text-[#EA6B6B] dark:text-[#D45454]',
+        default: 'text-[#A8E6E2] dark:text-[#6ED7D1]'
       }
       return classes[type] || classes.default
     },
 
     getIcon(type) {
       const icons = {
-        job: 'fas fa-briefcase',
-        default: 'fas fa-bell text-[#EABF71]'
+        job_application: 'fas fa-briefcase',
+        job_status_update: 'fas fa-clock',
+        user_verification: 'fas fa-user-check',
+        evaluation: 'fas fa-star',
+        system: 'fas fa-bell',
+        default: 'fas fa-bell'
       }
       return icons[type] || icons.default
     },

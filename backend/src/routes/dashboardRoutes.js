@@ -10,4 +10,7 @@ router.get('/stats', authMiddleware, checkAdminRole, dashboardController.getDash
 router.get('/calendar-events', authMiddleware, checkAdminRole, dashboardController.getCalendarEvents)
 
 router.get('/users-ratings', authMiddleware, checkAdminRole, dashboardController.getTopUsersWithRatings);
+
+router.get('/user/dashboard', authMiddleware, dashboardController.getUserDashboard);
+
 export default router

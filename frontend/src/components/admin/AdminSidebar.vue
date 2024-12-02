@@ -343,7 +343,8 @@ export default {
             Swal.showLoading()
           }
         })
-
+        // หยุดเช็คการแจ้งเตือนเมื่อ logout
+        this.notificationStore.stopChecking()
         // ทำการ logout และ clear stores
         this.adminStore.logout()
 
@@ -378,12 +379,20 @@ export default {
       this.sidebarStore.toggleDarkMode()
     }
   },
-  mounted() {
+  async mounted() {
     this.sidebarStore.initializeResponsive()
     this.sidebarStore.initializeTheme()
+
+    // เริ่มเช็คการแจ้งเตือนเมื่อ admin login แล้ว
+    if (this.adminStore.isLoggedIn) {
+      await this.notificationStore.fetchNotifications() // เช็คครั้งแรก
+      this.notificationStore.startChecking() // เริ่มการเช็คอัตโนมัติ
+    }
   },
   beforeUnmount() {
     this.sidebarStore.cleanup()
+    // หยุดเช็คการแจ้งเตือนเมื่อออกจาก layout
+    this.notificationStore.stopChecking()
   }
 }
 </script>

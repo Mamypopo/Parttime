@@ -332,15 +332,6 @@ export const getRejectedUsers = async (req, res) => {
 };
 
 
-// ดึงสถิติจำนวนผู้ใช้แต่ละสถานะ
-// export const getUserStats = async (req, res) => {
-//     try {
-//         const stats = await adminModel.countUsersByStatus();
-//         res.json(stats);
-//     } catch (error) {
-//         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูลสถิติ' });
-//     }
-// };
 
 // อนุมัติผู้ใช้งานในระบบ
 export const approveUser = async (req, res) => {

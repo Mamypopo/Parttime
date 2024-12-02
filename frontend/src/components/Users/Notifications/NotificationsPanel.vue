@@ -6,18 +6,18 @@
         class="w-full flex items-center px-4 py-2 hover:bg-[#5D5FEF] hover:bg-opacity-5 rounded-lg font-semibold text-gray-600 transition-colors duration-200"
         :class="[
           isCollapsed ? 'justify-center' : 'gap-3',
-          'hover:bg-[#5D5FEF] hover:bg-opacity-5 dark:hover:bg-opacity-10 text-gray-600 dark:text-gray-300'
+          'hover:bg-gradient-to-r hover:from-[#feac5e]/10 hover:via-[#c779d0]/10 hover:to-[#4bc0c8]/10 dark:hover:from-[#feac5e]/20 dark:hover:via-[#c779d0]/20 dark:hover:to-[#4bc0c8]/20'
         ]"
       >
         <div class="w-4 text-center">
-          <i class="fas fa-bell text-xl text-[#A8E6E2] dark:text-[#6ED7D1]"></i>
+          <i class="fas fa-bell text-xl text-[#c779d0] dark:text-[#c779d0]/70"></i>
         </div>
         <span v-if="!isCollapsed" class="font-semibold ml-1 text-gray-600 dark:text-gray-300"
           >การแจ้งเตือน</span
         >
         <span
           v-if="notificationCount"
-          class="text-xs bg-[#f76363] dark:bg-[#ff4444] text-white px-2 py-0.5 rounded-full animate-pulse"
+          class="text-xs bg-[#EA6B6B] dark:bg-[#FF8F8F] text-white px-2 py-0.5 rounded-full animate-pulse"
           :class="[isCollapsed ? 'absolute -top-1 -right-1' : 'ml-auto']"
         >
           {{ notificationCount }}
@@ -44,13 +44,13 @@
         >
           <!-- หัวข้อ -->
           <div
-            class="flex justify-between items-center px-4 py-2 bg-gradient-to-r from-[#A8E6E2] to-[#C3E8D5] dark:from-[#4a9490] dark:to-[#6ED7D1] border-b"
+            class="flex justify-between items-center px-4 py-2 bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] dark:from-[#feac5e]/80 dark:via-[#c779d0]/80 dark:to-[#4bc0c8]/80"
           >
             <h3 class="font-medium text-[#3A3A49] dark:text-white">การแจ้งเตือน</h3>
             <button
               v-if="notifications.length > 0"
               @click="markAllAsRead"
-              class="text-sm text-[#3A3A49] hover:text-[#6ED7D1] dark:text-white dark:hover:text-[#A8E6E2] transition-colors duration-200"
+              class="text-sm text-white/80 hover:text-white transition-colors duration-200"
             >
               <span class="flex items-center gap-2">
                 <i class="fas fa-check-double"></i>
@@ -69,9 +69,11 @@
               <div
                 class="px-4 py-3 cursor-pointer transition-all duration-200 border-b last:border-b-0 dark:border-gray-700"
                 :class="[
-                  active ? 'bg-[#D9F9F4] dark:bg-[#3D756E]' : '',
+                  active
+                    ? 'bg-gradient-to-r from-[#feac5e]/10 via-[#c779d0]/10 to-[#4bc0c8]/10 dark:from-[#feac5e]/20 dark:via-[#c779d0]/20 dark:to-[#4bc0c8]/20'
+                    : '',
                   !notification.read
-                    ? 'bg-[#E3FCEC] dark:bg-[#2F4F4D]'
+                    ? 'bg-[#c779d0]/10 dark:bg-[#c779d0]/20'
                     : 'bg-white dark:bg-gray-800'
                 ]"
                 @click="handleNotificationClick(notification)"
@@ -90,7 +92,7 @@
                       class="text-sm font-medium"
                       :class="
                         !notification.read
-                          ? 'text-[#256D85] dark:text-[#A3E0DF]'
+                          ? 'text-[#CDE45F] dark:text-[#A4B83C]'
                           : 'text-[#94A3B8] dark:text-[#64748B]'
                       "
                     >
@@ -128,14 +130,10 @@
             class="px-4 py-3 border-t bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-800 dark:border-gray-700"
           >
             <button
-              class="w-full text-center text-sm transition-all duration-200"
+              class="w-full text-center text-sm text-[#c779d0] hover:text-[#4bc0c8] dark:text-[#c779d0]/70 dark:hover:text-[#4bc0c8]/70 transition-colors duration-200"
               @click="openModal"
             >
-              <p
-                class="text-[#6ED7D1] hover:text-[#4bb3af] dark:text-[#A8E6E2] dark:hover:text-[#6ED7D1] font-medium"
-              >
-                ดูการแจ้งเตือนทั้งหมด
-              </p>
+              ดูการแจ้งเตือนทั้งหมด
             </button>
           </div>
         </HeadlessMenuItems>
@@ -230,19 +228,24 @@ export default {
 
     getIconClass(type) {
       const classes = {
-        job: 'bg-gradient-to-br from-[#6ED7D1] to-[#9899ee] text-white',
-        default:
-          'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-600 dark:text-gray-300'
+        job_status: 'bg-gradient-to-br from-[#6ED7D1] to-[#9899ee]', // สถานะงาน
+        evaluation: 'bg-gradient-to-br from-[#CDE45F] to-[#A4B83C]', // ผลการประเมิน
+        rejected: 'bg-gradient-to-br from-[#EA6B6B] to-[#FF8F8F]', // ไม่ผ่านการประเมิน
+        system: 'bg-gradient-to-br from-[#9899ee] to-[#6667AA]', // ระบบ
+        general: 'bg-[#EABF71] dark:bg-[#C69B4F]' // ทั่วไป
       }
-      return classes[type] || classes.default
+      return classes[type] || classes.general
     },
 
     getIcon(type) {
       const icons = {
-        job: 'fas fa-briefcase',
-        default: 'fas fa-bell'
+        job_status: 'fas fa-briefcase text-white',
+        evaluation: 'fas fa-star text-white',
+        rejected: 'fas fa-times-circle text-white',
+        system: 'fas fa-cog text-white',
+        general: 'fas fa-bell text-white'
       }
-      return icons[type] || icons.default
+      return icons[type] || icons.general
     },
 
     formatTime(date) {

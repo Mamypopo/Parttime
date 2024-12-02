@@ -25,7 +25,7 @@
             leave-to="opacity-0 translate-y-full"
           >
             <HeadlessDialogPanel
-              class="w-[300px] max-w-md h-full bg-white dark:bg-gray-800 shadow-xl relative"
+              class="w-[400px] max-w-md h-full bg-white dark:bg-gray-800 shadow-xl relative"
             >
               <!-- Header -->
               <div
@@ -57,20 +57,18 @@
               </div>
 
               <!-- Filters -->
-              <div
-                class="sticky top-[65px] z-10 px-3 py-2 border-b dark:border-gray-700 bg-white dark:bg-gray-800"
-              >
-                <div class="flex gap-2">
+              <div class="sticky px-3 py-4 border-b dark:border-gray-700 bg-white dark:bg-gray-800">
+                <div class="flex gap-2 overflow-x-auto no-scrollbar">
                   <button
                     v-for="filter in filters"
                     :key="filter.value"
                     @click="currentFilter = filter.value"
-                    class="px-4 py-1.5 text-sm rounded-full transition-all duration-200 flex items-center justify-center gap-1.5"
-                    :class="
+                    class="flex-shrink-0 px-4 py-2 text-sm rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5"
+                    :class="[
                       currentFilter === filter.value
-                        ? 'bg-[#babbec] dark:bg-[#6667AA] text-white'
-                        : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-                    "
+                        ? 'bg-[#babbec] dark:bg-[#6667aa] text-white shadow-md'
+                        : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 border dark:border-gray-600'
+                    ]"
                   >
                     <i :class="getFilterIcon(filter.value)"></i>
                     {{ filter.label }}
@@ -79,7 +77,7 @@
               </div>
 
               <!-- Notifications List -->
-              <div class="overflow-y-auto" style="height: calc(100vh - 130px)">
+              <div class="overflow-y-auto flex-1" style="height: calc(100vh - 130px)">
                 <div
                   v-if="filteredNotifications.length === 0"
                   class="flex flex-col items-center justify-center h-[50vh] p-8 text-center"
@@ -179,10 +177,12 @@ export default {
       currentFilter: 'all',
       filters: [
         { label: 'ทั้งหมด', value: 'all' },
-        { label: 'ยังไม่ได้อ่าน', value: 'unread' }
-        // { label: 'ผู้ใช้งาน', value: 'user' },
-        // { label: 'ทักษะ', value: 'skill' },
-        // { label: 'งาน', value: 'job' }
+        { label: 'ยังไม่ได้อ่าน', value: 'unread' },
+        { label: 'สมัครงาน', value: 'job_application' },
+        { label: 'สถานะงาน', value: 'job_status_update' },
+        { label: 'ยืนยันตัวตน', value: 'user_verification' },
+        { label: 'ประเมินผล', value: 'evaluation' },
+        { label: 'ระบบ', value: 'system' }
       ]
     }
   },
@@ -223,30 +223,36 @@ export default {
     },
     getIconClass(type) {
       const classes = {
-        // user: 'text-[#CDE45F]',
-        // skill: 'bg-green-100 text-green-600',
-        job: 'bg-purple-100 text-purple-600',
-        default: 'bg-gray-100 text-gray-600'
+        job_application: 'text-[#A8E6E2] dark:text-[#6ED7D1]',
+        job_status_update: 'text-[#CDE45F] dark:text-[#9AB52D]',
+        user_verification: 'text-[#EABF71] dark:text-[#D99F41]',
+        evaluation: 'text-[#9899ee] dark:text-[#6667AA]',
+        system: 'text-[#EA6B6B] dark:text-[#D45454]',
+        default: 'text-[#A8E6E2] dark:text-[#6ED7D1]'
       }
       return classes[type] || classes.default
     },
 
     getIcon(type) {
       const icons = {
-        // user: 'fas fa-user-clock',
-        // skill: 'fas fa-tasks',
-        job: 'fas fa-briefcase ',
-        default: 'fas fa-bell text-[#EABF71]'
+        job_application: 'fas fa-briefcase',
+        job_status_update: 'fas fa-clock',
+        user_verification: 'fas fa-user-check',
+        evaluation: 'fas fa-star',
+        system: 'fas fa-bell',
+        default: 'fas fa-bell'
       }
       return icons[type] || icons.default
     },
     getFilterIcon(value) {
       const icons = {
-        all: 'fas fa-th-list  text-[#81E2C4]',
-        unread: 'fas fa-envelope text-[#81E2C4]',
-        // user: 'fas fa-users',
-        // skill: 'fas fa-tools',
-        job: 'fas fa-briefcase'
+        all: 'fas fa-th-list text-[#81E2C4] dark:text-[#6ED7D1]',
+        unread: 'fas fa-envelope text-[#81E2C4] dark:text-[#6ED7D1]',
+        job_application: 'fas fa-briefcase text-[#81E2C4] dark:text-[#6ED7D1]',
+        job_status_update: 'fas fa-clock text-[#81E2C4] dark:text-[#6ED7D1]',
+        user_verification: 'fas fa-user-check text-[#81E2C4] dark:text-[#6ED7D1]',
+        evaluation: 'fas fa-star text-[#81E2C4] dark:text-[#6ED7D1]',
+        system: 'fas fa-bell text-[#81E2C4] dark:text-[#6ED7D1]'
       }
       return icons[value]
     },
@@ -311,5 +317,14 @@ export default {
     background-color: #4b9592;
     border: 2px solid #1f2937;
   }
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 </style>

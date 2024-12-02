@@ -2,7 +2,7 @@
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
     <!-- ปุ่มแสดง/ซ่อนสำหรับมือถือ -->
     <button
-      class="lg:hidden w-full p-4 text-left bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-purple-500 text-white rounded-lg flex items-center"
+      class="lg:hidden w-full p-4 text-left bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] hover:from-[#B4A3D2] hover:to-[#D9B5EB] dark:from-purple-600 dark:to-purple-500 text-white rounded-lg flex items-center transform hover:scale-[1.02] transition-all duration-200"
       @click="toggleSearch"
     >
       <i class="fas fa-search mr-2"></i>
@@ -112,15 +112,36 @@
           </div>
 
           <!-- ค่าจ้าง -->
-          <div class="relative min-w-[120px]">
-            <input
-              v-model.number="filters.minWage"
-              type="number"
-              class="w-full pl-8 pr-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-              placeholder="ค่าจ้าง"
-              @input="debouncedSearch"
-            />
-            <i class="fas fa-baht-sign absolute left-3 top-3 text-gray-400 dark:text-gray-500"></i>
+          <div class="flex items-center gap-2">
+            <!-- Min Wage -->
+            <div class="relative min-w-[120px]">
+              <input
+                v-model.number="filters.minWage"
+                type="number"
+                class="w-full pl-8 pr-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                placeholder="ค่าจ้างต่ำสุด"
+                @input="debouncedSearch"
+              />
+              <i
+                class="fas fa-baht-sign absolute left-3 top-3 text-gray-400 dark:text-gray-500"
+              ></i>
+            </div>
+
+            <span class="text-gray-400">-</span>
+
+            <!-- Max Wage -->
+            <div class="relative min-w-[120px]">
+              <input
+                v-model.number="filters.maxWage"
+                type="number"
+                class="w-full pl-8 pr-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                placeholder="ค่าจ้างสูงสุด"
+                @input="debouncedSearch"
+              />
+              <i
+                class="fas fa-baht-sign absolute left-3 top-3 text-gray-400 dark:text-gray-500"
+              ></i>
+            </div>
           </div>
 
           <!-- วันที่ -->
@@ -133,7 +154,7 @@
           <!-- ค้นหา -->
           <button
             @click="handleSearch"
-            class="px-6 py-2.5 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-purple-500 text-white rounded-lg ml-auto hover:opacity-90 transition-opacity duration-200"
+            class="px-6 py-2.5 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-purple-500 text-white rounded-lg ml-auto hover:opacity-90 transition-all duration-300 transform hover:scale-105 hover:shadow-lg active:scale-95"
           >
             <i class="fas fa-search mr-2"></i>
             ค้นหา

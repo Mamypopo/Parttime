@@ -123,7 +123,7 @@ export const getExpensesByDateRange = async (startDate, endDate) => {
     })
 }
 
-// ฟังก์ชันใหม่สำหรับรายงานค่าใช้จ่าย
+// ฟังก์ชันสำหรับรายงานค่าใช้จ่าย
 export const getJobExpensesReport = async (month = new Date().getMonth(), year = new Date().getFullYear()) => {
     try {
         const startDate = new Date(year, month, 1)
@@ -186,7 +186,7 @@ export const getMonthlyApplications = (startOfMonth) => {
     })
 }
 
-// เพิ่มฟังก์ชันใหม่สำหรับดึงข้อมูลการสมัครพร้อมสถานะ
+// ฟังก์ชันสำหรับดึงข้อมูลการสมัครพร้อมสถานะ
 export const getMonthlyApplicationsWithStatus = async (startOfMonth) => {
     const endOfMonth = new Date(startOfMonth)
     endOfMonth.setMonth(endOfMonth.getMonth() + 1)
@@ -430,3 +430,186 @@ export const getRecentRegistrations = () => {
         take: 5  // แสดง 5 รายการล่าสุด
     })
 }
+
+
+
+// ดึงข้อมูลสถิติของ User
+export const getUserDashboardStats = async (userId) => {
+    try {
+        const [averageRating, completedJobs, monthlyIncome] = await Promise.all([
+            // คะแนนเฉลี่ย
+            prisma.workHistory.aggregate({
+                where: {
+                    jobParticipation: {
+                        user_id: userId,
+                        status: 'completed'
+                    }
+                },
+                _avg: {
+                    total_score: true
+                }
+            }),
+
+            // จำนวนงานที่เสร็จสิ้นและได้รับการประเมิน
+            prisma.jobParticipation.count({
+                where: {
+                    user_id: userId,
+                    status: 'completed',
+                    workHistories: {
+                        some: {} // มีประวัติการประเมิน
+                    }
+                }
+            }),
+
+            // รายได้เดือนนี้ (เฉพาะงานที่ได้รับการประเมิน)
+            prisma.jobParticipation.findMany({
+                where: {
+                    user_id: userId,
+                    status: 'completed',
+                    workHistories: {
+                        some: {} // มีประวัติการประเมิน
+                    },
+                    created_at: {
+                        gte: new Date(new Date().setDate(1)) // ตั้งแต่วันที่ 1 ของเดือนนี้
+                    }
+                },
+                select: {
+                    jobPosition: {
+                        select: {
+                            wage: true // ค่าแรงต่อวัน
+                        }
+                    },
+                    workHistories: {
+                        select: {
+                            is_passed_evaluation: true // สถานะการประเมิน
+                        }
+                    }
+                }
+            })
+        ]);
+
+        // คำนวณรายได้จากงานที่ผ่านการประเมิน
+        const totalMonthlyIncome = monthlyIncome.reduce((total, job) => {
+            // ตรวจสอบว่างานผ่านการประเมินหรือไม่
+            const isPassedEvaluation = job.workHistories.some(
+                history => history.is_passed_evaluation
+            );
+
+            // เพิ่มรายได้เฉพาะงานที่ผ่านการประเมิน
+            if (isPassedEvaluation) {
+                return total + Number(job.jobPosition.wage);
+            }
+            return total;
+        }, 0);
+
+        return {
+            averageRating: Number(averageRating._avg.total_score || 0).toFixed(1),
+            completedJobs,
+            monthlyIncome: totalMonthlyIncome
+        };
+    } catch (error) {
+        console.error('Error in getUserDashboardStats:', error);
+        throw error;
+    }
+};
+
+// ดึงรายได้ล่าสุด (ปรับปรุงให้ดึงเฉพาะงานที่ผ่านการประเมิน)
+export const getRecentIncomes = async (userId) => {
+    try {
+        return await prisma.jobParticipation.findMany({
+            where: {
+                user_id: userId,
+                status: 'completed',
+                workHistories: {
+                    some: {
+                        is_passed_evaluation: true // เฉพาะงานที่ผ่านการประเมิน
+                    }
+                }
+            },
+            select: {
+                id: true,
+                created_at: true,
+                jobPosition: {
+                    select: {
+                        position_name: true,
+                        wage: true, // ค่าแรง
+                        job: {
+                            select: {
+                                title: true,
+                                location: true
+                            }
+                        }
+                    }
+                },
+                workHistories: {
+                    select: {
+                        created_at: true, // วันที่ประเมิน
+                        total_score: true
+                    },
+                    where: {
+                        is_passed_evaluation: true
+                    }
+                }
+            },
+            orderBy: {
+                created_at: 'desc'
+            },
+            take: 5
+        });
+    } catch (error) {
+        console.error('Error in getRecentIncomes:', error);
+        throw error;
+    }
+};
+
+// ดึงตารางงานวันนี้
+export const getTodaySchedule = async (userId) => {
+    try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        return await prisma.jobParticipation.findMany({
+            where: {
+                user_id: userId,
+                jobPosition: {
+                    job: {
+                        work_date: {
+                            gte: today,
+                            lt: tomorrow
+                        }
+                    }
+                }
+            },
+            select: {
+                id: true,
+                status: true,
+                jobPosition: {
+                    select: {
+                        position_name: true,
+                        job: {
+                            select: {
+                                title: true,
+                                location: true,
+                                start_time: true,
+                                end_time: true
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: {
+                jobPosition: {
+                    job: {
+                        start_time: 'asc'
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error in getTodaySchedule:', error);
+        throw error;
+    }
+};
+

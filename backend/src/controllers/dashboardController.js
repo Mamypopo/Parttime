@@ -77,6 +77,7 @@ function calculateTotalExpenses(positions) {
         return total + expense
     }, 0)
 }
+
 export const getDashboardStats = async (req, res) => {
     try {
         // ดึงข้อมูลพื้นฐาน
@@ -267,9 +268,6 @@ export const getDashboardStats = async (req, res) => {
 }
 
 
-
-
-
 export const getCalendarEvents = async (req, res) => {
     try {
         const { month, year } = req.query
@@ -300,3 +298,54 @@ export const getTopUsersWithRatings = async (req, res) => {
         });
     }
 };
+
+
+
+export const getUserDashboard = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        // ดึงข้อมูลทั้งหมดพร้อมกัน
+        const [stats, todaySchedule, recentIncomes] = await Promise.all([
+            DashboardModel.getUserDashboardStats(userId),
+            DashboardModel.getTodaySchedule(userId),
+            DashboardModel.getRecentIncomes(userId)
+        ]);
+
+        // แปลงข้อมูลตารางงานให้อยู่ในรูปแบบที่ต้องการ
+        const formattedSchedule = todaySchedule.map(job => ({
+            id: job.id,
+            start_time: job.jobPosition.job.start_time,
+            end_time: job.jobPosition.job.end_time,
+            title: job.jobPosition.position_name,
+            workplace: job.jobPosition.job.title,
+            location: job.jobPosition.job.location,
+            status: job.status,
+
+        }));
+
+        // แปลงข้อมูลรายได้ให้อยู่ในรูปแบบที่ต้องการ
+        const formattedIncomes = recentIncomes.map(income => ({
+            id: income.id,
+            jobTitle: income.jobPosition.position_name,
+            workplace: income.jobPosition.job.title,
+            date: income.workHistories[0].created_at,
+            amount: income.jobPosition.wage,
+            score: income.workHistories[0].total_score
+        }));
+
+        res.status(200).json({
+            stats,
+            todaySchedule: formattedSchedule,
+            recentIncomes: formattedIncomes
+        });
+
+    } catch (error) {
+        console.error('Error in getUserDashboard:', error);
+        res.status(500).json({
+            message: 'เกิดข้อผิดพลาดในการดึงข้อมูล Dashboard'
+        });
+    }
+};
+
+

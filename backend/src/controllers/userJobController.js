@@ -15,6 +15,8 @@ export const getMyJobs = async (req, res) => {
             work_date: participation.jobPosition.job.work_date,
             position: participation.jobPosition.position_name,
             wage: participation.jobPosition.wage,
+            start_time: participation.jobPosition.job.start_time,
+            end_time: participation.jobPosition.job.end_time,
             status: participation.status,
             job_details: participation.jobPosition.job.details,
             position_details: participation.jobPosition.details,

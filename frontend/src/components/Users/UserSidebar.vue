@@ -22,7 +22,7 @@
       >
         <!-- Header -->
         <div
-          class="relative h-16 bg-gradient-to-r from-[#A8E6E2] to-[#C3E8D5] dark:from-blue-600 dark:to-cyan-600"
+          class="relative h-16 bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] dark:from-[#feac5e]/80 dark:via-[#c779d0]/80 dark:to-[#4bc0c8]/80"
         >
           <div class="absolute inset-0 flex items-center justify-between px-4">
             <!-- Logo & Text -->
@@ -78,12 +78,12 @@
               class="flex items-center px-4 py-3 rounded-xl transition-all duration-200"
               :class="[
                 $route.path.includes(item.path)
-                  ? 'bg-gradient-to-r from-cyan-50 to-green-50 text-cyan-600 dark:from-cyan-900/30 dark:to-green-900/30'
-                  : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700',
+                  ? 'bg-gradient-to-r from-[#feac5e]/10 via-[#c779d0]/10 to-[#4bc0c8]/10 text-[#4bc0c8] dark:from-[#feac5e]/20 dark:via-[#c779d0]/20 dark:to-[#4bc0c8]/20 dark:text-[#4bc0c8]'
+                  : 'text-gray-600 hover:bg-gray-50/50 dark:text-gray-300 dark:hover:bg-gray-700/50',
                 sidebarStore.isCollapsed ? 'justify-center' : 'gap-3'
               ]"
             >
-              <i :class="[item.icon, 'text-xl']"></i>
+              <i :class="[item.icon, 'text-xl text-[#c779d0] dark:text-[#c779d0]/70']"></i>
               <span v-if="!sidebarStore.isCollapsed" class="font-medium">{{ item.name }}</span>
               <!-- Badge -->
               <div
@@ -91,7 +91,9 @@
                 class="ml-auto flex items-center"
                 :class="{ 'absolute -top-1 -right-1': sidebarStore.isCollapsed }"
               >
-                <span class="bg-red-500 text-white text-xs font-medium px-2 py-0.5 rounded-full">
+                <span
+                  class="bg-gradient-to-r from-[#feac5e] to-[#c779d0] text-white text-xs font-medium px-2 py-0.5 rounded-full"
+                >
                   {{ item.badgeCount }}
                 </span>
               </div>
@@ -123,7 +125,11 @@
               >
                 <div
                   class="w-12 h-7 rounded-full transition-colors duration-300 ease-in-out overflow-hidden"
-                  :class="[isDarkMode ? 'bg-cyan-600' : 'bg-gray-200']"
+                  :class="[
+                    isDarkMode
+                      ? 'bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8]'
+                      : 'bg-gradient-to-r from-[#feac5e]/30 via-[#c779d0]/30 to-[#4bc0c8]/30'
+                  ]"
                 >
                   <div
                     class="absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full transition-transform duration-300 ease-in-out flex items-center justify-center"
@@ -151,11 +157,11 @@
           <div class="border-t pt-4 px-3">
             <router-link
               to="/user/profile"
-              class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
+              class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-gradient-to-r hover:from-[#feac5e]/10 hover:via-[#c779d0]/10 hover:to-[#4bc0c8]/10 dark:hover:from-[#feac5e]/20 dark:hover:via-[#c779d0]/20 dark:hover:to-[#4bc0c8]/20 transition-colors group"
             >
               <img
                 :src="userStore.getUser.profile_image"
-                class="w-10 h-10 rounded-full object-cover ring-2 ring-transparent group-hover:ring-cyan-500 transition-all"
+                class="w-10 h-10 rounded-full object-cover ring-2 ring-transparent group-hover:ring-[#4bc0c8] dark:group-hover:ring-[#4bc0c8]/70 transition-all"
                 alt="Profile"
               />
               <div v-if="!sidebarStore.isCollapsed">
@@ -176,7 +182,7 @@
             <button
               v-if="!sidebarStore.isCollapsed"
               @click="handleLogout"
-              class="w-full mt-2 px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors duration-200 flex items-center gap-2"
+              class="w-full mt-2 px-4 py-2 text-[#c779d0] dark:text-[#c779d0]/70 hover:bg-gradient-to-r hover:from-[#feac5e]/10 hover:via-[#c779d0]/10 hover:to-[#4bc0c8]/10 dark:hover:from-[#feac5e]/20 dark:hover:via-[#c779d0]/20 dark:hover:to-[#4bc0c8]/20 rounded-xl transition-colors duration-200 flex items-center gap-2"
             >
               <i class="fas fa-sign-out-alt"></i>
               <span>ออกจากระบบ</span>
@@ -210,6 +216,8 @@ import { useNotificationStore } from '@/stores/notificationStore'
 import { useUserStore } from '@/stores/userStore'
 import { useSidebarStore } from '@/stores/sidebarStore'
 import { useJobStore } from '@/stores/jobStore'
+import { useUserNotificationStore } from '@/stores/userNotificationStore'
+
 import MobileNavigation from '@/components/Users/mobile/MobileNavigation.vue'
 import NotificationsPanel from '@/components/Users/Notifications/NotificationsPanel.vue'
 
@@ -268,6 +276,8 @@ export default {
         })
 
         if (result.isConfirmed) {
+          // หยุดเช็คการแจ้งเตือนเมื่อ logout
+          this.userNotificationStore.stopChecking()
           await this.userStore.logout()
 
           // เคลียร์ค่าใน sidebarStore
@@ -296,13 +306,20 @@ export default {
     }
   },
 
-  mounted() {
+  async mounted() {
     this.sidebarStore.initializeResponsive()
     this.sidebarStore.initializeTheme()
-  },
 
+    // เริ่มเช็คการแจ้งเตือนเมื่อ login แล้ว
+    if (this.userStore.isLoggedIn) {
+      await this.userNotificationStore.fetchNotifications() // เช็คครั้งแรก
+      this.userNotificationStore.startChecking() // เริ่มการเช็คอัตโนมัติ
+    }
+  },
   beforeUnmount() {
     this.sidebarStore.cleanup()
+    // หยุดเช็คการแจ้งเตือนเมื่อออกจาก layout
+    this.userNotificationStore.stopChecking()
   }
 }
 </script>

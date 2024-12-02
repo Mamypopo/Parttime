@@ -2,7 +2,7 @@
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
     <!-- ปุ่มแสดง/ซ่อนสำหรับมือถือ -->
     <button
-      class="lg:hidden w-full p-4 text-left bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-purple-500 text-white rounded-lg flex items-center"
+      class="lg:hidden w-full p-4 text-left bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] hover:from-[#feac5e]/90 hover:via-[#c779d0]/90 hover:to-[#4bc0c8]/90 dark:from-[#feac5e]/80 dark:via-[#c779d0]/80 dark:to-[#4bc0c8]/80 text-white rounded-lg flex items-center transform hover:scale-[1.02] transition-all duration-200"
       @click="toggleFilters"
     >
       <i class="fas fa-filter mr-2"></i>
@@ -48,7 +48,7 @@
             <button
               @click="showPositionList = !showPositionList"
               @blur="handlePositionBlur"
-              class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-left text-gray-900 dark:text-gray-100 flex justify-between items-center"
+              class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-left hover:border-[#c779d0] dark:hover:border-[#c779d0]/50 transition-colors duration-200"
             >
               <span>{{ selectedPosition || 'ตำแหน่ง' }}</span>
               <i class="fas fa-chevron-down text-gray-400 dark:text-gray-500"></i>
@@ -56,14 +56,14 @@
             <!-- Dropdown -->
             <div
               v-if="showPositionList"
-              class="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
+              class="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-[#c779d0]/20 dark:border-[#c779d0]/30"
             >
               <div class="p-1 max-h-[240px] overflow-y-auto">
                 <button
                   v-for="pos in positionOptions"
                   :key="pos.value"
                   @click="selectPosition(pos)"
-                  class="w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 rounded text-gray-900 dark:text-gray-100"
+                  class="w-full px-3 py-2 text-left hover:bg-gradient-to-r hover:from-[#feac5e]/5 hover:via-[#c779d0]/5 hover:to-[#4bc0c8]/5 dark:hover:from-[#feac5e]/10 dark:hover:via-[#c779d0]/10 dark:hover:to-[#4bc0c8]/10 rounded"
                 >
                   {{ pos.label }}
                 </button>
@@ -72,15 +72,36 @@
           </div>
 
           <!-- ค่าจ้าง -->
-          <div class="relative min-w-[120px]">
-            <input
-              v-model.number="filters.minWage"
-              type="number"
-              class="w-full pl-8 pr-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-              placeholder="ค่าจ้าง"
-              @input="debouncedSearch"
-            />
-            <i class="fas fa-baht-sign absolute left-3 top-3 text-gray-400 dark:text-gray-500"></i>
+          <div class="flex items-center gap-2">
+            <!-- Min Wage -->
+            <div class="relative min-w-[120px]">
+              <input
+                v-model.number="filters.minWage"
+                type="number"
+                class="w-full pl-8 pr-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                placeholder="ค่าจ้างต่ำสุด"
+                @input="debouncedSearch"
+              />
+              <i
+                class="fas fa-baht-sign absolute left-3 top-3 text-gray-400 dark:text-gray-500"
+              ></i>
+            </div>
+
+            <span class="text-gray-400">-</span>
+
+            <!-- Max Wage -->
+            <div class="relative min-w-[120px]">
+              <input
+                v-model.number="filters.maxWage"
+                type="number"
+                class="w-full pl-8 pr-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                placeholder="ค่าจ้างสูงสุด"
+                @input="debouncedSearch"
+              />
+              <i
+                class="fas fa-baht-sign absolute left-3 top-3 text-gray-400 dark:text-gray-500"
+              ></i>
+            </div>
           </div>
 
           <!-- วันที่ -->
@@ -94,10 +115,10 @@
           <button
             @click="toggleMatchSkills"
             :class="[
-              'px-4 py-2.5 rounded-lg border transition-colors duration-200',
+              'px-4 py-2.5 rounded-lg border transition-all duration-300 transform hover:scale-105',
               filters.matchSkills
-                ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800'
-                : 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100'
+                ? 'bg-gradient-to-r from-[#feac5e]/10 via-[#c779d0]/10 to-[#4bc0c8]/10 dark:from-[#feac5e]/20 dark:via-[#c779d0]/20 dark:to-[#4bc0c8]/20 border-[#c779d0] dark:border-[#c779d0]/50 text-[#c779d0] dark:text-[#c779d0]/90'
+                : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[#c779d0] dark:hover:border-[#c779d0]/50'
             ]"
           >
             <i class="fas fa-user-check mr-2"></i>
@@ -107,7 +128,7 @@
           <!-- ค้นหา -->
           <button
             @click="handleSearch"
-            class="px-6 py-2.5 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-purple-500 text-white rounded-lg ml-auto hover:opacity-90 transition-opacity duration-200"
+            class="px-6 py-2.5 bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] dark:from-[#feac5e]/80 dark:via-[#c779d0]/80 dark:to-[#4bc0c8]/80 text-white rounded-lg ml-auto hover:opacity-90 transition-all duration-300 transform hover:scale-105 hover:shadow-lg active:scale-95"
           >
             <i class="fas fa-search mr-2"></i>
             ค้นหา
@@ -287,7 +308,7 @@ button:hover {
 /* Custom scrollbar for dropdowns */
 .overflow-y-auto {
   scrollbar-width: thin;
-  scrollbar-color: #c5b4e3 transparent;
+  scrollbar-color: #c779d0 transparent;
 }
 
 .overflow-y-auto::-webkit-scrollbar {
@@ -299,11 +320,37 @@ button:hover {
 }
 
 .overflow-y-auto::-webkit-scrollbar-thumb {
-  background-color: #c5b4e3;
+  background-color: #c779d0;
+  background-image: linear-gradient(to bottom, #feac5e, #c779d0, #4bc0c8);
   border-radius: 3px;
 }
 
+/* Dark mode scrollbar */
 .dark .overflow-y-auto::-webkit-scrollbar-thumb {
-  background-color: #6b46c1;
+  background-image: linear-gradient(to bottom, #feac5e80, #c779d080, #4bc0c880);
+}
+
+/* Input focus styles */
+input:focus,
+button:focus {
+  outline: none;
+  border-color: #c779d0;
+  box-shadow: 0 0 0 1px #c779d0;
+}
+
+.dark input:focus,
+.dark button:focus {
+  border-color: #c779d080;
+  box-shadow: 0 0 0 1px #c779d080;
+}
+
+/* Hover animations */
+button:not(:disabled):hover {
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+button:not(:disabled):active {
+  transform: translateY(0);
 }
 </style>

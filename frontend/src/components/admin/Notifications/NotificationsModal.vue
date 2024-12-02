@@ -194,9 +194,11 @@ export default {
       filters: [
         { label: 'ทั้งหมด', value: 'all' },
         { label: 'ยังไม่ได้อ่าน', value: 'unread' },
-        // { label: 'ผู้ใช้งาน', value: 'user' },
-        // { label: 'ทักษะ', value: 'skill' },
-        { label: 'งาน', value: 'job' }
+        { label: 'สมัครงาน', value: 'job_application' },
+        { label: 'สถานะงาน', value: 'job_status_update' },
+        { label: 'ยืนยันตัวตน', value: 'user_verification' },
+        { label: 'ประเมินผล', value: 'evaluation' },
+        { label: 'ระบบ', value: 'system' }
       ]
     }
   },
@@ -231,7 +233,11 @@ export default {
       const icons = {
         all: 'fas fa-th-list text-[#81E2C4] dark:text-[#6ED7D1]',
         unread: 'fas fa-envelope text-[#81E2C4] dark:text-[#6ED7D1]',
-        job: 'fas fa-briefcase text-[#81E2C4] dark:text-[#6ED7D1]'
+        job_application: 'fas fa-briefcase text-[#81E2C4] dark:text-[#6ED7D1]',
+        job_status_update: 'fas fa-clock text-[#81E2C4] dark:text-[#6ED7D1]',
+        user_verification: 'fas fa-user-check text-[#81E2C4] dark:text-[#6ED7D1]',
+        evaluation: 'fas fa-star text-[#81E2C4] dark:text-[#6ED7D1]',
+        system: 'fas fa-bell text-[#81E2C4] dark:text-[#6ED7D1]'
       }
       return icons[value]
     },
