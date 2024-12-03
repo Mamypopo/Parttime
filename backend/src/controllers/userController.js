@@ -282,6 +282,8 @@ export const updateUserProfile = async (req, res) => {
         const updatedUser = await userModel.updateUser(userId, {
 
             first_name: first_name || existingUser.first_name,
+
+
             last_name: last_name || existingUser.last_name,
             education_certificate: newEducationCertificatePath || existingUser.education_certificate,
             phone_number: phone_number || existingUser.phone_number,

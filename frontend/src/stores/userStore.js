@@ -13,12 +13,14 @@ export const useUserStore = defineStore('user', {
             birth_date: null,
             age: null,
             education_certificate: null,
+            documents: null,
             phone_number: null,
             line_id: null,
             profile_image: null,
             skills: [],
             email_verified: false,
-            approved: false
+            approved: false,
+
         },
         token: localStorage.getItem('token') || null,
         isAuthenticated: !!localStorage.getItem('token')
@@ -81,6 +83,7 @@ export const useUserStore = defineStore('user', {
                 birth_date: userData.birth_date,
                 age: userData.age,
                 education_certificate: userData.education_certificate,
+                documents: userData.user_documents,
                 phone_number: userData.phone_number,
                 line_id: userData.line_id,
                 profile_image: userData.profile_image,
@@ -91,6 +94,26 @@ export const useUserStore = defineStore('user', {
 
         },
 
+        async fetchUser() {
+            try {
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/profile`, {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`
+                    }
+                })
+
+                if (response.data) {
+                    this.setUser(response.data)
+                    return response.data
+                }
+            } catch (error) {
+                console.error('Error fetching user:', error)
+                if (error.response?.status === 401) {
+                    this.logout()
+                }
+                throw error
+            }
+        },
         startHeartbeat() {
             this.heartbeatInterval = setInterval(async () => {
                 try {
@@ -122,6 +145,7 @@ export const useUserStore = defineStore('user', {
                 birth_date: this.user.birth_date,
                 age: this.user.age,
                 education_certificate: this.user.education_certificate,
+                documents: this.user.documents,
                 phone_number: this.user.phone_number,
                 line_id: this.user.line_id,
                 profile_image: this.user.profile_image ?

@@ -221,7 +221,7 @@ export const updateWorkHistory = async (req, res) => {
             );
         }
 
-        // สร้าง log
+
         if (currentJobParticipation?.user?.id) {
             await createLog(
                 currentJobParticipation.user.id,

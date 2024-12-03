@@ -337,13 +337,12 @@ export const getRejectedUsers = async (req, res) => {
 export const approveUser = async (req, res) => {
     const { status } = req.body;
     const { userId } = req.params;
+    const userIdAsInt = parseInt(userId);
     const adminId = req.user.id;
     const ip = req.ip;
     const userAgent = req.headers['user-agent'];
 
     try {
-        // แปลง userId เป็นตัวเลข
-        const userIdAsInt = Number(userId);
 
         // ตรวจสอบว่าผู้ใช้
         const user = await userModel.getUserById(userIdAsInt);
@@ -384,7 +383,7 @@ export const approveUser = async (req, res) => {
             ? 'ยินดีด้วย! บัญชีของคุณได้รับการอนุมัติแล้ว คุณสามารถเข้าใช้งานระบบได้ทันที โปรดเข้าสู่ระบบเพื่อเริ่มใช้งาน'
             : 'ขออภัย บัญชีของคุณไม่ได้รับการอนุมัติในขณะนี้ โปรดติดต่อฝ่ายสนับสนุนเพื่อขอข้อมูลเพิ่มเติมหรือยื่นคำร้องใหม่';
 
-        await notificationModel.createUserNotification(userIdAsInt, notificationMessage, adminId);
+        await notificationModel.createUserNotification(userIdAsInt, notificationMessage, adminId, notificationModel.NOTIFICATION_TYPES.SYSTEM);
 
 
         // ดึงข้อมูลแอดมิน

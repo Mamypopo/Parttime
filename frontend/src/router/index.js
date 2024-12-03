@@ -43,6 +43,17 @@ const router = createRouter({
       name: 'signInadmin',
       component: SignInAdminView
     },
+
+    {
+      path: '/forgot-password',
+      name: 'ForgotPassword',
+      component: () => import('@/views/auth/ForgotPasswordView.vue')
+    },
+    {
+      path: '/reset-password/:token',
+      name: 'ResetPassword',
+      component: () => import('@/views/auth/ResetPasswordView.vue')
+    },
     // Admin Routes
     {
       path: '/admin',
@@ -115,6 +126,11 @@ const router = createRouter({
           path: 'my-jobs',
           name: 'MyJobs',
           component: () => import('@/views/user/MyJobs.vue')
+        },
+        {
+          path: 'profile-View',
+          name: 'Profile',
+          component: () => import('@/views/user/ProfileView.vue')
         },
 
       ]

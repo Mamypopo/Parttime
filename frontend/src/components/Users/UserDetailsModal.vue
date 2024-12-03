@@ -162,13 +162,13 @@
               <!-- Close Button -->
               <button
                 @click="closeImagePreview"
-                class="absolute -top-12 right-0 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg p-2"
+                class="absolute -top-4 -right-4 text-white/90 hover:text-white bg-white/30 hover:bg-white/20 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
               >
                 <i class="fas fa-times text-xl"></i>
               </button>
 
               <!-- Image Container -->
-              <div class="relative max-h-[80vh] overflow-auto rounded-lg">
+              <div class="max-h-[80vh] overflow-auto rounded-lg">
                 <img
                   :src="adminUserStore.getProfileImage(user.profileImage)"
                   :alt="user.fullName"

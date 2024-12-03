@@ -1,308 +1,315 @@
 <template>
   <div class="min-h-screen relative flex flex-col">
+    <!-- Hero Section with Gradient Background -->
     <div
-      class="absolute top-2 left-4 right-4 h-[45vh] bg-cover bg-center rounded-lg bg-register"
+      class="absolute top-0 left-0 right-0 h-[45vh] bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] rounded-b-[30px]"
     ></div>
 
     <!-- Content Section -->
     <div class="relative z-10">
       <!-- Welcome Section -->
       <div class="text-center pt-24 pb-5">
-        <h1 class="text-4xl font-bold text-white mb-4 animate-fade-in">Welcome!</h1>
-        <div class="max-w-xl lg:max-w-2xl mx-auto -pt-1 space-y-2 animate-fade-in-up">
-          <p class="text-sm lg:text-base text-white/80">
-            Find the perfect part-time opportunity that matches your skills and schedule
+        <h1 class="text-4xl font-semibold text-white mb-4 animate-fade-in">ยินดีต้อนรับ!</h1>
+        <div class="max-w-xl lg:max-w-2xl mx-auto space-y-2 animate-fade-in-up">
+          <p class="text-base lg:text-lg text-white/90">
+            มาร่วมเป็นส่วนหนึ่งกับทีมผู้เชี่ยวชาญของเรา
           </p>
         </div>
       </div>
 
       <!-- Register Form -->
-      <div class="max-w-5xl mx-auto px-4 lg:px-8 bg-white rounded-[15px] shadow-md pt-4 mb-8">
-        <h2 class="text-2xl font-semibold text-center mb-8 text-[#3A3A49]">Register</h2>
+      <div class="max-w-5xl mx-auto px-4 lg:px-8">
+        <div class="bg-white rounded-[20px] shadow-xl p-6 lg:p-8 mb-8">
+          <h2 class="text-2xl font-semibold text-center mb-8 text-gray-800">สมัครสมาชิก</h2>
 
-        <form @submit.prevent="register" class="space-y-6">
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-            <!-- คอลัมน์ซ้าย:  -->
-            <div class="space-y-4">
-              <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                <h3 class="text-base lg:text-lg font-medium text-[#3A3A49] mb-4">
-                  Personal information
-                </h3>
-                <div class="space-y-4">
-                  <div class="grid grid-cols-7 gap-3">
-                    <div class="col-span-3">
-                      <label class="block text-sm text-[#3A3A49] mb-1">Prefix</label>
-                      <select
-                        v-model="form.prefix"
-                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200"
-                      >
-                        <option value="" disabled selected>Select</option>
-                        <option value="นาย">นาย</option>
-                        <option value="นาง">นาง</option>
-                        <option value="นางสาว">นางสาว</option>
-                      </select>
+          <form @submit.prevent="register" class="space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              <!-- คอลัมน์ซ้าย: ข้อมูลส่วนตัว -->
+              <div class="space-y-4">
+                <div
+                  class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+                >
+                  <h3 class="text-lg font-medium text-gray-700 mb-4">ข้อมูลส่วนตัว</h3>
+                  <div class="space-y-4">
+                    <div class="grid grid-cols-7 gap-3">
+                      <div class="col-span-3">
+                        <label class="block text-sm text-gray-600 mb-1">คำนำหน้า</label>
+                        <select
+                          v-model="form.prefix"
+                          class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                        >
+                          <option value="" disabled selected>เลือก</option>
+                          <option value="นาย">นาย</option>
+                          <option value="นาง">นาง</option>
+                          <option value="นางสาว">นางสาว</option>
+                        </select>
+                      </div>
+                      <div class="col-span-4">
+                        <label class="block text-sm text-gray-600 mb-1">ชื่อ</label>
+                        <input
+                          type="text"
+                          v-model="form.firstname"
+                          placeholder="ชื่อจริง"
+                          class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                        />
+                      </div>
                     </div>
-                    <div class="col-span-4">
-                      <label class="block text-sm text-[#3A3A49] mb-1">Firstname</label>
+
+                    <div>
+                      <label class="block text-sm text-gray-600 mb-1">นามสกุล</label>
                       <input
                         type="text"
-                        v-model="form.firstname"
-                        placeholder="Your firstname"
-                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                        v-model="form.lastname"
+                        placeholder="นามสกุล"
+                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
                       />
                     </div>
-                  </div>
-                  <div>
-                    <label class="block text-sm text-[#3A3A49] mb-1">Lastname</label>
-                    <input
-                      type="text"
-                      v-model="form.lastname"
-                      placeholder="Your lastname"
-                      class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200"
-                    />
-                  </div>
-                  <div class="grid grid-cols-5 gap-3">
-                    <div class="col-span-2">
-                      <label class="block text-sm text-[#3A3A49] mb-1">Gender</label>
-                      <select
-                        v-model="form.gender"
-                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200"
-                      >
-                        <option value="" disabled selected class="text-gray-300">gender</option>
-                        <option value="ชาย">ชาย</option>
-                        <option value="หญิง">หญิง</option>
-                      </select>
-                    </div>
 
-                    <div class="col-span-3">
-                      <label class="block text-sm text-[#3A3A49] mb-1">Birthdate</label>
-                      <div class="relative">
-                        <input
-                          type="date"
-                          v-model="form.birthdate"
-                          placeholder="dd/mm/yyyy"
-                          class="w-full px-4 py-2 rounded-[15px] text-gray-400 bg-gray-50 border border-gray-200 date-input focus:outline-none focus:ring-2 focus:ring-purple-200"
-                        />
-
-                        <i
-                          class="fa-regular fa-calendar absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none text-[#C5B4E3]"
-                        ></i>
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <label class="block text-sm text-[#3A3A49] mb-1">National ID</label>
-                    <input
-                      type="text"
-                      v-model="form.nationalId"
-                      placeholder="Your national ID"
-                      class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200"
-                    />
-                  </div>
-
-                  <div>
-                    <label class="block text-sm text-[#3A3A49] mb-1">Line ID</label>
-                    <input
-                      type="text"
-                      v-model="form.lineId"
-                      placeholder="Your Line ID"
-                      class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- คอลัมน์กลาง: -->
-            <div class="space-y-4">
-              <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                <h3 class="text-lg font-medium text-[#3A3A49] mb-4">Email Password</h3>
-                <div class="space-y-4">
-                  <div>
-                    <label class="block text-sm text-[#3A3A49] mb-1">Email</label>
-                    <input
-                      type="email"
-                      v-model="form.email"
-                      placeholder="Your email address"
-                      class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-sm text-[#3A3A49] mb-1">Password</label>
-                    <input
-                      type="password"
-                      v-model="form.password"
-                      placeholder="Your password"
-                      class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-sm text-[#3A3A49] mb-1">Confirm password</label>
-                    <input
-                      type="password"
-                      v-model="form.confirmPassword"
-                      placeholder="Confirm your password"
-                      class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200"
-                      :class="{ 'border-red-300': !passwordsMatch && form.confirmPassword }"
-                    />
-                  </div>
-                  <!-- <p v-if="form.confirmPassword && !passwordsMatch" 
-       class="text-red-500 text-xs mt-1">
-      รหัสผ่านไม่ตรงกัน
-    </p> -->
-                  <div>
-                    <label class="block text-sm text-[#3A3A49] mb-1">Phone number</label>
-                    <input
-                      type="tel"
-                      v-model="form.phone"
-                      placeholder="Your phone number"
-                      class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- คอลัมน์ขวา:  -->
-            <div class="space-y-4">
-              <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                <h3 class="text-lg font-medium text-[#3A3A49] mb-4">Other information</h3>
-                <div class="space-y-4">
-                  <div class="grid grid-cols-2 gap-3">
-                    <div>
-                      <label class="block text-sm text-[#3A3A49] mb-1">Profile</label>
-                      <button
-                        type="button"
-                        @click="$refs.profileInput.click()"
-                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 flex items-center gap-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
-                      >
-                        <i class="fa-regular fa-user text-[#C5B4E3]"></i>
-                        <span class="truncate">{{ profileFileName || 'Upload' }}</span>
-                      </button>
-                      <input
-                        type="file"
-                        ref="profileInput"
-                        @change="handleFileChange('profilePic', $event)"
-                        class="hidden"
-                      />
-                    </div>
-                    <div>
-                      <label class="block text-sm text-[#3A3A49] mb-1">Education</label>
-                      <button
-                        type="button"
-                        @click="$refs.educationInput.click()"
-                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 flex items-center gap-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
-                      >
-                        <i class="fa-regular fa-file text-[#C5B4E3]"></i>
-                        <span class="truncate">{{ educationFileName || 'Upload' }}</span>
-                      </button>
-                      <input
-                        type="file"
-                        ref="educationInput"
-                        @change="handleFileChange('educationCertificate', $event)"
-                        class="hidden"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label class="block text-sm text-[#3A3A49] mb-1">Documents</label>
-                    <button
-                      type="button"
-                      @click="$refs.documentsInput.click()"
-                      class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 flex items-center gap-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-200"
-                    >
-                      <i class="fa-regular fa-file text-[#C5B4E3]"></i>
-                      <span class="truncate">{{
-                        documentsCount ? `${documentsCount} files` : 'Upload'
-                      }}</span>
-                    </button>
-                    <input
-                      type="file"
-                      multiple
-                      ref="documentsInput"
-                      @change="handleFileChange('documents', $event)"
-                      class="hidden"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-sm text-[#3A3A49] mb-1">Skills</label>
-                    <div class="bg-gray-50 p-2 rounded-[15px] border border-gray-200">
-                      <div class="flex flex-wrap gap-1.5">
-                        <label
-                          v-for="skill in availableSkills"
-                          :key="skill"
-                          class="inline-flex items-center px-2.5 py-1 rounded-full border text-sm cursor-pointer hover:bg-gray-100"
-                          :class="
-                            form.skills.includes(skill)
-                              ? 'bg-purple-100 border-purple-300'
-                              : 'bg-white border-gray-200'
-                          "
+                    <div class="grid grid-cols-5 gap-3">
+                      <div class="col-span-2">
+                        <label class="block text-sm text-gray-600 mb-1">เพศ</label>
+                        <select
+                          v-model="form.gender"
+                          class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
                         >
-                          <input
-                            type="checkbox"
-                            :value="skill"
-                            v-model="form.skills"
-                            class="hidden"
-                          />
-                          <span class="text-sm">{{ skill }}</span>
+                          <option value="" disabled selected>เลือก</option>
+                          <option value="ชาย">ชาย</option>
+                          <option value="หญิง">หญิง</option>
+                        </select>
+                      </div>
+
+                      <div class="col-span-3">
+                        <label class="block text-sm text-gray-600 mb-1">
+                          วันเกิด
+                          <span class="text-xs text-gray-400 ml-1">(ระบุเป็น ค.ศ.)</span>
                         </label>
+                        <div class="relative">
+                          <input
+                            type="date"
+                            v-model="form.birthdate"
+                            class="w-full px-2.5 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm text-gray-600 mb-1">เลขบัตรประชาชน</label>
+                      <input
+                        type="text"
+                        v-model="form.nationalId"
+                        @input="validateNationalId"
+                        maxlength="13"
+                        placeholder="เลขบัตรประชาชน 13 หลัก"
+                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label class="block text-sm text-gray-600 mb-1">ไลน์ไอดี</label>
+                      <input
+                        type="text"
+                        v-model="form.lineId"
+                        placeholder="ไลน์ไอดีของคุณ"
+                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- คอลัมน์กลาง: อีเมลและรหัสผ่าน -->
+              <div class="space-y-4">
+                <div
+                  class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+                >
+                  <h3 class="text-lg font-medium text-gray-700 mb-4">อีเมลและรหัสผ่าน</h3>
+                  <div class="space-y-4">
+                    <div>
+                      <label class="block text-sm text-gray-600 mb-1">อีเมล</label>
+                      <input
+                        type="email"
+                        v-model="form.email"
+                        placeholder="อีเมลของคุณ"
+                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label class="block text-sm text-gray-600 mb-1">รหัสผ่าน</label>
+                      <input
+                        type="password"
+                        v-model="form.password"
+                        placeholder="รหัสผ่าน"
+                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label class="block text-sm text-gray-600 mb-1">ยืนยันรหัสผ่าน</label>
+                      <input
+                        type="password"
+                        v-model="form.confirmPassword"
+                        placeholder="ยืนยันรหัสผ่าน"
+                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                      />
+                    </div>
+
+                    <div>
+                      <label class="block text-sm text-gray-600 mb-1">เบอร์โทรศัพท์</label>
+                      <input
+                        type="tel"
+                        v-model="form.phone"
+                        placeholder="เบอร์โทรศัพท์ของคุณ"
+                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- คอลัมน์ขวา: ข้อมูลเพิ่มเติม -->
+              <div class="space-y-4">
+                <div
+                  class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+                >
+                  <h3 class="text-lg font-medium text-gray-700 mb-4">ข้อมูลเพิ่มเติม</h3>
+                  <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-sm text-gray-600 mb-1">รูปโปรไฟล์</label>
+                        <button
+                          type="button"
+                          @click="$refs.profileInput.click()"
+                          class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 flex items-center gap-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50 transition-colors"
+                        >
+                          <i class="fa-regular fa-user text-[#c779d0]"></i>
+                          <span class="truncate">{{ profileFileName || 'อัพโหลด' }}</span>
+                        </button>
+                        <input
+                          type="file"
+                          ref="profileInput"
+                          @change="handleFileChange('profilePic', $event)"
+                          class="hidden"
+                        />
+                      </div>
+
+                      <div>
+                        <label class="block text-sm text-gray-600 mb-1">วุฒิการศึกษา</label>
+                        <button
+                          type="button"
+                          @click="$refs.educationInput.click()"
+                          class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 flex items-center gap-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50 transition-colors"
+                        >
+                          <i class="fa-regular fa-file text-[#c779d0]"></i>
+                          <span class="truncate">{{ educationFileName || 'อัพโหลด' }}</span>
+                        </button>
+                        <input
+                          type="file"
+                          ref="educationInput"
+                          @change="handleFileChange('educationCertificate', $event)"
+                          class="hidden"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label class="block text-sm text-gray-600 mb-1">เอกสารเพิ่มเติม</label>
+                      <button
+                        type="button"
+                        @click="$refs.documentsInput.click()"
+                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 flex items-center gap-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50 transition-colors"
+                      >
+                        <i class="fa-regular fa-file text-[#c779d0]"></i>
+                        <span class="truncate">{{
+                          documentsCount ? `${documentsCount} ไฟล์` : 'อัพโหลด'
+                        }}</span>
+                      </button>
+                      <input
+                        type="file"
+                        multiple
+                        ref="documentsInput"
+                        @change="handleFileChange('documents', $event)"
+                        class="hidden"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-sm text-[#3A3A49] mb-1">Skills</label>
+                      <div class="bg-gray-50 p-2 rounded-[15px] border border-gray-200">
+                        <div class="flex flex-wrap gap-1.5">
+                          <label
+                            v-for="skill in availableSkills"
+                            :key="skill"
+                            class="inline-flex items-center px-2.5 py-1 rounded-full border text-sm cursor-pointer hover:bg-gray-100"
+                            :class="
+                              form.skills.includes(skill)
+                                ? 'bg-purple-100 border-purple-300'
+                                : 'bg-white border-gray-200'
+                            "
+                          >
+                            <input
+                              type="checkbox"
+                              :value="skill"
+                              v-model="form.skills"
+                              class="hidden"
+                            />
+                            <span class="text-sm">{{ skill }}</span>
+                          </label>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- ฉันยอมรับ ข้อกำหนดการใช้งาน -->
-          <div class="text-sm text-[#3A3A49] text-center mt-4">
-            <label class="flex items-center gap-3 justify-center">
-              <input
-                type="checkbox"
-                v-model="form.acceptTerms"
-                class="w-6 h-6 sm:w-5 sm:h-5 rounded text-purple-500"
-              />
-              <span>
-                ฉันยอมรับ
-                <a href="#" class="text-[#CDE45F] hover:underline">ข้อกำหนดการใช้งาน</a> และ
-                <a href="#" class="text-[#CDE45F] hover:underline">นโยบายความเป็นส่วนตัว</a>
-              </span>
-            </label>
-            <!-- เพิ่ม error message -->
-            <p v-if="showTermsError" class="text-red-500 text-sm mt-2">
-              กรุณายอมรับข้อกำหนดการใช้งานและนโยบายความเป็นส่วนตัว
-            </p>
-          </div>
-
-          <!-- ปุ่ม Submit -->
-          <div class="text-center pb-9">
-            <button
-              type="submit"
-              class="px-8 py-2.5 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] text-white rounded-lg hover:bg-[#B39DDB] transition-colors disabled:opacity-50 w-full sm:w-auto"
-            >
-              <span>SIGN UP</span>
-            </button>
-
-            <p class="mt-4 text-gray-600">
-              Already have an account?
-              <router-link to="/signin-user" class="text-[#CDE45F] hover:underline"
-                >Sign in</router-link
+              <label class="flex items-center gap-3 justify-center">
+                <input
+                  type="checkbox"
+                  v-model="form.acceptTerms"
+                  class="w-6 h-6 sm:w-5 sm:h-5 rounded text-purple-500"
+                />
+                <span>
+                  ฉันยอมรับ
+                  <a href="#" class="text-[#CDE45F] hover:underline">ข้อกำหนดการใช้งาน</a> และ
+                  <a href="#" class="text-[#CDE45F] hover:underline">นโยบายความเป็นส่วนตัว</a>
+                </span>
+              </label>
+              <!-- เพิ่ม error message -->
+              <p v-if="showTermsError" class="text-red-500 text-sm mt-2">
+                กรุณายอมรับข้อกำหนดการใช้งานและนโยบายความเป็นส่วนตัว
+              </p>
+            </div>
+            <!-- ปุ่ม Submit -->
+            <div class="text-center pb-4">
+              <button
+                type="submit"
+                class="px-8 py-3 bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] text-white rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 w-full sm:w-auto"
               >
-            </p>
-          </div>
-        </form>
+                <span>สมัครสมาชิก</span>
+              </button>
+
+              <p class="mt-4 text-gray-600">
+                มีบัญชีอยู่แล้ว?
+                <router-link to="/signin-user" class="text-[#c779d0] transition-colors">
+                  เข้าสู่ระบบ
+                </router-link>
+              </p>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
+
     <!-- Footer -->
-    <footer class="bg-[#ffffff] py-8 mt-auto">
-      <div class="max-w-4xl lg:max-w-5xl mx-auto px-4 lg:px-8 flex justify-between text-gray-600">
-        <div>
-          Lorem ipsum dolor sit <span class="text-[#CDE45F]">Lorem ipsum</span> &
-          <span class="text-[#CDE45F]">Something</span> Lorem ipsum
+    <footer class="bg-white/80 backdrop-blur-sm py-6 mt-auto">
+      <div class="max-w-5xl mx-auto px-4 lg:px-8 flex flex-wrap justify-between text-gray-600">
+        <div class="text-sm">
+          ระบบจัดการข้อมูลบุคลากร <span class="text-[#c779d0]">Healthcare</span> &
+          <span class="text-[#c779d0]">Medical</span> Services
         </div>
-        <div class="flex gap-8">
-          <span>Lorem ipsum</span>
-          <span>Lorem ipsum</span>
+        <div class="flex gap-8 text-sm">
+          <span>นโยบายความเป็นส่วนตัว</span>
+          <span>ติดต่อเรา</span>
         </div>
       </div>
     </footer>
@@ -330,7 +337,8 @@ export default {
         birthdate: '',
         phone: '',
         lineId: '',
-        skills: [] // array สำหรับเก็บ skills
+        skills: [],
+        nationalIdError: ''
       },
       // สำหรับแสดงชื่อไฟล์ที่เลือก
       profileFileName: '',
@@ -364,6 +372,16 @@ export default {
   },
 
   methods: {
+    validateNationalId() {
+      // ลบตัวอักษรที่ไม่ใช่ตัวเลข
+      this.form.nationalId = this.form.nationalId.replace(/[^0-9]/g, '')
+
+      if (this.form.nationalId.length > 0 && this.form.nationalId.length !== 13) {
+        this.nationalIdError = 'เลขบัตรประชาชนต้องมี 13 หลัก'
+      } else {
+        this.nationalIdError = ''
+      }
+    },
     validateForm() {
       // เช็คข้อมูลที่จำเป็น
       const requiredFields = {
@@ -388,7 +406,16 @@ export default {
           return false
         }
       }
-
+      if (this.form.nationalId.length !== 13) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'กรุณากรอกเลขบัตรประชาชนให้ถูกต้อง',
+          text: 'เลขบัตรประชาชนต้องมี 13 หลัก',
+          timer: 1500,
+          showConfirmButton: false
+        })
+        return false
+      }
       // เช็คไฟล์ที่จำเป็น
       const profileInput = this.$refs.profileInput
       const educationInput = this.$refs.educationInput

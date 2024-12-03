@@ -49,6 +49,13 @@
               <span v-else>เข้าสู่ระบบ</span>
             </button>
 
+            <!-- Forgot Password Link -->
+            <p class="text-center text-sm text-gray-600">
+              <router-link to="/forgot-password" class="text-[#CDE45F] hover:underline">
+                ลืมรหัสผ่าน?
+              </router-link>
+            </p>
+
             <!-- Sign Up Link -->
             <p class="text-center text-sm text-gray-600">
               Don't have an account?

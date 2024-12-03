@@ -408,6 +408,8 @@ export const useJobStore = defineStore('job', {
             this.error = null
 
             try {
+
+
                 const headers = this.getAuthHeaders()
                 const response = await axios.post(
                     `${this.baseURL}/api/jobs/apply`,
@@ -450,7 +452,7 @@ export const useJobStore = defineStore('job', {
                     `${this.baseURL}/api/users/my-jobs`,
                     { headers }
                 )
-                console.log(response)
+
                 if (response.data.success) {
                     this.myJobs = response.data.jobs
                     return response.data

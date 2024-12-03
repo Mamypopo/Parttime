@@ -47,7 +47,7 @@
                   </button>
                   <button
                     @click="closeModal"
-                    class="text-[#3A3A49]/70 hover:text-[#3A3A49] dark:text-white/70 dark:hover:text-white bg-white/10 hover:bg-white/20 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
+                    class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 dark:bg-gray-700/30 dark:hover:bg-gray-700/50 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
                   >
                     <i class="fas fa-times text-xl"></i>
                   </button>

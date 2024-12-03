@@ -12,34 +12,35 @@ export const useUserDashboardStore = defineStore('userDashboard', {
         },
         todaySchedule: [],
         recentIncomes: [],
+        upcomingDeadlines: [],
         loading: false,
         error: null
     }),
 
     actions: {
-        async fetchDashboardData() {
+        async fetchDashboardData(range = 'monthly') {
             this.loading = true;
             this.error = null;
 
             try {
+
                 const response = await axios.get(`${this.baseURL}/api/dashboard/user/dashboard`, {
+                    params: { range },
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
                 });
 
-                const { stats, todaySchedule, recentIncomes } = response.data;
+                const { stats, todaySchedule, recentIncomes, upcomingDeadlines } = response.data;
 
-                // คำนวณรายได้และชั่วโมงทำงานในเดือนปัจจุบัน
+                // คำนวณรายได้ในเดือนปัจจุบัน
                 const currentDate = new Date();
                 const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
 
                 // กรองรายการที่เสร็จสิ้นในเดือนนี้
                 const thisMonthIncomes = recentIncomes.filter(income => {
-
                     const incomeDate = new Date(income.date);
-                    return incomeDate >= firstDayOfMonth &&
-                        incomeDate <= currentDate;
+                    return incomeDate >= firstDayOfMonth && incomeDate <= currentDate;
                 });
 
                 // คำนวณรายได้รวมของเดือน
@@ -47,31 +48,37 @@ export const useUserDashboardStore = defineStore('userDashboard', {
                     return total + (Number(income.amount) || 0);
                 }, 0);
 
-                // คำนวณชั่วโมงทำงานรวม
-                const totalWorkHours = thisMonthIncomes.reduce((total, income) => {
-                    if (income.start_time && income.end_time) {
-                        const start = new Date(`1970-01-01T${income.start_time}`);
-                        const end = new Date(`1970-01-01T${income.end_time}`);
-                        const hours = (end - start) / (1000 * 60 * 60);
-                        return total + hours;
-                    }
-                    return total;
-                }, 0);
-
                 // อัพเดท stats
                 this.stats = {
                     ...stats,
-                    monthlyIncome,
-                    totalWorkHours: Math.round(totalWorkHours)
+                    monthlyIncome
                 };
-                // จัดรูปแบบข้อมูลก่อนเก็บ
+
+                // จัดรูปแบบข้อมูลรายได้
                 this.recentIncomes = recentIncomes.map(income => ({
                     ...income,
                     date: income.date,
-                    amount: Number(income.amount)
+                    amount: Number(income.amount),
+                    formattedAmount: this.formatCurrency(income.amount)
                 }));
 
-                this.todaySchedule = todaySchedule;
+                // จัดรูปแบบตารางงานวันนี้
+                this.todaySchedule = todaySchedule.map(schedule => ({
+                    ...schedule,
+                    formattedTime: `${schedule.start_time.slice(0, 5)} - ${schedule.end_time.slice(0, 5)} น.`
+                }));
+
+                // จัดรูปแบบงานที่ใกล้ถึงกำหนด
+                this.upcomingDeadlines = upcomingDeadlines.map(deadline => ({
+                    ...deadline,
+                    formattedDate: new Date(deadline.workDate).toLocaleDateString('th-TH', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    }),
+                    formattedTime: `${deadline.startTime.slice(0, 5)} - ${deadline.endTime.slice(0, 5)} น.`,
+                    daysLeftText: this.formatDaysLeft(deadline.daysLeft)
+                }));
 
             } catch (error) {
                 console.error('Error fetching user dashboard data:', error);
@@ -87,6 +94,13 @@ export const useUserDashboardStore = defineStore('userDashboard', {
                 currency: 'THB',
                 minimumFractionDigits: 0
             }).format(amount);
+        },
+
+        formatDaysLeft(days) {
+            if (days === 0) return 'วันนี้';
+            if (days === 1) return 'พรุ่งนี้';
+            if (days === 2) return 'มะรืนนี้';
+            return `เหลือ ${days} วัน`;
         }
     }
 });

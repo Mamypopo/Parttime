@@ -342,9 +342,9 @@ export default {
         } catch (error) {
           // กรณี error ให้แสดง error message
           await Swal.fire({
-            icon: 'info',
-            title: 'ไม่สามารถสมัครได้',
-            text: error.response?.data?.message || 'ไม่สามารถสมัครงานได้ในขณะนี้',
+            icon: 'warning',
+            title: error.response?.data?.message || 'ไม่สามารถสมัครงานได้',
+            text: error.response?.data?.details || 'กรุณาลองใหม่อีกครั้ง',
             footer: error.response?.data?.position
               ? `ตำแหน่ง: ${error.response.data.position}`
               : '',

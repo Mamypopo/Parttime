@@ -1,22 +1,25 @@
 <template>
   <div class="p-4 md:p-6 space-y-4 md:space-y-6">
     <!-- Header Section  -->
-    <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
         <div class="space-y-3">
-          <h1 class="text-xl md:text-2xl font-semibold text-gray-800">
-            สวัสดี, {{ userStore.user?.first_name }}
+          <h1 class="text-xl md:text-2xl font-semibold text-gray-800 dark:text-white">
+            สวัสดี, {{ fullName }}
           </h1>
           <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-            <span class="px-3 py-1 text-sm rounded-full w-fit" :class="statusClass">
-              {{ userStore.user?.status || 'พร้อมทำงาน' }}
+            <span
+              class="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full"
+              :class="getStatusClass(userStore.user?.approved)"
+            >
+              <i class="fas mr-1.5" :class="getStatusIcon(userStore.user?.approved)"></i>
+              {{ getStatusText(userStore.user?.approved) }}
             </span>
-            <!-- ทักษะ - แสดงแบบ wrap -->
             <div class="flex flex-wrap gap-2">
               <span
                 v-for="skill in userSkills"
                 :key="skill"
-                class="px-2 py-1 text-xs bg-purple-50 text-purple-600 rounded-full"
+                class="px-2 py-1 text-xs bg-purple-50 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300 rounded-full"
               >
                 {{ skill }}
               </span>
@@ -24,8 +27,10 @@
           </div>
         </div>
         <div class="text-left md:text-right mt-4 md:mt-0">
-          <p class="text-sm text-gray-500">วันที่วันนี้</p>
-          <p class="text-base md:text-lg font-medium text-gray-800">{{ currentDate }}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">วันที่วันนี้</p>
+          <p class="text-base md:text-lg font-medium text-gray-800 dark:text-white">
+            {{ currentDate }}
+          </p>
         </div>
       </div>
     </div>
@@ -33,55 +38,69 @@
     <!-- Stats Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
       <!-- คะแนนเฉลี่ย -->
-      <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
         <div class="flex justify-between items-center">
           <div>
-            <p class="text-sm md:text-base text-gray-500">คะแนนเฉลี่ย</p>
-            <h3 class="text-lg md:text-2xl font-semibold">{{ stats.averageRating }}/10</h3>
+            <p class="text-sm md:text-base text-gray-500 dark:text-gray-400">คะแนนเฉลี่ย</p>
+            <h3 class="text-lg md:text-2xl font-semibold text-gray-800 dark:text-white">
+              {{ stats.averageRating }}/10
+            </h3>
           </div>
-          <div class="w-12 h-12 bg-yellow-50 rounded-xl flex items-center justify-center">
+          <div
+            class="w-12 h-12 bg-yellow-50 rounded-xl flex items-center justify-center dark:bg-opacity-50"
+          >
             <i class="fas fa-star text-yellow-500"></i>
           </div>
         </div>
       </div>
 
       <!-- งานที่ทำสำเร็จ -->
-      <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
         <div class="flex justify-between items-center">
           <div>
-            <p class="text-sm md:text-base text-gray-500">งานสำเร็จ</p>
-            <h3 class="text-lg md:text-2xl font-semibold">{{ stats.completedJobs }} งาน</h3>
+            <p class="text-sm md:text-base text-gray-500 dark:text-gray-400">งานสำเร็จ</p>
+            <h3 class="text-lg md:text-2xl font-semibold text-gray-800 dark:text-white">
+              {{ stats.completedJobs }} งาน
+            </h3>
           </div>
-          <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
+          <div
+            class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center dark:bg-opacity-50"
+          >
             <i class="fas fa-check text-green-500"></i>
           </div>
         </div>
       </div>
 
       <!-- รายได้เดือนนี้ -->
-      <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
         <div class="flex justify-between items-center">
           <div>
-            <p class="text-sm md:text-base text-gray-500">รายได้เดือนนี้</p>
-            <h3 class="text-lg md:text-2xl font-semibold">
+            <p class="text-sm md:text-base text-gray-500 dark:text-gray-400">รายได้เดือนนี้</p>
+            <h3 class="text-lg md:text-2xl font-semibold text-gray-800 dark:text-white">
               {{ formatCurrency(stats.monthlyIncome) }}
             </h3>
           </div>
-          <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+          <div
+            class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center dark:bg-opacity-50"
+          >
             <i class="fas fa-wallet text-blue-500"></i>
           </div>
         </div>
       </div>
 
-      <!-- ชั่วโมงทำงาน -->
-      <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+      <!-- เงานที่กำลังจะมาถึง -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
         <div class="flex justify-between items-center">
           <div>
-            <p class="text-sm md:text-base text-gray-500">ชั่วโมงทำงานเดือนนี้</p>
-            <h3 class="text-lg md:text-2xl font-semibold">{{ monthlyWorkHours }} ชม.</h3>
+            <p class="text-sm md:text-base text-gray-500 dark:text-gray-400">งานที่กำลังจะมาถึง</p>
+            <h3 class="text-lg md:text-2xl font-semibold text-gray-800 dark:text-white">
+              {{ dashboardStore.upcomingDeadlines.length }} งาน
+            </h3>
           </div>
-          <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
-            <i class="fas fa-clock text-purple-500"></i>
+          <div
+            class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center dark:bg-opacity-50"
+          >
+            <i class="fas fa-calendar text-purple-500"></i>
           </div>
         </div>
       </div>
@@ -90,48 +109,81 @@
     <!-- Income Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
       <!-- กราฟรายได้ -->
-      <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-          <h2 class="text-base md:text-lg font-semibold">สรุปรายได้</h2>
-          <div class="flex flex-wrap gap-2">
-            <button
-              @click="exportIncome"
-              class="px-3 py-1 text-sm bg-green-50 text-green-600 rounded-lg hover:bg-green-100 w-full sm:w-auto"
-            >
-              <i class="fas fa-file-excel mr-1"></i> Export Excel
-            </button>
+          <h2 class="text-base md:text-lg font-semibold text-gray-800 dark:text-white">
+            สรุปรายได้
+          </h2>
+
+          <!-- ตัวเลือกและปุ่มต่างๆ -->
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- ตัวเลือกช่วงเวลา -->
             <select
               v-model="incomeRange"
-              class="text-sm border rounded-lg px-2 py-1 w-full sm:w-auto"
+              class="text-sm border rounded-lg px-3 py-1.5 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600"
             >
-              <option value="daily">รายวัน</option>
-              <option value="weekly">รายสัปดาห์</option>
-              <option value="monthly">รายเดือน</option>
+              <option value="daily">7 วันล่าสุด</option>
+              <option value="weekly">4 สัปดาห์ล่าสุด</option>
+              <option value="monthly">6 เดือนล่าสุด</option>
+              <option value="yearly">รายปี</option>
             </select>
+
+            <!-- ปุ่ม Export -->
+            <div class="flex gap-2">
+              <button
+                @click="exportIncome"
+                class="px-3 py-1.5 text-sm bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/50 flex items-center gap-2 transition-colors"
+              >
+                <i class="fas fa-file-excel"></i>
+                <span class="hidden sm:inline">Export Excel</span>
+              </button>
+
+              <!-- ปุ่ม Print -->
+              <button
+                @click="printChart"
+                class="px-3 py-1.5 text-sm bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 flex items-center gap-2 transition-colors"
+              >
+                <i class="fas fa-print"></i>
+                <span class="hidden sm:inline">พิมพ์</span>
+              </button>
+            </div>
           </div>
         </div>
-        <div class="h-48 md:h-64">
-          <!-- Chart Component -->
+
+        <!-- Loading State -->
+        <div v-if="loading" class="h-48 md:h-64 flex items-center justify-center">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4bc0c8]"></div>
+        </div>
+
+        <!-- Chart -->
+        <div v-else class="h-48 md:h-64">
+          <IncomeChart :incomes="recentIncomes" :range="incomeRange" />
         </div>
       </div>
 
       <!-- ตารางรายได้  -->
-      <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
-        <h2 class="text-base md:text-lg font-semibold mb-4">รายได้ล่าสุด</h2>
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
+        <h2 class="text-base md:text-lg font-semibold text-gray-800 dark:text-white mb-4">
+          รายได้ล่าสุด
+        </h2>
         <div class="space-y-3">
           <div
             v-for="income in recentIncomes"
             :key="income.id"
-            class="flex flex-col sm:flex-row justify-between gap-2 p-3 border rounded-lg"
+            class="flex flex-col sm:flex-row justify-between gap-2 p-3 border dark:border-gray-700 rounded-lg"
           >
             <div>
-              <h4 class="font-medium">{{ income.jobTitle }}</h4>
-              <p class="text-sm text-gray-500">{{ income.workplace }}</p>
-              <p class="text-xs text-gray-500 sm:hidden">{{ formatDate(income.date) }}</p>
+              <h4 class="font-medium text-gray-800 dark:text-white">{{ income.jobTitle }}</h4>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ income.workplace }}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 sm:hidden">
+                {{ formatDate(income.date) }}
+              </p>
             </div>
             <div class="flex justify-between sm:block">
-              <p class="text-sm text-gray-500 hidden sm:block">{{ formatDate(income.date) }}</p>
-              <span class="text-base md:text-lg font-medium text-green-600">
+              <p class="text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
+                {{ formatDate(income.date) }}
+              </p>
+              <span class="text-base md:text-lg font-medium text-green-600 dark:text-green-400">
                 {{ formatCurrency(income.amount) }}
               </span>
             </div>
@@ -140,15 +192,16 @@
       </div>
     </div>
 
-    <!-- Schedule & Upcoming Deadlines -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
       <!-- ตารางงานวันนี้ -->
-      <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-base md:text-lg font-semibold">ตารางงานวันนี้</h2>
-          <router-link to="/user/schedule" class="text-sm text-blue-500 hover:underline">
+          <h2 class="text-base md:text-lg font-semibold text-gray-800 dark:text-white">
+            ตารางงานวันนี้
+          </h2>
+          <!-- <router-link to="/user/schedule" class="text-sm text-blue-500 hover:underline">
             ดูทั้งหมด →
-          </router-link>
+          </router-link> -->
         </div>
 
         <div class="space-y-3">
@@ -156,18 +209,20 @@
             <div
               v-for="schedule in todaySchedule"
               :key="schedule.id"
-              class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 p-3 border rounded-lg"
+              class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 p-3 border dark:border-gray-700 rounded-lg dark:bg-gray-800/50"
             >
               <div class="flex-1">
                 <!-- แสดงเวลาเริ่มและสิ้นสุด -->
                 <div class="flex items-center gap-2">
-                  <span class="text-sm text-gray-500">
+                  <span class="text-sm text-gray-500 dark:text-gray-400">
                     {{ formatTimeRange(schedule.start_time, schedule.end_time) }}
                   </span>
                 </div>
-                <h4 class="font-medium mt-1">{{ schedule.title || 'เอกชนรับ' }}</h4>
-                <p class="text-sm text-gray-500">
-                  {{ schedule.workplace || schedule.location || 'ad1' }}
+                <h4 class="font-medium mt-1 text-gray-800 dark:text-white">
+                  {{ schedule.title }}
+                </h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ schedule.workplace || schedule.location }}
                 </p>
               </div>
               <div class="flex items-center gap-2">
@@ -180,37 +235,58 @@
               </div>
             </div>
           </template>
-          <div v-else class="text-center py-8 text-gray-500">ไม่มีตารางงานสำหรับวันนี้</div>
+          <div v-else class="text-center py-8 text-gray-500 dark:text-gray-400">
+            ไม่มีตารางงานสำหรับวันนี้
+          </div>
         </div>
       </div>
 
       <!-- งานที่ใกล้ถึงกำหนด -->
-      <div class="bg-white rounded-xl shadow-sm p-4 md:p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-semibold">งานที่ใกล้ถึงกำหนด</h2>
-          <router-link to="/user/tasks" class="text-sm text-blue-500 hover:underline">
+          <h2 class="text-lg font-semibold text-gray-800 dark:text-white">งานที่ใกล้ถึงกำหนด</h2>
+          <!-- <router-link to="/user/tasks" class="text-sm text-blue-500 hover:underline">
             ดูทั้งหมด →
-          </router-link>
+          </router-link> -->
         </div>
         <div class="space-y-3">
-          <div
-            v-for="task in upcomingDeadlines"
-            :key="task.id"
-            class="flex items-center justify-between p-3 border rounded-lg"
-          >
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center">
-                <i class="fas fa-exclamation text-red-500"></i>
+          <template v-if="dashboardStore.upcomingDeadlines.length > 0">
+            <div
+              v-for="task in dashboardStore.upcomingDeadlines"
+              :key="task.id"
+              class="flex items-center justify-between p-3 border dark:border-gray-700 rounded-lg dark:bg-gray-800/50"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center"
+                  :class="{
+                    'bg-red-50 dark:bg-red-900/30': task.daysLeft <= 2,
+                    'bg-yellow-50 dark:bg-yellow-900/30': task.daysLeft > 2
+                  }"
+                >
+                  <i
+                    class="fas fa-exclamation"
+                    :class="{
+                      'text-red-500 dark:text-red-400': task.daysLeft <= 2,
+                      'text-yellow-500 dark:text-yellow-400': task.daysLeft > 2
+                    }"
+                  ></i>
+                </div>
+                <div>
+                  <h4 class="font-medium text-gray-800 dark:text-white">{{ task.title }}</h4>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ task.workplace }}</p>
+                </div>
               </div>
-              <div>
-                <h4 class="font-medium">{{ task.title }}</h4>
-                <p class="text-sm text-gray-500">{{ task.workplace }}</p>
+              <div class="text-right">
+                <p class="text-sm font-medium text-gray-800 dark:text-white">
+                  {{ task.formattedDate }}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ task.daysLeftText }}</p>
               </div>
             </div>
-            <div class="text-right">
-              <p class="text-sm font-medium text-red-500">{{ task.deadline }}</p>
-              <p class="text-xs text-gray-500">เหลือ {{ task.remainingTime }}</p>
-            </div>
+          </template>
+          <div v-else class="text-center py-8 text-gray-500 dark:text-gray-400">
+            ไม่มีงานที่ใกล้ถึงกำหนด
           </div>
         </div>
       </div>
@@ -221,60 +297,37 @@
 <script>
 import { useUserStore } from '@/stores/userStore'
 import { useUserDashboardStore } from '@/stores/userDashboardStore'
+import IncomeChart from '@/components/Charts/IncomeChart.vue'
+import * as XLSX from 'xlsx'
 
 export default {
   name: 'DashboardView',
-
+  components: {
+    IncomeChart
+  },
   data() {
     return {
       userStore: useUserStore(),
       dashboardStore: useUserDashboardStore(),
-      incomeRange: 'monthly',
-      upcomingDeadlines: [
-        {
-          id: 1,
-          title: 'ส่งรายงานการทำงาน',
-          workplace: 'ร้านอาหารบ้านสวน',
-          deadline: '16 มี.ค. 2024',
-          remainingTime: '2 วัน'
-        },
-        {
-          id: 2,
-          title: 'ส่งเอกสารการเงิน',
-          workplace: 'ร้านกาแฟ Morning',
-          deadline: '17 มี.ค. 2024',
-          remainingTime: '3 วัน'
-        }
-      ]
+      incomeRange: 'monthly'
     }
   },
   async mounted() {
-    if (!this.userStore.user) {
-      await this.userStore.fetchUserProfile()
-    }
-    console.log('User Data:', this.userStore.user)
     await this.dashboardStore.fetchDashboardData()
-    console.log('Dashboard Data:', {
-      stats: this.dashboardStore.stats,
-      recentIncomes: this.dashboardStore.recentIncomes,
-      todaySchedule: this.dashboardStore.todaySchedule
-    })
   },
   computed: {
     // ข้อมูลผู้ใช้
     userSkills() {
       const skills = this.userStore.user?.skills
       if (!skills) return []
-
-      // ถ้าเป็น string ให้แปลงเป็น array ก่อน
       const skillsArray =
         typeof skills === 'string' ? JSON.parse(skills.replace(/'/g, '"')) : skills
 
       return skillsArray.map((skill) => skill.toString().replace(/[[\]"]+/g, ''))
     },
 
-    userName() {
-      return this.userStore.user?.first_name || 'ผู้ใช้งาน'
+    fullName() {
+      return `${this.userStore.user?.first_name || ''} ${this.userStore.user?.last_name || ''}`.trim()
     },
     loading() {
       return this.dashboardStore.loading
@@ -297,47 +350,61 @@ export default {
     todaySchedule() {
       return this.dashboardStore.todaySchedule
     },
-    monthlyWorkHours() {
-      return this.stats.totalWorkHours || 0
-    },
     recentIncomes() {
       return this.dashboardStore.recentIncomes
+    },
+    upcomingDeadlines() {
+      return this.dashboardStore.upcomingDeadlines
     }
   },
 
   methods: {
-    async fetchDashboardData() {
+    async updateIncomeRange() {
+      await this.dashboardStore.fetchDashboardData(this.incomeRange)
+      // อัพเดทข้อมูลกราฟตามช่วงเวลาที่เลือก
+    },
+    printChart() {
+      window.print()
+    },
+    exportIncome() {
       try {
-        // TODO: เพิ่ม API calls เพื่อดึงข้อมูล
-        // const response = await axios.get('/api/dashboard')
-        // this.averageRating = response.data.averageRating
-        // this.completedJobs = response.data.completedJobs
-        // etc...
+        // สร้างข้อมูลสำหรับ export
+        const data = this.recentIncomes.map((income) => ({
+          วันที่: this.formatDate(income.date),
+          งาน: income.jobTitle,
+          สถานที่: income.workplace,
+          จำนวนเงิน: income.amount
+        }))
+
+        // สร้าง workbook
+        const wb = XLSX.utils.book_new()
+        const ws = XLSX.utils.json_to_sheet(data)
+
+        // ตั้งค่าความกว้างคอลัมน์
+        const colWidths = [
+          { wch: 15 }, // วันที่
+          { wch: 30 }, // งาน
+          { wch: 25 }, // สถานที่
+          { wch: 15 } // จำนวนเงิน
+        ]
+        ws['!cols'] = colWidths
+
+        // เพิ่ม worksheet ลงใน workbook
+        XLSX.utils.book_append_sheet(wb, ws, 'รายได้')
+
+        // บันทึกไฟล์
+        const fileName = `income_report_${new Date().toISOString().split('T')[0]}.xlsx`
+        XLSX.writeFile(wb, fileName)
       } catch (error) {
-        console.error('Error fetching dashboard data:', error)
+        console.error('Error exporting income:', error)
+        // TODO: แสดง error message
       }
     },
 
-    exportIncome() {
-      // TODO: เพิ่มฟังก์ชัน export Excel
-      console.log('Exporting income data...', this.incomeRange)
-    },
-
-    async updateIncomeRange() {
-      // TODO: อัพเดทข้อมูลรายได้ตามช่วงเวลาที่เลือก
-      console.log('Updating income range:', this.incomeRange)
-    },
     formatCurrency(amount) {
       return this.dashboardStore.formatCurrency(amount)
     },
-    statusClass() {
-      const status = this.userStore.user?.status || 'available'
-      return {
-        'bg-green-50 text-green-600': status === 'available',
-        'bg-yellow-50 text-yellow-600': status === 'busy',
-        'bg-red-50 text-red-600': status === 'unavailable'
-      }
-    },
+
     formatDate(dateString) {
       try {
         const date = new Date(dateString)
@@ -387,8 +454,8 @@ export default {
     getStatusText(status) {
       const statusMap = {
         pending: 'รอการยืนยัน',
-        approved: 'ยืนยันแล้ว',
-        rejected: 'ถูกปฏิเสธ',
+        approved: 'พร้อมทำงาน',
+        rejected: 'ไม่พร้อมทำงาน',
         completed: 'เสร็จสิ้น',
         cancelled: 'ยกเลิก',
         default: 'รอดำเนินการ'
@@ -398,23 +465,37 @@ export default {
 
     getStatusClass(status) {
       return {
-        'bg-yellow-50 text-yellow-600': status === 'pending',
-        'bg-green-50 text-green-600': status === 'approved',
-        'bg-red-50 text-red-600': status === 'rejected',
-        'bg-blue-50 text-blue-600': status === 'completed',
-        'bg-gray-50 text-gray-600': status === 'cancelled'
+        'bg-yellow-50 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800':
+          status === 'pending',
+        'bg-green-50 dark:bg-green-900/50 text-green-600 dark:text-green-300 border border-green-200 dark:border-green-800':
+          status === 'approved',
+        'bg-red-50 dark:bg-red-900/50 text-red-600 dark:text-red-300 border border-red-200 dark:border-red-800':
+          status === 'rejected',
+        'bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-blue-800':
+          status === 'completed',
+        'bg-gray-50 dark:bg-gray-900/50 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700':
+          status === 'cancelled'
+      }
+    },
+
+    // เพิ่ม method สำหรับไอคอนตามสถานะ
+    getStatusIcon(status) {
+      return {
+        'fa-clock': status === 'pending',
+        'fa-check-circle': status === 'approved',
+        'fa-times-circle': status === 'rejected',
+        'fa-check-double': status === 'completed',
+        'fa-ban': status === 'cancelled',
+        'fa-question-circle': !status // default
       }
     }
   },
 
-  async mounted() {
-    await this.dashboardStore.fetchDashboardData()
-  },
-
   watch: {
     incomeRange: {
-      handler: 'updateIncomeRange',
-      immediate: true
+      handler() {
+        this.updateIncomeRange()
+      }
     }
   }
 }

@@ -26,34 +26,43 @@
               leave-to="opacity-0 scale-95"
             >
               <DialogPanel
-                class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden"
+                class="w-full max-w-3xl bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden"
               >
                 <!-- Header -->
                 <div
-                  class="p-6 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA]"
+                  class="p-6 bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] dark:from-[#feac5e]/80 dark:via-[#c779d0]/80 dark:to-[#4bc0c8]/80"
                 >
                   <div class="flex justify-between items-center">
                     <DialogTitle class="text-2xl font-semibold text-white">
                       ผลการประเมิน
-                      <p class="text-sm font-normal text-white/80 mt-1">{{ job?.title }}</p>
+                      <p class="text-sm font-normal text-white/90 mt-1">{{ job?.title }}</p>
                     </DialogTitle>
-                    <button @click="$emit('close')" class="text-white/70 hover:text-white">
+                    <button
+                      @click="$emit('close')"
+                      class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 dark:bg-gray-700/30 dark:hover:bg-gray-700/50 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
+                    >
                       <i class="fas fa-times text-xl"></i>
                     </button>
                   </div>
                 </div>
 
                 <!-- Content -->
-                <div class="p-6 bg-gray-50 dark:bg-gray-900">
+                <div class="p-6 bg-gray-50 dark:bg-gray-900/50">
                   <!-- คะแนนการประเมิน -->
                   <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                     <div
                       v-for="(score, index) in scoreItems"
                       :key="index"
-                      class="bg-white dark:bg-gray-800 p-4 rounded-lg"
+                      class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
                     >
                       <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                        <i :class="score.icon" class="mr-2"></i>
+                        <i
+                          :class="[
+                            score.icon,
+                            'mr-2',
+                            getScoreIconClass(evaluation?.[score.field])
+                          ]"
+                        ></i>
                         {{ score.title }}
                       </div>
                       <div
@@ -66,19 +75,23 @@
                   </div>
 
                   <!-- คะแนนรวม -->
-                  <div class="bg-white dark:bg-gray-800 p-6 rounded-lg mb-6">
+                  <div
+                    class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 mb-6"
+                  >
                     <div class="flex justify-between items-center mb-3">
-                      <span class="text-lg font-medium">คะแนนรวม</span>
+                      <span class="text-lg font-medium text-gray-800 dark:text-gray-200"
+                        >คะแนนรวม</span
+                      >
                       <div class="flex items-baseline">
                         <span class="text-3xl font-bold mr-2" :class="getTotalScoreClass()">
                           {{ getTotalScore() }}
                         </span>
-                        <span class="text-gray-500">/10</span>
+                        <span class="text-gray-500 dark:text-gray-400">/10</span>
                       </div>
                     </div>
 
                     <!-- Progress bar -->
-                    <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                       <div
                         class="h-full rounded-full transition-all duration-300"
                         :class="getProgressBarClass()"
@@ -88,8 +101,13 @@
                   </div>
 
                   <!-- ความคิดเห็น -->
-                  <div v-if="evaluation?.comment" class="bg-white dark:bg-gray-800 p-6 rounded-lg">
-                    <h3 class="font-medium mb-2">ความคิดเห็นเพิ่มเติม</h3>
+                  <div
+                    v-if="evaluation?.comment"
+                    class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                  >
+                    <h3 class="font-medium text-gray-800 dark:text-gray-200 mb-2">
+                      ความคิดเห็นเพิ่มเติม
+                    </h3>
                     <p class="text-gray-600 dark:text-gray-300">{{ evaluation.comment }}</p>
                   </div>
                 </div>
@@ -157,7 +175,7 @@ export default {
           icon: 'fas fa-smile'
         },
         {
-          title: 'การตรงต่อเวลา',
+          title: 'ตรงต่อเวลา',
           field: 'punctuality_score',
           icon: 'fas fa-clock'
         }
@@ -203,38 +221,18 @@ export default {
           return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
       }
     },
-    getScoreClass(score) {
-      const numScore = Number(score) || 0
-      if (numScore >= 1.5) return 'text-green-600 dark:text-green-400'
-      if (numScore >= 1) return 'text-yellow-600 dark:text-yellow-400'
-      return 'text-red-600 dark:text-red-400'
-    },
-    getProgressBarClass(job) {
-      const score = this.getTotalScore(job)
-      if (score >= 8) return 'bg-green-500 dark:bg-green-400'
-      if (score >= 6) return 'bg-yellow-500 dark:bg-yellow-400'
-      return 'bg-red-500 dark:bg-red-400'
-    },
+
     getTotalScore() {
       if (!this.evaluation) return 0
 
-      // ใช้ total_score ที่มีอยู่แล้ว
       if (this.evaluation.total_score) {
         return this.evaluation.total_score
       }
-
-      // หรือคำนวณใหม่จากคะแนนแต่ละด้าน
       return this.scoreItems.reduce((sum, item) => {
         return sum + (Number(this.evaluation[item.field]) || 0)
       }, 0)
     },
 
-    getTotalScoreClass() {
-      const total = this.getTotalScore()
-      if (total >= 8) return 'text-green-600 dark:text-green-400'
-      if (total >= 6) return 'text-yellow-600 dark:text-yellow-400'
-      return 'text-red-600 dark:text-red-400'
-    },
     getOverallScore() {
       if (!this.jobs?.length) return 0
       // รวมคะแนนทั้งหมด รวมถึงงานที่ไม่ผ่านการประเมิน (จะได้ 0 คะแนน)
@@ -259,6 +257,33 @@ export default {
         default:
           return 'รอดำเนินการ'
       }
+    },
+    getScoreIconClass(score) {
+      const numScore = Number(score) || 0
+      if (numScore >= 1.5) return 'text-[#4bc0c8] dark:text-[#4bc0c8]/80'
+      if (numScore >= 1) return 'text-[#c779d0] dark:text-[#c779d0]/80'
+      return 'text-[#feac5e] dark:text-[#feac5e]/80'
+    },
+
+    getProgressBarClass() {
+      const score = this.getTotalScore()
+      if (score >= 8) return 'bg-gradient-to-r from-[#4bc0c8] to-[#4bc0c8]/80'
+      if (score >= 6) return 'bg-gradient-to-r from-[#c779d0] to-[#c779d0]/80'
+      return 'bg-gradient-to-r from-[#feac5e] to-[#feac5e]/80'
+    },
+
+    getScoreClass(score) {
+      const numScore = Number(score) || 0
+      if (numScore >= 1.5) return 'text-[#4bc0c8] dark:text-[#4bc0c8]/80'
+      if (numScore >= 1) return 'text-[#c779d0] dark:text-[#c779d0]/80'
+      return 'text-[#feac5e] dark:text-[#feac5e]/80'
+    },
+
+    getTotalScoreClass() {
+      const total = this.getTotalScore()
+      if (total >= 8) return 'text-[#4bc0c8] dark:text-[#4bc0c8]/80'
+      if (total >= 6) return 'text-[#c779d0] dark:text-[#c779d0]/80'
+      return 'text-[#feac5e] dark:text-[#feac5e]/80'
     },
     formatDate(date) {
       if (!date) return 'ไม่ระบุ'

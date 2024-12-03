@@ -131,21 +131,35 @@
             </button>
 
             <!-- ปุ่มสมัครงาน -->
+            <!-- ปุ่มสมัครงาน -->
             <button
               @click="openApplyModal(job)"
               class="flex-1 py-2 px-4 rounded-lg font-medium text-white transition-all duration-200 hover:scale-[1.02]"
               :class="[
-                hasApplied(job) || !canApply(job)
-                  ? 'bg-gray-500 dark:bg-gray-600 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] hover:opacity-90'
+                getJobStatus(job) === 'completed'
+                  ? 'bg-[#4CD7B0] hover:bg-[#45c6a2] cursor-not-allowed'
+                  : getJobStatus(job) === 'in_progress'
+                    ? 'bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] hover:opacity-90'
               ]"
-              :disabled="hasApplied(job) || !canApply(job)"
+              :disabled="getJobStatus(job) !== 'published'"
             >
-              <i class="fas fa-paper-plane mr-2"></i>
-              <span v-if="hasApplied(job)">สมัครแล้ว</span>
-              <span v-else-if="getJobStatus(job) === 'in_progress'">กำลังดำเนินงาน</span>
-              <span v-else-if="getJobStatus(job) === 'completed'">งานเสร็จสิ้น</span>
-              <span v-else>สมัครงาน</span>
+              <!-- ลบ icon fa-paper-plane ที่ซ้ำกันออก -->
+              <span
+                v-if="getJobStatus(job) === 'completed'"
+                class="flex items-center justify-center"
+              >
+                <i class="fas fa-check-circle mr-2"></i>
+                งานเสร็จสิ้น
+              </span>
+              <span v-else-if="getJobStatus(job) === 'in_progress'">
+                <i class="fas fa-clock mr-2"></i>
+                กำลังดำเนินงาน
+              </span>
+              <span v-else>
+                <i class="fas fa-paper-plane mr-2"></i>
+                สมัครงาน
+              </span>
             </button>
           </div>
         </div>
@@ -248,16 +262,6 @@ export default {
       }
     },
 
-    hasApplied(job) {
-      if (!this.userStore.user?.id) return false
-      if (!job.JobPositions) return false
-
-      const isApplied = job.JobPositions.some((position) =>
-        position.JobParticipation?.some((p) => p.user_id === this.userStore.user.id)
-      )
-
-      return isApplied
-    },
     canApply(job) {
       // แปลง string เป็น Date object ให้ถูกต้อง
       const now = new Date()

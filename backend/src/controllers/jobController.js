@@ -62,21 +62,21 @@ export const getAllJobs = [
         try {
             const page = parseInt(req.query.page) || 1;
             const pageSize = parseInt(req.query.pageSize) || 10;
+            const userId = req.user?.id;
 
-            // เพิ่ม query parameters สำหรับการค้นหา
             const filters = {
                 id: req.query.id,
                 title: req.query.title,
                 location: req.query.location,
                 dateFrom: req.query.dateFrom,
                 dateTo: req.query.dateTo,
-                status: req.query.status, // completed หรือ not
+                status: req.query.status,
                 minWage: req.query.minWage ? parseInt(req.query.minWage) : undefined,
                 maxWage: req.query.maxWage ? parseInt(req.query.maxWage) : undefined,
-                position: req.query.position // ค้นหาตาม position_name
+                position: req.query.position
             };
 
-            const jobs = await jobModel.getAllJobs(page, pageSize, filters);
+            const jobs = await jobModel.getAllJobs(page, pageSize, filters, userId);
             const totalCount = await jobModel.getJobsCount(filters);
 
             return res.status(200).json({

@@ -5,12 +5,13 @@ import * as jobParticipationController from '../controllers/jobParticipationCont
 
 const router = express.Router();
 
-// เส้นทางสาธารณะ
-router.get('/', jobController.getAllJobs);
+
+
 
 // เส้นทางที่ต้องการการยืนยันตัวตน
 router.use(authMiddleware);
 
+router.get('/', jobController.getAllJobs);
 // ฟังชั่นสมัครงาน
 router.post('/apply', jobController.applyForJob);
 // เส้นทางสำหรับแอดมิน

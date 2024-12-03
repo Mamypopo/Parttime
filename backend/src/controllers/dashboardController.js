@@ -306,10 +306,11 @@ export const getUserDashboard = async (req, res) => {
         const userId = req.user.id;
 
         // ดึงข้อมูลทั้งหมดพร้อมกัน
-        const [stats, todaySchedule, recentIncomes] = await Promise.all([
+        const [stats, todaySchedule, recentIncomes, upcomingDeadlines] = await Promise.all([
             DashboardModel.getUserDashboardStats(userId),
             DashboardModel.getTodaySchedule(userId),
-            DashboardModel.getRecentIncomes(userId)
+            DashboardModel.getRecentIncomes(userId),
+            DashboardModel.getUpcomingDeadlines(userId)
         ]);
 
         // แปลงข้อมูลตารางงานให้อยู่ในรูปแบบที่ต้องการ
@@ -324,6 +325,25 @@ export const getUserDashboard = async (req, res) => {
 
         }));
 
+        // แปลงข้อมูลงานที่ใกล้ถึงกำหนด
+        const formattedDeadlines = upcomingDeadlines.map(job => {
+            const workDate = new Date(job.jobPosition.job.work_date);
+            const today = new Date();
+            const daysLeft = Math.ceil((workDate - today) / (1000 * 60 * 60 * 24));
+
+            return {
+                id: job.id,
+                title: job.jobPosition.position_name,
+                workplace: job.jobPosition.job.title,
+                workDate: job.jobPosition.job.work_date,
+                daysLeft: daysLeft, // จำนวนวันที่เหลือ
+                location: job.jobPosition.job.location,
+                startTime: job.jobPosition.job.start_time,
+                endTime: job.jobPosition.job.end_time,
+                status: job.status
+            };
+        });
+
         // แปลงข้อมูลรายได้ให้อยู่ในรูปแบบที่ต้องการ
         const formattedIncomes = recentIncomes.map(income => ({
             id: income.id,
@@ -337,7 +357,8 @@ export const getUserDashboard = async (req, res) => {
         res.status(200).json({
             stats,
             todaySchedule: formattedSchedule,
-            recentIncomes: formattedIncomes
+            recentIncomes: formattedIncomes,
+            upcomingDeadlines: formattedDeadlines
         });
 
     } catch (error) {

@@ -51,7 +51,7 @@
               class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-left hover:border-[#c779d0] dark:hover:border-[#c779d0]/50 transition-colors duration-200"
             >
               <span>{{ selectedPosition || 'ตำแหน่ง' }}</span>
-              <i class="fas fa-chevron-down text-gray-400 dark:text-gray-500"></i>
+              <i class="fas fa-chevron-down ml-9 text-gray-400 dark:text-gray-500"></i>
             </button>
             <!-- Dropdown -->
             <div

@@ -6,7 +6,8 @@ export const NOTIFICATION_TYPES = {
     WORK_EVALUATION: 'evaluation',           // แจ้งเตือนผลการประเมิน
     WORK_EVALUATION_REJECTED: 'rejected',    // แจ้งเตือนไม่ผ่านการประเมิน
     SYSTEM: 'system',                        // แจ้งเตือนจากระบบ
-    GENERAL: 'general'                       // แจ้งเตือนทั่วไป
+    GENERAL: 'general',                      // แจ้งเตือนทั่วไป
+    USER_APPROVAL: 'user_approval'
 }
 
 export const NOTIFICATIONADMIN_TYPES = {
@@ -18,16 +19,31 @@ export const NOTIFICATIONADMIN_TYPES = {
 };
 // สร้างการแจ่้งเตือนสำหรับ users
 export const createUserNotification = async (userId, message, type = NOTIFICATION_TYPES.GENERAL) => {
+    if (!userId) {
+        throw new Error('ต้องระบุ userId สำหรับการสร้างการแจ้งเตือน');
+    }
+
+    if (!message) {
+        throw new Error('ต้องระบุเนื้อหาการแจ้งเตือน');
+    }
+
+    // ตรวจสอบ type ที่ถูกส่งมา
+    if (type && !Object.values(NOTIFICATION_TYPES).includes(type)) {
+        type = NOTIFICATION_TYPES.SYSTEM; // ถ้าไม่ตรงกับที่กำหนด ให้เป็น system
+    }
+
     try {
         return await prisma.notification.create({
             data: {
+                userId: parseInt(userId),
                 message,
-                type,
-                user: { connect: { id: userId } },
+                type: type || NOTIFICATION_TYPES.SYSTEM,
+                createdAt: new Date(),
+                adminId: null // ระบุชัดเจนว่าเป็นการแจ้งเตือนของ user
             },
         });
     } catch (error) {
-        console.error('Error creating notification:', error);
+        console.error('Error creating user notification:', error);
         throw error;
     }
 };

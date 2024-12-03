@@ -513,6 +513,7 @@ export const getUserDashboardStats = async (userId) => {
     }
 };
 
+
 // ดึงรายได้ล่าสุด (ปรับปรุงให้ดึงเฉพาะงานที่ผ่านการประเมิน)
 export const getRecentIncomes = async (userId) => {
     try {
@@ -532,18 +533,21 @@ export const getRecentIncomes = async (userId) => {
                 jobPosition: {
                     select: {
                         position_name: true,
-                        wage: true, // ค่าแรง
+                        wage: true,
                         job: {
                             select: {
                                 title: true,
-                                location: true
+                                location: true,
+                                work_date: true,
+                                start_time: true,
+                                end_time: true
                             }
                         }
                     }
                 },
                 workHistories: {
                     select: {
-                        created_at: true, // วันที่ประเมิน
+                        created_at: true,
                         total_score: true
                     },
                     where: {
@@ -613,3 +617,57 @@ export const getTodaySchedule = async (userId) => {
     }
 };
 
+// ฟังก์ชันดึงงานที่ใกล้ถึงกำหนด
+export const getUpcomingDeadlines = async (userId) => {
+    try {
+        const today = new Date();
+        const nextWeek = new Date(today);
+        nextWeek.setDate(nextWeek.getDate() + 7);
+
+        return await prisma.jobParticipation.findMany({
+            where: {
+                user_id: userId,
+                status: {
+                    in: ['approved', 'in_progress']
+                },
+                jobPosition: {
+                    job: {
+                        work_date: {
+                            gte: today,
+                            lte: nextWeek
+                        }
+                    }
+                }
+            },
+            select: {
+                id: true,
+                status: true,
+                jobPosition: {
+                    select: {
+                        position_name: true,
+                        job: {
+                            select: {
+                                title: true,
+                                work_date: true,
+                                start_time: true,
+                                end_time: true,
+                                location: true
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: {
+                jobPosition: {
+                    job: {
+                        work_date: 'asc'
+                    }
+                }
+            },
+            take: 5  // แสดง 5 รายการล่าสุด
+        });
+    } catch (error) {
+        console.error('Error in getUpcomingDeadlines:', error);
+        throw error;
+    }
+};

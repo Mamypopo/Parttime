@@ -156,7 +156,7 @@
           <!-- User Profile Section -->
           <div class="border-t pt-4 px-3">
             <router-link
-              to="/user/profile"
+              to="/user/profile-view"
               class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-gradient-to-r hover:from-[#feac5e]/10 hover:via-[#c779d0]/10 hover:to-[#4bc0c8]/10 dark:hover:from-[#feac5e]/20 dark:hover:via-[#c779d0]/20 dark:hover:to-[#4bc0c8]/20 transition-colors group"
             >
               <img
@@ -277,7 +277,7 @@ export default {
 
         if (result.isConfirmed) {
           // หยุดเช็คการแจ้งเตือนเมื่อ logout
-          this.userNotificationStore.stopChecking()
+          this.notificationStore.stopChecking()
           await this.userStore.logout()
 
           // เคลียร์ค่าใน sidebarStore
@@ -312,14 +312,14 @@ export default {
 
     // เริ่มเช็คการแจ้งเตือนเมื่อ login แล้ว
     if (this.userStore.isLoggedIn) {
-      await this.userNotificationStore.fetchNotifications() // เช็คครั้งแรก
-      this.userNotificationStore.startChecking() // เริ่มการเช็คอัตโนมัติ
+      await this.notificationStore.fetchNotifications() // เช็คครั้งแรก
+      this.notificationStore.startChecking() // เริ่มการเช็คอัตโนมัติ
     }
   },
   beforeUnmount() {
     this.sidebarStore.cleanup()
     // หยุดเช็คการแจ้งเตือนเมื่อออกจาก layout
-    this.userNotificationStore.stopChecking()
+    this.notificationStore.stopChecking()
   }
 }
 </script>
