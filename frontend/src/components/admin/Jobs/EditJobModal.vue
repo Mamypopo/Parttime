@@ -17,7 +17,7 @@
         <div class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-xl">
           <!-- Modal Header -->
           <div
-            class="flex items-center justify-between p-4 md:p-5 rounded-t-2xl border-b dark:border-gray-700 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA]"
+            class="flex items-center justify-between p-4 md:p-5 rounded-t-2xl border-b dark:border-gray-700 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600"
           >
             <h3 class="text-xl font-semibold text-white flex items-center">
               <i class="fas fa-edit text-white mr-2"></i>
@@ -25,7 +25,7 @@
             </h3>
             <button
               @click="closeModal"
-              class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
+              class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 dark:bg-gray-700/30 dark:hover:bg-gray-700/50 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
             >
               <i class="fas fa-xmark text-xl"></i>
             </button>
@@ -145,9 +145,11 @@
                     <!-- แถบแสดงสถานะ "ใหม่" -->
                     <span
                       v-if="position.isNew"
-                      class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-green-400 to-blue-400 dark:from-green-500 dark:to-blue-500 text-white animate-bounce shadow-sm"
+                      class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-gradient-to-r from-[#FF6B6B] to-[#FF8E8E] dark:from-[#FF4444] dark:to-[#FF6B6B] text-white shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl animate-bounce"
                     >
-                      <i class="fas fa-star-of-life mr-1 text-xs"></i>
+                      <i
+                        class="fas fa-star-of-life mr-1 text-xs text-yellow-300 animate-pulse drop-shadow-md"
+                      ></i>
                       ใหม่
                     </span>
                     <div class="flex items-center gap-4">

@@ -1,6 +1,6 @@
 <template>
   <div :class="{ dark: sidebarStore.isDarkMode }">
-    <div class="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
+    <div class="min-h-screen dark:bg-gray-900 transition-colors duration-300">
       <!-- แสดง Navbar เฉพาะเมื่อไม่ได้อยู่ใน route ของ admin หรือ user -->
       <header v-if="!isAuthenticatedRoute">
         <Navbar />
@@ -56,7 +56,7 @@ export default {
   transition: none !important;
 }
 
-/* เพิ่ม smooth scrolling */
+/*  smooth scrolling */
 html {
   scroll-behavior: smooth;
 }

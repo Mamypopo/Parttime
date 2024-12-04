@@ -11,8 +11,11 @@ export const useAdminStore = defineStore('admin', {
             email: null,
             role: null,
             first_name: null,
-            last_name: null
+            last_name: null,
+            profile_pic: null,
+            phone: null
         },
+        profileImageUrl: null,
         token: localStorage.getItem('admin_token') || null,
         isAuthenticated: !!localStorage.getItem('admin_token')
     }),
@@ -33,8 +36,11 @@ export const useAdminStore = defineStore('admin', {
                 email: null,
                 role: null,
                 first_name: null,
-                last_name: null
+                last_name: null,
+                profile_pic: null,
+                phone: null
             }
+            this.profileImageUrl = null
             this.token = null
             this.isAuthenticated = false
 
@@ -64,9 +70,22 @@ export const useAdminStore = defineStore('admin', {
                 email: adminData.email,
                 role: adminData.role,
                 first_name: adminData.first_name,
-                last_name: adminData.last_name
+                last_name: adminData.last_name,
+                profile_pic: adminData.profile_pic,
+                phone: adminData.phone
             }
-        }
+            this.updateProfileImageUrl()
+
+        },
+        updateProfileImageUrl() {
+            if (this.admin.profile_pic) {
+                this.profileImageUrl = `${import.meta.env.VITE_API_URL}/uploads/admin-profiles/${this.admin.profile_pic}`
+            } else {
+                // ใช้รูป default ถ้าไม่มีรูปโปรไฟล์
+                this.profileImageUrl = new URL('@/assets/images/logosemed.svg', import.meta.url).href
+            }
+        },
+
     },
 
     getters: {
@@ -79,7 +98,9 @@ export const useAdminStore = defineStore('admin', {
                 first_name: this.admin.first_name,
                 last_name: this.admin.last_name,
                 fullName: this.admin.first_name && this.admin.last_name ?
-                    `${this.admin.first_name} ${this.admin.last_name}` : ''
+                    `${this.admin.first_name} ${this.admin.last_name}` : '',
+                profile_pic: this.profileImageUrl,
+                phone: this.admin.phone
             }
         }
     }

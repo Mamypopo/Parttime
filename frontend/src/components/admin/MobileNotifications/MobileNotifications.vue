@@ -32,16 +32,14 @@
             <DialogPanel class="bg-white dark:bg-gray-800 border-t dark:border-gray-700 shadow-lg">
               <!-- Header -->
               <div
-                class="sticky top-0 z-10 flex justify-between items-center p-4 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA] border-b dark:border-gray-700"
+                class="sticky top-0 z-10 flex justify-between items-center p-4 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 border-b dark:border-gray-700"
               >
-                <DialogTitle class="text-base font-medium text-[#EA6B6B] dark:text-[#FF8F8F]">
-                  การแจ้งเตือน
-                </DialogTitle>
+                <DialogTitle class="text-base font-medium text-white"> การแจ้งเตือน </DialogTitle>
                 <div class="flex items-center gap-4">
                   <button
                     v-if="hasUnread"
                     @click="markAllAsRead"
-                    class="text-sm text-[#6ED7D1] dark:text-[#4B9592] hover:text-[#4bb3af] dark:hover:text-[#3D7A78] transition-colors duration-200 whitespace-nowrap"
+                    class="text-sm text-white/80 hover:text-white transition-colors duration-200"
                   >
                     <span class="flex items-center gap-2">
                       <i class="fas fa-check-double"></i>
@@ -51,7 +49,7 @@
                   <button
                     tabindex="0"
                     @click="$emit('update:modelValue', false)"
-                    class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center ml-2"
+                    class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 dark:bg-gray-700/30 dark:hover:bg-gray-700/50 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
                   >
                     <i class="fas fa-times text-xl"></i>
                   </button>

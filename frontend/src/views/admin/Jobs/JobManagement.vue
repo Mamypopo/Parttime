@@ -12,7 +12,6 @@
           <p class="text-gray-500 dark:text-gray-400 mt-1">จัดการและดูรายละเอียดงานทั้งหมด</p>
         </div>
         <div class="flex gap-2">
-          <!-- เพิ่ม div ครอบปุ่ม -->
           <!-- ปุ่มรีเฟรช -->
           <button
             @click="refreshJobs"
@@ -102,7 +101,7 @@
             v-else
             v-for="job in jobs"
             :key="job.id"
-            class="bg-white dark:bg-gray-800 rounded-2xl hover:scale-[1.01]shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden"
+            class="bg-white dark:bg-gray-800 rounded-2xl hover:scale-[1.01] shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
           >
             <!-- Card Header -->
             <div class="p-4 border-b dark:border-gray-700">
@@ -318,7 +317,7 @@
                     <!-- ปุ่มประเมิน -->
                     <button
                       @click="openWorkStatusModal(job)"
-                      class="px-4 py-2 text-sm rounded-lg transition-all duration-300 bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600 shadow-md dark:shadow-none dark:from-purple-600 dark:to-indigo-700 dark:hover:from-purple-700 dark:hover:to-indigo-800"
+                      class="px-4 py-2 text-sm rounded-lg transition-all duration-300 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 text-white shadow-md hover:opacity-90 hover:shadow-lg whitespace-nowrap"
                     >
                       <i class="fas fa-star mr-2"></i>
                       ประเมินผลงาน
@@ -785,8 +784,14 @@ export default {
       return this.jobStore.hasNewParticipants(job)
     },
     openWorkStatusModal(job) {
-      this.selectedJob = job
-      this.showWorkStatusModal = true
+      // รีเฟรชข้อมูลงานก่อนเปิด modal
+      this.jobStore.fetchJobsAndParticipants().then(() => {
+        const updatedJob = this.jobs.find((j) => j.id === job.id)
+        if (updatedJob) {
+          this.selectedJob = { ...updatedJob }
+          this.showWorkStatusModal = true
+        }
+      })
     },
 
     closeWorkStatusModal() {
@@ -796,7 +801,6 @@ export default {
 
     async handleUpdateWorkStatus(data) {
       try {
-        // เพิ่ม log เพื่อดูข้อมูลที่ส่งไป
         console.log('Sending evaluation data:', {
           participationId: data.participationId,
           ratings: data.ratings,
@@ -810,10 +814,20 @@ export default {
           ratings: data.ratings,
           totalScore: data.totalScore,
           comment: data.comment,
-          isPassedEvaluation: data.isPassedEvaluation // ต้องส่งค่านี้ด้วย
+          isPassedEvaluation: data.isPassedEvaluation
         })
+        // รีเฟรชข้อมูลงานทั้งหมด
+        await this.jobStore.fetchJobsAndParticipants()
 
+        // อัพเดทข้อมูลงานที่เลือกอยู่
+        if (this.selectedJob) {
+          const updatedJob = this.jobs.find((job) => job.id === this.selectedJob.id)
+          if (updatedJob) {
+            this.selectedJob = { ...updatedJob }
+          }
+        }
         this.closeWorkStatusModal()
+
         Swal.fire({
           icon: 'success',
           title: 'บันทึกการประเมินสำเร็จ',
@@ -821,7 +835,7 @@ export default {
           timer: 1500
         })
       } catch (error) {
-        console.error('Error details:', error.response?.data) // เพิ่ม log error
+        console.error('Error details:', error.response?.data)
         Swal.fire({
           icon: 'error',
           title: 'เกิดข้อผิดพลาด',
@@ -888,9 +902,7 @@ export default {
     calculateActualCost(job) {
       return this.jobStore.calculateActualCost(job)
     },
-    calculateTotalWage(job) {
-      return this.jobStore.calculateTotalWage(job)
-    },
+
     async refreshJobs() {
       try {
         // โหลดข้อมูลใหม่

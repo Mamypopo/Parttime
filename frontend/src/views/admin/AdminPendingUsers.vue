@@ -92,7 +92,9 @@
       v-else-if="formattedUsers.length === 0"
       class="flex flex-col items-center justify-center py-12"
     >
-      <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+      <div
+        class="w-24 h-24 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 text-gray-500 dark:text-gray-400 rounded-full flex items-center justify-center mb-4"
+      >
         <i class="fas fa-users text-3xl text-[#EABF71]"></i>
       </div>
       <p class="text-gray-500 text-lg">ไม่พบข้อมูลผู้ใช้ที่รอการอนุมัติ</p>

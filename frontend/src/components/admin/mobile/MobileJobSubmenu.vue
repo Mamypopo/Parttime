@@ -20,7 +20,7 @@
           >
             <!-- Header -->
             <div
-              class="flex justify-between items-center p-4 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA] rounded-t-2xl mb-4"
+              class="flex justify-between items-center p-4 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 rounded-t-2xl mb-4"
             >
               <h3 class="text-lg font-medium text-white">งาน</h3>
               <button

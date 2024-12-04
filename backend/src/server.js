@@ -4,7 +4,7 @@ import userRoutes from './routes/userRoutes.js';
 import jobRoutes from './routes/jobRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
-
+import authRoutes from './routes/authRoutes.js'
 import { startNotificationCleanup, runCleanupNow } from './cron/notificationCleanup.js';
 import { startLogCleanup, runlogCleanupNow } from './cron/logCleanup.js';
 import cors from 'cors';
@@ -19,7 +19,7 @@ app.use('/uploads', express.static('uploads'))
 
 app.use(express.json());
 
-app.use(cors());
+
 
 //  routes
 app.use('/api/users', userRoutes);
@@ -27,6 +27,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/jobs', jobRoutes);
 
 app.use('/api/admin', adminRoutes);
+
+app.use('/api/auth', authRoutes);
 
 app.use('/api/dashboard', dashboardRoutes);
 

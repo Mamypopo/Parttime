@@ -2,23 +2,21 @@
   <div class="min-h-screen relative flex flex-col">
     <!-- Hero Section with Gradient Background -->
     <div
-      class="absolute top-0 left-0 right-0 h-[45vh] bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] rounded-b-[30px]"
+      class="absolute top-0 left-0 right-0 h-[45vh] bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] rounded-b-[30px] opacity-95"
     ></div>
 
     <!-- Content Section -->
     <div class="relative z-10">
       <!-- Welcome Section -->
       <div class="text-center pt-24 pb-5">
-        <h1 class="text-4xl font-semibold text-white mb-4 animate-fade-in">ยินดีต้อนรับ!</h1>
-        <div class="max-w-xl lg:max-w-2xl mx-auto space-y-2 animate-fade-in-up">
-          <p class="text-base lg:text-lg text-white/90">
-            มาร่วมเป็นส่วนหนึ่งกับทีมผู้เชี่ยวชาญของเรา
-          </p>
-        </div>
+        <h1 class="text-4xl font-semibold text-white mb-1 animate-fade-in-up">ยินดีต้อนรับห</h1>
+        <p class="text-base lg:text-lg text-white/90 animate-fade-in-up max-w-xl mx-auto">
+          มาร่วมเป็นส่วนหนึ่งกับทีมผู้เชี่ยวชาญของเรา
+        </p>
       </div>
 
       <!-- Register Form -->
-      <div class="max-w-5xl mx-auto px-4 lg:px-8">
+      <div class="max-w-6xl mx-auto px-4 lg:px-8">
         <div class="bg-white rounded-[20px] shadow-xl p-6 lg:p-8 mb-8">
           <h2 class="text-2xl font-semibold text-center mb-8 text-gray-800">สมัครสมาชิก</h2>
 
@@ -27,7 +25,7 @@
               <!-- คอลัมน์ซ้าย: ข้อมูลส่วนตัว -->
               <div class="space-y-4">
                 <div
-                  class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+                  class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300"
                 >
                   <h3 class="text-lg font-medium text-gray-700 mb-4">ข้อมูลส่วนตัว</h3>
                   <div class="space-y-4">
@@ -36,7 +34,7 @@
                         <label class="block text-sm text-gray-600 mb-1">คำนำหน้า</label>
                         <select
                           v-model="form.prefix"
-                          class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                          class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200 text-gray-600"
                         >
                           <option value="" disabled selected>เลือก</option>
                           <option value="นาย">นาย</option>
@@ -50,7 +48,7 @@
                           type="text"
                           v-model="form.firstname"
                           placeholder="ชื่อจริง"
-                          class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                          class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200 placeholder:text-gray-400"
                         />
                       </div>
                     </div>
@@ -61,7 +59,7 @@
                         type="text"
                         v-model="form.lastname"
                         placeholder="นามสกุล"
-                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200 placeholder:text-gray-400"
                       />
                     </div>
 
@@ -70,7 +68,7 @@
                         <label class="block text-sm text-gray-600 mb-1">เพศ</label>
                         <select
                           v-model="form.gender"
-                          class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                          class="w-full px-3 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200 text-gray-600"
                         >
                           <option value="" disabled selected>เลือก</option>
                           <option value="ชาย">ชาย</option>
@@ -83,11 +81,11 @@
                           วันเกิด
                           <span class="text-xs text-gray-400 ml-1">(ระบุเป็น ค.ศ.)</span>
                         </label>
-                        <div class="relative">
+                        <div class="date-input-container">
                           <input
                             type="date"
                             v-model="form.birthdate"
-                            class="w-full px-2.5 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                            class="w-full px-2.5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200 placeholder:text-gray-400"
                           />
                         </div>
                       </div>
@@ -101,7 +99,7 @@
                         @input="validateNationalId"
                         maxlength="13"
                         placeholder="เลขบัตรประชาชน 13 หลัก"
-                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200 placeholder:text-gray-400"
                       />
                     </div>
 
@@ -111,7 +109,7 @@
                         type="text"
                         v-model="form.lineId"
                         placeholder="ไลน์ไอดีของคุณ"
-                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200 placeholder:text-gray-400"
                       />
                     </div>
                   </div>
@@ -131,7 +129,7 @@
                         type="email"
                         v-model="form.email"
                         placeholder="อีเมลของคุณ"
-                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200 placeholder:text-gray-400"
                       />
                     </div>
 
@@ -141,7 +139,7 @@
                         type="password"
                         v-model="form.password"
                         placeholder="รหัสผ่าน"
-                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200 placeholder:text-gray-400"
                       />
                     </div>
 
@@ -151,7 +149,7 @@
                         type="password"
                         v-model="form.confirmPassword"
                         placeholder="ยืนยันรหัสผ่าน"
-                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200 placeholder:text-gray-400"
                       />
                     </div>
 
@@ -161,7 +159,7 @@
                         type="tel"
                         v-model="form.phone"
                         placeholder="เบอร์โทรศัพท์ของคุณ"
-                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50"
+                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200 placeholder:text-gray-400"
                       />
                     </div>
                   </div>
@@ -181,7 +179,7 @@
                         <button
                           type="button"
                           @click="$refs.profileInput.click()"
-                          class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 flex items-center gap-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50 transition-colors"
+                          class="w-full px-4 py-2.5 rounded-xl border border-dashed border-gray-300 hover:border-[#c779d0] hover:bg-gray-50/50 transition-all duration-200 text-gray-600 flex items-center justify-center gap-2"
                         >
                           <i class="fa-regular fa-user text-[#c779d0]"></i>
                           <span class="truncate">{{ profileFileName || 'อัพโหลด' }}</span>
@@ -199,7 +197,7 @@
                         <button
                           type="button"
                           @click="$refs.educationInput.click()"
-                          class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 flex items-center gap-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50 transition-colors"
+                          class="w-full px-4 py-2.5 rounded-xl border border-dashed border-gray-300 hover:border-[#c779d0] hover:bg-gray-50/50 transition-all duration-200 text-gray-600 flex items-center justify-center gap-2"
                         >
                           <i class="fa-regular fa-file text-[#c779d0]"></i>
                           <span class="truncate">{{ educationFileName || 'อัพโหลด' }}</span>
@@ -218,7 +216,7 @@
                       <button
                         type="button"
                         @click="$refs.documentsInput.click()"
-                        class="w-full px-3 py-2 rounded-[15px] bg-gray-50 border border-gray-200 flex items-center gap-2 text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/50 transition-colors"
+                        class="w-full px-4 py-2.5 rounded-xl border border-dashed border-gray-300 hover:border-[#c779d0] hover:bg-gray-50/50 transition-all duration-200 text-gray-600 flex items-center justify-center gap-2"
                       >
                         <i class="fa-regular fa-file text-[#c779d0]"></i>
                         <span class="truncate">{{
@@ -234,7 +232,7 @@
                       />
                     </div>
                     <div>
-                      <label class="block text-sm text-[#3A3A49] mb-1">Skills</label>
+                      <label class="block text-sm text-[#3A3A49] mb-1">ทักษะความสามารถ</label>
                       <div class="bg-gray-50 p-2 rounded-[15px] border border-gray-200">
                         <div class="flex flex-wrap gap-1.5">
                           <label
@@ -262,30 +260,179 @@
                 </div>
               </div>
             </div>
-              <label class="flex items-center gap-3 justify-center">
+            <!-- Terms and Privacy Policy Section -->
+            <div class="text-sm text-[#3A3A49] text-center mt-4">
+              <label class="flex items-center gap-3 justify-center group cursor-pointer">
                 <input
                   type="checkbox"
                   v-model="form.acceptTerms"
-                  class="w-6 h-6 sm:w-5 sm:h-5 rounded text-purple-500"
+                  class="w-6 h-6 sm:w-5 sm:h-5 rounded border-gray-300 text-[#c779d0] focus:ring-[#c779d0] transition-all duration-200 cursor-pointer"
                 />
-                <span>
+                <span class="select-none">
                   ฉันยอมรับ
-                  <a href="#" class="text-[#CDE45F] hover:underline">ข้อกำหนดการใช้งาน</a> และ
-                  <a href="#" class="text-[#CDE45F] hover:underline">นโยบายความเป็นส่วนตัว</a>
+                  <button
+                    @click.prevent="showTermsModal = true"
+                    class="text-[#c779d0] hover:text-[#feac5e] transition-colors duration-200 hover:underline"
+                  >
+                    ข้อกำหนดการใช้งาน
+                  </button>
+                  และ
+                  <button
+                    @click.prevent="showPrivacyModal = true"
+                    class="text-[#c779d0] hover:text-[#feac5e] transition-colors duration-200 hover:underline"
+                  >
+                    นโยบายความเป็นส่วนตัว
+                  </button>
                 </span>
               </label>
-              <!-- เพิ่ม error message -->
-              <p v-if="showTermsError" class="text-red-500 text-sm mt-2">
+              <!-- Error Message -->
+              <p v-if="showTermsError" class="text-red-500 text-sm mt-2 animate-fade-in">
                 กรุณายอมรับข้อกำหนดการใช้งานและนโยบายความเป็นส่วนตัว
               </p>
             </div>
+
+            <!-- Terms Modal -->
+            <TransitionRoot appear :show="showTermsModal" as="template">
+              <Dialog as="div" @close="showTermsModal = false" class="relative z-50">
+                <TransitionChild
+                  enter="duration-300 ease-out"
+                  enter-from="opacity-0"
+                  enter-to="opacity-100"
+                  leave="duration-200 ease-in"
+                  leave-from="opacity-100"
+                  leave-to="opacity-0"
+                >
+                  <div class="fixed inset-0 bg-black/25 backdrop-blur-sm" />
+                </TransitionChild>
+
+                <div class="fixed inset-0 overflow-y-auto">
+                  <div class="flex min-h-full items-center justify-center p-4">
+                    <TransitionChild
+                      enter="duration-300 ease-out"
+                      enter-from="opacity-0 scale-95"
+                      enter-to="opacity-100 scale-100"
+                      leave="duration-200 ease-in"
+                      leave-from="opacity-100 scale-100"
+                      leave-to="opacity-0 scale-95"
+                    >
+                      <DialogPanel
+                        class="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all"
+                      >
+                        <DialogTitle as="h3" class="text-xl font-medium text-gray-900 mb-4">
+                          ข้อกำหนดการใช้งาน
+                        </DialogTitle>
+                        <div
+                          class="mt-4 text-sm text-gray-600 space-y-4 max-h-[60vh] overflow-y-auto"
+                        >
+                          <!-- เพิ่มเนื้อหาข้อกำหนดการใช้งานตรงนี้ -->
+                          <p>1. การยอมรับข้อกำหนด...</p>
+                          <p>2. การใช้งานระบบ...</p>
+                          <!-- เพิ่มเนื้อหาอื่นๆ -->
+                        </div>
+                        <div class="mt-6 flex justify-end">
+                          <button
+                            @click="showTermsModal = false"
+                            class="px-4 py-2 bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] text-white rounded-xl hover:shadow-lg transition-all duration-200"
+                          >
+                            ปิด
+                          </button>
+                        </div>
+                      </DialogPanel>
+                    </TransitionChild>
+                  </div>
+                </div>
+              </Dialog>
+            </TransitionRoot>
+
+            <!-- Privacy Policy Modal -->
+            <TransitionRoot appear :show="showPrivacyModal" as="template">
+              <Dialog as="div" @close="showPrivacyModal = false" class="relative z-50">
+                <TransitionChild
+                  enter="duration-300 ease-out"
+                  enter-from="opacity-0"
+                  enter-to="opacity-100"
+                  leave="duration-200 ease-in"
+                  leave-from="opacity-100"
+                  leave-to="opacity-0"
+                >
+                  <div class="fixed inset-0 bg-black/25 backdrop-blur-sm" />
+                </TransitionChild>
+
+                <div class="fixed inset-0 overflow-y-auto">
+                  <div class="flex min-h-full items-center justify-center p-4">
+                    <TransitionChild
+                      enter="duration-300 ease-out"
+                      enter-from="opacity-0 scale-95"
+                      enter-to="opacity-100 scale-100"
+                      leave="duration-200 ease-in"
+                      leave-from="opacity-100 scale-100"
+                      leave-to="opacity-0 scale-95"
+                    >
+                      <DialogPanel
+                        class="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all"
+                      >
+                        <DialogTitle as="h3" class="text-xl font-medium text-gray-900 mb-4">
+                          นโยบายความเป็นส่วนตัว
+                        </DialogTitle>
+                        <div
+                          class="mt-4 text-sm text-gray-600 space-y-4 max-h-[60vh] overflow-y-auto"
+                        >
+                          <!-- เนื้อหานโยบายความเป็นส่วนตัว -->
+                          <p>1. การเก็บรวบรวมข้อมูล</p>
+                          <p>เราเก็บรวบรวมข้อมูลส่วนบุคคลที่คุณให้กับเราโดยตรง เช่น:</p>
+                          <ul class="list-disc pl-6 space-y-2">
+                            <li>ชื่อ-นามสกุล</li>
+                            <li>ที่อยู่อีเมล</li>
+                            <li>หมายเลขโทรศัพท์</li>
+                            <li>ที่อยู่</li>
+                            <li>ข้อมูลทางการแพทย์</li>
+                          </ul>
+
+                          <p>2. วัตถุประสงค์ในการใช้ข้อมูล</p>
+                          <p>เราใช้ข้อมูลของคุณเพื่อ:</p>
+                          <ul class="list-disc pl-6 space-y-2">
+                            <li>ให้บริการทางการแพทย์</li>
+                            <li>ติดต่อสื่อสารกับคุณ</li>
+                            <li>ปรับปรุงการให้บริการ</li>
+                            <li>วิเคราะห์และพัฒนาระบบ</li>
+                          </ul>
+
+                          <p>3. การรักษาความปลอดภัย</p>
+                          <p>
+                            เรามีมาตรการรักษาความปลอดภัยที่เหมาะสมเพื่อป้องกันการสูญหาย การเข้าถึง
+                            การใช้ หรือการเปิดเผยข้อมูลส่วนบุคคลโดยไม่ได้รับอนุญาต
+                          </p>
+
+                          <p>4. สิทธิของคุณ</p>
+                          <p>คุณมีสิทธิที่จะ:</p>
+                          <ul class="list-disc pl-6 space-y-2">
+                            <li>เข้าถึงข้อมูลส่วนบุคคลของคุณ</li>
+                            <li>แก้ไขข้อมูลที่ไม่ถูกต้อง</li>
+                            <li>ลบข้อมูลของคุณ</li>
+                            <li>คัดค้านการประมวลผลข้อมูล</li>
+                          </ul>
+                        </div>
+                        <div class="mt-6 flex justify-end">
+                          <button
+                            @click="showPrivacyModal = false"
+                            class="px-4 py-2 bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] text-white rounded-xl hover:shadow-lg transition-all duration-200"
+                          >
+                            ปิด
+                          </button>
+                        </div>
+                      </DialogPanel>
+                    </TransitionChild>
+                  </div>
+                </div>
+              </Dialog>
+            </TransitionRoot>
             <!-- ปุ่ม Submit -->
             <div class="text-center pb-4">
               <button
                 type="submit"
-                class="px-8 py-3 bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] text-white rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 w-full sm:w-auto"
+                class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] text-white rounded-xl hover:shadow-lg hover:shadow-[#c779d0]/20 transition-all duration-300 transform hover:-translate-y-0.5"
               >
-                <span>สมัครสมาชิก</span>
+                สมัครสมาชิก
               </button>
 
               <p class="mt-4 text-gray-600">
@@ -301,15 +448,37 @@
     </div>
 
     <!-- Footer -->
-    <footer class="bg-white/80 backdrop-blur-sm py-6 mt-auto">
-      <div class="max-w-5xl mx-auto px-4 lg:px-8 flex flex-wrap justify-between text-gray-600">
-        <div class="text-sm">
-          ระบบจัดการข้อมูลบุคลากร <span class="text-[#c779d0]">Healthcare</span> &
-          <span class="text-[#c779d0]">Medical</span> Services
+    <footer class="bg-white/80 backdrop-blur-sm py-4 sm:py-6 mt-auto">
+      <div class="max-w-5xl mx-auto px-4 lg:px-8">
+        <!-- Desktop & Tablet Layout -->
+        <div class="hidden sm:flex justify-between items-center text-gray-600">
+          <div class="text-sm">
+            ระบบจัดการข้อมูลบุคลากร <span class="text-[#c779d0]">Healthcare</span> &
+            <span class="text-[#c779d0]">Medical</span> Services
+          </div>
+          <div class="flex gap-8 text-sm">
+            <span class="hover:text-[#c779d0] transition-colors cursor-pointer"
+              >นโยบายความเป็นส่วนตัว</span
+            >
+            <span class="hover:text-[#c779d0] transition-colors cursor-pointer">ติดต่อเรา</span>
+          </div>
         </div>
-        <div class="flex gap-8 text-sm">
-          <span>นโยบายความเป็นส่วนตัว</span>
-          <span>ติดต่อเรา</span>
+
+        <!-- Mobile Layout -->
+        <div class="sm:hidden flex flex-col items-center space-y-3 text-gray-600">
+          <div class="text-sm text-center">
+            ระบบจัดการข้อมูลบุคลากร
+            <div class="mt-1">
+              <span class="text-[#c779d0]">Healthcare</span> &
+              <span class="text-[#c779d0]">Medical</span> Services
+            </div>
+          </div>
+          <div class="flex gap-4 text-sm">
+            <span class="hover:text-[#c779d0] transition-colors cursor-pointer"
+              >นโยบายความเป็นส่วนตัว</span
+            >
+            <span class="hover:text-[#c779d0] transition-colors cursor-pointer">ติดต่อเรา</span>
+          </div>
         </div>
       </div>
     </footer>
@@ -319,10 +488,20 @@
 <script>
 import axios from 'axios'
 import Swal from 'sweetalert2'
+import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogTitle } from '@headlessui/vue'
 
 const baseURL = import.meta.env.VITE_API_URL
 
 export default {
+  name: 'SignUpView',
+  components: {
+    TransitionRoot,
+    TransitionChild,
+    Dialog,
+    DialogPanel,
+    DialogTitle
+  },
+
   data() {
     return {
       form: {
@@ -367,7 +546,9 @@ export default {
       ],
       loading: false,
       passwordsMatch: true,
-      showTermsError: null
+      showTermsModal: false,
+      showPrivacyModal: false,
+      showTermsError: false
     }
   },
 
@@ -391,9 +572,32 @@ export default {
         lastname: 'นามสกุล',
         nationalId: 'เลขบัตรประชาชน',
         phone: 'เบอร์โทรศัพท์',
-        birthdate: 'วันเกิด'
+        birthdate: 'วันเกิด',
+        skills: 'ทักษะความสามารถ'
       }
-
+      for (const [field, label] of Object.entries(requiredFields)) {
+        if (field === 'skills') {
+          if (!this.form[field] || this.form[field].length === 0) {
+            Swal.fire({
+              icon: 'warning',
+              title: 'กรุณาเลือกทักษะ',
+              text: 'กรุณาเลือกทักษะอย่างน้อย 1 อย่าง',
+              timer: 1500,
+              showConfirmButton: false
+            })
+            return false
+          }
+        } else if (!this.form[field]) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'กรุณากรอกข้อมูลให้ครบ',
+            text: `กรุณากรอก${label}`,
+            timer: 1500,
+            showConfirmButton: false
+          })
+          return false
+        }
+      }
       for (const [field, label] of Object.entries(requiredFields)) {
         if (!this.form[field]) {
           Swal.fire({
@@ -548,6 +752,30 @@ export default {
           text: error.response?.data?.message || 'ไม่สามารถลงทะเบียนได้ กรุณาลองใหม่อีกครั้ง'
         })
       }
+    },
+    validateTerms() {
+      if (!this.form.acceptTerms) {
+        this.showTermsError = true
+        return false
+      }
+      this.showTermsError = false
+      return true
+    },
+
+    openTermsModal() {
+      this.showTermsModal = true
+    },
+
+    closeTermsModal() {
+      this.showTermsModal = false
+    },
+
+    openPrivacyModal() {
+      this.showPrivacyModal = true
+    },
+
+    closePrivacyModal() {
+      this.showPrivacyModal = false
     }
   }
 }
@@ -585,20 +813,64 @@ export default {
   }
 }
 
-.date-input::-webkit-calendar-picker-indicator {
-  opacity: 0;
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-}
-.date-input::before {
-  content: attr(placeholder);
-  width: 100%;
-  color: #9ca3af;
+/* ปรับ animation ให้นุ่มนวลขึ้น */
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
 }
 
-.date-input:focus::before,
-.date-input:valid::before {
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ซ่อนไอคอน calendar ของ input type date */
+input[type='date']::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+}
+
+/* สร้าง custom calendar icon */
+.date-input-container {
+  position: relative;
+}
+
+.date-input-container::after {
+  content: '\f133'; /* Font Awesome calendar icon */
+  font-family: 'Font Awesome 5 Free';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #9ca3af; /* gray-400 */
+}
+
+/* ซ่อน icon เมื่อมีการกรอกข้อมูล */
+input[type='date']:not(:placeholder-shown) + .date-input-container::after {
   display: none;
 }
 </style>

@@ -79,7 +79,7 @@
 }
 .dropdown-menu {
   z-index: var(--z-dropdown);
-  position: absolute; /* ใช้ absolute เพื่อกำหนดตำแหน่งสัมพันธ์กับ parent */
+  position: absolute;
   background: white;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);

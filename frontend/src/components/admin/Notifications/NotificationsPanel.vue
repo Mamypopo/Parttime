@@ -41,13 +41,13 @@
           style="width: 320px; max-height: 480px; overflow-y: auto"
         >
           <div
-            class="flex justify-between items-center px-4 py-2 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4a9490] dark:to-[#6667aa] border-b"
+            class="flex justify-between items-center px-4 py-2 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600"
           >
-            <h3 class="font-medium text-[#EA6B6B]">การแจ้งเตือน</h3>
+            <h3 class="font-medium text-white">การแจ้งเตือน</h3>
             <button
               v-if="notifications.length > 0"
               @click="markAllAsRead"
-              class="text-sm text-[#6ED7D1] hover:text-[#4bb3af] dark:text-[#A8E6E2] dark:hover:text-[#6ED7D1] transition-colors duration-200"
+              class="text-sm text-white/80 hover:text-white transition-colors duration-200"
             >
               <span class="flex items-center gap-2">
                 <i class="fas fa-check-double"></i>

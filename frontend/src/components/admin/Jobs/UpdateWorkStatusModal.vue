@@ -14,28 +14,33 @@
       </TransitionChild>
 
       <div class="fixed inset-0 overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4">
+        <div class="flex min-h-full items-center justify-center p-2 md:p-4">
           <DialogPanel
             class="w-full max-w-5xl transform bg-white dark:bg-gray-800 rounded-2xl shadow-xl"
           >
             <!-- Header -->
             <div
-              class="bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA] px-6 py-4 rounded-t-2xl"
+              class="bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 px-4 md:px-6 py-3 md:py-4 rounded-t-2xl"
             >
               <div class="flex justify-between items-center">
-                <DialogTitle class="text-xl font-medium text-white">
+                <DialogTitle class="text-lg md:text-xl font-medium text-white">
                   ประเมินผลการทำงาน
-                  <p class="text-sm text-white/80 mt-1">{{ job?.title }}</p>
+                  <p class="text-xs md:text-sm text-white/80 mt-1">{{ job?.title }}</p>
                 </DialogTitle>
-                <button @click="$emit('close')" class="text-white/70 hover:text-white">
+                <button
+                  @click="$emit('close')"
+                  class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 dark:bg-gray-700/30 dark:hover:bg-gray-700/50 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
+                >
                   <i class="fas fa-times text-xl"></i>
                 </button>
               </div>
             </div>
 
-            <div class="flex h-[calc(100vh-200px)]">
+            <div class="flex flex-col md:flex-row h-[calc(100vh-200px)]">
               <!-- Left Sidebar - Position Tabs & User List -->
-              <div class="w-1/3 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+              <div
+                class="w-full md:w-1/3 h-[250px] md:h-auto border-b md:border-r border-gray-200 dark:border-gray-700 flex flex-col"
+              >
                 <!-- Position Tabs -->
                 <div class="border-b border-gray-200 dark:border-gray-700">
                   <div class="px-2 flex overflow-x-auto">
@@ -43,7 +48,7 @@
                       v-for="position in job.JobPositions"
                       :key="position.id"
                       @click="activeTab = position.id"
-                      class="py-3 px-4 inline-flex items-center whitespace-nowrap"
+                      class="py-2 md:py-3 px-3 md:px-4 inline-flex items-center whitespace-nowrap text-sm md:text-base"
                       :class="[
                         activeTab === position.id
                           ? 'text-[#6ED7D1] dark:text-[#4B9592] border-b-2 border-[#6ED7D1] dark:border-[#4B9592]'
@@ -72,17 +77,17 @@
                       v-for="participant in getPendingParticipants(position)"
                       :key="participant.id"
                       @click="selectParticipant(participant)"
-                      class="p-3 rounded-lg mb-2 cursor-pointer transition-all duration-200"
+                      class="p-2 md:p-3 rounded-lg mb-2 cursor-pointer transition-all duration-200"
                       :class="[
                         selectedParticipant?.id === participant.id
                           ? 'bg-[#E7F6F6] dark:bg-[#4B9592]/30 border-[#6ED7D1] dark:border-[#4B9592]'
                           : 'hover:bg-gray-50 dark:hover:bg-gray-700 border-transparent'
                       ]"
                     >
-                      <div class="flex items-center space-x-3">
+                      <div class="flex items-center space-x-2 md:space-x-3">
                         <img
                           :src="getProfileImage(participant.user.profile_image)"
-                          class="w-12 h-12 rounded-full object-cover border-2"
+                          class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2"
                           :class="[
                             selectedParticipant?.id === participant.id
                               ? 'border-[#6ED7D1] dark:border-[#4B9592]'
@@ -91,11 +96,13 @@
                           alt="Profile"
                         />
                         <div>
-                          <h4 class="font-medium text-gray-900 dark:text-gray-100">
+                          <h4
+                            class="font-medium text-sm md:text-base text-gray-900 dark:text-gray-100"
+                          >
                             {{ participant.user?.first_name }}
                             {{ participant.user?.last_name }}
                           </h4>
-                          <p class="text-sm text-gray-500 dark:text-gray-400">
+                          <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">
                             {{ participant.user?.phone_number }}
                           </p>
                         </div>
@@ -105,27 +112,33 @@
                     <!-- Empty State -->
                     <div
                       v-if="getPendingParticipants(position).length === 0"
-                      class="text-center py-8"
+                      class="text-center py-6 md:py-8"
                     >
-                      <p class="text-gray-500 dark:text-gray-400">ไม่มีผู้ใช้ที่รอการประเมิน</p>
+                      <p class="text-sm text-gray-500 dark:text-gray-400">
+                        ไม่มีผู้ใช้ที่รอการประเมิน
+                      </p>
                     </div>
                   </div>
                 </div>
               </div>
 
               <!-- Right Content - Evaluation Form -->
-              <div class="w-2/3 p-6 overflow-y-auto bg-gray-50 dark:bg-gray-900">
-                <div v-if="selectedParticipant" class="space-y-6">
+              <div
+                class="w-full md:w-2/3 p-3 md:p-6 rounded-xl overflow-y-auto bg-gray-50 dark:bg-gray-900"
+              >
+                <div v-if="selectedParticipant" class="space-y-4 md:space-y-6">
                   <!-- Rating Categories -->
                   <div
-                    class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
+                    class="bg-white dark:bg-gray-800 rounded-xl p-4 md:p-6 border border-gray-200 dark:border-gray-700"
                   >
                     <h3
-                      class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center justify-between mb-2"
+                      class="text-base md:text-lg font-medium text-gray-900 dark:text-gray-100 flex flex-col md:flex-row md:items-center md:justify-between mb-2"
                     >
                       การประเมินผลการทำงาน
-                      <!-- Move Rating Legend Here -->
-                      <div class="mt-1 text-xs text-gray-500 flex items-center gap-2">
+                      <!-- Rating Legend -->
+                      <div
+                        class="mt-2 md:mt-1 text-xs text-gray-500 flex flex-col md:flex-row items-start md:items-center gap-2"
+                      >
                         <span class="flex items-center">
                           <i class="fas fa-star text-yellow-400 mr-1"></i>
                           <i class="fas fa-star text-yellow-400 mr-1"></i>
@@ -138,11 +151,12 @@
                       </div>
                     </h3>
 
-                    <div class="space-y-6">
+                    <!-- Rating Categories -->
+                    <div class="space-y-4 md:space-y-6">
                       <div
                         v-for="(category, key) in ratingCategories"
                         :key="key"
-                        class="border-b dark:border-gray-700 pb-4 last:border-0"
+                        class="border-b dark:border-gray-700 pb-3 md:pb-4 last:border-0"
                       >
                         <div class="flex justify-between items-center mb-2">
                           <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -158,13 +172,12 @@
                           </span>
                         </div>
 
-                        <!-- Star Rating สำหรับ 2 คะแนน -->
                         <div class="flex items-center gap-2">
                           <button
                             v-for="n in 2"
                             :key="n"
                             @click="setRating(selectedParticipant?.id, key, n)"
-                            class="text-2xl focus:outline-none transition-all duration-200 transform hover:scale-110"
+                            class="text-xl md:text-2xl focus:outline-none transition-all duration-200 transform hover:scale-110"
                           >
                             <i
                               class="fas fa-star"
@@ -175,7 +188,6 @@
                               ]"
                             ></i>
                           </button>
-                          <!-- ปุ่มรีเซ็ตคะแนน -->
                           <button
                             v-if="getRatingScore(selectedParticipant?.id, key) > 0"
                             @click="setRating(selectedParticipant?.id, key, 0)"
@@ -185,25 +197,28 @@
                           </button>
                         </div>
 
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        <p class="mt-1 text-xs md:text-sm text-gray-500 dark:text-gray-400">
                           {{ category.description }}
                         </p>
                       </div>
                     </div>
 
                     <!-- สรุปคะแนน -->
-                    <div class="mb-6">
-                      <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+                    <div class="mb-4 md:mb-6">
+                      <h4
+                        class="text-base md:text-lg font-medium text-gray-900 dark:text-gray-100 mb-3 md:mb-4"
+                      >
                         สรุปการประเมิน
                       </h4>
                       <div
-                        class="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                        class="flex justify-between items-center p-3 md:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
                       >
-                        <span class="font-medium text-gray-700 dark:text-gray-300"
+                        <span
+                          class="text-sm md:text-base font-medium text-gray-700 dark:text-gray-300"
                           >คะแนนรวมทั้งหมด</span
                         >
                         <span
-                          class="text-2xl font-bold"
+                          class="text-xl md:text-2xl font-bold"
                           :class="getTotalScoreColor(getTotalScore(selectedParticipant?.id))"
                         >
                           {{ getTotalScore(selectedParticipant?.id) }}/10
@@ -212,7 +227,7 @@
                     </div>
 
                     <!-- Comment Field -->
-                    <div class="mb-6">
+                    <div class="mb-4 md:mb-6">
                       <label
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                       >
@@ -221,27 +236,25 @@
                       <textarea
                         v-model="comments[selectedParticipant.id]"
                         rows="3"
-                        class="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#6ED7D1] dark:focus:ring-[#4B9592] focus:border-transparent dark:bg-gray-800"
+                        class="w-full px-3 md:px-4 py-2 text-sm md:text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#6ED7D1] dark:focus:ring-[#4B9592] focus:border-transparent dark:bg-gray-800"
                         placeholder="กรุณาใส่ความคิดเห็น..."
                       ></textarea>
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex gap-4">
-                      <!-- ปุ่มไม่ผ่านงาน -->
+                    <div class="flex flex-col md:flex-row gap-3 md:gap-4">
                       <button
                         @click="confirmReject"
-                        class="flex items-center justify-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200"
+                        class="flex items-center justify-center px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200 text-sm md:text-base"
                       >
                         <i class="fas fa-ban mr-2"></i>
                         ไม่ผ่านงาน
                       </button>
 
-                      <!-- ปุ่มบันทึกการประเมิน -->
                       <button
                         @click="submitEvaluation"
                         :disabled="!isFormValid(selectedParticipant?.id)"
-                        class="flex-1 px-4 py-2 bg-[#6ED7D1] dark:bg-[#4B9592] text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                        class="flex-1 px-4 py-2 bg-[#6ED7D1] dark:bg-[#4B9592] text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm md:text-base"
                       >
                         <i class="fas fa-check mr-2"></i>
                         บันทึกการประเมิน
@@ -249,6 +262,7 @@
                     </div>
                   </div>
                 </div>
+
                 <!-- No Selection State -->
                 <div
                   v-else
@@ -256,9 +270,9 @@
                 >
                   <div>
                     <i
-                      class="fas fa-user-check text-4xl mb-3 text-[#EABF71] dark:text-[#B38B4A]"
+                      class="fas fa-user-check text-3xl md:text-4xl mb-3 text-[#EABF71] dark:text-[#B38B4A]"
                     ></i>
-                    <p>กรุณาเลือกผู้ใช้ที่ต้องการประเมิน</p>
+                    <p class="text-sm md:text-base">กรุณาเลือกผู้ใช้ที่ต้องการประเมิน</p>
                   </div>
                 </div>
               </div>
@@ -335,6 +349,29 @@ export default {
           (position) => this.getPendingParticipants(position).length > 0
         ) || []
       )
+    },
+    // กรองเฉพาะผู้ที่ยังไม่ได้รับการประเมิน
+    eligibleParticipants() {
+      if (!this.job?.JobPositions) return []
+
+      const participants = []
+      this.job.JobPositions.forEach((position) => {
+        position.JobParticipation?.forEach((participation) => {
+          // เช็คว่ายังไม่มีประวัติการประเมิน
+          if (
+            participation.status === 'approved' &&
+            (!participation.workHistories || participation.workHistories.length === 0)
+          ) {
+            participants.push({
+              ...participation,
+              position_name: position.position_name,
+              wage: position.wage
+            })
+          }
+        })
+      })
+
+      return participants
     }
   },
 
@@ -523,7 +560,7 @@ export default {
 <style scoped>
 /* Light mode scrollbar */
 .overflow-y-auto::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 .overflow-y-auto::-webkit-scrollbar-track {
@@ -551,6 +588,31 @@ export default {
 
   .overflow-y-auto::-webkit-scrollbar-thumb:hover {
     background: #3d7a78;
+  }
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .modal {
+    padding: 0.5rem;
+  }
+
+  .overflow-y-auto::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  .dialog-panel {
+    margin: 0;
+    max-height: calc(100vh - 2rem);
+  }
+
+  .rating-container {
+    flex-direction: column;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }
 </style>

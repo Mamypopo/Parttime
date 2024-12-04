@@ -8,7 +8,7 @@
 
       <select
         v-model="selectedStatus"
-        class="px-4 py-2 bg-white text-gray-700 rounded-lg shadow-sm focus:ring focus:ring-indigo-200"
+        class="px-4 py-2 bg-white text-gray-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200"
         @change="filterJobs"
       >
         <option value="all">ทั้งหมด</option>

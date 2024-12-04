@@ -39,7 +39,7 @@
             <div class="p-4 space-y-4">
               <!-- Edit Profile -->
               <router-link
-                to="/user/profile/edit"
+                to="/user/profile-view"
                 class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
                 @click="$emit('close')"
               >

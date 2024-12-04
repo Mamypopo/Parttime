@@ -157,7 +157,7 @@
                   <div class="text-sm">
                     จ่ายจริง:
                     <span class="font-medium text-purple-600 dark:text-purple-400">
-                      {{ jobStore.calculateTotalWage(job) }} บาท
+                      {{ jobStore.calculateActualCost(job) }} บาท
                     </span>
                   </div>
                 </div>
@@ -257,7 +257,7 @@
               <div class="text-sm">
                 จ่ายจริง:
                 <span class="font-medium text-purple-600 dark:text-purple-400">
-                  {{ jobStore.calculateTotalWage(job) }} บาท
+                  {{ jobStore.calculateActualCost(job) }} บาท
                 </span>
               </div>
             </div>
@@ -402,14 +402,9 @@ export default {
       return (job) => {
         return this.jobStore.calculateEstimatedCost(job)
       }
-    },
-
-    calculateTotalWage() {
-      return (job) => {
-        return this.jobStore.calculateTotalWage(job)
-      }
     }
   },
+
   async created() {
     try {
       this.jobStore.resetPagination()
@@ -419,6 +414,7 @@ export default {
       console.error('Error in created hook:', error)
     }
   },
+
   methods: {
     async fetchJobs() {
       try {
@@ -451,7 +447,7 @@ export default {
         this.jobStore.fetchJobs()
       }
     },
-    // ใช้ utility functions จาก store
+
     formatDate(date) {
       return this.jobStore.formatDate(date)
     },
@@ -468,7 +464,7 @@ export default {
       this.isModalOpen = false
       this.selectedJob = null
     },
-    // เพิ่มฟังก์ชันสำหรับแสดงสถานะ
+    // ฟังก์ชันสำหรับแสดงสถานะ
     getJobStatus(job) {
       const today = new Date()
       today.setHours(0, 0, 0, 0)

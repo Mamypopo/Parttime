@@ -1,116 +1,272 @@
 <template>
-  <div class="p-4 md:p-6 space-y-6">
+  <div class="p-4 space-y-6">
     <!-- Profile Header -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-      <div class="relative h-32 bg-gradient-to-r from-blue-500 to-purple-500">
-        <div class="absolute -bottom-12 left-6">
-          <div
-            class="w-20 h-20 rounded-full border-4 border-white dark:border-gray-800 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
-            @click="openImagePreview"
-          >
-            <img
-              :src="user.profile_image || '/default-avatar.png'"
-              class="w-full h-full object-cover"
-              alt="Profile"
-            />
+    <div
+      class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-all duration-300"
+    >
+      <div class="relative h-40 md:h-48">
+        <!-- Background Cover -->
+        <div
+          class="absolute inset-0 bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] dark:from-[#feac5e]/80 dark:via-[#c779d0]/80 dark:to-[#4bc0c8]/80"
+        >
+          <div class="absolute inset-0 bg-black/10 dark:bg-black/20"></div>
+        </div>
+
+        <!-- Profile Image -->
+        <div class="absolute -bottom-16 left-6 md:left-8">
+          <div class="group relative">
+            <div
+              class="w-24 h-24 md:w-28 md:h-28 rounded-2xl border-4 border-white dark:border-gray-800 overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
+            >
+              <img
+                :src="user.profile_image || '/default-avatar.png'"
+                class="w-full h-full object-cover"
+                alt="Profile"
+                @click="openImagePreview"
+              />
+            </div>
+            <div
+              class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-2xl"
+              @click="openImagePreview"
+            >
+              <i class="fas fa-camera text-white text-xl"></i>
+            </div>
           </div>
         </div>
       </div>
-      <div class="pt-16 pb-6 px-6">
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-          <div>
-            <h1 class="text-xl font-semibold text-gray-800 dark:text-white">
+
+      <!-- Profile Info -->
+      <div class="pt-20 md:pt-8 pb-6 px-6 md:px-8 md:ml-44">
+        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+          <!-- ข้อมูลส่วนตัว -->
+          <div class="text-center md:text-left space-y-2">
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">
               {{ user.fullName }}
             </h1>
-            <p class="text-gray-500 dark:text-gray-400">{{ user.email }}</p>
-            <div class="mt-2">
+            <p
+              class="text-gray-500 dark:text-gray-400 flex items-center justify-center md:justify-start gap-2"
+            >
+              <i class="fas fa-envelope text-sm"></i>
+              {{ user.email }}
+            </p>
+            <div class="flex items-center justify-center md:justify-start gap-2">
               <span
-                class="inline-flex items-center px-3 py-1 text-sm rounded-full"
+                class="inline-flex items-center px-3 py-1 text-sm rounded-full transition-colors duration-200"
                 :class="getStatusClass"
               >
+                <i class="fas fa-check-circle mr-1.5" v-if="user.approved"></i>
+                <i class="fas fa-clock mr-1.5" v-else></i>
                 {{ getStatusText }}
               </span>
             </div>
           </div>
+
+          <!-- Edit Button -->
           <button
             @click="openEditModal"
-            class="px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 transition-colors duration-200"
+            class="self-center md:self-start px-4 py-2 bg-violet-500/10 hover:bg-violet-500/20 dark:bg-violet-400/10 dark:hover:bg-violet-400/20 text-violet-600 dark:text-violet-400 rounded-xl flex items-center gap-2 backdrop-blur-sm transition-all duration-300 shadow-lg hover:shadow-xl"
           >
             <i class="fas fa-edit"></i>
-            <span class="hidden sm:inline">แก้ไขข้อมูล</span>
+            <span>แก้ไขข้อมูล</span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- ข้อมูลพื้นฐาน -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-      <div class="p-6">
-        <h2 class="text-lg font-medium mb-6 text-gray-800 dark:text-white">ข้อมูลพื้นฐาน</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div class="space-y-1">
-            <p class="text-sm text-gray-500 dark:text-gray-400">ชื่อ-นามสกุล</p>
-            <p class="text-gray-800 dark:text-white">{{ user.fullName || '-' }}</p>
-          </div>
-          <div class="space-y-1">
-            <p class="text-sm text-gray-500 dark:text-gray-400">อีเมล</p>
-            <p class="text-gray-800 dark:text-white">{{ user.email || '-' }}</p>
-          </div>
-          <div class="space-y-1">
-            <p class="text-sm text-gray-500 dark:text-gray-400">เบอร์โทรศัพท์</p>
-            <p class="text-gray-800 dark:text-white">{{ formatPhoneNumber(user.phone_number) }}</p>
-          </div>
-          <div class="space-y-1">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Line ID</p>
-            <p class="text-gray-800 dark:text-white">{{ user.line_id || '-' }}</p>
-          </div>
-          <div class="space-y-1">
-            <p class="text-sm text-gray-500 dark:text-gray-400">เพศ</p>
-            <p class="text-gray-800 dark:text-white">{{ formatGender(user.gender) }}</p>
-          </div>
-          <div class="space-y-1">
-            <p class="text-sm text-gray-500 dark:text-gray-400">วันเกิด</p>
-            <p class="text-gray-800 dark:text-white">{{ formatDate(user.birth_date) }}</p>
-          </div>
-        </div>
+    <!-- Skills Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+      <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white flex items-center gap-2">
+        <i class="fas fa-tools text-violet-500"></i>
+        ทักษะและความสามารถ
+      </h2>
+      <div class="flex flex-wrap gap-2">
+        <template v-if="user.skills && user.skills.length > 0">
+          <span
+            v-for="skill in userSkills"
+            :key="skill"
+            class="px-4 py-2 bg-purple-50 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300 rounded-xl text-sm font-medium"
+          >
+            {{ skill }}
+          </span>
+        </template>
+        <span v-else class="text-gray-500 dark:text-gray-400">ยังไม่ได้เพิ่มทักษะ</span>
       </div>
     </div>
 
-    <!-- เอกสาร -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-      <div class="p-6">
-        <h2 class="text-lg font-medium mb-6 text-gray-800 dark:text-white">เอกสาร</h2>
+    <!-- Info Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- ข้อมูลพื้นฐาน -->
+      <div
+        class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl"
+      >
+        <h2
+          class="text-lg font-semibold mb-6 text-gray-800 dark:text-white flex items-center gap-2"
+        >
+          <i class="fas fa-user-circle text-violet-500 dark:text-violet-400"></i>
+          ข้อมูลพื้นฐาน
+        </h2>
+
+        <!-- Grid Layout สำหรับข้อมูล -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
+          <!-- ข้อมูลส่วนตัว -->
+          <div class="space-y-6">
+            <!-- ชื่อ-นามสกุล -->
+            <div
+              class="flex items-center gap-3 p-3 rounded-xl bg-violet-50/50 dark:bg-violet-900/10"
+            >
+              <div
+                class="w-10 h-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center"
+              >
+                <i class="fas fa-user text-violet-500 dark:text-violet-400 text-lg"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm text-gray-500 dark:text-gray-400">ชื่อ-นามสกุล</p>
+                <p class="text-gray-800 dark:text-white font-medium">{{ user.fullName || '-' }}</p>
+              </div>
+            </div>
+
+            <!-- เพศ -->
+            <div
+              class="flex items-center gap-3 p-3 rounded-xl bg-violet-50/50 dark:bg-violet-900/10"
+            >
+              <div
+                class="w-10 h-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center"
+              >
+                <i class="fas fa-venus-mars text-violet-500 dark:text-violet-400 text-lg"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm text-gray-500 dark:text-gray-400">เพศ</p>
+                <p class="text-gray-800 dark:text-white font-medium">
+                  {{ formatGender(user.gender) }}
+                </p>
+              </div>
+            </div>
+
+            <!-- อายุ -->
+            <div
+              class="flex items-center gap-3 p-3 rounded-xl bg-violet-50/50 dark:bg-violet-900/10"
+            >
+              <div
+                class="w-10 h-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center"
+              >
+                <i class="fas fa-birthday-cake text-violet-500 dark:text-violet-400 text-lg"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm text-gray-500 dark:text-gray-400">อายุ</p>
+                <p class="text-gray-800 dark:text-white font-medium">
+                  {{ user.age ? `${user.age} ปี` : '-' }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ข้อมูลการติดต่อ -->
+          <div class="space-y-6">
+            <!-- เบอร์โทรศัพท์ -->
+            <div
+              class="flex items-center gap-3 p-3 rounded-xl bg-violet-50/50 dark:bg-violet-900/10"
+            >
+              <div
+                class="w-10 h-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center"
+              >
+                <i class="fas fa-phone text-violet-500 dark:text-violet-400 text-lg"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm text-gray-500 dark:text-gray-400">เบอร์โทรศัพท์</p>
+                <p class="text-gray-800 dark:text-white font-medium">
+                  {{ formatPhoneNumber(user.phone_number) }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Line ID -->
+            <div
+              class="flex items-center gap-3 p-3 rounded-xl bg-violet-50/50 dark:bg-violet-900/10"
+            >
+              <div
+                class="w-10 h-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center"
+              >
+                <i class="fab fa-line text-violet-500 dark:text-violet-400 text-lg"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Line ID</p>
+                <p class="text-gray-800 dark:text-white font-medium">{{ user.line_id || '-' }}</p>
+              </div>
+            </div>
+
+            <!-- วันเกิด -->
+            <div
+              class="flex items-center gap-3 p-3 rounded-xl bg-violet-50/50 dark:bg-violet-900/10"
+            >
+              <div
+                class="w-10 h-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center"
+              >
+                <i class="fas fa-calendar text-violet-500 dark:text-violet-400 text-lg"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm text-gray-500 dark:text-gray-400">วันเกิด</p>
+                <p class="text-gray-800 dark:text-white font-medium">
+                  {{ formatDate(user.birth_date) }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- เอกสาร -->
+      <div
+        class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl"
+      >
+        <h2
+          class="text-lg font-semibold mb-6 text-gray-800 dark:text-white flex items-center gap-2"
+        >
+          <i class="fas fa-file-alt text-violet-500 dark:text-violet-400"></i>
+          เอกสาร
+        </h2>
         <div class="space-y-6">
           <!-- วุฒิการศึกษา -->
-          <div>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">วุฒิการศึกษา</p>
-            <div v-if="getDocumentUrl(user.education_certificate, 'certificate')">
+          <div class="flex items-start gap-3">
+            <div
+              class="w-8 h-8 rounded-lg bg-violet-50 dark:bg-violet-900/30 flex items-center justify-center"
+            >
+              <i class="fas fa-graduation-cap text-violet-500 dark:text-violet-400"></i>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">วุฒิการศึกษา</p>
               <a
+                v-if="getDocumentUrl(user.education_certificate, 'certificate')"
                 :href="getDocumentUrl(user.education_certificate, 'certificate')"
                 target="_blank"
-                class="inline-flex items-center text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
+                class="inline-flex items-center gap-2 text-violet-500 hover:text-violet-600 dark:text-violet-400 dark:hover:text-violet-300 transition-colors duration-200"
               >
-                <i class="fas fa-file-alt mr-2"></i>
-                ดูไฟล์วุฒิการศึกษา
+                <i class="fas fa-external-link-alt"></i>
+                <span>ดูเอกสาร</span>
               </a>
+              <p v-else class="text-gray-500 dark:text-gray-400">ยังไม่ได้อัพโหลดเอกสาร</p>
             </div>
-            <p v-else class="text-gray-500 dark:text-gray-400">ยังไม่ได้อัพโหลดวุฒิการศึกษา</p>
           </div>
 
           <!-- เอกสารอื่นๆ -->
-          <div>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">เอกสารอื่นๆ</p>
-            <div v-if="getDocumentUrl(user.documents, 'documents')">
+          <div class="flex items-start gap-3">
+            <div
+              class="w-8 h-8 rounded-lg bg-violet-50 dark:bg-violet-900/30 flex items-center justify-center"
+            >
+              <i class="fas fa-file-alt text-violet-500 dark:text-violet-400"></i>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">เอกสารอื่นๆ</p>
               <a
+                v-if="getDocumentUrl(user.documents, 'documents')"
                 :href="getDocumentUrl(user.documents, 'documents')"
                 target="_blank"
-                class="inline-flex items-center text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
+                class="inline-flex items-center gap-2 text-violet-500 hover:text-violet-600 dark:text-violet-400 dark:hover:text-violet-300 transition-colors duration-200"
               >
-                <i class="fas fa-file-alt mr-2"></i>
-                ดูไฟล์เอกสาร
+                <i class="fas fa-external-link-alt"></i>
+                <span>ดูเอกสาร</span>
               </a>
+              <p v-else class="text-gray-500 dark:text-gray-400">ยังไม่ได้อัพโหลดเอกสาร</p>
             </div>
-            <p v-else class="text-gray-500 dark:text-gray-400">ยังไม่ได้อัพโหลดเอกสาร</p>
           </div>
         </div>
       </div>
@@ -211,6 +367,15 @@ export default {
     user() {
       return this.userStore.getUser
     },
+    userSkills() {
+      const skills = this.userStore.user?.skills
+      if (!skills) return []
+      const skillsArray =
+        typeof skills === 'string' ? JSON.parse(skills.replace(/'/g, '"')) : skills
+
+      return skillsArray.map((skill) => skill.toString().replace(/[[\]"]+/g, ''))
+    },
+
     getStatusClass() {
       return {
         'bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400': this.user.approved,

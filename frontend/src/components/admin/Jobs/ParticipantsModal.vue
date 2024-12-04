@@ -19,7 +19,7 @@
           >
             <!-- Header -->
             <div
-              class="bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA] p-4 md:p-6 rounded-t-2xl"
+              class="bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 p-4 md:p-6 rounded-t-2xl"
             >
               <div class="flex justify-between items-center">
                 <div>
@@ -36,7 +36,7 @@
                 </div>
                 <button
                   @click="$emit('close')"
-                  class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2.5 transition-all duration-200"
+                  class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 dark:bg-gray-700/30 dark:hover:bg-gray-700/50 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
                 >
                   <i class="fas fa-times text-xl"></i>
                 </button>

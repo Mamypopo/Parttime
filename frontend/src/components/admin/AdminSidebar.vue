@@ -192,7 +192,7 @@
                 <span v-if="!sidebarStore.isCollapsed" class="font-medium">{{ item.name }}</span>
                 <span
                   v-if="item.badge && jobStore.pendingApplicationsCount > 0"
-                  class="ml-auto bg-red-100 text-red-600 text-xs font-medium px-2 py-0.5 rounded-full animate-pulse"
+                  class="ml-auto text-xs bg-[#EA6B6B] dark:bg-[#FF8F8F] text-white font-medium px-2 py-0.5 rounded-full animate-pulse"
                 >
                   {{ jobStore.pendingApplicationsCount }}
                 </span>
@@ -228,13 +228,17 @@
               :class="[sidebarStore.isCollapsed ? 'justify-center' : 'gap-3']"
             >
               <img
-                src="@/assets/images/logosemed.svg"
-                alt="Profile"
-                class="w-10 h-10 rounded-xl shadow-md"
+                :src="adminStore.profileImageUrl"
+                :alt="adminStore.admin.username"
+                class="w-10 h-10 rounded-xl object-cover shadow-md bg-white dark:bg-gray-700"
               />
               <div v-if="!sidebarStore.isCollapsed" class="flex-1">
-                <h3 class="font-semibold text-gray-700 dark:text-gray-300">Admin User</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">admin@example.com</p>
+                <h3 class="font-semibold text-gray-700 dark:text-gray-300">
+                  {{ adminStore.getAdmin.fullName || adminStore.getAdmin.username }}
+                </h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ adminStore.getAdmin.email }}
+                </p>
               </div>
             </div>
             <div v-if="!sidebarStore.isCollapsed" class="mt-4">
@@ -310,7 +314,6 @@ export default {
     }
   },
   computed: {
-    // เพิ่ม computed property สำหรับ isDarkMode
     isDarkMode() {
       return this.sidebarStore.isDarkMode
     }
@@ -335,7 +338,7 @@ export default {
 
         if (!result.isConfirmed) return
 
-        // เพิ่ม Loader ระหว่าง Logout
+        //  Loader ระหว่าง Logout
         Swal.fire({
           title: 'กำลังออกจากระบบ...',
           allowOutsideClick: false,
@@ -345,17 +348,16 @@ export default {
         })
         // หยุดเช็คการแจ้งเตือนเมื่อ logout
         this.notificationStore.stopChecking()
-        // ทำการ logout และ clear stores
+        //  logout และ clear stores
         this.adminStore.logout()
 
         if (this.sidebarStore?.$reset) {
           this.sidebarStore.$reset()
         } else {
-          // หากไม่มี $reset, ให้เคลียร์ค่าเริ่มต้นเอง
+          // ไม่มี $reset, ให้เคลียร์ค่าเริ่มต้นเอง
           this.sidebarStore.$patch({ isCollapsed: false, isMobile: false })
         }
 
-        // แสดงข้อความสำเร็จ
         await Swal.fire({
           icon: 'success',
           title: 'ออกจากระบบสำเร็จ!',
@@ -363,7 +365,6 @@ export default {
           timer: 1500
         })
 
-        // Redirect ไปหน้า login
         await this.$router.push('/signin-admin')
       } catch (error) {
         console.error('Logout error:', error)

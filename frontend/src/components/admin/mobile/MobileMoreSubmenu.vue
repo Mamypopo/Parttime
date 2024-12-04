@@ -20,7 +20,7 @@
           >
             <!-- Header -->
             <div
-              class="bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA] p-4 flex justify-between items-center"
+              class="bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 p-4 flex justify-between items-center"
             >
               <h3 class="text-lg font-medium text-white">เพิ่มเติม</h3>
               <button

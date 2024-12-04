@@ -50,10 +50,13 @@ const router = createRouter({
       component: () => import('@/views/auth/ForgotPasswordView.vue')
     },
     {
-      path: '/reset-password/:token',
+      path: '/reset-password/:token?',
       name: 'ResetPassword',
-      component: () => import('@/views/auth/ResetPasswordView.vue')
+      component: () => import('@/views/auth/ResetPasswordView.vue'),
     },
+
+
+
     // Admin Routes
     {
       path: '/admin',

@@ -589,19 +589,21 @@ export const useJobStore = defineStore('job', {
 
         calculateActualCost(job) {
             try {
-                if (!job?.JobPositions) return 0;
+                if (!job?.JobPositions) return '0';
 
                 const total = job.JobPositions.reduce((sum, position) => {
-                    const completedCount = position.JobParticipation?.filter(
-                        p => p.status === 'completed'
+                    // นับเฉพาะ users ที่ผ่านการประเมินแล้ว
+                    const evaluatedCount = position.JobParticipation?.filter(
+                        p => p.workHistories?.length > 0 && p.workHistories[0].is_passed_evaluation
                     ).length || 0;
-                    return sum + (completedCount * Number(position.wage));
+
+                    return sum + (evaluatedCount * Number(position.wage));
                 }, 0);
 
-                return total;
+                return this.formatNumber(total);
             } catch (error) {
                 console.error('Error calculating actual cost:', error);
-                return 0;
+                return '0';
             }
         },
 
@@ -620,30 +622,7 @@ export const useJobStore = defineStore('job', {
             }
         },
 
-        calculateTotalWage(job) {
-            try {
-                if (!job?.JobPositions) return '0';
 
-                const total = job.JobPositions.reduce((sum, position) => {
-                    // แปลงค่าจ้างต่อคน
-                    const wage = Number(position.wage) || 0;
-
-                    // นับทั้งคนที่ approved และ completed
-                    const participantCount = position.JobParticipation
-                        ? position.JobParticipation.filter(p =>
-                            p.status === 'approved' || p.status === 'completed'
-                        ).length
-                        : 0;
-
-                    return sum + (wage * participantCount);
-                }, 0);
-
-                return this.formatNumber(total);
-            } catch (error) {
-                console.error('Error calculating total wage:', error);
-                return '0';
-            }
-        },
 
         // Utility functions
         formatDateTime(date, time) {

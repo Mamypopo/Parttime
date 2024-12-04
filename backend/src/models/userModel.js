@@ -254,7 +254,56 @@ export const updateUserOfflineStatus = async (userId) => {
 };
 
 
+// ฟังก์ชันสำหรับอัพเดท reset token
+export const updateResetToken = async (email, resetToken, resetTokenExpiry) => {
+    try {
+        return await prisma.user.update({
+            where: { email },
+            data: {
+                reset_password_token: resetToken,
+                reset_token_expires: resetTokenExpiry
+            }
+        });
+    } catch (error) {
+        console.error('Error updating reset token:', error);
+        throw new Error('ไม่สามารถอัพเดทโทเค็นรีเซ็ตรหัสผ่านได้');
+    }
+};
 
+
+// ฟังก์ชันสำหรับค้นหา user จาก reset token
+export const findUserByResetToken = async (token) => {
+    try {
+        return await prisma.user.findFirst({
+            where: {
+                reset_password_token: token,
+                reset_token_expires: {
+                    gt: new Date()
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error finding user by reset token:', error);
+        throw new Error('ไม่สามารถค้นหาผู้ใช้จากโทเค็นได้');
+    }
+};
+
+// ฟังก์ชันสำหรับรีเซ็ตรหัสผ่าน
+export const resetUserPassword = async (userId, hashedPassword) => {
+    try {
+        return await prisma.user.update({
+            where: { id: userId },
+            data: {
+                password: hashedPassword,
+                reset_password_token: null,
+                reset_token_expires: null
+            }
+        });
+    } catch (error) {
+        console.error('Error resetting password:', error);
+        throw new Error('ไม่สามารถรีเซ็ตรหัสผ่านได้');
+    }
+};
 
 
 

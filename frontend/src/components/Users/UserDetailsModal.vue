@@ -28,14 +28,14 @@
           >
             <!-- Header -->
             <div
-              class="sticky top-0 z-10 flex justify-between items-center p-6 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA] rounded-t-xl"
+              class="sticky top-0 z-10 flex justify-between items-center p-6 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 rounded-t-xl"
             >
               <HeadlessDialogTitle class="text-2xl font-semibold text-white">
                 รายละเอียดผู้ใช้ #{{ user.id }}
               </HeadlessDialogTitle>
               <button
                 @click="closeModal"
-                class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"
+                class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 dark:bg-gray-700/30 dark:hover:bg-gray-700/50 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center transition-colors duration-200"
               >
                 <i class="fas fa-times text-xl"></i>
               </button>

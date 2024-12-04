@@ -1,53 +1,39 @@
-import crypto from 'crypto';
-import { sendEmail } from '../utils/emailService';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { sendResetPasswordEmail } from '../utils/email.js';
+import * as userModel from '../models/userModel.js'
 
 export const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
+        console.log('Forgot password request for email:', email);
 
-        // ตรวจสอบว่ามีอีเมลนี้ในระบบหรือไม่
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await userModel.getUserByEmail(email);
         if (!user) {
             return res.status(404).json({ message: 'ไม่พบอีเมลนี้ในระบบ' });
         }
 
-        // สร้าง reset token และกำหนดเวลาหมดอายุ (30 นาที)
-        const resetToken = crypto.randomBytes(32).toString('hex');
-        const resetTokenExpiry = new Date(Date.now() + 30 * 60 * 1000);
+        const resetToken = jwt.sign(
+            { email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
 
-        // บันทึก token ลงฐานข้อมูล
-        await prisma.user.update({
-            where: { email },
-            data: {
-                reset_password_token: resetToken,
-                reset_password_expires: resetTokenExpiry
-            }
-        });
-
-        // สร้าง reset URL
-        const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-
-        // ส่งอีเมล
-        await sendEmail({
-            to: email,
-            subject: 'รีเซ็ตรหัสผ่าน',
-            html: `
-                <h1>คำขอรีเซ็ตรหัสผ่าน</h1>
-                <p>คุณได้ขอรีเซ็ตรหัสผ่าน กรุณาคลิกที่ลิงก์ด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
-                <p>ลิงก์นี้จะหมดอายุใน 30 นาที</p>
-                <a href="${resetUrl}">คลิกที่นี่เพื่อรีเซ็ตรหัสผ่าน</a>
-            `
+        await userModel.updateResetToken(email, resetToken);
+        const emailResult = await sendResetPasswordEmail({
+            email: user.email,
+            first_name: user.first_name,
+            resetToken
         });
 
         res.status(200).json({
-            message: 'ส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมลของคุณแล้ว'
+            message: 'ส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมลของคุณแล้ว',
+            previewUrl: emailResult.previewUrl
         });
 
     } catch (error) {
         console.error('Forgot password error:', error);
-        res.status(500).json({
-            message: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง'
-        });
+        res.status(500).json({ message: 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' });
     }
 };
 
@@ -55,32 +41,24 @@ export const resetPassword = async (req, res) => {
     try {
         const { token, password } = req.body;
 
-        // ตรวจสอบ token และเวลาหมดอายุ
-        const user = await prisma.user.findFirst({
-            where: {
-                reset_password_token: token,
-                reset_password_expires: {
-                    gt: new Date()
-                }
-            }
-        });
-
-        if (!user) {
+        let decodedToken;
+        try {
+            decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (error) {
             return res.status(400).json({
                 message: 'ลิงก์รีเซ็ตรหัสผ่านไม่ถูกต้องหรือหมดอายุแล้ว'
             });
         }
 
-        // อัพเดทรหัสผ่านใหม่
+        const user = await userModel.getUserByEmail(decodedToken.email);
+        if (!user) {
+            return res.status(400).json({
+                message: 'ไม่พบผู้ใช้งานในระบบ'
+            });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
-        await prisma.user.update({
-            where: { id: user.id },
-            data: {
-                password: hashedPassword,
-                reset_password_token: null,
-                reset_password_expires: null
-            }
-        });
+        await userModel.resetUserPassword(user.id, hashedPassword);
 
         res.status(200).json({
             message: 'รีเซ็ตรหัสผ่านสำเร็จ'

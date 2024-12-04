@@ -40,6 +40,8 @@ model User {
   user_documents        String? // เอกสารของผู้ใช้
   last_active           DateTime?
   is_online             Boolean            @default(false)
+  reset_password_token  String? // โทเค็นสำหรับรีเซ็ตรหัสผ่าน
+  reset_token_expires   DateTime? // วันหมดอายุของโทเค็น
   workHistories         WorkHistory[] // ความสัมพันธ์กับ WorkHistory ผ่าน JobParticipation
   JobParticipation      JobParticipation[] // ความสัมพันธ์กับงานที่สมัคร
   Log                   Log[]

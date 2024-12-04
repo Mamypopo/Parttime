@@ -179,7 +179,7 @@
       class="text-center py-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
     >
       <i
-        class="fas fa-search text-5xl bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] text-transparent bg-clip-text mb-4"
+        class="fas fa-search text-5xl bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] text-transparent bg-clip-text mb-4 mt-1"
       ></i>
       <p class="text-gray-500 dark:text-gray-400">ไม่พบงานที่คุณค้นหา</p>
     </div>
