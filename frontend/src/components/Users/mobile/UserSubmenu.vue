@@ -44,7 +44,10 @@
                 @click="$emit('close')"
               >
                 <i class="fas fa-user-edit text-cyan-600 text-xl mr-3"></i>
-                <span>แก้ไขข้อมูลส่วนตัว</span>
+                <span
+                  class="text-gray-700 dark:text-gray-300 transition-colors duration-300 ease-in-out"
+                  >แก้ไขข้อมูลส่วนตัว</span
+                >
               </router-link>
 
               <!-- Dark Mode Toggle -->

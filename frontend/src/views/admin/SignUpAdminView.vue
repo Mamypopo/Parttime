@@ -2,7 +2,7 @@
   <div class="min-h-screen relative flex flex-col bg-gradient-to-br from-[#ece9e6] to-[#ffffff]">
     <!-- Hero Background -->
     <div
-      class="absolute top-0 left-0 right-0 h-[45vh] bg-gradient-to-r from-[#C5B4E3] via-[#EAC6FC] to-[#B7E4E0] rounded-b-[30px] opacity-95"
+      class="absolute ml-5 mr-5 top-0 left-0 right-0 h-[45vh] bg-gradient-to-r from-[#C5B4E3] via-[#EAC6FC] to-[#B7E4E0] rounded-b-[30px] opacity-95"
     ></div>
 
     <!-- Content -->

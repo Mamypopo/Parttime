@@ -88,7 +88,7 @@
           <!-- Date and Time -->
           <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
             <span class="flex items-center">
-              <i class="fas fa-calendar mr-2 text-[#feac5e] dark:text-[#feac5e]/70"></i>
+              <i class="fa-solid fa-calendar-days mr-2 text-[#feac5e] dark:text-[#feac5e]/70"></i>
               {{ formatDate(job.work_date) }}
             </span>
             <span class="flex items-center">
@@ -124,43 +124,85 @@
             <!-- ปุ่มดูรายละเอียด -->
             <button
               @click="openJobDetail(job)"
-              class="flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 border-2 hover:scale-[1.02] bg-white dark:bg-gray-800 border-[#4bc0c8]/50 dark:border-[#4bc0c8]/50 text-[#4bc0c8] dark:text-[#4bc0c8] hover:bg-gradient-to-r hover:from-[#4bc0c8]/10 hover:to-[#c779d0]/10 dark:hover:from-[#4bc0c8]/20 dark:hover:to-[#c779d0]/20"
+              class="flex-1 py-2.5 px-4 rounded-lg font-medium transition-all duration-300 relative overflow-hidden group border-2 hover:scale-[1.02] hover:shadow-lg hover:shadow-[#4bc0c8]/10"
+              :class="[
+                'border-[#4bc0c8]/30 dark:border-[#4bc0c8]/30',
+                'bg-white dark:bg-gray-800/80',
+                'text-[#4bc0c8] dark:text-[#4bc0c8]'
+              ]"
             >
-              <i class="fas fa-info-circle mr-2 text-[#c779d0] dark:text-[#c779d0]/70"></i>
-              รายละเอียด
+              <!-- Effect กระพริบ -->
+              <span
+                class="absolute inset-0 bg-gradient-to-r from-[#4bc0c8]/0 via-[#4bc0c8]/10 to-[#c779d0]/0 transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"
+              ></span>
+
+              <!-- Effect gradient พื้นหลัง -->
+              <div
+                class="absolute inset-0 bg-gradient-to-r from-[#4bc0c8]/5 via-[#c779d0]/5 to-[#4bc0c8]/5 dark:from-[#4bc0c8]/10 dark:via-[#c779d0]/10 dark:to-[#4bc0c8]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              ></div>
+
+              <!-- เนื้อหาปุ่ม -->
+              <span class="relative flex items-center justify-center">
+                <i
+                  class="fas fa-info-circle mr-2 text-[#c779d0] dark:text-[#c779d0]/70 group-hover:rotate-12 transition-transform duration-300"
+                ></i>
+                <span class="group-hover:tracking-wide transition-all duration-300"
+                  >รายละเอียด</span
+                >
+              </span>
             </button>
 
             <!-- ปุ่มสมัครงาน -->
-            <!-- ปุ่มสมัครงาน -->
             <button
+              v-if="!hasAppliedForJob(job)"
               @click="openApplyModal(job)"
-              class="flex-1 py-2 px-4 rounded-lg font-medium text-white transition-all duration-200 hover:scale-[1.02]"
+              class="flex-1 py-2.5 px-4 rounded-lg font-medium transition-all duration-300 hover:scale-[1.02] relative overflow-hidden group"
               :class="[
                 getJobStatus(job) === 'completed'
-                  ? 'bg-[#4CD7B0] hover:bg-[#45c6a2] cursor-not-allowed'
+                  ? 'bg-gray-400 cursor-not-allowed'
                   : getJobStatus(job) === 'in_progress'
-                    ? 'bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] hover:opacity-90'
+                    ? 'bg-amber-500 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] hover:shadow-lg hover:shadow-[#c779d0]/20'
               ]"
               :disabled="getJobStatus(job) !== 'published'"
             >
-              <!-- ลบ icon fa-paper-plane ที่ซ้ำกันออก -->
+              <!-- เพิ่ม Effect ไฟกระพริบ -->
               <span
-                v-if="getJobStatus(job) === 'completed'"
-                class="flex items-center justify-center"
-              >
-                <i class="fas fa-check-circle mr-2"></i>
-                งานเสร็จสิ้น
-              </span>
-              <span v-else-if="getJobStatus(job) === 'in_progress'">
-                <i class="fas fa-clock mr-2"></i>
-                กำลังดำเนินงาน
-              </span>
-              <span v-else>
-                <i class="fas fa-paper-plane mr-2"></i>
-                สมัครงาน
+                class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"
+              ></span>
+
+              <span class="relative flex items-center justify-center text-white">
+                <i class="fas fa-paper-plane mr-2 group-hover:animate-bounce"></i>
+                <span class="group-hover:tracking-wider transition-all duration-300">สมัครงาน</span>
               </span>
             </button>
+
+            <!-- สถานะการสมัคร -->
+            <div
+              v-else
+              class="flex-1 py-2.5 px-4 rounded-lg font-medium relative overflow-hidden group transition-all duration-300"
+              :class="[
+                getApplicationStatusClass(getApplicationStatus(job)),
+                'hover:shadow-lg border-2 border-opacity-50'
+              ]"
+            >
+              <div
+                class="absolute inset-0 bg-gradient-to-r opacity-20"
+                :class="getStatusGradient(getApplicationStatus(job))"
+              ></div>
+
+              <span class="relative flex items-center justify-center">
+                <i
+                  :class="[
+                    getApplicationStatusIcon(getApplicationStatus(job)),
+                    'mr-2 group-hover:rotate-12 transition-transform duration-300'
+                  ]"
+                ></i>
+                <span class="group-hover:tracking-wide transition-all duration-300">
+                  {{ getApplicationStatusText(getApplicationStatus(job)) }}
+                </span>
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -287,6 +329,80 @@ export default {
         return 'ตำแหน่งงานเต็มแล้ว หรือปิดรับสมัคร'
       }
       return ''
+    },
+    // เช็คว่าผู้ใช้สมัครงานนี้แล้วหรือยัง
+    hasAppliedForJob(job) {
+      const userId = this.userStore.user?.id
+      return job.JobPositions?.some((position) =>
+        position.JobParticipation?.some((p) => p.user_id === userId)
+      )
+    },
+
+    // ดึงสถานะการสมัครงาน
+    getApplicationStatus(job) {
+      const userId = this.userStore.user?.id
+      for (const position of job.JobPositions || []) {
+        const participation = position.JobParticipation?.find((p) => p.user_id === userId)
+        if (participation) {
+          return participation.status
+        }
+      }
+      return null
+    },
+
+    // สีและสไตล์ตามสถานะการสมัคร
+    getApplicationStatusClass(status) {
+      switch (status) {
+        case 'pending':
+          return 'text-yellow-600 dark:text-yellow-400 border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
+        case 'approved':
+          return 'text-emerald-600 dark:text-emerald-400 border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20'
+        case 'rejected':
+          return 'text-rose-600 dark:text-rose-400 border-rose-400 bg-rose-50 dark:bg-rose-900/20'
+        default:
+          return 'text-gray-600 dark:text-gray-400 border-gray-400 bg-gray-50 dark:bg-gray-900/20'
+      }
+    },
+
+    // ไอคอนตามสถานะ
+    getApplicationStatusIcon(status) {
+      switch (status) {
+        case 'pending':
+          return 'fas fa-clock'
+        case 'approved':
+          return 'fas fa-check-circle'
+        case 'rejected':
+          return 'fas fa-times-circle'
+        default:
+          return 'fas fa-info-circle'
+      }
+    },
+
+    // ข้อความแสดงสถานะ
+    getApplicationStatusText(status) {
+      switch (status) {
+        case 'pending':
+          return 'รอการอนุมัติ'
+        case 'approved':
+          return 'ได้รับอนุมัติ'
+        case 'rejected':
+          return 'ไม่ผ่านการอนุมัติ'
+        default:
+          return 'ไม่ทราบสถานะ'
+      }
+    },
+
+    getStatusGradient(status) {
+      switch (status) {
+        case 'pending':
+          return 'from-yellow-400 via-amber-300 to-yellow-400'
+        case 'approved':
+          return 'from-emerald-400 via-green-300 to-emerald-400'
+        case 'rejected':
+          return 'from-rose-400 via-red-300 to-rose-400'
+        default:
+          return 'from-gray-400 via-gray-300 to-gray-400'
+      }
     },
     handleJobApplied() {
       this.closeApplyModal()

@@ -114,7 +114,7 @@
   <!-- เพิ่ม Modal สำหรับแสดงข้อมูลติดต่อ -->
   <div
     v-if="showContactModal"
-    class="fixed inset-0 bg-black/25 backdrop-blur-sm flex items-center justify-center z-50"
+    class="fixed inset-0 bg-black/25 backdrop-blur-sm flex items-center justify-center modal"
   >
     <div
       class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-sm w-full mx-4 border border-gray-200 dark:border-gray-700 shadow-lg shadow-[#c779d0]/10 dark:shadow-[#4bc0c8]/10"
@@ -181,8 +181,13 @@ export default {
       return this.jobStore.myJobs
     },
     filteredJobs() {
-      if (this.selectedStatus === 'all') return this.myJobs
-      return this.myJobs.filter((job) => job.status === this.selectedStatus)
+      let jobs =
+        this.selectedStatus === 'all'
+          ? this.myJobs
+          : this.myJobs.filter((job) => job.status === this.selectedStatus)
+
+      // เรียงลำดับตามวันที่งาน จากวันที่ใกล้ที่สุดไปไกลที่สุด
+      return jobs.sort((a, b) => new Date(a.work_date) - new Date(b.work_date))
     }
   },
 

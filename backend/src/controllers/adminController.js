@@ -1,10 +1,13 @@
-import * as adminModel from '../models/adminModel.js';
-import * as userModel from '../models/userModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { createLog } from '../models/logModel.js';
+
+import * as adminModel from '../models/adminModel.js';
+import * as userModel from '../models/userModel.js';
 import * as notificationModel from '../models/notificationModel.js';
+
 import { deleteFile } from '../utils/fileUpload.js';
+import { createLog } from '../models/logModel.js';
+
 
 // register admin
 export const registerAdmin = async (req, res) => {
@@ -162,7 +165,7 @@ export const loginAdmin = async (req, res) => {
     }
 };
 
-// getprofile admin 
+// get profile admin 
 export const getAdminProfile = async (req, res) => {
     try {
         const { id } = req.user

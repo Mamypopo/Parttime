@@ -348,7 +348,29 @@ input:hover,
 button:hover {
   transition: all 0.2s ease;
 }
+/* Input focus styles */
+input:focus,
+button:focus {
+  outline: none;
+  border-color: #c779d0;
+  box-shadow: 0 0 0 1px #c779d0;
+}
 
+.dark input:focus,
+.dark button:focus {
+  border-color: #c779d080;
+  box-shadow: 0 0 0 1px #c779d080;
+}
+
+/* Hover animations */
+button:not(:disabled):hover {
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+button:not(:disabled):active {
+  transform: translateY(0);
+}
 /* Dropdown animation */
 [v-if] {
   transition: all 0.2s ease-in-out;

@@ -4,44 +4,38 @@ import Swal from 'sweetalert2'
 import { useUserStore } from '@/stores/userStore'
 import { useAdminStore } from '../stores/adminStore'
 import { checkTokenExpiration } from '@/utils/auth'
-
 import AdminSidebar from '@/components/admin/AdminSidebar.vue'
 
-import HomeView from '../views/HomeView.vue'
-import SignInView from '@/views/SignInView.vue'
-import SignUpView from '@/views/SignUpView.vue'
 
 
-import SignUpAdminView from '@/views/admin/SignUpAdminView.vue'
-import SignInAdminView from '@/views/admin/SignInAdminView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
       name: 'home',
-      component: HomeView
+      component: () => import('@/views/HomeView.vue')
     },
     {
       path: '/signup-user',
       name: 'signUp',
-      component: SignUpView
+      component: () => import('@/views/user/SignUpView.vue')
     },
 
     {
       path: '/signin-user',
       name: 'signinuser',
-      component: SignInView
+      component: () => import('@/views/user/SignInView.vue')
     },
     {
       path: '/signup-admin',
       name: 'signupadmin',
-      component: SignUpAdminView
+      component: () => import('@/views/admin/SignUpAdminView.vue')
     },
     {
       path: '/signin-admin',
       name: 'signInadmin',
-      component: SignInAdminView
+      component: () => import('@/views/admin/SignInAdminView.vue')
     },
 
     {

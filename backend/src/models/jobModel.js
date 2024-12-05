@@ -45,7 +45,7 @@ export const createJob = async (jobData, adminId) => {
 };
 
 // ดึงงานทั้งหมด
-export const getAllJobs = async (page = 1, pageSize = 20, filters = {}) => {
+export const getAllJobs = async (page = 1, pageSize = 20, filters = {}, userId = null) => {
     const skip = (page - 1) * pageSize;
 
     // สร้าง where clause สำหรับ filters
@@ -133,10 +133,17 @@ export const getAllJobs = async (page = 1, pageSize = 20, filters = {}) => {
             JobPositions: {
                 include: {
                     JobParticipation: {
+                        where: userId ? {
+                            OR: [
+                                { user_id: userId },  // ดึงเฉพาะการสมัครของ user นี้
+                                { status: 'approved' }  // และดึงการสมัครที่ approved แล้วของทุกคน
+                            ]
+                        } : undefined,
                         select: {
                             id: true,
                             status: true,
                             created_at: true,
+                            user_id: true,
                             workHistories: {
                                 select: {
                                     id: true,

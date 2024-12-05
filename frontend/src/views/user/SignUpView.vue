@@ -2,14 +2,14 @@
   <div class="min-h-screen relative flex flex-col">
     <!-- Hero Section with Gradient Background -->
     <div
-      class="absolute top-0 left-0 right-0 h-[45vh] bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] rounded-b-[30px] opacity-95"
+      class="absolute ml-5 mr-5 top-0 left-0 right-0 h-[45vh] bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] rounded-b-[30px] opacity-95"
     ></div>
 
     <!-- Content Section -->
     <div class="relative z-10">
       <!-- Welcome Section -->
       <div class="text-center pt-24 pb-5">
-        <h1 class="text-4xl font-semibold text-white mb-1 animate-fade-in-up">ยินดีต้อนรับห</h1>
+        <h1 class="text-4xl font-semibold text-white mb-1 animate-fade-in-up">ยินดีต้อนรับ</h1>
         <p class="text-base lg:text-lg text-white/90 animate-fade-in-up max-w-xl mx-auto">
           มาร่วมเป็นส่วนหนึ่งกับทีมผู้เชี่ยวชาญของเรา
         </p>

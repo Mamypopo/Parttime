@@ -132,7 +132,7 @@
                 <!-- Submit Button -->
                 <button
                   type="submit"
-                  class="w-full py-3 text-white rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-500 dark:to-blue-400 hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg mt-6"
+                  class="w-full py-3 text-white rounded-xl bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg mt-6"
                 >
                   {{ editingPosition ? 'อัพเดทตำแหน่ง' : 'เพิ่มตำแหน่ง' }}
                 </button>

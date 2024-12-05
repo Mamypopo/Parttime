@@ -60,7 +60,7 @@
               <i class="fas fa-hand-holding-medical text-white text-xl"></i>
             </div>
             <h3 class="text-xl font-semibold mb-2">สภาพแวดล้อมที่ดี</h3>
-            <p class="text-gray-600">ทำงานในโรงพยาบาลที่มีมาตรฐาน พร้อมทีมงานมืออาชีพ</p>
+            <p class="text-gray-600">ทำงานในหน่วยงานที่มีมาตรฐาน พร้อมทีมงานมืออาชีพ</p>
           </div>
 
           <!-- Feature 3 -->
