@@ -161,7 +161,7 @@
             >
               <img
                 :src="userStore.getUser.profile_image"
-                class="w-10 h-10 rounded-full object-cover ring-2 ring-transparent group-hover:ring-[#4bc0c8] dark:group-hover:ring-[#4bc0c8]/70 transition-all"
+                class="w-10 h-10 rounded-full object-cover ring-2 ring-[#9899ee]/30 dark:ring-[#6667AA]/30 group-hover:ring-[#4bc0c8] dark:group-hover:ring-[#4bc0c8]/70 transition-all"
                 alt="Profile"
               />
               <div v-if="!sidebarStore.isCollapsed">
@@ -169,11 +169,9 @@
                   class="font-medium text-gray-700 dark:text-gray-300 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors"
                 >
                   {{ userStore.getUser.first_name }}
-                  <!-- ใช้ getter แทน -->
                 </h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
                   {{ userStore.getUser.email }}
-                  <!-- ใช้ getter แทน -->
                 </p>
               </div>
             </router-link>

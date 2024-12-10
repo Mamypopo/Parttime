@@ -632,7 +632,9 @@ export default {
       try {
         // แจ้งเตือนเกี่ยวกับประวัติงาน
         const hasHistory = job.JobPositions?.some((pos) =>
-          pos.JobParticipation?.some((p) => p.status === 'approved' || p.work_status)
+          pos.JobParticipation?.some(
+            (p) => ['approved', 'completed', 'in_progress'].includes(p.status) || p.work_status
+          )
         )
 
         if (hasHistory) {

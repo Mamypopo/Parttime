@@ -125,10 +125,15 @@
             <span class="text-[#c779d0]">Medical</span> Services
           </div>
           <div class="flex gap-8 text-sm">
-            <span class="hover:text-[#c779d0] transition-colors cursor-pointer"
-              >นโยบายความเป็นส่วนตัว</span
+            <button
+              @click="showPrivacyModal = true"
+              class="hover:text-[#c779d0] transition-colors cursor-pointer"
             >
-            <span class="hover:text-[#c779d0] transition-colors cursor-pointer">ติดต่อเรา</span>
+              นโยบายความเป็นส่วนตัว
+            </button>
+            <router-link to="/contact">
+              <span class="hover:text-[#c779d0] transition-colors cursor-pointer">ติดต่อเรา</span>
+            </router-link>
           </div>
         </div>
 
@@ -142,19 +147,111 @@
             </div>
           </div>
           <div class="flex gap-4 text-sm">
-            <span class="hover:text-[#c779d0] transition-colors cursor-pointer"
-              >นโยบายความเป็นส่วนตัว</span
+            <button
+              @click="showPrivacyModal = true"
+              class="hover:text-[#c779d0] transition-colors cursor-pointer"
             >
-            <span class="hover:text-[#c779d0] transition-colors cursor-pointer">ติดต่อเรา</span>
+              นโยบายความเป็นส่วนตัว
+            </button>
+
+            <router-link to="/contact">
+              <span class="hover:text-[#c779d0] transition-colors cursor-pointer">ติดต่อเรา</span>
+            </router-link>
           </div>
         </div>
       </div>
     </footer>
+
+    <!-- Privacy Policy Modal -->
+    <TransitionRoot appear :show="showPrivacyModal" as="template">
+      <Dialog as="div" @close="showPrivacyModal = false" class="relative z-50">
+        <TransitionChild
+          enter="duration-300 ease-out"
+          enter-from="opacity-0"
+          enter-to="opacity-100"
+          leave="duration-200 ease-in"
+          leave-from="opacity-100"
+          leave-to="opacity-0"
+        >
+          <div class="fixed inset-0 bg-black/25 backdrop-blur-sm" />
+        </TransitionChild>
+
+        <div class="fixed inset-0 overflow-y-auto">
+          <div class="flex min-h-full items-center justify-center p-4">
+            <TransitionChild
+              enter="duration-300 ease-out"
+              enter-from="opacity-0 scale-95"
+              enter-to="opacity-100 scale-100"
+              leave="duration-200 ease-in"
+              leave-from="opacity-100 scale-100"
+              leave-to="opacity-0 scale-95"
+            >
+              <DialogPanel
+                class="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 shadow-xl transition-all"
+              >
+                <DialogTitle as="h3" class="text-xl font-medium text-gray-900 mb-4">
+                  นโยบายความเป็นส่วนตัว
+                </DialogTitle>
+                <div class="mt-4 text-sm text-gray-600 space-y-4 max-h-[60vh] overflow-y-auto">
+                  <!-- เนื้อหานโยบายความเป็นส่วนตัว -->
+                  <p>1. การเก็บรวบรวมข้อมูล</p>
+                  <p>เราเก็บรวบรวมข้อมูลส่วนบุคคลที่จำเป็นสำหรับการสมัครงาน เช่น:</p>
+                  <ul class="list-disc pl-6 space-y-2">
+                    <li>ชื่อ-นามสกุล</li>
+                    <li>ที่อยู่อีเมล</li>
+                    <li>หมายเลขโทรศัพท์</li>
+                    <li>ที่อยู่</li>
+                    <li>รูปถ่าย</li>
+                    <li>วุฒิการศึกษา</li>
+                    <li>ประวัติการทำงาน</li>
+                    <li>เอกสารประกอบการสมัครงาน</li>
+                  </ul>
+
+                  <p>2. วัตถุประสงค์ในการใช้ข้อมูล</p>
+                  <p>เราใช้ข้อมูลของคุณเพื่อ:</p>
+                  <ul class="list-disc pl-6 space-y-2">
+                    <li>พิจารณาคุณสมบัติในการสมัครงาน</li>
+                    <li>ติดต่อสื่อสารเกี่ยวกับการสมัครงาน</li>
+                    <li>จัดเก็บประวัติผู้สมัครงาน</li>
+                    <li>บริหารจัดการทรัพยากรบุคคล</li>
+                  </ul>
+
+                  <p>3. การรักษาความปลอดภัย</p>
+                  <p>
+                    เรามีมาตรการรักษาความปลอดภัยที่เหมาะสมเพื่อป้องกันการสูญหาย การเข้าถึง การใช้
+                    หรือการเปิดเผยข้อมูลส่วนบุคคลโดยไม่ได้รับอนุญาต
+                  </p>
+
+                  <p>4. สิทธิของคุณ</p>
+                  <p>คุณมีสิทธิที่จะ:</p>
+                  <ul class="list-disc pl-6 space-y-2">
+                    <li>เข้าถึงข้อมูลส่วนบุคคลของคุณ</li>
+                    <li>แก้ไขข้อมูลที่ไม่ถูกต้อง</li>
+                    <li>ลบข้อมูลของคุณ</li>
+                    <li>คัดค้านการประมวลผลข้อมูล</li>
+                  </ul>
+                </div>
+                <div class="mt-6 flex justify-end">
+                  <button
+                    @click="showPrivacyModal = false"
+                    class="px-4 py-2 bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] text-white rounded-xl hover:shadow-lg transition-all duration-200"
+                  >
+                    ปิด
+                  </button>
+                </div>
+              </DialogPanel>
+            </TransitionChild>
+          </div>
+        </div>
+      </Dialog>
+    </TransitionRoot>
   </div>
 </template>
 
 <script>
 import { useUserStore } from '@/stores/userStore'
+import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogTitle } from '@headlessui/vue'
+
 import axios from 'axios'
 import Swal from 'sweetalert2'
 
@@ -162,7 +259,13 @@ const baseURL = import.meta.env.VITE_API_URL
 
 export default {
   name: 'SignInView',
-
+  components: {
+    TransitionRoot,
+    TransitionChild,
+    Dialog,
+    DialogPanel,
+    DialogTitle
+  },
   data() {
     return {
       form: {
@@ -170,7 +273,8 @@ export default {
         password: ''
       },
       error: '',
-      isLoading: false
+      isLoading: false,
+      showPrivacyModal: false
     }
   },
 
@@ -282,5 +386,23 @@ export default {
 /* Hover Effects */
 input:hover {
   @apply border-[#CDE45F]/50;
+}
+
+.modal-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+.modal-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-scroll::-webkit-scrollbar-track {
+  background: #f7fafc;
+}
+
+.modal-scroll::-webkit-scrollbar-thumb {
+  background-color: #cbd5e0;
+  border-radius: 3px;
 }
 </style>

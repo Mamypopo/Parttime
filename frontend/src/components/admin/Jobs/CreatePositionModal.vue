@@ -28,7 +28,7 @@
               class="w-full max-w-none sm:max-w-lg md:max-w-3xl lg:max-w-4xl bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-6 pb-20 shadow-xl"
             >
               <HeadlessDialogTitle
-                class="text-lg sm:text-xl font-bold text-center bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-400 dark:to-blue-400 bg-clip-text text-transparent mb-4 sm:mb-6"
+                class="text-lg sm:text-xl font-bold text-center bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-400 dark:to-blue-300 bg-clip-text text-transparent mb-4 sm:mb-6"
               >
                 {{ editingPosition ? 'แก้ไขตำแหน่งงาน' : 'เพิ่มตำแหน่งงาน' }}
               </HeadlessDialogTitle>

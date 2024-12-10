@@ -9,7 +9,7 @@
           >
             SEMed Living Care Hospital
           </h1>
-          <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+          <p class="text-lg text-gray-600 mb-8 leading-relaxed">
             ร่วมเป็นส่วนหนึ่งกับทีมผู้เชี่ยวชาญของเรา
             พร้อมโอกาสการทำงานที่ยืดหยุ่นและค่าตอบแทนที่เหมาะสม
           </p>
@@ -105,7 +105,6 @@
 </template>
 
 <script>
-import axios from 'axios'
 export default {
   name: 'HomeView'
 }

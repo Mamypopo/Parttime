@@ -359,6 +359,8 @@ export default {
           return 'text-emerald-600 dark:text-emerald-400 border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20'
         case 'rejected':
           return 'text-rose-600 dark:text-rose-400 border-rose-400 bg-rose-50 dark:bg-rose-900/20'
+        case 'completed':
+          return 'text-blue-600 dark:text-blue-400 border-blue-400 bg-blue-50 dark:bg-blue-900/20' // โทนน้ำเงิน
         default:
           return 'text-gray-600 dark:text-gray-400 border-gray-400 bg-gray-50 dark:bg-gray-900/20'
       }
@@ -373,6 +375,8 @@ export default {
           return 'fas fa-check-circle'
         case 'rejected':
           return 'fas fa-times-circle'
+        case 'completed':
+          return 'fa-regular fa-circle-check'
         default:
           return 'fas fa-info-circle'
       }
@@ -387,6 +391,8 @@ export default {
           return 'ได้รับอนุมัติ'
         case 'rejected':
           return 'ไม่ผ่านการอนุมัติ'
+        case 'completed':
+          return 'ได้รับการประเมินแล้ว'
         default:
           return 'ไม่ทราบสถานะ'
       }
@@ -400,6 +406,8 @@ export default {
           return 'from-emerald-400 via-green-300 to-emerald-400'
         case 'rejected':
           return 'from-rose-400 via-red-300 to-rose-400'
+        case 'completed':
+          return 'from-blue-400 via-sky-300 to-blue-400'
         default:
           return 'from-gray-400 via-gray-300 to-gray-400'
       }

@@ -3,21 +3,21 @@ import nodemailer from 'nodemailer';
 // ใช้จริง
 // export const sendVerificationEmail = async (user, token) => {
 //     const transporter = nodemailer.createTransport({
-//         service: 'gmail',  // หรือ SMTP provider อื่น ๆ ที่คุณต้องการใช้
+//         service: 'gmail',
 //         auth: {
-//             user: process.env.EMAIL_USER,   // เก็บข้อมูลอีเมลผู้ส่งใน .env
-//             pass: process.env.EMAIL_PASS    // เก็บข้อมูลรหัสผ่านใน .env (ใช้ App Password ถ้าเป็น Gmail)
+//             user: process.env.EMAIL_USER,
+//             pass: process.env.EMAIL_PASS
 //         }
 //     });
 
 //     const mailOptions = {
-//         from: '"YourApp" <noreply@yourapp.com>',
+//         from: process.env.EMAIL_FROM,
 //         to: user.email,
-//         subject: 'Verify your email address',
+//         subject: 'ยืนยันอีเมลของคุณ',
 //         html: `
-//       <h1>Hi ${user.first_name},</h1>
-//       <p>Please verify your email by clicking the link below:</p>
-//       <a href="http://yourproductiondomain.com/api/users/verify-email?token=${token}">Verify Email</a>
+//       <h1>สวัสดี ${user.first_name},</h1>
+//       <p>กรุณายืนยันอีเมลโดยคลิกที่ลิงก์ด้านล่าง:</p>
+//       <a href="${process.env.FRONTEND_URL}/verify-email?token=${token}">ยืนยันอีเมล</a>
 //     `
 //     };
 

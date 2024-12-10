@@ -4,7 +4,6 @@ import Swal from 'sweetalert2'
 import { useUserStore } from '@/stores/userStore'
 import { useAdminStore } from '../stores/adminStore'
 import { checkTokenExpiration } from '@/utils/auth'
-import AdminSidebar from '@/components/admin/AdminSidebar.vue'
 
 
 
@@ -48,13 +47,18 @@ const router = createRouter({
       name: 'ResetPassword',
       component: () => import('@/views/auth/ResetPasswordView.vue'),
     },
+    {
+      path: '/contact',
+      name: 'contact',
+      component: () => import('@/views/ContactView.vue')
+    },
 
 
 
     // Admin Routes
     {
       path: '/admin',
-      component: AdminSidebar,
+      component: () => import('@/components/admin/AdminSidebar.vue'),
       meta: { requiresAdmin: true },
       children: [
         {
@@ -131,6 +135,11 @@ const router = createRouter({
         },
 
       ]
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('@/views/NotFound.vue')
     }
   ]
 })
@@ -181,6 +190,8 @@ router.beforeEach(async (to, from, next) => {
         adminStore.setToken(adminToken)
       } catch (error) {
         console.error('Error fetching admin profile:', error)
+        // ถ้าไม่สามารถดึงข้อมูล profile ได้ ให้ redirect ไปหน้า 404
+        return next({ name: 'NotFound' })
       }
 
 
@@ -209,13 +220,15 @@ router.beforeEach(async (to, from, next) => {
     }
 
     if (token) {
-      // ตั้งค่า token ใน axios header
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-      // ดึงข้อมูล profile user
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/profile`)
-      // เก็บข้อมูล user และ token ใน store
-      userStore.setUser(response.data)
-      userStore.setToken(token)
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/profile`)
+        userStore.setUser(response.data)
+        userStore.setToken(token)
+      } catch (error) {
+        // ถ้าไม่สามารถดึงข้อมูล profile ได้ ให้ redirect ไปหน้า 404
+        return next({ name: 'NotFound' })
+      }
     }
 
     // ตรวจสอบสิทธิ์การเข้าถึง
@@ -228,10 +241,8 @@ router.beforeEach(async (to, from, next) => {
     }
 
   } catch (error) {
-    // จัดการกรณี error
     if (axios.isAxiosError(error)) {
       if (error.response?.data?.message === 'token expired') {
-        // แยกการจัดการระหว่าง admin และ user
         if (to.meta.requiresAdmin) {
           adminStore.logout()
           if (!to.path.includes('signin-admin')) {
@@ -253,8 +264,22 @@ router.beforeEach(async (to, from, next) => {
           }
           next('/signin-user')
         }
+      } else if (error.response?.status === 404) {
+        // เคลียร์ข้อมูลทั้งหมด
+        localStorage.clear()
+        userStore.logout()
+        adminStore.logout()
+        delete axios.defaults.headers.common['Authorization']
+        next({ name: 'NotFound' })
+        return
       }
     }
+    localStorage.clear()
+    userStore.logout()
+    adminStore.logout()
+    delete axios.defaults.headers.common['Authorization']
+    next({ name: 'NotFound' })
+
   }
 })
 

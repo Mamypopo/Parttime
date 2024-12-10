@@ -16,7 +16,7 @@
         <div class="absolute -bottom-16 left-6 md:left-8">
           <div class="group relative">
             <div
-              class="w-24 h-24 md:w-28 md:h-28 rounded-2xl border-4 border-white dark:border-gray-800 overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
+              class="w-24 h-24 md:w-28 md:h-28 rounded-2xl border-4 border-white dark:border-gray-800 ring-4 ring-[#9899ee]/30 dark:ring-[#6667AA] overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
             >
               <img
                 :src="user.profile_image || '/default-avatar.png'"

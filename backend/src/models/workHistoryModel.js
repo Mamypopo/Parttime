@@ -130,10 +130,10 @@ export const getTopUsersWithRatings = async () => {
 
             // คำนวณคะแนนเฉลี่ยแต่ละประเภท
             const calculateAverage = (field) => {
-                const scores = passedEvaluationJobs
-                    .map(wh => wh[field])
-                    .filter(score => score != null);
-                return scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / user.JobParticipation.length : 0;
+                const allJobs = user.JobParticipation.flatMap(jp => jp.workHistories);
+                const scores = allJobs
+                    .map(wh => (wh && wh[field] !== null) ? wh[field] : 0); // งานที่ไม่ผ่านจะได้ 0 คะแนน
+                return scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
             };
 
             return {

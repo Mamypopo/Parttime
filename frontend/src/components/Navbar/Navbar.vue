@@ -29,8 +29,15 @@
         <!-- Desktop Auth Buttons -->
         <div class="hidden lg:flex items-center gap-4">
           <router-link
+            to="/contact"
+            class="px-6 py-2 text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white transition-colors duration-300 flex items-center gap-2 text-sm font-medium"
+          >
+            <i class="fas fa-phone-alt"></i>
+            <span>ติดต่อเรา</span>
+          </router-link>
+          <router-link
             to="/signin-user"
-            class="px-6 py-2 bg-gradient-to-r from-[#A8E6E2] to-[#C3E8D5] text-gray-700 rounded-xl hover:shadow-lg hover:shadow-[#C3E8D5]/20 transition-all duration-300 flex items-center gap-2 text-sm font-medium"
+            class="px-6 py-2 bg-gradient-to-r from-[#A8E6E2] to-[#C3E8D5] text-gray-700 rounded-xl hover:shadow-lg hover:shadow-[#C3E8D5]/20 transition-all duration-300 flex items-center gap-2 text-sm font-medium transform hover:-translate-y-0.5"
           >
             <i class="fa-solid fa-key"></i>
             <span>เข้าสู่ระบบ</span>
@@ -65,10 +72,19 @@
       >
         <div
           v-if="isMenuOpen"
-          class="lg:hidden mt-2 max-w-6xl mx-auto bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-4 border border-gray-100 dark:bg-gray-800/95 dark:border-gray-700/50"
+          class="lg:hidden mt-2 max-w-6xl mx-auto bg-white/95 rounded-xl shadow-lg p-4 border border-gray-100 dark:bg-gray-800/95 dark:border-gray-700/50"
         >
           <!-- Mobile Auth Buttons -->
           <div class="space-y-3">
+            <router-link
+              to="/contact"
+              class="w-full px-4 py-2.5 text-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm font-medium"
+              @click="isMenuOpen = false"
+            >
+              <i class="fas fa-phone-alt"></i>
+              <span>ติดต่อเรา</span>
+            </router-link>
+
             <router-link
               to="/signin-user"
               class="w-full px-4 py-2.5 text-center bg-gradient-to-r from-[#A8E6E2] to-[#C3E8D5] text-gray-700 rounded-xl hover:shadow-lg hover:shadow-[#C3E8D5]/20 transition-all duration-300 flex items-center justify-center gap-2 text-sm font-medium"

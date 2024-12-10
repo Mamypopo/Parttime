@@ -47,22 +47,31 @@
             >
               <!-- Profile Image -->
               <div class="flex flex-col items-center">
-                <div
-                  class="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-lg ring-4 ring-[#9899ee]/30 dark:ring-[#6667AA]/30 mb-4 cursor-pointer transform transition-transform hover:scale-105"
-                  @click="openImagePreview"
-                >
-                  <img
-                    v-if="user.profileImage"
-                    :src="adminUserStore.getProfileImage(user.profileImage)"
-                    :alt="user.fullName"
-                    class="w-full h-full object-cover"
-                    @error="$event.target.style.display = 'none'"
-                  />
+                <div class="relative group">
                   <div
-                    v-else
-                    class="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 flex items-center justify-center text-white font-medium text-3xl"
+                    class="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-lg ring-4 ring-[#9899ee]/30 dark:ring-[#6667AA]/30 mb-4 cursor-pointer transform transition-transform hover:scale-105"
+                    @click="openImagePreview"
                   >
-                    {{ user.fullName.charAt(0) }}
+                    <img
+                      v-if="user.profileImage"
+                      :src="adminUserStore.getProfileImage(user.profileImage)"
+                      :alt="user.fullName"
+                      class="w-full h-full object-cover"
+                      @error="$event.target.style.display = 'none'"
+                    />
+                    <div
+                      v-else
+                      class="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 flex items-center justify-center text-white font-medium text-3xl"
+                    >
+                      {{ user.fullName.charAt(0) }}
+                    </div>
+                  </div>
+                  <!-- เพิ่มส่วน overlay กับไอคอนกล้อง -->
+                  <div
+                    class="absolute w-32 h-32 md:w-40 md:h-40 inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full"
+                    @click="openImagePreview"
+                  >
+                    <i class="fas fa-camera text-white text-xl"></i>
                   </div>
                 </div>
                 <div class="text-center">

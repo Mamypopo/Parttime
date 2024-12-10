@@ -1,8 +1,8 @@
 <template>
   <div :class="{ dark: sidebarStore.isDarkMode }">
     <div class="min-h-screen dark:bg-gray-900 transition-colors duration-300">
-      <!-- แสดง Navbar เฉพาะเมื่อไม่ได้อยู่ใน route ของ admin หรือ user -->
-      <header v-if="!isAuthenticatedRoute">
+      <!-- แสดง Navbar เฉพาะเมื่อไม่ได้อยู่ใน route ของ admin หรือ user และ 404 -->
+      <header v-if="!isAuthenticatedRoute && !is404Page">
         <Navbar />
       </header>
       <RouterView />
@@ -30,6 +30,9 @@ export default {
     isAuthenticatedRoute() {
       const authenticatedRoutes = ['/admin', '/user']
       return authenticatedRoutes.some((route) => this.$route.path.startsWith(route))
+    },
+    is404Page() {
+      return this.$route.name === 'NotFound'
     }
   },
   mounted() {

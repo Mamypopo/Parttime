@@ -324,10 +324,58 @@
                         <div
                           class="mt-4 text-sm text-gray-600 space-y-4 max-h-[60vh] overflow-y-auto"
                         >
-                          <!-- เพิ่มเนื้อหาข้อกำหนดการใช้งานตรงนี้ -->
-                          <p>1. การยอมรับข้อกำหนด...</p>
-                          <p>2. การใช้งานระบบ...</p>
-                          <!-- เพิ่มเนื้อหาอื่นๆ -->
+                          <!-- เนื้อหาข้อกำหนดการใช้งาน -->
+                          <h4 class="font-medium text-gray-800">1. การยอมรับข้อกำหนด</h4>
+                          <p>
+                            การใช้บริการเว็บไซต์นี้ถือว่าท่านได้อ่านและยอมรับข้อกำหนดและเงื่อนไขทั้งหมด
+                            หากไม่เห็นด้วยกับข้อกำหนดใดๆ กรุณางดใช้บริการ
+                          </p>
+
+                          <h4 class="font-medium text-gray-800">2. คุณสมบัติผู้สมัคร</h4>
+                          <ul class="list-disc pl-6 space-y-2">
+                            <li>ต้องมีอายุ 18 ปีขึ้นไป</li>
+                            <li>มีเอกสารแสดงตัวตนที่ถูกต้องตามกฎหมาย</li>
+                            <li>สามารถทำงานในประเทศไทยได้อย่างถูกต้องตามกฎหมาย</li>
+                          </ul>
+
+                          <h4 class="font-medium text-gray-800">3. ความถูกต้องของข้อมูล</h4>
+                          <ul class="list-disc pl-6 space-y-2">
+                            <li>ข้อมูลที่ให้ต้องเป็นความจริงและถูกต้อง</li>
+                            <li>เอกสารประกอบการสมัครต้องเป็นเอกสารจริง ไม่ปลอมแปลง</li>
+                            <li>การให้ข้อมูลเท็จอาจส่งผลให้ถูกปฏิเสธการสมัครหรือเลิกจ้าง</li>
+                          </ul>
+
+                          <h4 class="font-medium text-gray-800">4. การใช้งานเว็บไซต์</h4>
+                          <ul class="list-disc pl-6 space-y-2">
+                            <li>ห้ามใช้โปรแกรมอัตโนมัติในการสมัครงาน</li>
+                            <li>ห้ามส่งไฟล์ที่มีไวรัสหรือมัลแวร์</li>
+                            <li>ห้ามพยายามเข้าถึงส่วนที่ไม่ได้รับอนุญาต</li>
+                          </ul>
+
+                          <h4 class="font-medium text-gray-800">5. การจัดการข้อมูล</h4>
+                          <ul class="list-disc pl-6 space-y-2">
+                            <li>ข้อมูลของท่านจะถูกเก็บไว้ในระบบตามนโยบายความเป็นส่วนตัว</li>
+                            <li>ท่านสามารถขอลบข้อมูลได้หากไม่ประสงค์ให้เก็บไว้</li>
+                            <li>เราอาจติดต่อท่านผ่านช่องทางที่ให้ไว้เกี่ยวกับการสมัครงาน</li>
+                          </ul>
+
+                          <h4 class="font-medium text-gray-800">6. การปฏิเสธการสมัคร</h4>
+                          <p>
+                            เราขอสงวนสิทธิ์ในการปฏิเสธการสมัครโดยไม่จำเป็นต้องชี้แจงเหตุผล
+                            ในกรณีที่พบว่าผู้สมัครไม่เหมาะสมหรือให้ข้อมูลอันเป็นเท็จ
+                          </p>
+
+                          <h4 class="font-medium text-gray-800">7. การเปลี่ยนแปลงข้อกำหนด</h4>
+                          <p>
+                            เราอาจปรับปรุงข้อกำหนดการใช้งานได้ตามความเหมาะสม
+                            โดยจะแจ้งให้ทราบผ่านทางเว็บไซต์
+                          </p>
+
+                          <h4 class="font-medium text-gray-800">8. กฎหมายที่ใช้บังคับ</h4>
+                          <p>
+                            ข้อกำหนดนี้อยู่ภายใต้กฎหมายไทย หากมีข้อพิพาทใดๆ
+                            ให้อยู่ภายใต้เขตอำนาจของศาลไทย
+                          </p>
                         </div>
                         <div class="mt-6 flex justify-end">
                           <button
@@ -457,10 +505,14 @@
             <span class="text-[#c779d0]">Medical</span> Services
           </div>
           <div class="flex gap-8 text-sm">
-            <span class="hover:text-[#c779d0] transition-colors cursor-pointer"
-              >นโยบายความเป็นส่วนตัว</span
-            >
-            <span class="hover:text-[#c779d0] transition-colors cursor-pointer">ติดต่อเรา</span>
+            <button @click.prevent="showPrivacyModal = true">
+              <span class="hover:text-[#c779d0] transition-colors cursor-pointer"
+                >นโยบายความเป็นส่วนตัว</span
+              >
+            </button>
+            <router-link to="/contact">
+              <span class="hover:text-[#c779d0] transition-colors cursor-pointer">ติดต่อเรา</span>
+            </router-link>
           </div>
         </div>
 
@@ -474,10 +526,14 @@
             </div>
           </div>
           <div class="flex gap-4 text-sm">
-            <span class="hover:text-[#c779d0] transition-colors cursor-pointer"
-              >นโยบายความเป็นส่วนตัว</span
-            >
-            <span class="hover:text-[#c779d0] transition-colors cursor-pointer">ติดต่อเรา</span>
+            <button @click.prevent="showPrivacyModal = true">
+              <span class="hover:text-[#c779d0] transition-colors cursor-pointer"
+                >นโยบายความเป็นส่วนตัว</span
+              >
+            </button>
+            <router-link to="/contact">
+              <span class="hover:text-[#c779d0] transition-colors cursor-pointer">ติดต่อเรา</span>
+            </router-link>
           </div>
         </div>
       </div>

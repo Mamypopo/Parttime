@@ -229,7 +229,7 @@
                     <!-- Comment Field -->
                     <div class="mb-4 md:mb-6">
                       <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 focus:outline-none focus:ring-2 focus:ring-[#EAC6FC]/50 transition-all duration-200"
                       >
                         ความคิดเห็นเพิ่มเติม <span class="text-red-500">*</span>
                       </label>

@@ -436,28 +436,31 @@ export const getRecentRegistrations = () => {
 // ดึงข้อมูลสถิติของ User
 export const getUserDashboardStats = async (userId) => {
     try {
-        const [averageRating, completedJobs, monthlyIncome] = await Promise.all([
+        const [workHistories, completedJobs, monthlyIncome] = await Promise.all([
             // คะแนนเฉลี่ย
-            prisma.workHistory.aggregate({
+            prisma.workHistory.findMany({
                 where: {
                     jobParticipation: {
                         user_id: userId,
                         status: 'completed'
                     }
                 },
-                _avg: {
+                select: {
+                    is_passed_evaluation: true,
+                    appearance_score: true,
+                    quality_score: true,
+                    quantity_score: true,
+                    manner_score: true,
+                    punctuality_score: true,
                     total_score: true
                 }
             }),
 
-            // จำนวนงานที่เสร็จสิ้นและได้รับการประเมิน
+            // นับจำนวนงานที่เสร็จสิ้นทั้งหมด
             prisma.jobParticipation.count({
                 where: {
                     user_id: userId,
-                    status: 'completed',
-                    workHistories: {
-                        some: {} // มีประวัติการประเมิน
-                    }
+                    status: 'completed'
                 }
             }),
 
@@ -502,8 +505,16 @@ export const getUserDashboardStats = async (userId) => {
             return total;
         }, 0);
 
+
+        const scores = workHistories.map(wh =>
+            wh.is_passed_evaluation ? (wh.total_score || 0) : 0
+        );
+
+        const averageScore = scores.length > 0
+            ? scores.reduce((a, b) => a + b, 0) / scores.length
+            : 0;
         return {
-            averageRating: Number(averageRating._avg.total_score || 0).toFixed(1),
+            averageRating: Number(averageScore).toFixed(1),
             completedJobs,
             monthlyIncome: totalMonthlyIncome
         };
