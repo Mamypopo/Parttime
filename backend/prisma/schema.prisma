@@ -12,7 +12,8 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
 }
 
 model User {
@@ -47,6 +48,7 @@ model User {
   Log                   Log[]
   notifications         Notification[] // ความสัมพันธ์กับ Notification
   pending_skills        PendingSkill[]
+
 }
 
 model PendingSkill {
@@ -93,6 +95,7 @@ model JobPosition {
   status           String             @default("open") // เพิ่มฟิลด์ status พร้อมค่าดีฟอลต์เป็น 'open'
   job              Job                @relation(fields: [job_id], references: [id], onDelete: Cascade) // ความสัมพันธ์กับ Job
   JobParticipation JobParticipation[] // ผู้เข้าร่วมในตำแหน่งนี้
+
 }
 
 model JobParticipation {
@@ -145,6 +148,7 @@ model Log {
   user_agent  String? // ข้อมูลเบราว์เซอร์
   user        User?    @relation(fields: [user_id], references: [id]) // ความสัมพันธ์กับผู้ใช้
   admin       Admin?   @relation(fields: [admin_id], references: [id]) // ความสัมพันธ์กับผู้ดูแลระบบ
+
 }
 
 model Admin {
@@ -161,6 +165,7 @@ model Admin {
   Job          Job[]
   Log          Log[]
   Notification Notification[]
+
 }
 
 model Notification {
@@ -175,4 +180,5 @@ model Notification {
   jobId     Int?
   read      Boolean  @default(false)
   type      String   @default("notification")
+
 }

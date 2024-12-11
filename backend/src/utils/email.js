@@ -1,59 +1,83 @@
 import nodemailer from 'nodemailer';
 
 // ใช้จริง
+export const sendVerificationEmail = async (user, token) => {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+
+    // สร้าง verification URL ที่ถูกต้อง
+    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+
+    const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to: user.email,
+        subject: 'ยืนยันอีเมลของคุณ',
+        html: `
+            <div style="font-family: 'Sarabun', sans-serif; max-width: 600px; margin: 0 auto;">
+                <h1>สวัสดี ${user.first_name} ${user.last_name}</h1>
+                <p>กรุณายืนยันอีเมลโดยคลิกที่ปุ่มด้านล่าง:</p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="${verificationUrl}" 
+                       style="background-color: #4CAF50; 
+                              color: white; 
+                              padding: 14px 28px; 
+                              text-decoration: none; 
+                              border-radius: 5px;
+                              font-size: 16px;">
+                        ยืนยันอีเมล
+                    </a>
+                </div>
+                <p>หรือคัดลอกลิงก์นี้ไปวางในเบราว์เซอร์:</p>
+                <p style="background-color: #f5f5f5; 
+                          padding: 10px; 
+                          border-radius: 5px; 
+                          word-break: break-all;">
+                    ${verificationUrl}
+                </p>
+                <p>ลิงก์นี้จะหมดอายุใน 24 ชั่วโมง</p>
+                <p>หากคุณไม่ได้ขอยืนยันอีเมล กรุณาละเว้นอีเมลนี้</p>
+            </div>
+        `
+    };
+
+    await transporter.sendMail(mailOptions);
+};
+
+
 // export const sendVerificationEmail = async (user, token) => {
+//     // สร้างบัญชีชั่วคราวสำหรับทดสอบ
+//     let testAccount = await nodemailer.createTestAccount();
+//     console.log(testAccount);
+
 //     const transporter = nodemailer.createTransport({
-//         service: 'gmail',
+//         host: 'smtp.ethereal.email',
+//         port: 587,
+//         secure: false, // false สำหรับ STARTTLS (พอร์ต 587)
 //         auth: {
-//             user: process.env.EMAIL_USER,
-//             pass: process.env.EMAIL_PASS
+//             user: testAccount.user,  // ใช้ username ที่สร้างจากบัญชีชั่วคราว
+//             pass: testAccount.pass   // ใช้ password ที่สร้างจากบัญชีชั่วคราว
 //         }
 //     });
 
 //     const mailOptions = {
-//         from: process.env.EMAIL_FROM,
+//         from: '"YourApp" <noreply@yourapp.com>',
 //         to: user.email,
-//         subject: 'ยืนยันอีเมลของคุณ',
+//         subject: 'Verify your email address',
 //         html: `
-//       <h1>สวัสดี ${user.first_name},</h1>
-//       <p>กรุณายืนยันอีเมลโดยคลิกที่ลิงก์ด้านล่าง:</p>
-//       <a href="${process.env.FRONTEND_URL}/verify-email?token=${token}">ยืนยันอีเมล</a>
+//       <h1>Hi ${user.first_name},</h1>
+//       <p>Please verify your email by clicking the link below:</p>
+//       <a href="http://localhost:8000/api/users/verify-email?token=${token}">Verify Email</a>
 //     `
 //     };
 
-//     await transporter.sendMail(mailOptions);
+//     let info = await transporter.sendMail(mailOptions);
+//     console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info)); // URL แสดงอีเมลที่ส่งไป
 // };
-
-
-export const sendVerificationEmail = async (user, token) => {
-    // สร้างบัญชีชั่วคราวสำหรับทดสอบ
-    let testAccount = await nodemailer.createTestAccount();
-    console.log(testAccount);
-
-    const transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false, // false สำหรับ STARTTLS (พอร์ต 587)
-        auth: {
-            user: testAccount.user,  // ใช้ username ที่สร้างจากบัญชีชั่วคราว
-            pass: testAccount.pass   // ใช้ password ที่สร้างจากบัญชีชั่วคราว
-        }
-    });
-
-    const mailOptions = {
-        from: '"YourApp" <noreply@yourapp.com>',
-        to: user.email,
-        subject: 'Verify your email address',
-        html: `
-      <h1>Hi ${user.first_name},</h1>
-      <p>Please verify your email by clicking the link below:</p>
-      <a href="http://localhost:8000/api/users/verify-email?token=${token}">Verify Email</a>
-    `
-    };
-
-    let info = await transporter.sendMail(mailOptions);
-    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info)); // URL แสดงอีเมลที่ส่งไป
-};
 
 
 

@@ -2,7 +2,7 @@
   <div :class="{ dark: sidebarStore.isDarkMode }">
     <div class="min-h-screen dark:bg-gray-900 transition-colors duration-300">
       <!-- แสดง Navbar เฉพาะเมื่อไม่ได้อยู่ใน route ของ admin หรือ user และ 404 -->
-      <header v-if="!isAuthenticatedRoute && !is404Page">
+      <header v-if="!isAuthenticatedRoute && !is404Page && !isVarifyemail">
         <Navbar />
       </header>
       <RouterView />
@@ -33,6 +33,9 @@ export default {
     },
     is404Page() {
       return this.$route.name === 'NotFound'
+    },
+    isVarifyemail() {
+      return this.$route.name === 'VerifyEmail'
     }
   },
   mounted() {

@@ -81,7 +81,7 @@ export const useAdminStore = defineStore('admin', {
             if (this.admin.profile_pic) {
                 this.profileImageUrl = `${import.meta.env.VITE_API_URL}/uploads/admin-profiles/${this.admin.profile_pic}`
             } else {
-                // ใช้รูป default ถ้าไม่มีรูปโปรไฟล์
+
                 this.profileImageUrl = new URL('@/assets/images/logosemed.svg', import.meta.url).href
             }
         },

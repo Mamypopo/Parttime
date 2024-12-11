@@ -137,10 +137,16 @@ const router = createRouter({
       ]
     },
     {
+      path: '/verify-email',
+      name: 'VerifyEmail',
+      component: () => import('@/views/VerifyEmail.vue')
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
       component: () => import('@/views/NotFound.vue')
-    }
+    },
+
   ]
 })
 

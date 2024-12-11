@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Hero Section -->
-    <div class="pt-32 pb-20 bg-gradient-to-b from-purple-50 via-white to-transparent">
+    <div class="pt-40 pb-20 bg-gradient-to-b from-purple-50 via-white to-transparent">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-3xl mx-auto">
           <h1

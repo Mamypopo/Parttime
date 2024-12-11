@@ -329,7 +329,7 @@
 
 <script>
 import JobSearch from '@/components/Search/JobSearch.vue'
-import JobDetailModal from '@/components/admin/jobs/JobDetailModal.vue'
+import JobDetailModal from '@/components/admin/Jobs/JobDetailModal.vue'
 import { useJobStore } from '@/stores/jobStore'
 
 export default {

@@ -172,7 +172,7 @@ export const useAdminUserStore = defineStore('adminUser', {
             }
         },
 
-
+        // ดึงผู้ใช้ที่มี สถานะ Rejected
         async fetchRejectedUsers() {
             this.loading = true
             try {
@@ -232,6 +232,7 @@ export const useAdminUserStore = defineStore('adminUser', {
             }
         },
 
+        // ดึงคนที่ online
         async fetchOnlineUsers() {
             try {
                 const response = await axios.get(`${this.baseURL}/api/admin/online-users`)
@@ -249,10 +250,7 @@ export const useAdminUserStore = defineStore('adminUser', {
             return null
         },
 
-        // ฟังก์ชันสำหรับดึงตัวอักษรแรกของชื่อ
-        getInitials(fullName) {
-            return fullName ? fullName.trim().charAt(0).toUpperCase() : ''
-        },
+
 
         setSearchFilters(filters) {
             this.searchFilters = { ...filters }

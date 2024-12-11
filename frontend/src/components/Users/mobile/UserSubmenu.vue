@@ -18,15 +18,17 @@
             class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-xl transition-all"
           >
             <!-- Header -->
-            <div class="bg-gradient-to-r from-[#A8E6E2] to-[#C3E8D5] p-4">
+            <div
+              class="bg-gradient-to-r from-[#A1C4FD] to-[#C2E9FB] dark:from-[#373B44] dark:to-[#A1C4FD] p-4"
+            >
               <div class="flex items-center gap-3">
                 <img
                   :src="userStore.getUser?.profile_image || defaultAvatar"
-                  class="w-12 h-12 rounded-full object-cover"
+                  class="w-12 h-12 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
                 />
                 <div>
-                  <h3 class="font-medium text-gray-800 dark:text-gray-200">
-                    {{ userStore.getUser?.first_name }}
+                  <h3 class="font-medium text-gray-800 dark:text-gray-100">
+                    {{ userStore.getUser?.first_name }} {{ userStore.getUser?.last_name }}
                   </h3>
                   <p class="text-sm text-gray-600 dark:text-gray-400">
                     {{ userStore.getUser?.email }}

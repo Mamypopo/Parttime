@@ -1,0 +1,37 @@
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:8000
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=development
+      - PORT=8000
+      - DATABASE_URL=postgresql://postgres:s123456789@db:5432/Parttime?schema=public&options=-c%20timezone=Asia%2FBangkok
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=s123456789
+      - POSTGRES_DB=Parttime
+      - TZ=Asia/Bangkok
+      - PGTZ=Asia/Bangkok
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command: ["postgres", "-c", "timezone=Asia/Bangkok"]
+volumes:
+  postgres_data:

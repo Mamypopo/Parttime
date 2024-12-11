@@ -149,8 +149,6 @@ import { useAdminStore } from '@/stores/adminStore'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 
-const baseURL = import.meta.env.VITE_API_URL
-
 export default {
   name: 'SignInAdminView',
   data() {
@@ -203,7 +201,7 @@ export default {
         })
 
         // 1. Login request
-        const response = await axios.post(`${baseURL}/api/admin/login-admin`, {
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/admin/login-admin`, {
           email: this.form.email,
           password: this.form.password
         })
