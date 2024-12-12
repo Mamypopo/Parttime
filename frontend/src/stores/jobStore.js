@@ -485,6 +485,7 @@ export const useJobStore = defineStore('job', {
                     }
                 )
 
+
                 if (response.data) {
                     this.jobs = response.data.jobs
                     this.pagination.totalItems = parseInt(response.data.pagination?.total || 0)

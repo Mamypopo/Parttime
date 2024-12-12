@@ -21,6 +21,9 @@ export default defineConfig({
     port: 3000,
     open: true, // เปิด browser อัตโนมัติเมื่อรัน
     host: true, // เปิดให้เข้าถึงจากภายนอกได้
+    watch: {
+      usePolling: true
+    },
     strictPort: true, // จะ error ถ้า port ถูกใช้งานอยู่
   },
   plugins: [

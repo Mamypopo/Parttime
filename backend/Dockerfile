@@ -12,6 +12,7 @@ COPY prisma ./prisma/
 # ติดตั้ง dependencies
 RUN npm install
 
+RUN npm install -g nodemon
 # Copy source code
 COPY . .
 

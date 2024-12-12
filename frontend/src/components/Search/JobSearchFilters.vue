@@ -135,12 +135,21 @@
           </button>
 
           <!-- ล้าง -->
-          <button
-            @click="handleClear"
-            class="p-2.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-200"
-          >
-            <i class="fas fa-undo"></i>
-          </button>
+          <div class="relative group">
+            <button
+              @click="handleClear"
+              class="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600/50 hover:text-purple-500 dark:hover:text-purple-400 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-400/50 active:scale-95 shadow-sm"
+            >
+              <i class="fas fa-undo text-lg"></i>
+            </button>
+
+            <!-- Tooltip -->
+            <div
+              class="absolute -bottom-8 left-1/2 -translate-x-1/2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap"
+            >
+              ล้างการค้นหา
+            </div>
+          </div>
         </div>
       </div>
     </transition>
@@ -252,7 +261,7 @@ export default {
       }
       this.selectedPosition = ''
       jobStore.clearUserSearchFilters()
-      jobStore.searchJobs()
+      jobStore.fetchJobs()
     },
 
     toggleMatchSkills() {

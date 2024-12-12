@@ -39,7 +39,7 @@
             <div class="flex flex-col md:flex-row h-[calc(100vh-200px)]">
               <!-- Left Sidebar - Position Tabs & User List -->
               <div
-                class="w-full md:w-1/3 h-[250px] md:h-auto border-b md:border-r border-gray-200 dark:border-gray-700 flex flex-col"
+                class="w-full md:w-1/3 h-[250px] md:h-auto md:border-r border-gray-200 dark:border-gray-700 flex flex-col"
               >
                 <!-- Position Tabs -->
                 <div class="border-b border-gray-200 dark:border-gray-700">
@@ -236,7 +236,7 @@
                       <textarea
                         v-model="comments[selectedParticipant.id]"
                         rows="3"
-                        class="w-full px-3 md:px-4 py-2 text-sm md:text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#6ED7D1] dark:focus:ring-[#4B9592] focus:border-transparent dark:bg-gray-800"
+                        class="w-full px-3 md:px-4 py-2 text-sm md:text-base border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-[#6ED7D1] dark:focus:ring-[#4B9592] focus:border-transparent dark:bg-gray-800 focus:outline-none"
                         placeholder="กรุณาใส่ความคิดเห็น..."
                       ></textarea>
                     </div>

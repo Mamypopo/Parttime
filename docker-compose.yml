@@ -5,12 +5,17 @@ services:
       args:
         VITE_API_URL: http://localhost:8000
     ports:
-      - "3000:80"
+      - "3000:3000" 
+    volumes: 
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev
     depends_on:
       backend:
         condition: service_healthy
     environment:
       - VITE_API_URL=http://localhost:8000
+      - CHOKIDAR_USEPOLLING=true 
     networks:
       - app-network 
     healthcheck:
@@ -30,6 +35,8 @@ services:
       - uploads_data:/app/uploads
       - ./backend/.env:/app/.env 
       - ./backend/prisma:/app/prisma
+      - ./backend:/app 
+      - /app/node_modules  
     environment:
       - NODE_ENV=development
       - PORT=8000

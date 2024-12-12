@@ -159,24 +159,23 @@
               class="flex-1 py-2.5 px-4 rounded-lg font-medium transition-all duration-300 hover:scale-[1.02] relative overflow-hidden group"
               :class="[
                 getJobStatus(job) === 'completed'
-                  ? 'bg-gray-400 cursor-not-allowed'
+                  ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
                   : getJobStatus(job) === 'in_progress'
-                    ? 'bg-amber-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] hover:shadow-lg hover:shadow-[#c779d0]/20'
+                    ? 'bg-amber-400 dark:bg-amber-500/80 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] dark:from-[#feac5e]/80 dark:via-[#c779d0]/80 dark:to-[#4bc0c8]/80 hover:shadow-lg hover:shadow-[#c779d0]/20 dark:hover:shadow-[#c779d0]/10'
               ]"
               :disabled="getJobStatus(job) !== 'published'"
             >
-              <!-- เพิ่ม Effect ไฟกระพริบ -->
+              <!--  Effect ไฟกระพริบ -->
               <span
-                class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"
+                class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000 dark:via-white/10"
               ></span>
 
-              <span class="relative flex items-center justify-center text-white">
+              <span class="relative flex items-center justify-center text-white dark:text-white/90">
                 <i class="fas fa-paper-plane mr-2 group-hover:animate-bounce"></i>
                 <span class="group-hover:tracking-wider transition-all duration-300">สมัครงาน</span>
               </span>
             </button>
-
             <!-- สถานะการสมัคร -->
             <div
               v-else
@@ -321,15 +320,7 @@ export default {
 
       return canApply
     },
-    getApplyButtonTooltip(job) {
-      if (this.getJobStatus(job) === 'in_progress') {
-        return 'งานกำลังดำเนินการอยู่ ไม่สามารถสมัครได้'
-      }
-      if (!this.canApply(job)) {
-        return 'ตำแหน่งงานเต็มแล้ว หรือปิดรับสมัคร'
-      }
-      return ''
-    },
+
     // เช็คว่าผู้ใช้สมัครงานนี้แล้วหรือยัง
     hasAppliedForJob(job) {
       const userId = this.userStore.user?.id
@@ -344,7 +335,7 @@ export default {
       for (const position of job.JobPositions || []) {
         const participation = position.JobParticipation?.find((p) => p.user_id === userId)
         if (participation) {
-          return participation.status
+          return participation.status // 'pending', 'approved', 'rejected', 'completed'
         }
       }
       return null
@@ -360,7 +351,7 @@ export default {
         case 'rejected':
           return 'text-rose-600 dark:text-rose-400 border-rose-400 bg-rose-50 dark:bg-rose-900/20'
         case 'completed':
-          return 'text-blue-600 dark:text-blue-400 border-blue-400 bg-blue-50 dark:bg-blue-900/20' // โทนน้ำเงิน
+          return 'text-blue-600 dark:text-blue-400 border-blue-400 bg-blue-50 dark:bg-blue-900/20'
         default:
           return 'text-gray-600 dark:text-gray-400 border-gray-400 bg-gray-50 dark:bg-gray-900/20'
       }

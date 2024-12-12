@@ -501,23 +501,67 @@ export const getMyCreatedJobsCount = async (adminId, filters = {}) => {
 };
 
 
-
 // ฟังก์ชันสำหรับอัปเดตงาน
-export const updateJobMain = (jobId, jobData) =>
-    prisma.job.update({
-        where: { id: jobId },
-        data: {
-            title: jobData.title,
-            work_date: new Date(jobData.work_date),
-            location: jobData.location,
-            start_time: new Date(jobData.start_time),
-            end_time: new Date(jobData.end_time),
-            details: jobData.details
-        },
-        include: {
-            JobPositions: true
-        }
-    });
+export const updateJobMain = (jobId, jobData) => {
+
+    // แยกข้อมูลที่ต้องการอัพเดท
+    const { positions, ...mainJobData } = jobData;
+
+    // เช็คสถานะตามวันที่ใหม่
+    const today = new Date();
+    const workDate = new Date(mainJobData.work_date);
+
+    // Reset เวลาเป็น 00:00:00 เพื่อเปรียบเทียบเฉพาะวัน
+    today.setHours(0, 0, 0, 0);
+    workDate.setHours(0, 0, 0, 0);
+
+    // กำหนดสถานะตามวันที่
+    let status;
+    if (workDate > today) {
+        status = 'published';
+    } else if (workDate.getTime() === today.getTime()) {
+        status = 'in_progress';
+    } else {
+        status = 'completed';
+    }
+
+
+    try {
+        // อัพเดทข้อมูลงานพร้อมสถานะ
+        const updatedJob = prisma.job.update({
+            where: {
+                id: jobId
+            },
+            data: {
+                title: mainJobData.title,
+                location: mainJobData.location,
+                work_date: workDate,
+                start_time: new Date(mainJobData.start_time),
+                end_time: new Date(mainJobData.end_time),
+                details: mainJobData.details,
+                status: status,  // อัพเดทสถานะ
+                updated_at: new Date()  // อัพเดทเวลาแก้ไข
+            },
+            include: {
+                JobPositions: true,
+                creator: {
+                    select: {
+                        id: true,
+                        email: true,
+                        first_name: true,
+                        last_name: true
+                    }
+                }
+            }
+        });
+
+        return updatedJob;
+
+    } catch (error) {
+        console.error('Error updating job:', error);
+        throw error;
+    }
+};
 
 // อัปเดตตำแหน่งงาน
 export const updateJobPosition = (positionId, positionData) =>
@@ -914,7 +958,9 @@ export const searchJobs = async (page = 1, pageSize = 10, filters = {}) => {
                         },
                         select: {
                             id: true,
-                            status: true
+                            status: true,
+                            created_at: true,
+                            user_id: true
                         }
                     }
                 }

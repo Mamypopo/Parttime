@@ -73,7 +73,7 @@ export const getAllJobs = [
                 status: req.query.status,
                 minWage: req.query.minWage ? parseInt(req.query.minWage) : undefined,
                 maxWage: req.query.maxWage ? parseInt(req.query.maxWage) : undefined,
-                position: req.query.position
+                position: req.query.position,
             };
 
             const jobs = await jobModel.getAllJobs(page, pageSize, filters, userId);
@@ -159,6 +159,8 @@ export const editJob = async (req, res) => {
     const updatedJobData = req.body;
     const ip = req.ip || 'Unknown IP';
     const userAgent = req.headers['user-agent'] || 'Unknown User Agent';
+
+
     try {
         const existingJob = await jobModel.getJobByIdforUpdate(parseInt(jobId));
         if (!existingJob) {
@@ -546,6 +548,7 @@ export const searchJobs = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const pageSize = parseInt(req.query.pageSize) || 10;
         const userId = req.user?.id; // ดึง user ID จาก token
+
 
         // สร้าง filters object จาก query parameters
         const filters = {
