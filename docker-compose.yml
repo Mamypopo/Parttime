@@ -1,24 +1,51 @@
-
 services:
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:8000
     ports:
       - "3000:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     environment:
       - VITE_API_URL=http://localhost:8000
+    networks:
+      - app-network 
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   backend:
     build: ./backend
     ports:
       - "8000:8000"
+  
+    command: npm start 
+    volumes:
+      - uploads_data:/app/uploads
+      - ./backend/.env:/app/.env 
+      - ./backend/prisma:/app/prisma
     environment:
       - NODE_ENV=development
       - PORT=8000
       - DATABASE_URL=postgresql://postgres:s123456789@db:5432/Parttime?schema=public&options=-c%20timezone=Asia%2FBangkok
+     
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   db:
     image: postgres:15-alpine
@@ -33,5 +60,34 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     command: ["postgres", "-c", "timezone=Asia/Bangkok"]
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+
+  pgadmin:    
+    image: dpage/pgadmin4
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - app-network
+    depends_on:
+      - db
 volumes:
+  uploads_data:
   postgres_data:
+  pgadmin_data: 
+
+networks:
+  app-network:
+    driver: bridge

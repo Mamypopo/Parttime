@@ -22,8 +22,8 @@ RUN npx prisma generate
 RUN npm rebuild bcrypt --build-from-source
 
 # For file uploads
-RUN mkdir -p uploads/admin-profiles
-RUN chmod 777 uploads/admin-profiles
+RUN mkdir -p uploads/admin-profiles uploads/certificates uploads/documents uploads/profiles
+RUN chmod 777 uploads/admin-profiles uploads/certificates uploads/documents uploads/profiles
 
 EXPOSE 8000
 
