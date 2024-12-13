@@ -64,7 +64,7 @@ export const useUserHistoryStore = defineStore('userHistory', {
                     throw new Error('ไม่พบข้อมูลการประเมิน')
                 }
 
-                // รับ format ใหม่จาก API
+
                 const { scores, comment, isPassed, jobTitle } = response.data
 
                 return {

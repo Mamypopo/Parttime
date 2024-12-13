@@ -213,6 +213,17 @@
 
                           <!-- Rating Display -->
                           <div v-if="participant.workHistories?.length" class="mb-2">
+                            <!-- เพิ่มวันที่ประเมิน -->
+                            <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">
+                              <i class="fas fa-calendar-alt mr-1.5"></i>
+                              วันที่ประเมิน:
+                              {{
+                                new Date(
+                                  participant.workHistories[0].created_at
+                                ).toLocaleDateString()
+                              }}
+                            </div>
+
                             <!-- เพิ่มส่วนแสดงสถานะ -->
                             <div class="mb-3">
                               <span
@@ -766,30 +777,10 @@ select option:hover {
   background: #a8a8a8;
 }
 
-/* Dark mode scrollbar */
 @media (prefers-color-scheme: dark) {
-  .modal-scroll::-webkit-scrollbar-track {
-    background: #1f2937;
-  }
-
-  .modal-scroll::-webkit-scrollbar-thumb {
-    background: #4b9592;
-  }
-
-  .modal-scroll::-webkit-scrollbar-thumb:hover {
-    background: #3d7a78;
-  }
-
-  .overflow-auto::-webkit-scrollbar-track {
-    background: #1f2937;
-  }
-
-  .overflow-auto::-webkit-scrollbar-thumb {
-    background: #4b9592;
-  }
-
-  .overflow-auto::-webkit-scrollbar-thumb:hover {
-    background: #3d7a78;
+  .modal-scroll::-webkit-scrollbar,
+  .overflow-auto::-webkit-scrollbar {
+    display: none;
   }
 }
 </style>

@@ -161,7 +161,7 @@
                 getJobStatus(job) === 'completed'
                   ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
                   : getJobStatus(job) === 'in_progress'
-                    ? 'bg-amber-400 dark:bg-amber-500/80 cursor-not-allowed'
+                    ? 'bg-amber-400 dark:bg-amber-500/80 cursor-not-allowed '
                     : 'bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] dark:from-[#feac5e]/80 dark:via-[#c779d0]/80 dark:to-[#4bc0c8]/80 hover:shadow-lg hover:shadow-[#c779d0]/20 dark:hover:shadow-[#c779d0]/10'
               ]"
               :disabled="getJobStatus(job) !== 'published'"

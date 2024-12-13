@@ -26,6 +26,7 @@ ChartJS.register(
   Legend,
   Filler
 )
+
 export default {
   name: 'IncomeChart',
   components: { Line },
@@ -48,9 +49,18 @@ export default {
             label: 'รายได้',
             data: this.getIncomeData(),
             borderColor: '#0ea5e9',
-            backgroundColor: 'rgba(14, 165, 233, 0.1)',
+            backgroundColor: (context) => {
+              const gradient = context.chart.ctx.createLinearGradient(0, 0, 0, context.chart.height)
+              gradient.addColorStop(0, 'rgba(14, 165, 233, 0.5)')
+              gradient.addColorStop(1, 'rgba(255, 255, 255, 0)')
+              return gradient
+            },
             fill: true,
-            tension: 0.4
+            tension: 0.4,
+            pointBorderColor: '#0ea5e9',
+            pointBackgroundColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 5
           }
         ]
       }
@@ -59,17 +69,52 @@ export default {
       return {
         responsive: true,
         maintainAspectRatio: false,
+        animation: {
+          duration: 1000,
+          easing: 'easeOutBounce'
+        },
         plugins: {
           legend: {
             display: false
+          },
+          tooltip: {
+            callbacks: {
+              title: (tooltipItems) => `วันที่: ${tooltipItems[0].label}`,
+              label: (tooltipItem) => `รายได้: ฿${tooltipItem.raw.toLocaleString()}`
+            }
+          },
+          annotation: {
+            annotations: {
+              line1: {
+                type: 'line',
+                yMin: 300,
+                yMax: 300,
+                borderColor: 'red',
+                borderWidth: 2,
+                label: {
+                  content: 'เป้าหมาย',
+                  enabled: true,
+                  position: 'start'
+                }
+              }
+            }
           }
         },
         scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'ช่วงเวลา'
+            }
+          },
           y: {
             beginAtZero: true,
-
             ticks: {
               callback: (value) => `฿${value.toLocaleString()}`
+            },
+            title: {
+              display: true,
+              text: 'รายได้ (บาท)'
             }
           }
         }
@@ -83,7 +128,6 @@ export default {
 
       switch (this.range) {
         case 'daily':
-          // 7 วันล่าสุด
           for (let i = 6; i >= 0; i--) {
             const date = new Date(today)
             date.setDate(date.getDate() - i)
@@ -92,7 +136,6 @@ export default {
           break
 
         case 'weekly':
-          // 4 สัปดาห์ล่าสุด
           for (let i = 3; i >= 0; i--) {
             const date = new Date(today)
             date.setDate(date.getDate() - i * 7)
@@ -101,7 +144,6 @@ export default {
           break
 
         case 'monthly':
-          // 6 เดือนล่าสุด
           for (let i = 5; i >= 0; i--) {
             const date = new Date(today)
             date.setMonth(date.getMonth() - i)
@@ -110,7 +152,6 @@ export default {
           break
 
         case 'yearly':
-          // แสดง 5 ปีย้อนหลัง
           for (let i = 4; i >= 0; i--) {
             const date = new Date(today)
             date.setFullYear(date.getFullYear() - i)
@@ -127,7 +168,6 @@ export default {
       const labels = this.getLabels()
 
       labels.forEach((label) => {
-        // คำนวณรายได้ตามช่วงเวลา
         const amount = this.calculateIncomeForLabel(label)
         data.push(amount)
       })
@@ -170,3 +210,21 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+/* เพิ่ม Animation ของกราฟ */
+.chartjs-render-monitor {
+  animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>
