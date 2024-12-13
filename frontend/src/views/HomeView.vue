@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Hero Section -->
-    <div class="pt-40 pb-20 bg-gradient-to-b from-purple-50 via-white to-transparent">
+    <div class="pt-40 pb-20 animated-bg bg-gradient-to-b from-purple-50 via-white to-transparent">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-3xl mx-auto">
           <h1
@@ -16,13 +16,13 @@
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <router-link
               to="/signup-user"
-              class="px-8 py-3 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] text-white rounded-xl hover:shadow-lg transition-all transform hover:-translate-y-0.5"
+              class="px-8 py-3 bg-gradient-to-r from-[#FF6B6B] to-[#FF8E53] hover:bg-gradient-to-r hover:from-[#FF8E53] hover:to-[#FF6B6B] text-white rounded-xl hover:shadow-lg transition-all transform hover:-translate-y-0.5 pulse-btn"
             >
               สมัครงานเลย
             </router-link>
             <a
               href="#features"
-              class="px-8 py-3 text-gray-700 bg-white rounded-xl border border-gray-200 hover:border-purple-200 hover:bg-purple-50 transition-all"
+              class="px-8 py-3 text-gray-700 bg-white rounded-xl border border-gray-200 hover:border-purple-200 hover:bg-purple-50 hover:shadow-lg transition-all"
             >
               ดูรายละเอียด
             </a>
@@ -117,10 +117,10 @@ html {
 /* Adjust the padding and spacing in smaller screens */
 @media (max-width: 768px) {
   .container {
-    padding-top: 4rem; /* เพิ่ม padding ด้านบน */
+    padding-top: 4rem;
   }
   img {
-    margin-bottom: 0; /* ลดช่องว่างใต้รูป */
+    margin-bottom: 0;
   }
 }
 
@@ -139,5 +139,37 @@ html {
 .grid,
 .max-w-4xl {
   animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes gradientBackground {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+.animated-bg {
+  background: linear-gradient(-45deg, #6b7f5e, #9fe7dd, #c5b4e3, #eac6fc);
+  background-size: 300% 300%;
+  animation: gradientBackground 15s ease infinite;
+}
+
+@keyframes pulseEffect {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.pulse-btn {
+  animation: pulseEffect 2s infinite;
 }
 </style>

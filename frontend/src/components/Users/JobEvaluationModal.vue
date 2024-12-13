@@ -110,6 +110,15 @@
                     </h3>
                     <p class="text-gray-600 dark:text-gray-300">{{ evaluation.comment }}</p>
                   </div>
+
+                  <!-- วันที่ประเมิน -->
+                  <div class="evaluation-date mt-4 text-right">
+                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                      <i class="fas fa-calendar-alt mr-2"></i>
+                      ประเมินเมื่อ:
+                      {{ evaluation?.created_at ? formatDate(evaluation.created_at) : 'ไม่ระบุ' }}
+                    </span>
+                  </div>
                 </div>
               </DialogPanel>
             </TransitionChild>

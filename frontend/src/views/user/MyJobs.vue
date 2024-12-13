@@ -2,7 +2,7 @@
   <div class="p-4 md:p-6 transition-all duration-300 ease-in-out">
     <!-- Header -->
     <div
-      class="flex justify-between items-center bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8]ห text-white py-4 px-6 rounded-lg shadow-md"
+      class="flex justify-between items-center bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] text-white py-4 px-6 rounded-lg shadow-md"
     >
       <h1 class="text-2xl sm:text-3xl font-semibold">งานของฉัน</h1>
 

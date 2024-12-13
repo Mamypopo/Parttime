@@ -140,8 +140,8 @@
             <div class="px-4 py-3">
               <div class="flex items-center justify-between text-sm mb-2">
                 <span class="text-gray-600">สถานะงาน</span>
-                <span :class="getStatusClass(getJobStatus(job))">
-                  {{ getStatusText(getJobStatus(job)) }}
+                <span :class="getStatusClass(job.status)">
+                  {{ getStatusText(job.status) }}
                 </span>
               </div>
               <div class="relative pt-1">
@@ -478,15 +478,6 @@ export default {
 
     //คืนค่าสถานะของงานตามวันเวลาปัจจุบันและวันที่ทำงานของงาน
     getJobStatus(job) {
-      // ถ้ามีผู้สมัครที่ completed แล้ว ให้ถือว่างานเสร็จสิ้น
-      const hasCompletedParticipants = job.JobPositions?.some((position) =>
-        position.JobParticipation?.some((p) => p.status === 'completed')
-      )
-
-      if (hasCompletedParticipants) {
-        return 'completed'
-      }
-
       // ดูสถานะจริงของงานก่อน
       if (job.status === 'completed') {
         return 'completed'

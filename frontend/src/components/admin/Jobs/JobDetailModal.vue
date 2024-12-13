@@ -105,6 +105,19 @@
                     </div>
                   </div>
 
+                  <!-- รายละเอียดเพิ่มเติม -->
+                  <div v-if="job?.details" class="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl">
+                    <h4
+                      class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center mb-2"
+                    >
+                      <i class="fas fa-info-circle mr-2 text-[#81E2C4] dark:text-[#4B9592]"></i
+                      >รายละเอียดเพิ่มเติม
+                    </h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line">
+                      {{ job?.details }}
+                    </p>
+                  </div>
+
                   <!-- ตำแหน่งงาน -->
                   <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl">
                     <h4
@@ -190,19 +203,6 @@
                         </div>
                       </div>
                     </div>
-                  </div>
-
-                  <!-- รายละเอียดเพิ่มเติม -->
-                  <div v-if="job?.details" class="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl">
-                    <h4
-                      class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center mb-2"
-                    >
-                      <i class="fas fa-info-circle mr-2 text-[#81E2C4] dark:text-[#4B9592]"></i
-                      >รายละเอียดเพิ่มเติม
-                    </h4>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-line">
-                      {{ job?.details }}
-                    </p>
                   </div>
                 </div>
               </div>

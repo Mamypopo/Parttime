@@ -108,6 +108,7 @@
           <input
             v-model="filters.workDate"
             type="date"
+            @input="debouncedSearch"
             class="min-w-[120px] px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100"
           />
 

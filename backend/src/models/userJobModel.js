@@ -49,7 +49,9 @@ export const getMyJobs = async (userId) => {
                         punctuality_score: true,
                         total_score: true,
                         comment: true,
-                        is_passed_evaluation: true
+                        is_passed_evaluation: true,
+                        created_at: true,
+                        updated_at: true
                     }
                 }
             },
