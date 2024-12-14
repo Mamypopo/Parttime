@@ -97,22 +97,23 @@ export const updateJobStatuses = async () => {
                         console.error(`Failed to notify admin for job ${job.id}:`, notifyError.message);
                     }
                 }
-                // รวบรวมผู้เข้าร่วมงานจากทุกตำแหน่ง
-                // const participants = updatedJob.JobPositions.flatMap(position =>
-                //     position.JobParticipation.map(participation => participation.user)
-                // );
-                // // แจ้งเตือนผู้สมัครงาน
-                // if (participants.length > 0 && userMessage) {
-                //     const notificationPromises = participants.map(participant =>
-                //         notificationModel.createUserNotification({
-                //             userId: participant.user_id,
-                //             content: userMessage,
-                //             type: 'job_status_update',
-                //             jobId: job.id
-                //         })
-                //     );
-                //     await Promise.all(notificationPromises);
-                // }
+
+                รวบรวมผู้เข้าร่วมงานจากทุกตำแหน่ง
+                const participants = updatedJob.JobPositions.flatMap(position =>
+                    position.JobParticipation.map(participation => participation.user)
+                );
+                // แจ้งเตือนผู้สมัครงาน
+                if (participants.length > 0 && userMessage) {
+                    const notificationPromises = participants.map(participant =>
+                        notificationModel.createUserNotification({
+                            userId: participant.user_id,
+                            content: userMessage,
+                            type: 'job_status_update',
+                            jobId: job.id
+                        })
+                    );
+                    await Promise.all(notificationPromises);
+                }
 
             }
         }

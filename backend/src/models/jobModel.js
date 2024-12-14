@@ -689,7 +689,19 @@ export const createJobParticipation = async (userId, jobId, jobPositionId) => {
 // ฟังก์ชันตรวจสอบการสมัครงานที่มีอยู่แล้ว
 export const findExistingJobParticipation = (userId, jobId, jobPositionId) =>
     prisma.jobParticipation.findFirst({
-        where: { user_id: userId, jobId, job_position_id: jobPositionId }
+        where: {
+            user_id: userId, jobId, job_position_id: jobPositionId,
+            status: {
+                in: ['pending', 'approved'] // สถานะที่สามารถยกเลิกได้
+            }
+        },
+        include: {
+            jobPosition: {
+                include: {
+                    job: true
+                }
+            }
+        }
     });
 
 
@@ -730,6 +742,14 @@ export const findExistingDayApplication = async (userId, workDate) => {
         console.error('Error in findExistingDayApplication:', error);
         return null;
     }
+};
+
+// ฟังก์ชันอัปเดตสถานะการสมัครงาน ยกเลิกคำขอสมัครงาน
+export const updateJobParticipationStatus = async (participationId, newStatus) => {
+    return prisma.jobParticipation.update({
+        where: { id: participationId },
+        data: { status: newStatus }
+    });
 };
 
 // ฟังก์ชันเพื่ออัปเดตจำนวนคนที่เหลือใน JobPosition พร้อมอัปเดตสถานะ

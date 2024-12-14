@@ -180,6 +180,7 @@ export default {
         { label: 'สถานะงาน', value: 'job_status_update' },
         { label: 'ยืนยันตัวตน', value: 'user_verification' },
         { label: 'ประเมินผล', value: 'evaluation' },
+        { label: 'ยกเลิก', value: 'job_application_cancelled_admin' },
         { label: 'ระบบ', value: 'system' }
       ]
     }
@@ -221,24 +222,26 @@ export default {
     },
     getIconClass(type) {
       const classes = {
-        job_application: 'text-[#A8E6E2] dark:text-[#6ED7D1]',
-        job_status_update: 'text-[#CDE45F] dark:text-[#9AB52D]',
-        user_verification: 'text-[#EABF71] dark:text-[#D99F41]',
-        evaluation: 'text-[#9899ee] dark:text-[#6667AA]',
-        system: 'text-[#EA6B6B] dark:text-[#D45454]',
-        default: 'text-[#A8E6E2] dark:text-[#6ED7D1]'
+        job_application: 'bg-gradient-to-br from-[#89CFF0] to-[#4682B4]',
+        job_status_update: 'bg-gradient-to-br from-[#6FCF97] to-[#27AE60]',
+        user_verification: 'bg-gradient-to-br from-[#F2C94C] to-[#F2994A]',
+        evaluation: 'bg-gradient-to-br from-[#A29BFE] to-[#6C5CE7]',
+        system: 'bg-gradient-to-br from-[#BDC3C7] to-[#95A5A6]',
+        job_application_cancelled_admin: 'bg-gradient-to-br from-[#EB5757] to-[#C0392B]',
+        default: 'bg-gradient-to-br from-[#89CFF0] to-[#4682B4]'
       }
       return classes[type] || classes.default
     },
 
     getIcon(type) {
       const icons = {
-        job_application: 'fas fa-briefcase',
-        job_status_update: 'fas fa-clock',
-        user_verification: 'fas fa-user-check',
-        evaluation: 'fas fa-star',
-        system: 'fas fa-bell',
-        default: 'fas fa-bell'
+        job_application: 'fas fa-briefcase text-white',
+        job_status_update: 'fas fa-clock text-white',
+        user_verification: 'fas fa-user-check text-white',
+        evaluation: 'fas fa-star text-white',
+        system: 'fas fa-bell text-white',
+        default: 'fas fa-bell text-whitetext-white ',
+        job_application_cancelled_admin: 'fas fa-ban text-white'
       }
       return icons[type] || icons.default
     },
@@ -250,7 +253,8 @@ export default {
         job_status_update: 'fas fa-clock text-[#81E2C4] dark:text-[#6ED7D1]',
         user_verification: 'fas fa-user-check text-[#81E2C4] dark:text-[#6ED7D1]',
         evaluation: 'fas fa-star text-[#81E2C4] dark:text-[#6ED7D1]',
-        system: 'fas fa-bell text-[#81E2C4] dark:text-[#6ED7D1]'
+        system: 'fas fa-bell text-[#81E2C4] dark:text-[#6ED7D1]',
+        job_application_cancelled_admin: 'fas fa-ban text-[#81E2C4] dark:text-[#6ED7D1]'
       }
       return icons[value]
     },

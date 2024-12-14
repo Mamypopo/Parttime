@@ -15,7 +15,8 @@ export const useNotificationStore = defineStore('notification', {
             JOB_STATUS_UPDATE: 'job_status_update',  // สถานะงานเปลี่ยน
             USER_VERIFICATION: 'user_verification',   // มีการยืนยันตัวตนใหม่
             EVALUATION: 'evaluation',                // มีการประเมินงาน
-            SYSTEM: 'system'                         // แจ้งเตือนจากระบบ
+            SYSTEM: 'system',                      // แจ้งเตือนจากระบบ
+            JOB_APPLICATION_CANCELLED: 'job_application_cancelled_admin' // แจ้งเตือนการยกเลิกสมัครงาน
         }
     }),
     getters: {

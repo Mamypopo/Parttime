@@ -26,7 +26,7 @@
           >
             <!-- Modal Container -->
             <HeadlessDialogPanel
-              class="w-full max-w-4xl rounded-xl shadow-xl overflow-hidden bg-white dark:bg-gray-800"
+              class="w-full max-w-5xl rounded-xl shadow-xl overflow-hidden bg-white dark:bg-gray-800"
               @click.stop
             >
               <!-- Header -->
@@ -57,13 +57,13 @@
               </div>
 
               <!-- Filters -->
-              <div class="p-6 border-b bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+              <div class="p-5 border-b bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
                 <div class="flex gap-3">
                   <button
                     v-for="filter in filters"
                     :key="filter.value"
                     @click="currentFilter = filter.value"
-                    class="px-4 py-2 text-sm rounded-full transition-all duration-200 flex items-center gap-2"
+                    class="px-3 py-2 text-sm rounded-xl transition-all duration-200 flex items-center gap-2"
                     :class="
                       currentFilter === filter.value
                         ? 'bg-[#babbec] dark:bg-[#6667aa] text-white shadow-md'
@@ -196,6 +196,7 @@ export default {
         { label: 'สถานะงาน', value: 'job_status_update' },
         { label: 'ยืนยันตัวตน', value: 'user_verification' },
         { label: 'ประเมินผล', value: 'evaluation' },
+        { label: 'ยกเลิก', value: 'job_application_cancelled_admin' },
         { label: 'ระบบ', value: 'system' }
       ]
     }
@@ -221,12 +222,30 @@ export default {
   methods: {
     getIconClass(type) {
       const classes = {
-        user: 'text-[#CDE45F] dark:text-[#d4e474]',
-        job: 'bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400',
-        default: 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+        job_application: 'bg-gradient-to-br from-[#89CFF0] to-[#4682B4]',
+        job_status_update: 'bg-gradient-to-br from-[#6FCF97] to-[#27AE60]',
+        user_verification: 'bg-gradient-to-br from-[#F2C94C] to-[#F2994A]',
+        evaluation: 'bg-gradient-to-br from-[#A29BFE] to-[#6C5CE7]',
+        system: 'bg-gradient-to-br from-[#BDC3C7] to-[#95A5A6]',
+        job_application_cancelled_admin: 'bg-gradient-to-br from-[#EB5757] to-[#C0392B]',
+        default: 'bg-gradient-to-br from-[#89CFF0] to-[#4682B4]'
       }
       return classes[type] || classes.default
     },
+
+    getIcon(type) {
+      const icons = {
+        job_application: 'fas fa-briefcase text-white',
+        job_status_update: 'fas fa-clock text-white',
+        user_verification: 'fas fa-user-check text-white',
+        evaluation: 'fas fa-star text-white',
+        system: 'fas fa-bell text-white',
+        job_application_cancelled_admin: 'fas fa-ban text-white',
+        default: 'fas fa-bell text-white'
+      }
+      return icons[type] || icons.default
+    },
+
     getFilterIcon(value) {
       const icons = {
         all: 'fas fa-th-list text-[#81E2C4] dark:text-[#6ED7D1]',
@@ -235,18 +254,10 @@ export default {
         job_status_update: 'fas fa-clock text-[#81E2C4] dark:text-[#6ED7D1]',
         user_verification: 'fas fa-user-check text-[#81E2C4] dark:text-[#6ED7D1]',
         evaluation: 'fas fa-star text-[#81E2C4] dark:text-[#6ED7D1]',
-        system: 'fas fa-bell text-[#81E2C4] dark:text-[#6ED7D1]'
+        system: 'fas fa-bell text-[#81E2C4] dark:text-[#6ED7D1]',
+        job_application_cancelled_admin: 'fas fa-ban text-[#81E2C4] dark:text-[#6ED7D1]'
       }
       return icons[value]
-    },
-    getIcon(type) {
-      const icons = {
-        // user: 'fas fa-user-clock',
-        // skill: 'fas fa-tasks',
-        job: 'fas fa-briefcase ',
-        default: 'fas fa-bell text-[#EABF71]'
-      }
-      return icons[type] || icons.default
     },
 
     formatTime(date) {

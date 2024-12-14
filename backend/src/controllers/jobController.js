@@ -402,7 +402,7 @@ export const applyForJob = async (req, res) => {
             return res.status(404).json({ message: 'ตำแหน่งงานไม่ถูกต้อง' });
         }
 
-        // เพิ่มการตรวจสอบ skills
+        // การตรวจสอบ skills
         const hasMatchingSkills = await jobModel.checkUserSkillsMatch(userId, jobPositionId);
         if (!hasMatchingSkills) {
             return res.status(400).json({
@@ -465,6 +465,90 @@ export const applyForJob = async (req, res) => {
         res.status(500).json({ message: `เกิดข้อผิดพลด: ${error.message}` });
     }
 };
+
+// ฟังก์ชันยกเลิกคำขอสมัครงาน
+export const cancelJobApplication = async (req, res) => {
+    const { jobId, jobPositionId } = req.body;
+    const userId = req.user.id;
+    const ip = req.headers['x-forwarded-for'] || req.ip || 'Unknown IP';
+    const userAgent = req.headers['user-agent'] || 'Unknown User Agent';
+
+    try {
+        // ตรวจสอบว่าผู้ใช้มีคำขอสมัครงานนี้หรือไม่
+        const application = await jobModel.findExistingJobParticipation(userId, jobId, jobPositionId);
+        if (!application) {
+            return res.status(404).json({ message: 'ไม่พบคำขอสมัครงานที่ระบุ' });
+        }
+
+        // ตรวจสอบสถานะของคำขอสมัครงาน
+        if (application.status !== 'pending') {
+            return res.status(400).json({ message: 'ไม่สามารถยกเลิกคำขอสมัครงานที่มีสถานะนี้ได้' });
+        }
+
+        // อัปเดตสถานะเป็น 'cancelled'
+        await jobModel.updateJobParticipationStatus(application.id, 'cancelled');
+
+        // สร้าง log การยกเลิก
+        await createLog(
+            userId,
+            null,
+            'Cancel Job Application',
+            '/api/jobs/cancel',
+            'POST',
+            `User { ID: ${userId} } cancelled application for Job ID: ${jobId}, Position ID: ${jobPositionId}, Job Title: ${application.jobPosition.job.title}`,
+            ip,
+            userAgent
+        );
+
+        // ส่งการแจ้งเตือน
+        await notificationModel.createUserNotification(
+            userId,
+            `คุณได้ยกเลิกคำขอสมัครงานสำหรับงาน Titie: ${application.jobPosition.job.title} ID: ${jobId} โปรดตรวจสอบรายละเอียด`,
+            notificationModel.NOTIFICATION_TYPES.JOB_APPLICATION_CANCELLED,
+
+        );
+
+        // ตรวจสอบว่า creator มีค่า id
+        const adminId = application.jobPosition.job.created_by;
+        if (!adminId) {
+            return res.status(404).json({ message: 'ไม่พบแอดมินที่สร้างงาน' });
+        }
+
+        const user = await userModel.getUserById(userId);
+
+        // ส่งการแจ้งเตือนไปยังแอดมิน
+        await notificationModel.createAdminNotification({
+            userId,
+            content: `ผู้ใช้ ${user.first_name} ${user.last_name} ID: ${userId} ได้ยกเลิกคำขอสมัครงานสำหรับงาน "${application.jobPosition.job.title}" ตำแหน่ง: ${application.jobPosition.position_name}`,
+            jobId,
+            adminId,
+            type: 'job_application_cancelled_admin',
+        });
+
+
+        res.status(200).json({ message: 'ยกเลิกคำขอสมัครงานสำเร็จ' });
+    } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการยกเลิกคำขอสมัครงาน:', error);
+        try {
+            await createLog(
+                userId,
+                null,
+                'Cancel Job Application Failed',
+                '/api/jobs/cancel',
+                'POST',
+                `Failed to cancel application for Job ID: ${jobId}, Position ID: ${jobPositionId}. User ID: ${userId}. Error: ${error.message}`,
+                ip,
+                userAgent
+            );
+        } catch (logError) {
+            console.error('ไม่สามารถสร้างบันทึกสำหรับการยกเลิกคำขอสมัครงานที่ล้มเหลวได้:', logError);
+        }
+
+        res.status(500).json({ message: `เกิดข้อผิดพลาด: ${error.message}` });
+    }
+};
+
+
 
 // ฟังก์ชันอัพเดท สถานะงาน
 export const updateJobStatus = async (req, res) => {

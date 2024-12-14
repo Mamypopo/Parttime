@@ -10,6 +10,7 @@ export const getMyJobs = async (req, res) => {
         const formattedJobs = myJobs.map(participation => ({
             id: participation.jobPosition.job.id,
             participation_id: participation.id,
+            job_position_id: participation.job_position_id,
             title: participation.jobPosition.job.title,
             location: participation.jobPosition.job.location,
             work_date: participation.jobPosition.job.work_date,

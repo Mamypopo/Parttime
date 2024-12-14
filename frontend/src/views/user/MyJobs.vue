@@ -108,10 +108,21 @@
             ดูผลการประเมิน
           </button>
         </div>
+        <!-- ปุ่มยกเลิก -->
+        <div v-if="job.status === 'pending'" class="mt-4">
+          <button
+            @click="cancelApplication(job.id, job.job_position_id)"
+            class="w-full py-2 bg-red-500 text-white rounded-lg shadow-md hover:opacity-90 transition-all duration-200 dark:bg-red-600 dark:text-white"
+          >
+            <i class="fas fa-times-circle mr-2"></i>
+            ยกเลิกคำขอ
+          </button>
+        </div>
       </div>
     </div>
   </div>
-  <!-- เพิ่ม Modal สำหรับแสดงข้อมูลติดต่อ -->
+
+  <!--  Modal สำหรับแสดงข้อมูลติดต่อ -->
   <div
     v-if="showContactModal"
     class="fixed inset-0 bg-black/25 backdrop-blur-sm flex items-center justify-center modal"
@@ -155,7 +166,7 @@
 <script>
 import { useJobStore } from '@/stores/jobStore'
 import JobEvaluationModal from '@/components/Users/JobEvaluationModal.vue'
-
+import Swal from 'sweetalert2'
 export default {
   name: 'MyJobs',
   components: {
@@ -200,6 +211,38 @@ export default {
       }
     },
 
+    // ฟังชั่นยกเลิกสมัครงาน
+    async cancelApplication(jobId, jobPositionId) {
+      const result = await Swal.fire({
+        title: 'คุณแน่ใจหรือไม่?',
+        text: 'กรุณาพิมพ์ "ยืนยัน" เพื่อยืนยันการยกเลิกคำขอ',
+        icon: 'warning',
+        input: 'text',
+        inputPlaceholder: 'พิมพ์ "ยืนยัน"',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'ใช่, ยกเลิกเลย!',
+        cancelButtonText: 'ยกเลิก',
+        preConfirm: (inputValue) => {
+          if (inputValue !== 'ยืนยัน') {
+            Swal.showValidationMessage('กรุณาพิมพ์ "ยืนยัน" ให้ถูกต้อง')
+          }
+        }
+      })
+
+      if (result.isConfirmed) {
+        try {
+          await this.jobStore.cancelJobApplication(jobId, jobPositionId)
+          Swal.fire('ยกเลิกแล้ว!', 'คำขอของคุณถูกยกเลิกเรียบร้อย.', 'success')
+          this.fetchMyJobs()
+        } catch (error) {
+          console.error('Error cancelling application:', error)
+          Swal.fire('เกิดข้อผิดพลาด!', 'ไม่สามารถยกเลิกคำขอได้.', 'error')
+        }
+      }
+    },
+
     getStatusClass(status) {
       switch (status?.toLowerCase()) {
         case 'pending':
@@ -220,7 +263,8 @@ export default {
         pending: 'รอการอนุมัติ',
         approved: 'ได้รับอนุมัติ',
         rejected: 'ไม่ผ่านการอนุมัติ',
-        completed: 'เสร็จสิ้น'
+        completed: 'เสร็จสิ้น',
+        cancelled: 'ยกเลิก'
       }
       return texts[status] || status
     },

@@ -182,6 +182,7 @@ export default {
         { label: 'ยังไม่ได้อ่าน', value: 'unread' },
         { label: 'งาน', value: 'job_status' },
         { label: 'การประเมิน', value: 'evaluation' },
+        { label: 'ยกเลิก', value: 'job_application_cancelled' },
         { label: 'ระบบ', value: 'system' }
       ]
     }
@@ -216,11 +217,12 @@ export default {
 
     getIconClass(type) {
       const classes = {
-        job_status: 'bg-gradient-to-br from-[#6ED7D1] to-[#9899ee]', // สถานะงาน
-        evaluation: 'bg-gradient-to-br from-[#CDE45F] to-[#A4B83C]', // ผลการประเมิน
-        rejected: 'bg-gradient-to-br from-[#EA6B6B] to-[#FF8F8F]', // ไม่ผ่านการประเมิน
-        system: 'bg-gradient-to-br from-[#9899ee] to-[#6667AA]', // ระบบ
-        general: 'bg-[#EABF71] dark:bg-[#C69B4F]' // ทั่วไป
+        job_status: 'bg-gradient-to-br from-[#6FCF97] to-[#27AE60]',
+        evaluation: 'bg-gradient-to-br from-[#A29BFE] to-[#6C5CE7]',
+        rejected: 'bg-gradient-to-br from-[#FF6F61] to-[#D7263D]',
+        system: 'bg-gradient-to-br from-[#95A5A6] to-[#7F8C8D]',
+        general: 'bg-gradient-to-br from-[#F5D547] to-[#E5A623]',
+        job_application_cancelled: 'bg-gradient-to-br from-[#EB5757] to-[#C0392B]'
       }
       return classes[type] || classes.general
     },
@@ -230,21 +232,23 @@ export default {
         all: 'fas fa-th-list text-[#c779d0]',
         unread: 'fas fa-envelope text-[#feac5e]',
         job_status: 'fas fa-briefcase text-[#4bc0c8]',
-        evaluation: 'fas fa-star text-[#c779d0]',
-        system: 'fas fa-cog text-[#feac5e]'
+        evaluation: 'fas fa-star text-[#6FCF97]',
+        system: 'fas fa-cog text-[#95A5A6]',
+        job_application_cancelled: 'fas fa-ban text-[#FF6F61]'
       }
       return icons[value] || icons.all
     },
 
     getIcon(type) {
       const icons = {
-        job_status: 'fas fa-briefcase',
-        evaluation: 'fas fa-star',
-        rejected: 'fas fa-times-circle',
-        system: 'fas fa-cog',
-        general: 'fas fa-bell'
+        job_status: 'fas fa-briefcase text-white',
+        evaluation: 'fas fa-star text-white',
+        rejected: 'fas fa-times-circle text-white',
+        system: 'fas fa-cog text-white',
+        general: 'fas fa-bell text-white',
+        job_application_cancelled: 'fas fa-ban text-white'
       }
-      return `${icons[type] || icons.general} text-white`
+      return icons[type] || icons.general
     },
 
     formatTime(date) {

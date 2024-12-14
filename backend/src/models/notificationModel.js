@@ -7,7 +7,8 @@ export const NOTIFICATION_TYPES = {
     WORK_EVALUATION_REJECTED: 'rejected',    // แจ้งเตือนไม่ผ่านการประเมิน
     SYSTEM: 'system',                        // แจ้งเตือนจากระบบ
     GENERAL: 'general',                      // แจ้งเตือนทั่วไป
-    USER_APPROVAL: 'user_approval'
+    USER_APPROVAL: 'user_approval',
+    JOB_APPLICATION_CANCELLED: 'job_application_cancelled'
 }
 
 export const NOTIFICATIONADMIN_TYPES = {
@@ -15,10 +16,13 @@ export const NOTIFICATIONADMIN_TYPES = {
     JOB_STATUS_UPDATE: 'job_status_update',
     USER_VERIFICATION: 'user_verification',
     EVALUATION: 'evaluation',
-    SYSTEM: 'system'
+    SYSTEM: 'system',
+    JOB_APPLICATION_CANCELLED_ADMIN: 'job_application_cancelled_admin'
+
 };
+
 // สร้างการแจ่้งเตือนสำหรับ users
-export const createUserNotification = async (userId, message, type = NOTIFICATION_TYPES.GENERAL) => {
+export const createUserNotification = async (userId, message, type) => {
     if (!userId) {
         throw new Error('ต้องระบุ userId สำหรับการสร้างการแจ้งเตือน');
     }

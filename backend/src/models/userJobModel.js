@@ -12,8 +12,10 @@ export const getMyJobs = async (userId) => {
                 id: true,
                 status: true,
                 created_at: true,
+                job_position_id: true,
                 jobPosition: {
                     select: {
+                        id: true,
                         position_name: true,
                         wage: true,
                         details: true,

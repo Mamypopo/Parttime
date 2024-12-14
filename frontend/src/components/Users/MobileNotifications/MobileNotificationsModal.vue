@@ -61,15 +61,15 @@
               <div
                 class="sticky top-[65px] z-10 px-3 py-4 border-b dark:border-gray-700 bg-white dark:bg-gray-800"
               >
-                <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
+                <div class="flex gap-2 overflow-x-auto pb-1">
                   <button
                     v-for="filter in filters"
                     :key="filter.value"
                     @click="currentFilter = filter.value"
-                    class="px-4 py-3 text-xs whitespace-nowrap rounded-full transition-all duration-200 flex items-center justify-center gap-1.5 flex-shrink-0"
+                    class="px-4 py-3 text-xs whitespace-nowrap rounded-full transition-all duration-200 flex items-center justify-center gap-1.5 flex-shrink-0 shadow-md hover:shadow-lg"
                     :class="[
                       currentFilter === filter.value
-                        ? 'bg-[#babbec] dark:bg-[#6667AA] text-white shadow-sm'
+                        ? 'bg-gradient-to-r from-[#feac5e] via-[#ffaa5a] to-[#ff9839] text-white'
                         : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
                     ]"
                   >
@@ -78,7 +78,6 @@
                   </button>
                 </div>
               </div>
-
               <!-- Notifications List -->
               <div class="overflow-y-auto flex-1" style="height: calc(100vh - 130px)">
                 <div
@@ -183,9 +182,10 @@ export default {
       filters: [
         { label: 'ทั้งหมด', value: 'all' },
         { label: 'ยังไม่ได้อ่าน', value: 'unread' },
-        { label: 'งาน', value: 'job_status' }, // เพิ่มตัวกรองงาน
-        { label: 'การประเมิน', value: 'evaluation' }, // เพิ่มตัวกรองการประเมิน
-        { label: 'ระบบ', value: 'system' } // เพิ่มตัวกรองระบบ
+        { label: 'งาน', value: 'job_status' },
+        { label: 'การประเมิน', value: 'evaluation' },
+        { label: 'ยกเลิก', value: 'job_application_cancelled' },
+        { label: 'ระบบ', value: 'system' }
       ]
     }
   },
@@ -212,7 +212,8 @@ export default {
         evaluation: 'bg-gradient-to-br from-[#CDE45F] to-[#A4B83C]', // ผลการประเมิน
         rejected: 'bg-gradient-to-br from-[#EA6B6B] to-[#FF8F8F]', // ไม่ผ่านการประเมิน
         system: 'bg-gradient-to-br from-[#9899ee] to-[#6667AA]', // ระบบ
-        general: 'bg-[#EABF71] dark:bg-[#C69B4F]' // ทั่วไป
+        general: 'bg-[#EABF71] dark:bg-[#C69B4F]', // ทั่วไป
+        job_application_cancelled: 'bg-gradient-to-br from-[#EB5757] to-[#C0392B]'
       }
       return classes[type] || classes.general
     },
@@ -222,7 +223,8 @@ export default {
         evaluation: 'fas fa-star text-white',
         rejected: 'fas fa-times-circle text-white',
         system: 'fas fa-cog text-white',
-        general: 'fas fa-bell text-white'
+        general: 'fas fa-bell text-white',
+        job_application_cancelled: 'fas fa-ban text-white'
       }
       return icons[type] || icons.general
     },
@@ -233,9 +235,10 @@ export default {
         unread: 'fas fa-envelope text-[#feac5e]',
         job_status: 'fas fa-briefcase text-[#4bc0c8]',
         evaluation: 'fas fa-star text-[#c779d0]',
-        system: 'fas fa-cog text-[#feac5e]'
+        system: 'fas fa-cog text-[#feac5e]',
+        job_application_cancelled: 'fas fa-ban text-[#FF6F61]'
       }
-      return icons[value]
+      return icons[value] || icons.all
     },
 
     formatTime(date) {
@@ -302,14 +305,6 @@ export default {
   border-radius: 4px;
 }
 
-.hide-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-}
-
-.hide-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
-}
 /* Dark mode scrollbar */
 @media (prefers-color-scheme: dark) {
   .overflow-y-auto {

@@ -30,13 +30,14 @@ services:
     ports:
       - "8000:8000"
   
-    command: npm start 
+    command: nodemon src/server.js
     volumes:
       - uploads_data:/app/uploads
       - ./backend/.env:/app/.env 
       - ./backend/prisma:/app/prisma
       - ./backend:/app 
       - /app/node_modules  
+    
     environment:
       - NODE_ENV=development
       - PORT=8000

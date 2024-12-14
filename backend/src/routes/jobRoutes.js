@@ -14,6 +14,8 @@ router.use(authMiddleware);
 router.get('/', jobController.getAllJobs);
 // ฟังชั่นสมัครงาน
 router.post('/apply', jobController.applyForJob);
+// ฟั่งชั่น user ขอยกเลิกการสมัครงาน
+router.post('/cancel', jobController.cancelJobApplication);
 // เส้นทางสำหรับแอดมิน
 router.post('/create', checkAdminRole, jobController.createJob);
 // ค้นหางาน

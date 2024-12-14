@@ -443,6 +443,7 @@ export const useJobStore = defineStore('job', {
             }
         },
 
+        // ดึงงานของ user ที่สมัครไว้
         async fetchMyJobs() {
             this.loading = true
             try {
@@ -464,6 +465,26 @@ export const useJobStore = defineStore('job', {
                 throw error
             } finally {
                 this.loading = false
+            }
+        },
+
+        // ฟังชั่นยกเลิกการสมัครงานของ user
+        // Frontend
+        async cancelJobApplication(jobId, jobPositionId) {
+            try {
+                console.log('Sending data:', { jobId, jobPositionId }); // debug log
+                const response = await axios.post(
+                    `${this.baseURL}/api/jobs/cancel`,
+                    {
+                        jobId,
+                        jobPositionId
+                    },
+                    { headers: this.getAuthHeaders() }
+                );
+                return response.data;
+            } catch (error) {
+                console.error('Error cancelling job application:', error);
+                throw error;
             }
         },
 

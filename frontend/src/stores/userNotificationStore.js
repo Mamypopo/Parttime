@@ -13,7 +13,8 @@ export const useUserNotificationStore = defineStore('userNotification', {
             WORK_EVALUATION: 'evaluation',           // แจ้งเตือนผลการประเมิน
             WORK_EVALUATION_REJECTED: 'rejected',    // แจ้งเตือนไม่ผ่านการประเมิน
             SYSTEM: 'system',                        // แจ้งเตือนจากระบบ
-            GENERAL: 'general'                       // แจ้งเตือนทั่วไป
+            GENERAL: 'general',                       // แจ้งเตือนทั่วไป
+            JOB_APPLICATION_CANCELLED: 'job_application_cancelled'
         }
 
     }),
