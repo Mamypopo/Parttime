@@ -287,3 +287,53 @@ export const getJobsWithParticipants = async (req, res) => {
         });
     }
 };
+
+
+// ฟังก์ชันยกเลิกคำขอสมัครงานโดยแอดมิน
+export const adminCancelJobApplication = async (req, res) => {
+    const { jobId, jobPositionId, userId } = req.body;
+    const adminId = req.user.id; // รับ ID แอดมินจาก middleware
+    const ip = req.headers['x-forwarded-for'] || req.ip || 'Unknown IP';
+    const userAgent = req.headers['user-agent'] || 'Unknown User Agent';
+
+    try {
+        // ตรวจสอบคำขอสมัครงาน
+        const application = await jobModel.findExistingJobParticipation(userId, jobId, jobPositionId);
+        if (!application) {
+            return res.status(404).json({ success: false, message: 'ไม่พบคำขอสมัครงานที่ระบุ' });
+        }
+
+        // อัปเดตสถานะเป็น 'cancelled'
+        await jobModel.updateJobParticipationStatus(application.id, 'cancelled');
+
+        // บันทึก Log
+        await createLog(
+            null, adminId, 'Admin Cancel Job Application',
+            '/api/admin/jobs/cancel', 'POST',
+            `Admin ID: ${adminId} cancelled job participation for User ID: ${userId}`,
+            ip, userAgent
+        );
+
+        // ส่งการแจ้งเตือนไปยังผู้ใช้
+        await notificationModel.createUserNotification(
+            userId,
+            `คำขอสมัครงานของคุณสำหรับงาน "${application.jobPosition.job.title}" ถูกยกเลิกโดยแอดมิน`,
+            notificationModel.NOTIFICATION_TYPES.JOB_APPLICATION_CANCELLED
+        );
+
+        // ตอบกลับสำเร็จ
+        res.status(200).json({ success: true, message: 'ยกเลิกคำขอสมัครงานสำเร็จ' });
+    } catch (error) {
+        console.error('Error cancelling job application:', error);
+
+        // บันทึก Log ความผิดพลาด
+        await createLog(
+            adminId, null, 'Admin Cancel Job Application Failed',
+            '/api/admin/jobs/cancel', 'POST',
+            `Failed to cancel job participation. Admin ID: ${adminId}. Error: ${error.message}`,
+            ip, userAgent
+        );
+
+        res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' });
+    }
+};

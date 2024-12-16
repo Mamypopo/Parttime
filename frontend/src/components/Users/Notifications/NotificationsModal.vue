@@ -65,7 +65,7 @@
                     :class="[
                       currentFilter === filter.value
                         ? 'bg-[#babbec] dark:bg-[#6667AA] text-white shadow-md'
-                        : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-[#5D5FEF]/5 dark:hover:bg-[#5D5FEF]/20'
+                        : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-[#5D5FEF]/5 dark:hover:bg-[#5D5FEF]/20 border dark:border-gray-600'
                     ]"
                   >
                     <i :class="getFilterIcon(filter.value)"></i>

@@ -866,6 +866,21 @@ export const updateJobStatus = async (jobId, status) => {
     }
 };
 
+// อัพเดทสถานะของ ตำแหน่งด้วย
+export const updateJobPositionStatus = async (positionId, status) => {
+    try {
+        const updatedPosition = await prisma.jobPosition.update({
+            where: { id: positionId },
+            data: {
+                status: status,
+            }
+        });
+        return updatedPosition;
+    } catch (error) {
+        console.error('Error updating job position status:', error);
+        throw error;
+    }
+};
 
 // ค้นหางานสำหรับ User
 export const searchJobs = async (page = 1, pageSize = 10, filters = {}) => {

@@ -153,6 +153,7 @@ export const useJobStore = defineStore('job', {
             }
         },
 
+        // ดึงงานที่ตัวเองสร้างกับผู้สมัครพร้อมกัน
         async fetchJobsAndParticipants() {
             this.loading = true;
 
@@ -179,6 +180,7 @@ export const useJobStore = defineStore('job', {
                     axios.get(`${this.baseURL}/api/jobs/my-created-jobs${endpoint}`, { headers }),
                     axios.get(`${this.baseURL}/api/jobs/getJobsWithParticipants`, { headers })
                 ]);
+
 
                 // ตรวจสอบว่า jobsResponse มีข้อมูลและเป็น array
                 this.jobs = Array.isArray(jobsResponse.data?.jobs) ? jobsResponse.data.jobs : [];
@@ -469,10 +471,9 @@ export const useJobStore = defineStore('job', {
         },
 
         // ฟังชั่นยกเลิกการสมัครงานของ user
-        // Frontend
         async cancelJobApplication(jobId, jobPositionId) {
             try {
-                console.log('Sending data:', { jobId, jobPositionId }); // debug log
+
                 const response = await axios.post(
                     `${this.baseURL}/api/jobs/cancel`,
                     {
@@ -485,6 +486,27 @@ export const useJobStore = defineStore('job', {
             } catch (error) {
                 console.error('Error cancelling job application:', error);
                 throw error;
+            }
+        },
+
+
+        async adminCancelJobParticipation({ jobId, jobPositionId, userId }) {
+            this.loading = true;
+            try {
+                const headers = this.getAuthHeaders();
+                const response = await axios.post(
+                    `${this.baseURL}/api/admin/jobs/participation/cancel`,
+                    { jobId, jobPositionId, userId },
+                    { headers }
+                );
+
+
+                return response.data;
+            } catch (error) {
+                console.error('Error cancelling job participation:', error);
+                return { success: false, message: error.response?.data?.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ API' };
+            } finally {
+                this.loading = false;
             }
         },
 
@@ -523,7 +545,7 @@ export const useJobStore = defineStore('job', {
             }
         },
 
-        // แยก method สำหรับ set filters
+        //   สำหรับ set filters
         setUserSearchFilters(filters) {
             this.userSearchFilters = { ...filters }
         },
@@ -541,10 +563,12 @@ export const useJobStore = defineStore('job', {
             }
             this.pagination.currentPage = 1
         },
+
         // เซ็ต filters
         setSearchFilters(filters) {
             this.searchFilters = filters
         },
+
         // Utility functions
         formatDate(date) {
             return new Date(date).toLocaleDateString('th-TH', {
@@ -561,6 +585,7 @@ export const useJobStore = defineStore('job', {
                 hour12: false
             })
         },
+
         formatTimeRange(startTime, endTime) {
             try {
                 const start = new Date(startTime);
@@ -588,9 +613,11 @@ export const useJobStore = defineStore('job', {
                 return '08:00 - 17:00'; // ค่าเริ่มต้นถ้าเกิดข้อผิดพลาด
             }
         },
+
         getProfileImage(image) {
             return image ? `${this.baseURL}/uploads/profiles/${image}` : '/default-avatar.png'
         },
+
         calculateEstimatedCost(job) {
             try {
                 if (!job?.JobPositions) return 0;
@@ -643,8 +670,6 @@ export const useJobStore = defineStore('job', {
                 return '0';
             }
         },
-
-
 
         // Utility functions
         formatDateTime(date, time) {
@@ -727,10 +752,8 @@ export const useJobStore = defineStore('job', {
             this.pagination.currentPage = page
             window.scrollTo(0, 0)
         },
-        // เคลียร์ข้อผิดพลาด
-        clearError() {
-            this.error = null
-        },
+
+
 
         hasNewParticipants(job) {
             if (!job?.JobPositions) return false
@@ -765,6 +788,7 @@ export const useJobStore = defineStore('job', {
                 return total + (position.JobParticipation?.length || 0);
             }, 0);
         },
+
         getAllParticipants(job) {
             if (!job?.JobPositions) return [];
 
@@ -781,6 +805,7 @@ export const useJobStore = defineStore('job', {
                 new Date(b.created_at) - new Date(a.created_at)
             );
         },
+
         getCompletedWorkCount(job) {
             return job.JobPositions?.reduce((count, position) => {
                 return count + (position.JobParticipation?.filter(p =>
@@ -788,26 +813,9 @@ export const useJobStore = defineStore('job', {
                 ).length || 0);
             }, 0) || 0;
         },
-        getWorkEvaluationCount(job) {
-            // นับจำนวนคนที่ได้รับการประเมินแล้ว (ทั้งผ่านและไม่ผ่าน)
-            const evaluatedCount = job.JobPositions?.reduce((count, position) => {
-                return count + (position.JobParticipation?.filter(p =>
-                    p.workHistories?.length > 0 // มีประวัติการประเมิน
-                ).length || 0);
-            }, 0) || 0;
 
-            // นับจำนวนคนทั้งหมดที่ได้รับอนุมัติ
-            const totalApprovedCount = job.JobPositions?.reduce((count, position) => {
-                return count + (position.JobParticipation?.filter(p =>
-                    p.status === 'approved' || p.status === 'completed' || p.status === 'rej'
-                ).length || 0);
-            }, 0) || 0;
 
-            return {
-                evaluated: evaluatedCount,
-                total: totalApprovedCount
-            };
-        },
+
         getJobStatus(job) {
             if (!job) return null
 

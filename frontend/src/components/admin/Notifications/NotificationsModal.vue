@@ -57,17 +57,17 @@
               </div>
 
               <!-- Filters -->
-              <div class="p-5 border-b bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+              <div class="p-6 border-b bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
                 <div class="flex gap-3">
                   <button
                     v-for="filter in filters"
                     :key="filter.value"
                     @click="currentFilter = filter.value"
-                    class="px-3 py-2 text-sm rounded-xl transition-all duration-200 flex items-center gap-2"
+                    class="px-4 py-2 text-sm rounded-full transition-all duration-200 flex items-center gap-2"
                     :class="
                       currentFilter === filter.value
                         ? 'bg-[#babbec] dark:bg-[#6667aa] text-white shadow-md'
-                        : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 border dark:border-gray-600'
+                        : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-[#5D5FEF]/5 dark:hover:bg-[#5D5FEF]/20 border dark:border-gray-600'
                     "
                   >
                     <i :class="getFilterIcon(filter.value)"></i>
@@ -248,14 +248,14 @@ export default {
 
     getFilterIcon(value) {
       const icons = {
-        all: 'fas fa-th-list text-[#81E2C4] dark:text-[#6ED7D1]',
-        unread: 'fas fa-envelope text-[#81E2C4] dark:text-[#6ED7D1]',
-        job_application: 'fas fa-briefcase text-[#81E2C4] dark:text-[#6ED7D1]',
-        job_status_update: 'fas fa-clock text-[#81E2C4] dark:text-[#6ED7D1]',
-        user_verification: 'fas fa-user-check text-[#81E2C4] dark:text-[#6ED7D1]',
-        evaluation: 'fas fa-star text-[#81E2C4] dark:text-[#6ED7D1]',
-        system: 'fas fa-bell text-[#81E2C4] dark:text-[#6ED7D1]',
-        job_application_cancelled_admin: 'fas fa-ban text-[#81E2C4] dark:text-[#6ED7D1]'
+        all: 'fas fa-th-list text-[#c779d0]',
+        unread: 'fas fa-envelope text-[#feac5e]',
+        job_application: 'fas fa-briefcase text-[#4bc0c8] ',
+        job_status_update: 'fas fa-clock text-[#F5D547] ',
+        user_verification: 'fas fa-user-check text-[#81E2C4]',
+        evaluation: 'fas fa-star text-[#6FCF97] ',
+        system: 'fas fa-cog text-[#95A5A6] ',
+        job_application_cancelled_admin: 'fas fa-ban text-[#FF6F61] '
       }
       return icons[value]
     },

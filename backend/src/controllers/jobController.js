@@ -195,6 +195,12 @@ export const editJob = async (req, res) => {
                     }
                 }
             }
+
+            // อัพเดทสถานะของตำแหน่งงานตามสถานะของงานหลัก
+            const positionStatus = (updatedJob.status === 'completed') ? 'closed' : 'open';
+            for (const position of updatedJob.JobPositions) {
+                await jobModel.updateJobPositionStatus(position.id, positionStatus);
+            }
         }
         const admin = await adminModel.findAdminById(adminId)
         // สร้าง log

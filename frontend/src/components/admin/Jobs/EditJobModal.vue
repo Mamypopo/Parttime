@@ -434,7 +434,7 @@ export default {
       }
 
       return this.formData.positions.every(
-        (position) => position.name && position.wage > 0 && position.required_people > 0
+        (position) => position.name && position.wage > 0 && position.required_people >= 0
       )
     },
 

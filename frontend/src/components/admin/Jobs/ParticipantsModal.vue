@@ -133,6 +133,27 @@
                       {{ getRatedCount() }}
                     </span>
                   </div>
+
+                  <!-- cancelled Filter -->
+                  <div
+                    @click="toggleFilter('cancelled')"
+                    class="flex justify-between items-center p-3 rounded-lg cursor-pointer transition-all duration-200"
+                    :class="[
+                      statusFilter === 'cancelled'
+                        ? 'bg-red-100 dark:bg-red-900/30 ring-2 ring-red-200 dark:ring-red-800'
+                        : 'bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30'
+                    ]"
+                  >
+                    <div class="flex items-center gap-2 text-red-800 dark:text-red-300">
+                      <i class="fa-solid fa-ban"></i>
+                      <span>ยกเลิก</span>
+                    </div>
+                    <span
+                      class="bg-red-200 dark:bg-red-900/50 text-red-800 dark:text-red-300 px-2 py-0.5 rounded-full text-sm"
+                    >
+                      {{ getStatusCount('cancelled') }}
+                    </span>
+                  </div>
                 </div>
 
                 <!-- Filters -->
@@ -144,7 +165,7 @@
                       v-model="searchTerm"
                       type="text"
                       placeholder="ค้นหาผู้สมัคร..."
-                      class="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg text-sm border-0 focus:ring-2 focus:ring-[#6ED7D1] dark:focus:ring-[#4B9592]"
+                      class="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg text-sm border-0 focus:ring-2 focus:ring-[#6ED7D1] dark:focus:ring-[#4B9592] focus:outline-none"
                     />
                     <i
                       class="fas fa-search absolute left-3 top-2.5 text-gray-400 dark:text-gray-500"
@@ -158,24 +179,73 @@
                 <div class="p-4 md:p-6">
                   <div v-for="position in job.JobPositions" :key="position.id" class="mb-8">
                     <!-- Position Header -->
-                    <div class="flex items-center justify-between mb-4">
-                      <div class="flex items-center gap-3">
-                        <div
-                          class="w-10 h-10 rounded-full bg-[#E7F6F6] dark:bg-[#4B9592]/30 flex items-center justify-center"
-                        >
-                          <i class="fas fa-user-md text-[#5DA3A3] dark:text-[#4B9592]"></i>
+                    <div
+                      class="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-4"
+                    >
+                      <!-- Position Title with Icon -->
+                      <div class="flex items-center gap-2 mb-2 lg:mb-0">
+                        <i class="fas fa-user-md text-[#5DA3A3] dark:text-[#4B9592] text-xl"></i>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                          {{ position.position_name }}
+                        </h3>
+                      </div>
+
+                      <!-- Position Details -->
+                      <div
+                        class="grid grid-cols-2 md:grid-cols-3 lg:flex lg:flex-wrap gap-2 lg:gap-4 text-sm"
+                      >
+                        <!-- จำนวนที่รับ -->
+                        <div class="flex items-center gap-1">
+                          <i class="fas fa-users text-blue-500 dark:text-blue-300"></i>
+                          <span>จำนวนที่รับ:</span>
+                          <span class="font-medium text-gray-900 dark:text-gray-100">
+                            {{ position.required_people }} คน
+                          </span>
                         </div>
-                        <div>
-                          <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                            {{ position.position_name }}
-                          </h3>
-                          <div
-                            class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400"
-                          >
-                            <span>จำนวนที่รับ: {{ position.required_people }} คน</span>
-                            <span>•</span>
-                            <span>สมัครแล้ว: {{ filteredParticipants(position).length }} คน</span>
-                          </div>
+
+                        <!-- สมัครแล้ว -->
+                        <div class="flex items-center gap-1">
+                          <i class="fas fa-list text-indigo-500 dark:text-indigo-300"></i>
+                          <span>สมัครแล้ว:</span>
+                          <span class="font-medium text-gray-900 dark:text-gray-100">
+                            {{ position.JobParticipation.length }} คน
+                          </span>
+                        </div>
+
+                        <!-- รอดำเนินการ -->
+                        <div class="flex items-center gap-1">
+                          <i class="fas fa-clock text-yellow-500 dark:text-yellow-300"></i>
+                          <span>รอดำเนินการ:</span>
+                          <span class="font-medium text-gray-900 dark:text-gray-100">
+                            {{ getStatusCountForPosition(position, 'pending') }} คน
+                          </span>
+                        </div>
+
+                        <!-- อนุมัติแล้ว -->
+                        <div class="flex items-center gap-1">
+                          <i class="fas fa-check text-green-500 dark:text-green-300"></i>
+                          <span>อนุมัติแล้ว:</span>
+                          <span class="font-medium text-gray-900 dark:text-gray-100">
+                            {{ getStatusCountForPosition(position, 'approved') }} คน
+                          </span>
+                        </div>
+
+                        <!-- ไม่ผ่านการอนุมัติ -->
+                        <div class="flex items-center gap-1">
+                          <i class="fa-solid fa-xmark text-red-700 dark:text-red-400"></i>
+                          <span>ไม่ผ่านการอนุมัติ:</span>
+                          <span class="font-medium text-gray-900 dark:text-gray-100">
+                            {{ getStatusCountForPosition(position, 'rejected') }} คน
+                          </span>
+                        </div>
+
+                        <!-- ยกเลิก -->
+                        <div class="flex items-center gap-1">
+                          <i class="fas fa-ban text-red-500 dark:text-red-300"></i>
+                          <span>ยกเลิก:</span>
+                          <span class="font-medium text-gray-900 dark:text-gray-100">
+                            {{ getStatusCountForPosition(position, 'cancelled') }} คน
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -188,26 +258,47 @@
                         class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200"
                       >
                         <div class="p-4">
-                          <!-- User Info ในส่วนที่แสดงข้อมูลผู้สมัคร -->
+                          <!-- User Info  -->
                           <div class="flex items-center space-x-3 mb-4">
                             <img
                               :src="getProfileImage(participant.user.profile_image)"
                               class="w-12 h-12 rounded-full object-cover"
                               alt="Profile"
                             />
-                            <div>
+                            <div class="flex-1">
+                              <!-- ชื่อและเบอร์โทร -->
                               <h4 class="font-medium text-gray-900 dark:text-gray-100">
-                                {{ participant.user?.first_name }}
-                                {{ participant.user?.last_name }}
+                                {{ participant.user?.first_name }} {{ participant.user?.last_name }}
                               </h4>
-                              <!-- แสดงเฉพาะปุ่มดูประวัติ -->
-                              <button
-                                @click="handleOpenHistory(participant.user)"
-                                class="text-sm text-[#6ED7D1] hover:text-[#4B9592] dark:text-[#4B9592] hover:underline mt-1"
-                              >
-                                <i class="fas fa-history mr-1"></i>
-                                ดูประวัติการทำงาน
-                              </button>
+                              <p class="text-sm text-gray-600 dark:text-gray-400">
+                                เบอร์โทร: {{ participant.user?.phone_number }}
+                              </p>
+
+                              <!-- กล่องปุ่มที่จัดเรียงด้วย Flexbox -->
+                              <div class="flex items-center space-x-4 mt-2">
+                                <!-- ปุ่มดูประวัติการทำงาน -->
+                                <button
+                                  @click="handleOpenHistory(participant.user)"
+                                  class="text-sm text-[#6ED7D1] hover:text-[#4B9592] dark:text-[#4B9592] hover:underline"
+                                >
+                                  <i class="fas fa-history mr-1"></i>
+                                  ดูประวัติการทำงาน
+                                </button>
+
+                                <!-- ปุ่มยกเลิกคำขอ -->
+                                <button
+                                  v-if="
+                                    ['pending', 'approved'].includes(
+                                      participant.status?.toLowerCase()
+                                    )
+                                  "
+                                  @click="handleCancelRequest(participant.id)"
+                                  class="text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-600 hover:underline"
+                                >
+                                  <i class="fas fa-ban mr-1"></i>
+                                  ยกเลิกคำขอ
+                                </button>
+                              </div>
                             </div>
                           </div>
 
@@ -401,6 +492,7 @@ export default {
       statusFilter: null,
       ratingFilter: null,
       showHistoryModal: false,
+      position: null,
       selectedUser: null,
       userJobs: [],
       userHistoryStore: useUserHistoryStore(),
@@ -493,7 +585,9 @@ export default {
         )
       }, 0)
     },
-
+    getStatusCountForPosition(position, status) {
+      return position.JobParticipation.filter((p) => p.status === status).length
+    },
     async handleApprove(participationId) {
       try {
         const confirm = await Swal.fire({
@@ -598,6 +692,8 @@ export default {
           approved: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
           rejected: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300',
           completed: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
+          cancelled:
+            'text-rose-600 dark:text-rose-400 border-rose-400 bg-rose-50 dark:bg-rose-900/20',
           in_progress: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300'
         }[status] || 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
       )
@@ -610,6 +706,7 @@ export default {
           approved: 'อนุมัติแล้ว',
           rejected: 'ไม่ผ่านการอนุมัติ',
           completed: 'เสร็จสิ้น',
+          cancelled: 'ยกเลิก',
           in_progress: 'กำลังดำเนินการ'
         }[status] || 'ไม่ระบุสถานะ'
       )
@@ -620,7 +717,8 @@ export default {
         {
           pending: 'bg-yellow-100 text-yellow-800',
           approved: 'bg-green-100 text-green-800',
-          rejected: 'bg-red-100 text-red-800'
+          rejected: 'bg-red-100 text-red-800',
+          cancelled: 'bg-red-500 text-red-800'
         }[status] || ''
       )
     },
@@ -686,7 +784,6 @@ export default {
 
         this.showHistoryModal = true
       } catch (error) {
-        // จัดการ error 404 แยกออกมา
         if (error.response?.status === 404) {
           Swal.fire({
             title: 'ไม่พบประวัติการทำงาน',
@@ -713,6 +810,79 @@ export default {
       this.showHistoryModal = false
       this.selectedUser = null
       this.userHistoryStore.clearHistory()
+    },
+
+    async handleCancelRequest(participationId) {
+      try {
+        const position = this.job.JobPositions.find((pos) =>
+          pos.JobParticipation.some((p) => p.id === participationId)
+        )
+        const participant = position?.JobParticipation.find((p) => p.id === participationId)
+
+        if (!position || !participant) {
+          await Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ข้อมูลตำแหน่งหรือผู้ใช้ไม่ถูกต้อง'
+          })
+          return
+        }
+
+        // ยืนยันก่อนยกเลิก
+        const confirm = await Swal.fire({
+          title: 'ยืนยันการยกเลิก',
+          text: 'คุณต้องการยกเลิกคำขอนี้ใช่หรือไม่?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'ยืนยัน',
+          cancelButtonText: 'ยกเลิก',
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#6e7881',
+          input: 'text',
+          inputPlaceholder: 'พิมพ์ "ยืนยัน" เพื่อยืนยันการยกเลิก',
+          inputValidator: (value) => {
+            return value !== 'ยืนยัน' && 'กรุณาพิมพ์ "ยืนยัน" เพื่อยืนยันการยกเลิก'
+          }
+        })
+
+        if (confirm.isConfirmed) {
+          const result = await this.jobStore.adminCancelJobParticipation({
+            jobId: this.job.id,
+            jobPositionId: position.id,
+            userId: participant.user.id
+          })
+
+          if (result.success) {
+            await this.jobStore.fetchJobsAndParticipants()
+            this.$emit('update:job', {
+              ...this.job,
+              JobPositions: this.job.JobPositions.map((pos) => ({
+                ...pos,
+                JobParticipation: pos.JobParticipation.map((p) =>
+                  p.id === participationId ? { ...p, status: 'cancelled' } : p
+                )
+              }))
+            })
+            this.$emit('close')
+            await Swal.fire({
+              icon: 'success',
+              title: 'สำเร็จ',
+              text: 'คำขอถูกยกเลิกแล้ว',
+              timer: 1500,
+              showConfirmButton: false
+            })
+          } else {
+            throw new Error(result.message || 'ไม่สามารถยกเลิกคำขอได้')
+          }
+        }
+      } catch (error) {
+        console.error('Error:', error)
+        await Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: error.message
+        })
+      }
     }
   }
 }

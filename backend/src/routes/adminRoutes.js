@@ -34,6 +34,14 @@ router.put(
     jobParticipationController.updateWorkHistory
 );
 
+// ยกเลิกคำขอสมัครงานโดยแอดมิน
+router.post(
+    '/jobs/participation/cancel',
+    checkAdminRole,
+    jobParticipationController.adminCancelJobApplication
+);
+
+
 router.get('/notifications', checkAdminRole, adminController.getAdminNotifications);
 
 router.patch('/notifications/:id/read', checkAdminRole, adminController.markNotificationAsRead);

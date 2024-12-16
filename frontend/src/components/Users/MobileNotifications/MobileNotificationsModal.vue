@@ -1,6 +1,6 @@
 <template>
   <TransitionRoot appear :show="isOpen" as="template">
-    <Dialog as="div" @close="handleClose" class="relative z-[950]">
+    <Dialog as="div" @close="handleClose" class="relative modal">
       <!-- Backdrop -->
       <TransitionChild
         as="template"
@@ -27,7 +27,7 @@
             leave-to="opacity-0 translate-y-full"
           >
             <DialogPanel
-              class="w-[300px] max-w-md h-screen bg-white dark:bg-gray-800 shadow-xl relative"
+              class="w-5/6 max-w-md h-screen bg-white dark:bg-gray-800 shadow-xl relative"
               tabindex="0"
             >
               <!-- Header -->
@@ -43,7 +43,7 @@
                     @click="markAllAsRead"
                     class="text-sm text-white/80 hover:text-white transition-colors duration-200"
                   >
-                    <span class="flex items-center gap-2">
+                    <span class="flex items-center gap-1">
                       <i class="fas fa-check-double"></i>
                       อ่านทั้งหมด
                     </span>
@@ -61,7 +61,7 @@
               <div
                 class="sticky top-[65px] z-10 px-3 py-4 border-b dark:border-gray-700 bg-white dark:bg-gray-800"
               >
-                <div class="flex gap-2 overflow-x-auto pb-1">
+                <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
                   <button
                     v-for="filter in filters"
                     :key="filter.value"
@@ -69,7 +69,7 @@
                     class="px-4 py-3 text-xs whitespace-nowrap rounded-full transition-all duration-200 flex items-center justify-center gap-1.5 flex-shrink-0 shadow-md hover:shadow-lg"
                     :class="[
                       currentFilter === filter.value
-                        ? 'bg-gradient-to-r from-[#feac5e] via-[#ffaa5a] to-[#ff9839] text-white'
+                        ? 'bg-[#babbec] dark:bg-[#6667AA] text-white shadow-md'
                         : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
                     ]"
                   >
@@ -234,8 +234,8 @@ export default {
         all: 'fas fa-th-list text-[#c779d0]',
         unread: 'fas fa-envelope text-[#feac5e]',
         job_status: 'fas fa-briefcase text-[#4bc0c8]',
-        evaluation: 'fas fa-star text-[#c779d0]',
-        system: 'fas fa-cog text-[#feac5e]',
+        evaluation: 'fas fa-star text-[#6FCF97]',
+        system: 'fas fa-cog text-[#95A5A6]',
         job_application_cancelled: 'fas fa-ban text-[#FF6F61]'
       }
       return icons[value] || icons.all
@@ -305,6 +305,14 @@ export default {
   border-radius: 4px;
 }
 
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
 /* Dark mode scrollbar */
 @media (prefers-color-scheme: dark) {
   .overflow-y-auto {

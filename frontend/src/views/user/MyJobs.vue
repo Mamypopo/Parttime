@@ -243,21 +243,6 @@ export default {
       }
     },
 
-    getStatusClass(status) {
-      switch (status?.toLowerCase()) {
-        case 'pending':
-          return 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30'
-        case 'approved':
-          return 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30'
-        case 'rejected':
-          return 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30'
-        case 'completed':
-          return 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30'
-        default:
-          return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-      }
-    },
-
     getStatusText(status) {
       const texts = {
         pending: 'รอการอนุมัติ',
@@ -271,15 +256,17 @@ export default {
     getProgressBarClass(status) {
       switch (status?.toLowerCase()) {
         case 'pending':
-          return 'bg-yellow-500'
+          return 'bg-yellow-500 shadow-md shadow-yellow-300 border border-yellow-400'
         case 'approved':
-          return 'bg-blue-500'
+          return 'bg-blue-500 shadow-md shadow-blue-300 border border-blue-400'
         case 'rejected':
-          return 'bg-red-500'
+          return 'bg-red-500 shadow-md shadow-red-300 border border-red-400'
         case 'completed':
-          return 'bg-green-500'
+          return 'bg-green-500 shadow-md shadow-green-300 border border-green-400'
+        case 'cancelled':
+          return 'bg-gradient-to-br from-[#EB5757] to-[#C0392B] shadow-lg shadow-red-400/70 border border-red-600'
         default:
-          return 'bg-gray-500'
+          return 'bg-gray-500 shadow-md shadow-gray-300 border border-gray-400'
       }
     },
 
@@ -289,7 +276,8 @@ export default {
           pending: '25%',
           approved: '50%',
           rejected: '100%',
-          completed: '100%'
+          completed: '100%',
+          cancelled: '100%'
         }[status] || '0%'
       )
     },
@@ -304,6 +292,8 @@ export default {
           return 'text-red-500'
         case 'completed':
           return 'text-green-500'
+        case 'cancelled':
+          return 'text-[#EB5757]'
         default:
           return 'text-gray-500'
       }

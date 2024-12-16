@@ -57,6 +57,11 @@ export const updateJobStatuses = async () => {
                 if (newStatus !== job.status) {
                     await jobModel.updateJobStatus(job.id, newStatus);
                 }
+                // อัพเดทสถานะของการรับสมัครในแต่ละตำแหน่ง
+                const positionStatus = (newStatus === 'completed') ? 'closed' : 'open';
+                for (const position of job.JobPositions) {
+                    await jobModel.updateJobPositionStatus(position.id, positionStatus);
+                }
 
                 // สร้าง log
                 await createLog(

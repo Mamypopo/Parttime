@@ -335,7 +335,7 @@ export default {
       for (const position of job.JobPositions || []) {
         const participation = position.JobParticipation?.find((p) => p.user_id === userId)
         if (participation) {
-          return participation.status // 'pending', 'approved', 'rejected', 'completed'
+          return participation.status // 'pending', 'approved', 'rejected', 'completed' , 'cancelled'
         }
       }
       return null
@@ -352,6 +352,8 @@ export default {
           return 'text-rose-600 dark:text-rose-400 border-rose-400 bg-rose-50 dark:bg-rose-900/20'
         case 'completed':
           return 'text-blue-600 dark:text-blue-400 border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+        case 'cancelled':
+          return 'text-rose-600 dark:text-rose-400 border-rose-400 bg-rose-50 dark:bg-rose-900/20'
         default:
           return 'text-gray-600 dark:text-gray-400 border-gray-400 bg-gray-50 dark:bg-gray-900/20'
       }
@@ -368,6 +370,8 @@ export default {
           return 'fas fa-times-circle'
         case 'completed':
           return 'fa-regular fa-circle-check'
+        case 'cancelled':
+          return 'fa-solid fa-ban '
         default:
           return 'fas fa-info-circle'
       }
@@ -384,6 +388,8 @@ export default {
           return 'ไม่ผ่านการอนุมัติ'
         case 'completed':
           return 'ได้รับการประเมินแล้ว'
+        case 'cancelled':
+          return 'ยกเลิกการสมัครแล้ว'
         default:
           return 'ไม่ทราบสถานะ'
       }
@@ -399,8 +405,10 @@ export default {
           return 'from-rose-400 via-red-300 to-rose-400'
         case 'completed':
           return 'from-blue-400 via-sky-300 to-blue-400'
+        case 'cancelled':
+          return 'from-rose-400 via-red-300 to-rose-400'
         default:
-          return 'from-gray-400 via-gray-300 to-gray-400'
+          return 'from-blue-400 via-gray-300 to-gray-400'
       }
     },
     handleJobApplied() {
