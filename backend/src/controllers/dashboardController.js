@@ -110,9 +110,9 @@ export const getDashboardStats = async (req, res) => {
             approved: applications.approved,
             rejected: applications.rejected,
             pending: applications.pending,
-            completed: applications.completed
+            completed: applications.completed,
+            cancelled: applications.cancelled
         }
-
 
         // ดึงข้อมูลผู้ใช้ที่ลงทะเบียนล่าสุด
         const recentRegistrations = await DashboardModel.getRecentRegistrations()
@@ -251,7 +251,8 @@ export const getDashboardStats = async (req, res) => {
                     approved: monthlyApplications.approved,
                     rejected: monthlyApplications.rejected,
                     pending: monthlyApplications.pending,
-                    completed: monthlyApplications.completed
+                    completed: monthlyApplications.completed,
+                    cancelled: monthlyApplications.cancelled
                 },
                 recentRegistrations: pendingRegistrations
             },

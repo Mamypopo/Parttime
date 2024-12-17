@@ -103,7 +103,7 @@ export const updateJobStatuses = async () => {
                     }
                 }
 
-                รวบรวมผู้เข้าร่วมงานจากทุกตำแหน่ง
+                // รวบรวมผู้เข้าร่วมงานจากทุกตำแหน่ง
                 const participants = updatedJob.JobPositions.flatMap(position =>
                     position.JobParticipation.map(participation => participation.user)
                 );

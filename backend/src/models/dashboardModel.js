@@ -192,8 +192,8 @@ export const getMonthlyApplicationsWithStatus = async (startOfMonth) => {
     endOfMonth.setMonth(endOfMonth.getMonth() + 1)
     endOfMonth.setDate(0)
 
-    // แก้ไขการ query เพื่อนับจำนวนตามสถานะโดยตรง
-    const [total, approved, rejected, pending, completed] = await Promise.all([
+
+    const [total, approved, rejected, pending, completed, cancelled] = await Promise.all([
         // นับทั้งหมด
         prisma.jobParticipation.count({
             where: {
@@ -242,7 +242,18 @@ export const getMonthlyApplicationsWithStatus = async (startOfMonth) => {
                 },
                 status: 'completed'
             }
+        }),
+        // นับที่ยกเลิก
+        prisma.jobParticipation.count({
+            where: {
+                created_at: {
+                    gte: startOfMonth,
+                    lte: endOfMonth
+                },
+                status: 'cancelled'
+            }
         })
+
     ])
 
     return {
@@ -250,7 +261,8 @@ export const getMonthlyApplicationsWithStatus = async (startOfMonth) => {
         approved,
         rejected,
         pending,
-        completed
+        completed,
+        cancelled
     }
 }
 

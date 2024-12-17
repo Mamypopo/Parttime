@@ -490,6 +490,7 @@ export const useJobStore = defineStore('job', {
         },
 
 
+        // ฟังชั่นยกเลิกการสมัครงานของ admin
         async adminCancelJobParticipation({ jobId, jobPositionId, userId }) {
             this.loading = true;
             try {
@@ -544,6 +545,33 @@ export const useJobStore = defineStore('job', {
                 this.loading = false
             }
         },
+
+
+        async generateEvaluationSummary(jobId) {
+            try {
+                // เรียก API ใหม่สำหรับ Excel
+                const response = await axios.get(`${this.baseURL}/api/evaluations/${jobId}/excel`, {
+                    responseType: 'blob' // ระบุ response เป็นไฟล์ Blob สำหรับ Excel
+                });
+
+                // สร้าง Blob และ Trigger ดาวน์โหลดไฟล์
+                const blob = new Blob([response.data], {
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                });
+
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `evaluation-summary-${jobId}.xlsx`; // ชื่อไฟล์ใหม่เป็น .xlsx
+                link.click();
+
+                // ทำความสะอาด Object URL
+                URL.revokeObjectURL(link.href);
+            } catch (error) {
+                console.error('Error generating Excel summary:', error);
+                throw error;
+            }
+        },
+
 
         //   สำหรับ set filters
         setUserSearchFilters(filters) {

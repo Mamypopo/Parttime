@@ -80,6 +80,11 @@
             label: 'เสร็จสิ้น',
             value: monthlyApplicationsCompleted,
             color: 'text-blue-500'
+          },
+          {
+            label: 'ยกเลิก',
+            value: monthlyApplicationsCancelled,
+            color: 'text-blue-500'
           }
         ]"
         icon="fas fa-file-signature"
@@ -202,6 +207,9 @@ export default {
     },
     monthlyApplicationsCompleted() {
       return this.dashboardStore.stats.monthlyApplicationsDetails?.completed || 0
+    },
+    monthlyApplicationsCancelled() {
+      return this.dashboardStore.stats.monthlyApplicationsDetails?.cancelled || 0
     },
     topUsers() {
       return this.dashboardStore.topUsers

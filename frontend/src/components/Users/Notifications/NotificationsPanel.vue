@@ -92,7 +92,7 @@
                       class="text-sm font-medium"
                       :class="
                         !notification.read
-                          ? 'text-[#CDE45F] dark:text-[#A4B83C]'
+                          ? 'text-[#5DADEC] dark:text-[#A78BFA]'
                           : 'text-[#94A3B8] dark:text-[#64748B]'
                       "
                     >

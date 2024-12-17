@@ -830,7 +830,7 @@ export default {
 
         // ยืนยันก่อนยกเลิก
         const confirm = await Swal.fire({
-          title: 'ยืนยันการยกเลิก',
+          title: `ยืนยันการยกเลิกสำหรับ ${participant.user.first_name} ${participant.user.last_name}`,
           text: 'คุณต้องการยกเลิกคำขอนี้ใช่หรือไม่?',
           icon: 'warning',
           showCancelButton: true,

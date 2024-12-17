@@ -32,7 +32,9 @@ export const useDashboardStore = defineStore('dashboard', {
                 approved: 0,
                 rejected: 0,
                 pending: 0,
-                completed: 0
+                completed: 0,
+                cancelled: 0
+
             }
 
         },
@@ -85,10 +87,10 @@ export const useDashboardStore = defineStore('dashboard', {
                         approved: Number(stats.monthlyApplicationsDetails?.approved) || 0,
                         rejected: Number(stats.monthlyApplicationsDetails?.rejected) || 0,
                         pending: Number(stats.monthlyApplicationsDetails?.pending) || 0,
-                        completed: Number(stats.monthlyApplicationsDetails?.completed) || 0
+                        completed: Number(stats.monthlyApplicationsDetails?.completed) || 0,
+                        cancelled: Number(stats.monthlyApplicationsDetails?.cancelled) || 0
                     }
                 }
-
 
 
                 this.calendarEvents = eventsResponse.data.events || []
@@ -120,10 +122,10 @@ export const useDashboardStore = defineStore('dashboard', {
             try {
                 const response = await axios.get(`${this.baseURL}/api/dashboard/users-ratings`);
                 if (response.data.data) {
-                    // รับค่า averageScore จาก API โดยตรง
+
                     this.averageRating = response.data.data.averageScore;
 
-                    // แปลงข้อมูล topUsers ให้ตรงกับโครงสร้างที่ต้องการ
+
                     this.topUsers = response.data.data.topUsers.map(user => ({
                         id: user.id,
                         name: user.name,
@@ -148,6 +150,7 @@ export const useDashboardStore = defineStore('dashboard', {
                 this.loading = false;
             }
         },
+
         // จัดรูปแบบข้อมูลงาน
         formatEventDetails(event) {
             return {

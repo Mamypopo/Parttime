@@ -115,6 +115,13 @@
                 </div>
                 <div class="flex gap-2">
                   <button
+                    @click="generateEvaluationSummary(job.id, job.title)"
+                    class="p-2 text-[#7BC4C4] hover:text-[#5DA3A3] rounded-full hover:bg-gray-50 dark:hover:bg-gray-700"
+                    title="สร้างสรุปการประเมิน"
+                  >
+                    <i class="fas fa-file-export"></i>
+                  </button>
+                  <button
                     @click="viewJobDetails(job)"
                     class="p-2 text-[#7BC4C4] hover:text-[#5DA3A3] rounded-full hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
@@ -747,6 +754,36 @@ export default {
           icon: 'error',
           title: 'เกิดข้อผิดพลาด',
           text: 'ไม่สามารถรีเซ็ตการค้นหาได้',
+          confirmButtonText: 'ตกลง'
+        })
+      }
+    },
+
+    async generateEvaluationSummary(jobId, jobTitle) {
+      try {
+        const result = await Swal.fire({
+          icon: 'question',
+          title: 'ยืนยันการดาวน์โหลด',
+          text: `ต้องการดาวน์โหลดสรุปการประเมินสำหรับงาน "${jobTitle}" หรือไม่?`,
+          showCancelButton: true,
+          confirmButtonText: 'ใช่, ดาวน์โหลด',
+          cancelButtonText: 'ยกเลิก'
+        })
+
+        if (result.isConfirmed) {
+          await this.jobStore.generateEvaluationSummary(jobId)
+          Swal.fire({
+            icon: 'success',
+            title: 'สำเร็จ',
+            text: `ดาวน์โหลดสรุปการประเมินสำหรับงาน "${jobTitle}" เรียบร้อยแล้ว!`,
+            confirmButtonText: 'ตกลง'
+          })
+        }
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: `ไม่สามารถสร้างสรุปการประเมินสำหรับงาน "${jobTitle}" ได้`,
           confirmButtonText: 'ตกลง'
         })
       }

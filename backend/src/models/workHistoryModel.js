@@ -12,7 +12,7 @@ export const createWorkHistory = async (data) => {
                 }
             },
             comment: data.comment,
-            is_passed_evaluation: data.is_passed_evaluation // ใช้ค่าที่ส่งมาจาก data โดยตรง
+            is_passed_evaluation: data.is_passed_evaluation
         };
 
         // เพิ่มคะแนนเฉพาะเมื่อผ่านการประเมิน
@@ -73,7 +73,7 @@ export const findByJobParticipationId = async (jobParticipationId) => {
 
 
 
-// ฟังชั่นดึง Top Users ใหม่ โดยใช้ total_score
+// ฟังชั่นดึง Top Users โดยใช้ total_score
 export const getTopUsersWithRatings = async () => {
     // ดึงข้อมูลผู้ใช้พร้อมคะแนนและจำนวนงาน
     const users = await prisma.user.findMany({
@@ -104,6 +104,7 @@ export const getTopUsersWithRatings = async () => {
         .map(user => {
             // กรองเฉพาะงานที่มีการประเมิน
             const passedEvaluationJobs = user.JobParticipation
+                .filter(jp => jp.status !== 'cancelled')
                 .flatMap(jp => jp.workHistories)
                 .filter(wh =>
                     wh !== null &&

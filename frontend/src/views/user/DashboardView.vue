@@ -299,7 +299,7 @@ import { useUserStore } from '@/stores/userStore'
 import { useUserDashboardStore } from '@/stores/userDashboardStore'
 import IncomeChart from '@/components/Charts/IncomeChart.vue'
 import * as XLSX from 'xlsx'
-
+import Swal from 'sweetalert2'
 export default {
   name: 'DashboardView',
   components: {
@@ -367,38 +367,55 @@ export default {
       window.print()
     },
     exportIncome() {
-      try {
-        // สร้างข้อมูลสำหรับ export
-        const data = this.recentIncomes.map((income) => ({
-          วันที่: this.formatDate(income.date),
-          งาน: income.jobTitle,
-          สถานที่: income.workplace,
-          จำนวนเงิน: income.amount
-        }))
+      Swal.fire({
+        title: 'ยืนยันการดาวน์โหลด',
+        text: 'คุณต้องการดาวน์โหลดรายงานรายได้หรือไม่?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'ยืนยัน',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          try {
+            // สร้างข้อมูลสำหรับ export
+            const data = this.recentIncomes.map((income) => ({
+              วันที่: this.formatDate(income.date),
+              งาน: income.jobTitle,
+              สถานที่: income.workplace,
+              จำนวนเงิน: income.amount
+            }))
 
-        // สร้าง workbook
-        const wb = XLSX.utils.book_new()
-        const ws = XLSX.utils.json_to_sheet(data)
+            // สร้าง workbook
+            const wb = XLSX.utils.book_new()
+            const ws = XLSX.utils.json_to_sheet(data)
 
-        // ตั้งค่าความกว้างคอลัมน์
-        const colWidths = [
-          { wch: 15 }, // วันที่
-          { wch: 30 }, // งาน
-          { wch: 25 }, // สถานที่
-          { wch: 15 } // จำนวนเงิน
-        ]
-        ws['!cols'] = colWidths
+            // ตั้งค่าความกว้างคอลัมน์
+            const colWidths = [
+              { wch: 15 }, // วันที่
+              { wch: 30 }, // งาน
+              { wch: 25 }, // สถานที่
+              { wch: 15 } // จำนวนเงิน
+            ]
+            ws['!cols'] = colWidths
 
-        // เพิ่ม worksheet ลงใน workbook
-        XLSX.utils.book_append_sheet(wb, ws, 'รายได้')
+            //  worksheet ลงใน workbook
+            XLSX.utils.book_append_sheet(wb, ws, 'รายได้')
 
-        // บันทึกไฟล์
-        const fileName = `income_report_${new Date().toISOString().split('T')[0]}.xlsx`
-        XLSX.writeFile(wb, fileName)
-      } catch (error) {
-        console.error('Error exporting income:', error)
-        // TODO: แสดง error message
-      }
+            // บันทึกไฟล์
+            const fileName = `income_report_${new Date().toISOString().split('T')[0]}.xlsx`
+            XLSX.writeFile(wb, fileName)
+          } catch (error) {
+            console.error('Error exporting income:', error)
+            Swal.fire({
+              icon: 'error',
+              title: 'เกิดข้อผิดพลาด',
+              text: 'ไม่สามารถดาวน์โหลดรายงานได้'
+            })
+          }
+        }
+      })
     },
 
     formatCurrency(amount) {

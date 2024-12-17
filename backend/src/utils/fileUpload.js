@@ -23,6 +23,9 @@ const storage = multer.diskStorage({
                 case 'user_documents':
                     uploadPath = path.join(__dirname, '../../uploads/documents/');
                     break;
+                case 'summaries':
+                    uploadPath = path.join(__dirname, '../../uploads/summaries/');
+                    break;
                 default:
                     return cb(new Error('Invalid field name'), null);
             }
@@ -103,7 +106,7 @@ export const deleteFile = (filePath) => {
     if (fs.existsSync(filePath)) {
         try {
             fs.unlinkSync(filePath);
-            // console.log(`ลบไฟล์ ${filePath} สำเร็จ`);
+            console.log(`ลบไฟล์ ${filePath} สำเร็จ`);
         } catch (error) {
             console.error(`เกิดข้อผิดพลาดในการลบไฟล์ ${filePath}:`, error);
         }
