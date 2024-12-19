@@ -33,6 +33,18 @@
 
             <!-- Menu Items -->
             <div class="p-4 space-y-4">
+              <router-link
+                to="/admin/PaymentManagement-view"
+                @click="$emit('close')"
+                class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+              >
+                <div class="flex items-center gap-3">
+                  <i class="fas fa-money-bill-wave text-gray-600 dark:text-gray-300"></i>
+                  <span class="text-gray-600 dark:text-gray-300 text-sm">การเงิน</span>
+                </div>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+              </router-link>
+
               <!-- Dark Mode Toggle -->
               <div
                 class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50"
@@ -42,7 +54,6 @@
                     {{ isDarkMode ? 'โหมดมืด' : 'โหมดสว่าง' }}
                   </span>
                 </div>
-
                 <!-- Toggle Switch -->
                 <button
                   @click="toggleDarkMode"

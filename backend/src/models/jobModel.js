@@ -136,7 +136,8 @@ export const getAllJobs = async (page = 1, pageSize = 20, filters = {}, userId =
                         where: userId ? {
                             OR: [
                                 { user_id: userId },  // ดึงเฉพาะการสมัครของ user นี้
-                                { status: 'approved' }  // และดึงการสมัครที่ approved แล้วของทุกคน
+                                { status: 'approved' },  // และดึงการสมัครที่ approved แล้วของทุกคน
+                                { status: 'completed' }
                             ]
                         } : undefined,
                         select: {
@@ -392,6 +393,7 @@ export const getMyCreatedJobs = async (page = 1, pageSize = 10, filters = {}) =>
             details: true,
             created_by: true,
             created_at: true,
+            status: true,
             JobPositions: {
                 select: {
                     id: true,
@@ -404,9 +406,9 @@ export const getMyCreatedJobs = async (page = 1, pageSize = 10, filters = {}) =>
             },
 
             JobParticipation: {
-                where: {
-                    status: 'approved'  // ดึงเฉพาะที่อนุมัติแล้ว
-                },
+                // where: {
+                //     status: 'approved'  // ดึงเฉพาะที่อนุมัติแล้ว
+                // },
                 select: {
                     id: true,
                     status: true,

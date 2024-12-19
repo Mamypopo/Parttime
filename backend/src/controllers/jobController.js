@@ -57,44 +57,42 @@ export const createJob = async (req, res) => {
 };
 
 
-export const getAllJobs = [
-    async (req, res) => {
-        try {
-            const page = parseInt(req.query.page) || 1;
-            const pageSize = parseInt(req.query.pageSize) || 10;
-            const userId = req.user?.id;
+export const getAllJobs = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 10;
+        const userId = req.user?.id;
 
-            const filters = {
-                id: req.query.id,
-                title: req.query.title,
-                location: req.query.location,
-                dateFrom: req.query.dateFrom,
-                dateTo: req.query.dateTo,
-                status: req.query.status,
-                minWage: req.query.minWage ? parseInt(req.query.minWage) : undefined,
-                maxWage: req.query.maxWage ? parseInt(req.query.maxWage) : undefined,
-                position: req.query.position,
-            };
+        const filters = {
+            id: req.query.id,
+            title: req.query.title,
+            location: req.query.location,
+            dateFrom: req.query.dateFrom,
+            dateTo: req.query.dateTo,
+            status: req.query.status,
+            minWage: req.query.minWage ? parseInt(req.query.minWage) : undefined,
+            maxWage: req.query.maxWage ? parseInt(req.query.maxWage) : undefined,
+            position: req.query.position,
+        };
 
-            const jobs = await jobModel.getAllJobs(page, pageSize, filters, userId);
-            const totalCount = await jobModel.getJobsCount(filters);
+        const jobs = await jobModel.getAllJobs(page, pageSize, filters, userId);
+        const totalCount = await jobModel.getJobsCount(filters);
 
-            return res.status(200).json({
-                jobs,
-                page,
-                pageSize,
-                totalPages: Math.ceil(totalCount / pageSize),
-                totalCount
-            });
-        } catch (error) {
-            console.error('เกิดข้อผิดพลาดในการดึงข้อมูลงาน:', error);
-            return res.status(500).json({
-                message: "เกิดข้อผิดพลาดในการดึงข้อมูลงาน",
-                error: error.message
-            });
-        }
+        return res.status(200).json({
+            jobs,
+            page,
+            pageSize,
+            totalPages: Math.ceil(totalCount / pageSize),
+            totalCount
+        });
+    } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการดึงข้อมูลงาน:', error);
+        return res.status(500).json({
+            message: "เกิดข้อผิดพลาดในการดึงข้อมูลงาน",
+            error: error.message
+        });
     }
-];
+};
 
 // ฟังก์ชันสำหรับดึงงานตาม ID
 export const getJobById = async (req, res) => {
@@ -130,7 +128,7 @@ export const getMyCreatedJobs = async (req, res) => {
             minWage: req.query.minWage ? parseInt(req.query.minWage) : undefined,
             maxWage: req.query.maxWage ? parseInt(req.query.maxWage) : undefined,
             position: req.query.position,
-            createdBy: adminId // เพิ่ม filter ตาม adminId
+            createdBy: adminId
         };
 
         const jobs = await jobModel.getMyCreatedJobs(page, pageSize, filters);

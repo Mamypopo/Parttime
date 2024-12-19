@@ -181,7 +181,6 @@ export const useJobStore = defineStore('job', {
                     axios.get(`${this.baseURL}/api/jobs/getJobsWithParticipants`, { headers })
                 ]);
 
-
                 // ตรวจสอบว่า jobsResponse มีข้อมูลและเป็น array
                 this.jobs = Array.isArray(jobsResponse.data?.jobs) ? jobsResponse.data.jobs : [];
 
@@ -669,12 +668,12 @@ export const useJobStore = defineStore('job', {
                 if (!job?.JobPositions) return '0';
 
                 const total = job.JobPositions.reduce((sum, position) => {
-                    // นับเฉพาะ users ที่ผ่านการประเมินแล้ว
-                    const evaluatedCount = position.JobParticipation?.filter(
-                        p => p.workHistories?.length > 0 && p.workHistories[0].is_passed_evaluation
+                    // นับเฉพาะ users ที่มีสถานะ completed
+                    const completedCount = position.JobParticipation?.filter(
+                        p => p.status === 'completed'
                     ).length || 0;
 
-                    return sum + (evaluatedCount * Number(position.wage));
+                    return sum + (completedCount * Number(position.wage));
                 }, 0);
 
                 return this.formatNumber(total);

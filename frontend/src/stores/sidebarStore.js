@@ -25,6 +25,7 @@ export const useSidebarStore = defineStore('sidebar', {
             { name: 'ผู้ใช้', path: '/admin/alluser', icon: 'fas fa-users' },
             { name: 'ผู้ใช้งาน รออนุมัติ', path: '/admin/pending-users', icon: 'fas fa-user-clock' },
             { name: 'ผู้ใช้งาน ถูกปฏิเสธ', path: '/admin/reject-user', icon: 'fa-solid fa-user-xmark' },
+            { name: 'การเงิน', path: '/admin/PaymentManagement-view', icon: 'fas fa-money-bill-wave' },
             // { name: 'ผู้ใช้งาน ขอเพิ่มทักษะ', path: '/', icon: 'fas fa-tasks' }
         ],
 

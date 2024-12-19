@@ -30,7 +30,7 @@
               >
                 <!-- Header -->
                 <div
-                  class="sticky top-0 z-10 flex justify-between items-center p-6 bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4B9592] dark:to-[#6667AA]"
+                  class="sticky top-0 z-10 flex justify-between items-center p-6 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600"
                 >
                   <DialogTitle class="text-2xl font-semibold text-white">
                     ประวัติการทำงาน
@@ -98,9 +98,9 @@
                           <!-- สถานะงาน -->
                           <div
                             :class="{
-                              'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400':
+                              'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30':
                                 job.workHistories?.[0]?.is_passed_evaluation,
-                              'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400':
+                              'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30':
                                 !job.workHistories?.[0]?.is_passed_evaluation
                             }"
                             class="px-3 py-1 rounded-full text-sm font-medium"
@@ -257,74 +257,38 @@ export default {
     handleClose() {
       this.$emit('close')
     },
-    hasScores(job) {
-      if (!job.workHistories?.[0]) return false
-      const scores = [
-        'appearance_score',
-        'quality_score',
-        'quantity_score',
-        'manner_score',
-        'punctuality_score'
-      ]
-      return scores.some((score) => job.workHistories[0][score] !== null)
+
+    getTotalScore(job) {
+      return job.workHistories?.[0]?.total_score || 0
     },
-    getScore(job, field) {
-      const score = job.workHistories?.[0]?.[field]
-      return score !== null ? score : '-'
-    },
-    getScoreColor(job) {
-      if (!job.workHistories?.[0]) return 'gray'
-      return job.workHistories[0].is_passed_evaluation ? 'green' : 'red'
-    },
-    getStatusClass(status) {
-      switch (status) {
-        case 'approved':
-          return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-        case 'rejected':
-          return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-        default:
-          return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
-      }
-    },
+
     getScoreClass(score) {
-      const numScore = Number(score)
-      if (!numScore) return 'text-gray-400 dark:text-gray-500'
-      return numScore === 2
-        ? 'text-green-600 dark:text-green-400'
-        : numScore === 1
-          ? 'text-yellow-600 dark:text-yellow-400'
-          : 'text-red-600 dark:text-red-400'
+      if (score === null) return 'text-red-500 dark:text-red-600' // สีแดงเข้มสำหรับค่า null (ไม่ผ่าน)
+      const numScore = Number(score) || 0
+      if (numScore >= 2) return 'text-green-500 dark:text-green-400' // สีเขียวสำหรับคะแนนสูง
+      if (numScore >= 1) return 'text-blue-500 dark:text-blue-400' // สีฟ้าสำหรับคะแนนปานกลาง
+      return 'text-red-500 dark:text-red-400' // สีแดงสำหรับคะแนนต่ำ
     },
+
     getProgressBarClass(job) {
       const score = this.getTotalScore(job)
-      if (score >= 8) return 'bg-green-500 dark:bg-green-400'
-      if (score >= 6) return 'bg-yellow-500 dark:bg-yellow-400'
-      return 'bg-red-500 dark:bg-red-400'
-    },
-    getTotalScore(job) {
-      // ถ้าไม่มีประวัติการทำงาน หรือไม่ผ่านการประเมิน ให้คะแนน 0
-      if (!job.workHistories?.[0]) return 0
-      if (!job.workHistories[0].is_passed_evaluation) return 0
-
-      const scores = [
-        'appearance_score',
-        'quality_score',
-        'quantity_score',
-        'manner_score',
-        'punctuality_score'
-      ]
-      return scores.reduce((sum, field) => {
-        const score = Number(job.workHistories[0][field]) || 0
-        return sum + score
-      }, 0)
+      if (score >= 8)
+        return 'bg-gradient-to-r from-green-200 to-green-400 dark:from-green-600 dark:to-green-800' // สีพาสเทลเขียวสำหรับดีมาก
+      if (score >= 6)
+        return 'bg-gradient-to-r from-yellow-200 to-yellow-400 dark:from-yellow-600 dark:to-yellow-800' // สีพาสเทลเหลืองสำหรับปานกลาง
+      if (score >= 4)
+        return 'bg-gradient-to-r from-orange-200 to-orange-400 dark:from-orange-600 dark:to-orange-800' // สีพาสเทลส้มสำหรับค่อนข้างต่ำ
+      return 'bg-gradient-to-r from-red-200 to-red-400 dark:from-red-600 dark:to-red-800' // สีพาสเทลแดงสำหรับคะแนนต่ำ
     },
 
-    getTotalScoreClass(job) {
-      const total = this.getTotalScore(job)
-      if (total >= 8) return 'text-green-600 dark:text-green-400'
-      if (total >= 6) return 'text-yellow-600 dark:text-yellow-400'
-      return 'text-red-600 dark:text-red-400'
+    getTotalScoreClass(workHistory) {
+      const total = this.getTotalScore(workHistory)
+      if (total >= 8) return 'text-green-600 dark:text-green-400' // ดีมาก
+      if (total >= 6) return 'text-yellow-600 dark:text-yellow-400' // ปานกลาง
+      if (total >= 4) return 'text-orange-600 dark:text-orange-400' // ค่อนข้างต่ำ
+      return 'text-red-600 dark:text-red-400' // ต่ำ
     },
+
     getOverallScore() {
       if (!this.jobs?.length) return 0
       // รวมคะแนนทั้งหมด รวมถึงงานที่ไม่ผ่านการประเมิน (จะได้ 0 คะแนน)
@@ -334,22 +298,15 @@ export default {
       }, 0)
       return (totalScores / this.jobs.length).toFixed(1)
     },
+
     getOverallScoreClass(score) {
       const numScore = parseFloat(score)
       if (numScore >= 8) return 'text-green-600 dark:text-green-400'
       if (numScore >= 6) return 'text-yellow-600 dark:text-yellow-400'
+      if (numScore >= 4) return 'text-orange-600 dark:text-orange-400'
       return 'text-red-600 dark:text-red-400'
     },
-    getStatusText(status) {
-      switch (status) {
-        case 'approved':
-          return 'ผ่านการอนุมัติ'
-        case 'rejected':
-          return 'ไม่ผ่านการอนุมัติ'
-        default:
-          return 'รอดำเนินการ'
-      }
-    },
+
     formatDate(date) {
       if (!date) return 'ไม่ระบุ'
       return new Date(date).toLocaleDateString('th-TH', {

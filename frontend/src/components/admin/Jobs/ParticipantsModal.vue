@@ -164,7 +164,7 @@
                     <input
                       v-model="searchTerm"
                       type="text"
-                      placeholder="ค้นหาผู้สมัคร..."
+                      placeholder="ค้นหาผู้สมัครด้วย ชื่อ หรือ อีเมล..."
                       class="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg text-sm border-0 focus:ring-2 focus:ring-[#6ED7D1] dark:focus:ring-[#4B9592] focus:outline-none"
                     />
                     <i
@@ -304,7 +304,7 @@
 
                           <!-- Rating Display -->
                           <div v-if="participant.workHistories?.length" class="mb-2">
-                            <!-- เพิ่มวันที่ประเมิน -->
+                            <!-- วันที่ประเมิน -->
                             <div class="mb-3 text-sm text-gray-600 dark:text-gray-400">
                               <i class="fas fa-calendar-alt mr-1.5"></i>
                               วันที่ประเมิน:
@@ -315,7 +315,7 @@
                               }}
                             </div>
 
-                            <!-- เพิ่มส่วนแสดงสถานะ -->
+                            <!-- ส่วนแสดงสถานะ -->
                             <div class="mb-3">
                               <span
                                 class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium mr-4"
@@ -328,11 +328,11 @@
                                 class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
                                 :class="
                                   participant.workHistories[0].is_passed_evaluation
-                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                                    : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
+                                    ? 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30'
+                                    : 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30'
                                 "
                               >
-                                <i class="fas fa-circle text-[0.5rem] mr-1.5"></i>
+                                <i class="fa-solid fa-star text-[0.5rem] mr-1.5"></i>
                                 {{
                                   participant.workHistories[0].is_passed_evaluation
                                     ? 'ผ่านการประเมิน'
@@ -585,9 +585,11 @@ export default {
         )
       }, 0)
     },
+
     getStatusCountForPosition(position, status) {
       return position.JobParticipation.filter((p) => p.status === status).length
     },
+
     async handleApprove(participationId) {
       try {
         const confirm = await Swal.fire({
@@ -712,45 +714,25 @@ export default {
       )
     },
 
-    getStatusStyle(status) {
-      return (
-        {
-          pending: 'bg-yellow-100 text-yellow-800',
-          approved: 'bg-green-100 text-green-800',
-          rejected: 'bg-red-100 text-red-800',
-          cancelled: 'bg-red-500 text-red-800'
-        }[status] || ''
-      )
+    getTotalScore(workHistory) {
+      return workHistory?.total_score || 0
     },
 
     getScoreClass(score) {
       score = Number(score) || 0
-      if (score === 2) return 'text-green-600 dark:text-green-400'
-      if (score === 1) return 'text-yellow-600 dark:text-yellow-400'
+      if (score === 2) return 'text-green-500 dark:text-green-400'
+      if (score === 1) return 'text-blue-600 dark:text-blue-400'
       return 'text-red-600 dark:text-red-400'
-    },
-
-    getTotalScore(workHistory) {
-      if (!workHistory) return 0
-      const scores = [
-        'appearance_score',
-        'quality_score',
-        'quantity_score',
-        'manner_score',
-        'punctuality_score'
-      ]
-      return scores.reduce((sum, field) => {
-        const score = Number(workHistory[field]) || 0
-        return sum + score
-      }, 0)
     },
 
     getTotalScoreClass(workHistory) {
       const total = this.getTotalScore(workHistory)
-      if (total >= 8) return 'text-green-600 dark:text-green-400'
-      if (total >= 6) return 'text-yellow-600 dark:text-yellow-400'
-      return 'text-red-600 dark:text-red-400'
+      if (total >= 8) return 'text-green-600 dark:text-green-400' // ดีมาก
+      if (total >= 6) return 'text-yellow-600 dark:text-yellow-400' // ปานกลาง
+      if (total >= 4) return 'text-orange-600 dark:text-orange-400' // ค่อนข้างต่ำ
+      return 'text-red-500 dark:text-red-400' // ต่ำ
     },
+
     getProfileImage(image) {
       return this.jobStore.getProfileImage(image)
     },

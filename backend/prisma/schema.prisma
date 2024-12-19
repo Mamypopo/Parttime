@@ -48,7 +48,6 @@ model User {
   Log                   Log[]
   notifications         Notification[] // ความสัมพันธ์กับ Notification
   pending_skills        PendingSkill[]
-
 }
 
 model PendingSkill {
@@ -95,21 +94,21 @@ model JobPosition {
   status           String             @default("open") // เพิ่มฟิลด์ status พร้อมค่าดีฟอลต์เป็น 'open'
   job              Job                @relation(fields: [job_id], references: [id], onDelete: Cascade) // ความสัมพันธ์กับ Job
   JobParticipation JobParticipation[] // ผู้เข้าร่วมในตำแหน่งนี้
-
 }
 
 model JobParticipation {
-  id              Int           @id @default(autoincrement())
+  id              Int              @id @default(autoincrement())
   user_id         Int // ผู้ใช้ที่สมัครเข้าร่วม
   job_position_id Int // ตำแหน่งงานที่สมัคร
   status          String // สถานะของผู้เข้าร่วมงาน (สำเร็จ, ล้มเหลว, อื่นๆ)
-  created_at      DateTime      @default(now()) @db.Timestamptz
-  updated_at      DateTime      @updatedAt @db.Timestamptz
+  created_at      DateTime         @default(now()) @db.Timestamptz
+  updated_at      DateTime         @updatedAt @db.Timestamptz
   workHistories   WorkHistory[] // เพิ่มความสัมพันธ์กับประวัติการทำงาน
-  user            User          @relation(fields: [user_id], references: [id]) // ความสัมพันธ์กับผู้ใช้
-  jobPosition     JobPosition   @relation(fields: [job_position_id], references: [id]) // ความสัมพันธ์กับตำแหน่งงาน
-  Job             Job?          @relation(fields: [jobId], references: [id])
+  user            User             @relation(fields: [user_id], references: [id]) // ความสัมพันธ์กับผู้ใช้
+  jobPosition     JobPosition      @relation(fields: [job_position_id], references: [id]) // ความสัมพันธ์กับตำแหน่งงาน
+  Job             Job?             @relation(fields: [jobId], references: [id])
   jobId           Int?
+  PaymentHistory  PaymentHistory[]
 }
 
 // เพิ่มโมเดลใหม่สำหรับเก็บประวัติการทำงาน
@@ -148,24 +147,24 @@ model Log {
   user_agent  String? // ข้อมูลเบราว์เซอร์
   user        User?    @relation(fields: [user_id], references: [id]) // ความสัมพันธ์กับผู้ใช้
   admin       Admin?   @relation(fields: [admin_id], references: [id]) // ความสัมพันธ์กับผู้ดูแลระบบ
-
 }
 
 model Admin {
-  id           Int            @id @default(autoincrement())
-  email        String         @unique
-  password     String
-  first_name   String // ชื่อ
-  last_name    String // นามสกุล
-  role         String         @default("admin") // กำหนด role ให้เป็น admin
-  created_at   DateTime       @default(now()) @db.Timestamptz
-  updated_at   DateTime       @updatedAt @db.Timestamptz
-  phone        String? // เพิ่มเบอร์โทร
-  profile_pic  String? // เพิ่มรูปโปรไฟล์
-  Job          Job[]
-  Log          Log[]
-  Notification Notification[]
-
+  id             Int              @id @default(autoincrement())
+  email          String           @unique
+  password       String
+  first_name     String // ชื่อ
+  last_name      String // นามสกุล
+  role           String           @default("admin") // กำหนด role ให้เป็น admin
+  created_at     DateTime         @default(now()) @db.Timestamptz
+  updated_at     DateTime         @updatedAt @db.Timestamptz
+  phone          String? // เพิ่มเบอร์โทร
+  profile_pic    String? // เพิ่มรูปโปรไฟล์
+  Job            Job[]
+  Log            Log[]
+  Notification   Notification[]
+  PaymentHistory PaymentHistory[]
+  PaymentLog     PaymentLog[]
 }
 
 model Notification {
@@ -180,5 +179,38 @@ model Notification {
   jobId     Int?
   read      Boolean  @default(false)
   type      String   @default("notification")
+}
 
+//  model ใหม่สำหรับประวัติการจ่ายเงิน
+model PaymentHistory {
+  id                   Int              @id @default(autoincrement())
+  job_participation    JobParticipation @relation(fields: [job_participation_id], references: [id])
+  job_participation_id Int
+  amount               Decimal          @db.Decimal(10, 2)
+  payment_status       String // pending, paid, cancelled
+  payment_method       String? // cash, transfer
+  payment_slip         String? // path ของสลิป
+  payment_note         String?          @db.Text
+  paid_at              DateTime?
+  paid_by              Admin?           @relation(fields: [admin_id], references: [id])
+  admin_id             Int?
+  email_sent           Boolean          @default(false)
+  email_sent_at        DateTime?
+  created_at           DateTime         @default(now())
+  updated_at           DateTime         @updatedAt
+  payment_logs         PaymentLog[] // relation กับ PaymentLog
+}
+
+//  model สำหรับ log การเงิน
+model PaymentLog {
+  id            Int            @id @default(autoincrement())
+  payment       PaymentHistory @relation(fields: [payment_id], references: [id])
+  payment_id    Int
+  admin         Admin          @relation(fields: [admin_id], references: [id])
+  admin_id      Int
+  action        String // created, updated, email_sent, cancelled
+  action_detail Json? // รายละเอียดการเปลี่ยนแปลง
+  ip_address    String?        @db.VarChar(45)
+  user_agent    String?        @db.Text
+  created_at    DateTime       @default(now())
 }

@@ -256,17 +256,17 @@ export default {
     getProgressBarClass(status) {
       switch (status?.toLowerCase()) {
         case 'pending':
-          return 'bg-yellow-500 shadow-md shadow-yellow-300 border border-yellow-400'
+          return 'bg-gradient-to-br from-yellow-200 to-yellow-400 dark:from-yellow-600 dark:to-yellow-800 '
         case 'approved':
-          return 'bg-blue-500 shadow-md shadow-blue-300 border border-blue-400'
+          return 'bg-gradient-to-br from-blue-200 to-blue-400 dark:from-blue-600 dark:to-blue-800 '
         case 'rejected':
-          return 'bg-red-500 shadow-md shadow-red-300 border border-red-400'
+          return 'bg-gradient-to-br from-red-200 to-red-400 dark:from-red-600 dark:to-red-800'
         case 'completed':
-          return 'bg-green-500 shadow-md shadow-green-300 border border-green-400'
+          return 'bg-gradient-to-br from-green-200 to-green-400 dark:from-green-600 dark:to-green-800 '
         case 'cancelled':
-          return 'bg-gradient-to-br from-[#EB5757] to-[#C0392B] shadow-lg shadow-red-400/70 border border-red-600'
+          return 'bg-gradient-to-br from-pink-300 to-red-300 dark:from-pink-700 dark:to-red-700'
         default:
-          return 'bg-gray-500 shadow-md shadow-gray-300 border border-gray-400'
+          return 'bg-gradient-to-br from-gray-200 to-gray-400 dark:from-gray-600 dark:to-gray-800 '
       }
     },
 
@@ -316,25 +316,6 @@ export default {
     closeAdminContact() {
       this.showContactModal = false
       this.selectedAdmin = null
-    },
-
-    getScoreLabel(type) {
-      return (
-        {
-          appearance_score: 'การแต่งกาย',
-          quality_score: 'คุณภาพงาน',
-          quantity_score: 'ปริมาณงาน',
-          manner_score: 'มารยาท',
-          punctuality_score: 'การตรงต่อเวลา'
-        }[type] || type
-      )
-    },
-
-    getTotalScoreClass(score) {
-      if (score >= 4) return 'text-green-500 font-semibold'
-      if (score >= 3) return 'text-blue-500 font-semibold'
-      if (score >= 2) return 'text-yellow-500 font-semibold'
-      return 'text-red-500 font-semibold'
     }
   },
 

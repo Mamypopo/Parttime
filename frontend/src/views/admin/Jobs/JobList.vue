@@ -150,14 +150,14 @@
                   <div class="text-sm text-gray-500 dark:text-gray-400">
                     ประมาณการ:
                     <span class="font-medium text-gray-600 dark:text-gray-300">
-                      {{ jobStore.calculateEstimatedCost(job) }} บาท
+                      {{ calculateEstimatedCost(job).toLocaleString() }} บาท
                     </span>
                   </div>
                   <!-- ค่าจ้างจริง -->
                   <div class="text-sm">
                     จ่ายจริง:
                     <span class="font-medium text-purple-600 dark:text-purple-400">
-                      {{ jobStore.calculateActualCost(job) }} บาท
+                      {{ calculateActualCost(job).toLocaleString() }} บาท
                     </span>
                   </div>
                 </div>
@@ -251,13 +251,13 @@
               <div class="text-sm text-gray-500 dark:text-gray-400">
                 ประมาณการ:
                 <span class="font-medium text-gray-600 dark:text-gray-300">
-                  {{ jobStore.calculateEstimatedCost(job) }} บาท
+                  {{ calculateEstimatedCost(job).toLocaleString() }} บาท
                 </span>
               </div>
               <div class="text-sm">
                 จ่ายจริง:
                 <span class="font-medium text-purple-600 dark:text-purple-400">
-                  {{ jobStore.calculateActualCost(job) }} บาท
+                  {{ calculateActualCost(job).toLocaleString() }} บาท
                 </span>
               </div>
             </div>
@@ -338,25 +338,7 @@ export default {
     JobSearch,
     JobDetailModal
   },
-  props: {
-    isOpen: {
-      type: Boolean,
-      default: false
-    },
-    job: {
-      type: Object,
-      default: () => ({
-        title: '',
-        location: '',
-        work_date: null,
-        start_time: null,
-        end_time: null,
-        details: '',
-        completed: false,
-        JobPositions: []
-      })
-    }
-  },
+
   setup() {
     const jobStore = useJobStore()
     return { jobStore }
@@ -397,11 +379,6 @@ export default {
     },
     totalPages() {
       return this.jobStore.totalPages
-    },
-    calculateEstimatedCost() {
-      return (job) => {
-        return this.jobStore.calculateEstimatedCost(job)
-      }
     }
   },
 
@@ -455,6 +432,13 @@ export default {
       return this.jobStore.formatTime(time)
     },
 
+    calculateEstimatedCost(job) {
+      return this.jobStore.calculateEstimatedCost(job)
+    },
+
+    calculateActualCost(job) {
+      return this.jobStore.calculateActualCost(job)
+    },
     // Modal handlers
     openModal(job) {
       this.selectedJob = job

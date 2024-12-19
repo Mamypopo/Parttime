@@ -26,6 +26,9 @@ const storage = multer.diskStorage({
                 case 'summaries':
                     uploadPath = path.join(__dirname, '../../uploads/summaries/');
                     break;
+                case 'payment_slip':
+                    uploadPath = path.join(__dirname, '../../uploads/payment-slips/');
+                    break;
                 default:
                     return cb(new Error('Invalid field name'), null);
             }
@@ -81,6 +84,14 @@ const fileFilter = (req, file, cb) => {
         return;
     }
 
+    if (file.fieldname === 'payment_slip') {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|pdf)$/)) {
+            return cb(new Error('อนุญาตเฉพาะไฟล์ .jpg .jpeg .png และ .pdf เท่านั้นสำหรับสลิปการโอนเงิน'), false);
+        }
+        cb(null, true);
+        return;
+    }
+
     // ถ้าไม่ตรงกับ fieldname ใดๆ
     cb(new Error('Unexpected field'), false);
 };
@@ -100,6 +111,13 @@ export const upload = multer({
     { name: 'education_certificate', maxCount: 1 },
     { name: 'user_documents', maxCount: 5 }  // รองรับไฟล์หลายไฟล์ในฟิลด์นี้
 ]);
+
+// export  payment_slip
+export const uploadPaymentSlip = multer({
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: { fileSize: 5 * 1024 * 1024 } // จำกัดขนาด 5MB
+}).single('payment_slip');
 
 
 export const deleteFile = (filePath) => {

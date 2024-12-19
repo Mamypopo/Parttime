@@ -144,3 +144,59 @@ export const sendResetPasswordEmail = async ({ email, first_name, resetToken }) 
         throw new Error('ไม่สามารถส่งอีเมลรีเซ็ตรหัสผ่านได้');
     }
 };
+
+
+
+// ฟังก์ชันสำหรับส่งอีเมลแจ้งเตือนการจ่ายเงิน
+export const sendPaymentNotificationEmail = async (payment) => {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+
+    // สร้าง HTML สำหรับแสดงรายละเอียดการจ่ายเงิน
+    const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to: payment.job_participation.user.email,
+        subject: 'แจ้งการจ่ายเงิน',
+        html: `
+            <div style="font-family: 'Sarabun', sans-serif; max-width: 600px; margin: 0 auto;">
+                <h1>แจ้งการจ่ายเงิน</h1>
+                <p>เรียน ${payment.job_participation.user.first_name} ${payment.job_participation.user.last_name}</p>
+                
+                <div style="background-color: #f5f5f5; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                    <h2 style="margin-top: 0;">รายละเอียดการจ่ายเงิน</h2>
+                    <p><strong>งาน:</strong> ${payment.job_participation.jobPosition.job.title}</p>
+                    <p><strong>ตำแหน่ง:</strong> ${payment.job_participation.jobPosition.position_name}</p>
+                    <p><strong>จำนวนเงิน:</strong> ${payment.amount.toLocaleString('th-TH')} บาท</p>
+                    <p><strong>วิธีการจ่าย:</strong> ${payment.payment_method === 'cash' ? 'เงินสด' : 'โอนเงิน'
+            }</p>
+                    <p><strong>วันที่จ่าย:</strong> ${new Date(payment.paid_at).toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            })}</p>
+                    ${payment.payment_note ? `<p><strong>หมายเหตุ:</strong> ${payment.payment_note}</p>` : ''}
+                </div>
+
+                ${payment.payment_method === 'transfer' && payment.payment_slip ? `
+                    <div style="text-align: center; margin: 20px 0;">
+                        <p><strong>สลิปการโอนเงิน</strong></p>
+                        <img src="${process.env.BACKEND_URL}/${payment.payment_slip}" 
+                             alt="สลิปการโอนเงิน"
+                             style="max-width: 100%; height: auto; border-radius: 5px;">
+                    </div>
+                ` : ''}
+
+                <p>หากมีข้อสงสัยหรือต้องการสอบถามข้อมูลเพิ่มเติม กรุณาติดต่อเจ้าหน้าที่</p>
+            </div>
+        `
+    };
+
+    await transporter.sendMail(mailOptions);
+};

@@ -155,8 +155,8 @@
                 <div class="w-full bg-gray-200 rounded-full h-2.5">
                   <div
                     class="h-2.5 rounded-full transition-all duration-500"
-                    :class="getProgressBarClass(job)"
-                    :style="{ width: getProgressWidth(job) }"
+                    :class="getProgressBarClass(job.status)"
+                    :style="{ width: getProgressWidth(job.status) }"
                   ></div>
                 </div>
               </div>
@@ -365,7 +365,6 @@
       :show="showWorkStatusModal"
       :job="selectedJob"
       @close="closeWorkStatusModal"
-      @update="handleUpdateWorkStatus"
     />
   </div>
 </template>
@@ -443,6 +442,7 @@ export default {
       return this.jobStore.formatNumber(number)
     }
   },
+
   // เรียกใช้ loadInitialData เพื่อโหลดข้อมูลเมื่อคอมโพเนนต์ถูกสร้างขึ้น
   created() {
     this.loadInitialData()
@@ -452,6 +452,7 @@ export default {
     // เคลียร์ข้อมูลใน store เมื่อคอมโพเนนต์กำลังจะถูกทำลาย
     this.jobStore.resetStore()
   },
+
   async mounted() {
     try {
       await this.jobStore.fetchJobsAndParticipants()
@@ -481,68 +482,6 @@ export default {
       } catch (error) {
         this.showError('ไม่สามารถโหลดข้อมูลงานได้')
       }
-    },
-
-    //คืนค่าสถานะของงานตามวันเวลาปัจจุบันและวันที่ทำงานของงาน
-    getJobStatus(job) {
-      // ดูสถานะจริงของงานก่อน
-      if (job.status === 'completed') {
-        return 'completed'
-      }
-
-      const now = new Date()
-      const workDate = new Date(job.work_date)
-
-      // ถ้ายังไม่ถึงวันทำงาน = ประกาศรับสมัคร
-      if (workDate > now) {
-        return 'published'
-      }
-      // ถ้าเป็นวันเดียวกัน = กำลังดำเนินงาน
-      else if (workDate.toDateString() === now.toDateString()) {
-        return 'in_progress'
-      }
-      // ถ้าผ่านวันทำงานมาแล้ว = เสร็จสิ้น
-      else {
-        return 'completed'
-      }
-    },
-
-    getStatusClass(status) {
-      const classes = {
-        published: 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30',
-        in_progress: 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30',
-        completed: 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30'
-      }
-      return `px-2 py-1 rounded-full text-xs ${classes[status]}`
-    },
-
-    getStatusText(status) {
-      const texts = {
-        published: 'ประกาศรับสมัคร',
-        in_progress: 'กำลังดำเนินงาน',
-        completed: 'เสร็จสิ้น'
-      }
-      return texts[status]
-    },
-
-    getProgressBarClass(job) {
-      const status = this.getJobStatus(job)
-      const classes = {
-        published: 'bg-blue-500 dark:bg-blue-400',
-        in_progress: 'bg-yellow-500 dark:bg-yellow-400',
-        completed: 'bg-green-500 dark:bg-green-400'
-      }
-      return classes[status]
-    },
-
-    getProgressWidth(job) {
-      const status = this.getJobStatus(job)
-      const widths = {
-        published: '33%',
-        in_progress: '66%',
-        completed: '100%'
-      }
-      return widths[status]
     },
 
     // อนุมัติผู้สมัครและเรียก loadJobs
@@ -813,6 +752,7 @@ export default {
     hasNewParticipants(job) {
       return this.jobStore.hasNewParticipants(job)
     },
+
     openWorkStatusModal(job) {
       // รีเฟรชข้อมูลงานก่อนเปิด modal
       this.jobStore.fetchJobsAndParticipants().then(() => {
@@ -827,52 +767,6 @@ export default {
     closeWorkStatusModal() {
       this.showWorkStatusModal = false
       this.selectedJob = null
-    },
-
-    async handleUpdateWorkStatus(data) {
-      try {
-        console.log('Sending evaluation data:', {
-          participationId: data.participationId,
-          ratings: data.ratings,
-          totalScore: data.totalScore,
-          comment: data.comment,
-          isPassedEvaluation: data.isPassedEvaluation
-        })
-
-        await this.jobStore.updateWorkEvaluation({
-          participationId: data.participationId,
-          ratings: data.ratings,
-          totalScore: data.totalScore,
-          comment: data.comment,
-          isPassedEvaluation: data.isPassedEvaluation
-        })
-        // รีเฟรชข้อมูลงานทั้งหมด
-        await this.jobStore.fetchJobsAndParticipants()
-
-        // อัพเดทข้อมูลงานที่เลือกอยู่
-        if (this.selectedJob) {
-          const updatedJob = this.jobs.find((job) => job.id === this.selectedJob.id)
-          if (updatedJob) {
-            this.selectedJob = { ...updatedJob }
-          }
-        }
-        this.closeWorkStatusModal()
-
-        Swal.fire({
-          icon: 'success',
-          title: 'บันทึกการประเมินสำเร็จ',
-          showConfirmButton: false,
-          timer: 1500
-        })
-      } catch (error) {
-        console.error('Error details:', error.response?.data)
-        Swal.fire({
-          icon: 'error',
-          title: 'เกิดข้อผิดพลาด',
-          text: error.message || 'ไม่สามารถบันทึกการประเมินได้',
-          confirmButtonText: 'ตกลง'
-        })
-      }
     },
 
     openParticipantsModal(job) {
@@ -940,6 +834,48 @@ export default {
       } catch (error) {
         console.error('Error refreshing jobs:', error)
       }
+    },
+
+    getStatusClass(status) {
+      const classes = {
+        published: 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30',
+        in_progress: 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30',
+        completed: 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30'
+      }
+      return `px-2 py-1 rounded-full text-xs ${classes[status?.toLowerCase()] || 'bg-gray-100 text-gray-400'}`
+    },
+
+    getStatusText(status) {
+      const texts = {
+        published: 'ประกาศรับสมัคร',
+        in_progress: 'กำลังดำเนินงาน',
+        completed: 'เสร็จสิ้น'
+      }
+      return texts[status?.toLowerCase()] || 'สถานะไม่ระบุ'
+    },
+
+    getProgressBarClass(status) {
+      const classes = {
+        published:
+          'bg-gradient-to-br from-blue-200 to-blue-400 dark:from-blue-600 dark:to-blue-800 ',
+        in_progress:
+          'bg-gradient-to-br from-yellow-200 to-yellow-400 dark:from-yellow-600 dark:to-yellow-800 ',
+        completed:
+          'bg-gradient-to-br from-green-200 to-green-400 dark:from-green-600 dark:to-green-800 '
+      }
+      return (
+        classes[status] ||
+        'bg-gradient-to-br from-gray-200 to-gray-400 dark:from-gray-600 dark:to-gray-800 '
+      )
+    },
+
+    getProgressWidth(status) {
+      const widths = {
+        published: '33%',
+        in_progress: '66%',
+        completed: '100%'
+      }
+      return widths[status]
     }
   }
 }

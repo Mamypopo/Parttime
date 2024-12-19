@@ -100,63 +100,39 @@ export const getTopUsersWithRatings = async () => {
     });
 
     // คำนวณคะแนนเฉลี่ยของแต่ละคนและจำนวนงาน
-    const topUsers = users
-        .map(user => {
-            // กรองเฉพาะงานที่มีการประเมิน
-            const passedEvaluationJobs = user.JobParticipation
-                .filter(jp => jp.status !== 'cancelled')
-                .flatMap(jp => jp.workHistories)
-                .filter(wh =>
-                    wh !== null &&
-                    wh.total_score !== null
-                );
+    const topUsers = users.map(user => {
+        // กรองเฉพาะงานที่ผ่านการประเมินและไม่ถูกยกเลิก
+        const validWorkHistories = user.JobParticipation
+            .filter(jp => jp.status !== 'cancelled')
+            .flatMap(jp => jp.workHistories || [])
+            .filter(wh => wh && wh.total_score !== null); // งานที่มีการประเมิน
 
-            // ถ้าไม่มีงานที่ผ่านการประเมิน ให้คะแนนเป็น 0
-            if (passedEvaluationJobs.length === 0) {
-                return {
-                    id: user.id,
-                    name: `${user.first_name} ${user.last_name}`,
-                    profile_image: user.profile_image,
-                    averageScores: {
-                        appearance: 0,
-                        quality: 0,
-                        quantity: 0,
-                        manner: 0,
-                        punctuality: 0,
-                        total: 0
-                    },
-                    jobCount: user.JobParticipation.length // นับจำนวนงานทั้งหมด
-                };
-            }
+        // ฟังก์ชันคำนวณคะแนนเฉลี่ย
+        const calculateAverage = (field) => {
+            const scores = validWorkHistories.map(wh => wh[field] || 0); // ใช้ 0 แทน null
+            return scores.length > 0 ? scores.reduce((sum, score) => sum + score, 0) / scores.length : 0;
+        };
 
-            // คำนวณคะแนนเฉลี่ยแต่ละประเภท
-            const calculateAverage = (field) => {
-                const allJobs = user.JobParticipation.flatMap(jp => jp.workHistories);
-                const scores = allJobs
-                    .map(wh => (wh && wh[field] !== null) ? wh[field] : 0); // งานที่ไม่ผ่านจะได้ 0 คะแนน
-                return scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-            };
+        return {
+            id: user.id,
+            name: `${user.first_name} ${user.last_name}`,
+            profile_image: user.profile_image,
+            averageScores: {
+                appearance: calculateAverage('appearance_score'),
+                quality: calculateAverage('quality_score'),
+                quantity: calculateAverage('quantity_score'),
+                manner: calculateAverage('manner_score'),
+                punctuality: calculateAverage('punctuality_score'),
+                total: calculateAverage('total_score')
+            },
+            jobCount: user.JobParticipation.length // นับจำนวนงานทั้งหมด
+        };
+    })
+        .filter(user => user.jobCount > 0) // กรองผู้ที่มีงานที่ประเมิน
+        .sort((a, b) => b.averageScores.total - a.averageScores.total) // จัดเรียงคะแนนรวม
+        .slice(0, 10); // ดึง 10 คนแรก
 
-            return {
-                id: user.id,
-                name: `${user.first_name} ${user.last_name}`,
-                profile_image: user.profile_image,
-                averageScores: {
-                    appearance: calculateAverage('appearance_score'),
-                    quality: calculateAverage('quality_score'),
-                    quantity: calculateAverage('quantity_score'),
-                    manner: calculateAverage('manner_score'),
-                    punctuality: calculateAverage('punctuality_score'),
-                    total: calculateAverage('total_score')
-                },
-                jobCount: user.JobParticipation.length // นับจำนวนงานทั้งหมด
-            };
-        })
-        .filter(user => user.jobCount > 0)
-        .sort((a, b) => b.averageScores.total - a.averageScores.total)
-        .slice(0, 10);
-
-    // คำนวณคะแนนเฉลี่ยรวมจากคะแนนที่คำนวณใหม่
+    // คำนวณคะแนนเฉลี่ยรวม
     const totalScores = topUsers.reduce((sum, user) => sum + user.averageScores.total, 0);
     const averageScore = topUsers.length > 0 ? totalScores / topUsers.length : 0;
 

@@ -33,9 +33,9 @@
                   class="p-6 bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] dark:from-[#feac5e]/80 dark:via-[#c779d0]/80 dark:to-[#4bc0c8]/80"
                 >
                   <div class="flex justify-between items-center">
-                    <DialogTitle class="text-2xl font-semibold text-white">
+                    <DialogTitle class="text-3xl font-semibold text-white">
                       ผลการประเมิน
-                      <p class="text-sm font-normal text-white/90 mt-1">{{ job?.title }}</p>
+                      <p class="text-base font-base text-white/90 mt-1">งาน : {{ job?.title }}</p>
                     </DialogTitle>
                     <button
                       @click="$emit('close')"
@@ -76,6 +76,7 @@
 
                   <!-- คะแนนรวม -->
                   <div
+                    v-if="evaluation?.is_passed_evaluation"
                     class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 mb-6"
                   >
                     <div class="flex justify-between items-center mb-3">
@@ -91,12 +92,22 @@
                     </div>
 
                     <!-- Progress bar -->
-                    <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                    <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mt-3">
                       <div
                         class="h-full rounded-full transition-all duration-300"
                         :class="getProgressBarClass()"
                         :style="{ width: `${(getTotalScore() / 10) * 100}%` }"
                       ></div>
+                    </div>
+                  </div>
+
+                  <!-- แสดงข้อความเมื่อไม่ผ่านการประเมิน -->
+                  <div
+                    v-else
+                    class="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 mb-6"
+                  >
+                    <div class="flex justify-center items-center">
+                      <span class="text-lg font-medium">ไม่ผ่านการประเมิน</span>
                     </div>
                   </div>
 
@@ -201,99 +212,46 @@ export default {
     handleClose() {
       this.$emit('close')
     },
-    hasScores(job) {
-      if (!job.workHistories?.[0]) return false
-      const scores = [
-        'appearance_score',
-        'quality_score',
-        'quantity_score',
-        'manner_score',
-        'punctuality_score'
-      ]
-      return scores.some((score) => job.workHistories[0][score] !== null)
-    },
-    getScore(job, field) {
-      const score = job.workHistories?.[0]?.[field]
-      return score !== null ? score : '-'
-    },
-    getScoreColor(job) {
-      if (!job.workHistories?.[0]) return 'gray'
-      return job.workHistories[0].is_passed_evaluation ? 'green' : 'red'
-    },
-    getStatusClass(status) {
-      switch (status) {
-        case 'approved':
-          return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-        case 'rejected':
-          return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-        default:
-          return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
-      }
-    },
 
     getTotalScore() {
-      if (!this.evaluation) return 0
-
-      if (this.evaluation.total_score) {
-        return this.evaluation.total_score
-      }
-      return this.scoreItems.reduce((sum, item) => {
-        return sum + (Number(this.evaluation[item.field]) || 0)
-      }, 0)
+      if (!this.evaluation || !this.evaluation.total_score) return 0
+      return this.evaluation.total_score
     },
 
-    getOverallScore() {
-      if (!this.jobs?.length) return 0
-      // รวมคะแนนทั้งหมด รวมถึงงานที่ไม่ผ่านการประเมิน (จะได้ 0 คะแนน)
-      const totalScores = this.jobs.reduce((sum, job) => {
-        // หารด้วยจำนวนงานทั้งหมด ไม่ว่าจะผ่านหรือไม่ผ่าน
-        return sum + this.getTotalScore(job)
-      }, 0)
-      return (totalScores / this.jobs.length).toFixed(1)
-    },
-    getOverallScoreClass(score) {
-      const numScore = parseFloat(score)
-      if (numScore >= 8) return 'text-green-600 dark:text-green-400'
-      if (numScore >= 6) return 'text-yellow-600 dark:text-yellow-400'
-      return 'text-red-600 dark:text-red-400'
-    },
-    getStatusText(status) {
-      switch (status) {
-        case 'approved':
-          return 'ผ่านการอนุมัติ'
-        case 'rejected':
-          return 'ไม่ผ่านการอนุมัติ'
-        default:
-          return 'รอดำเนินการ'
-      }
-    },
-    getScoreIconClass(score) {
-      const numScore = Number(score) || 0
-      if (numScore >= 1.5) return 'text-[#4bc0c8] dark:text-[#4bc0c8]/80'
-      if (numScore >= 1) return 'text-[#c779d0] dark:text-[#c779d0]/80'
-      return 'text-[#feac5e] dark:text-[#feac5e]/80'
+    getScoreIconClass() {
+      return 'text-gray-500 dark:text-gray-300' // สีคงที่สำหรับไอคอน
     },
 
     getProgressBarClass() {
       const score = this.getTotalScore()
-      if (score >= 8) return 'bg-gradient-to-r from-[#4bc0c8] to-[#4bc0c8]/80'
-      if (score >= 6) return 'bg-gradient-to-r from-[#c779d0] to-[#c779d0]/80'
-      return 'bg-gradient-to-r from-[#feac5e] to-[#feac5e]/80'
+      if (score === null)
+        return 'bg-gradient-to-r from-pink-300 to-red-300 dark:from-pink-700 dark:to-red-700' // สีพาสเทลแดง-ชมพูสำหรับค่า null (ไม่ผ่าน)
+      if (score >= 8)
+        return 'bg-gradient-to-r from-green-200 to-green-400 dark:from-green-600 dark:to-green-800' // สีพาสเทลเขียวสำหรับดีมาก
+      if (score >= 6)
+        return 'bg-gradient-to-r from-yellow-200 to-yellow-400 dark:from-yellow-600 dark:to-yellow-800' // สีพาสเทลเหลืองสำหรับปานกลาง
+      if (score >= 4)
+        return 'bg-gradient-to-r from-orange-200 to-orange-400 dark:from-orange-600 dark:to-orange-800' // สีพาสเทลส้มสำหรับค่อนข้างต่ำ
+      return 'bg-gradient-to-r from-red-200 to-red-400 dark:from-red-600 dark:to-red-800' // สีพาสเทลแดงสำหรับคะแนนต่ำ
     },
 
     getScoreClass(score) {
+      if (score === null) return 'text-red-500 dark:text-red-600' // สีแดงเข้มสำหรับค่า null (ไม่ผ่าน)
       const numScore = Number(score) || 0
-      if (numScore >= 1.5) return 'text-[#4bc0c8] dark:text-[#4bc0c8]/80'
-      if (numScore >= 1) return 'text-[#c779d0] dark:text-[#c779d0]/80'
-      return 'text-[#feac5e] dark:text-[#feac5e]/80'
+      if (numScore >= 2) return 'text-green-500 dark:text-green-400' // สีเขียวสำหรับคะแนนสูง
+      if (numScore >= 1) return 'text-blue-500 dark:text-blue-400' // สีฟ้าสำหรับคะแนนปานกลาง
+      return 'text-red-500 dark:text-red-400' // สีแดงสำหรับคะแนนต่ำ
     },
 
     getTotalScoreClass() {
       const total = this.getTotalScore()
-      if (total >= 8) return 'text-[#4bc0c8] dark:text-[#4bc0c8]/80'
-      if (total >= 6) return 'text-[#c779d0] dark:text-[#c779d0]/80'
-      return 'text-[#feac5e] dark:text-[#feac5e]/80'
+      if (total === null) return 'text-red-500 dark:text-red-600' // สีแดงเข้มสำหรับค่า null (ไม่ผ่าน)
+      if (total >= 8) return 'text-green-600 dark:text-green-400' // ดีมาก
+      if (total >= 6) return 'text-yellow-600 dark:text-yellow-400' // ปานกลาง
+      if (total >= 4) return 'text-orange-600 dark:text-orange-400' // ค่อนข้างต่ำ
+      return 'text-red-600 dark:text-red-400' // สีแดงสำหรับคะแนนต่ำ
     },
+
     formatDate(date) {
       if (!date) return 'ไม่ระบุ'
       return new Date(date).toLocaleDateString('th-TH', {

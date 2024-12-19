@@ -167,8 +167,9 @@ export const updateWorkHistory = async (req, res) => {
             const requiredCategories = ['appearance', 'quality', 'quantity', 'manner', 'punctuality'];
             const isValidRatings = requiredCategories.every(category => {
                 const score = ratings[category];
-                return score !== undefined && (score === 1 || score === 2);
+                return score === null || score === 0 || score === 1 || score === 2;
             });
+
 
             if (!isValidRatings) {
                 return res.status(400).json({

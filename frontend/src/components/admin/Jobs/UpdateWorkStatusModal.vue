@@ -538,9 +538,9 @@ export default {
     isFormValid(participationId) {
       return (
         // ต้องให้คะแนนครบทุกด้าน
-        Object.keys(this.ratingCategories).every(
-          (category) => this.getRatingScore(participationId, category) > 0
-        ) &&
+        // Object.keys(this.ratingCategories).every(
+        //   (category) => this.getRatingScore(participationId, category) > 0
+        // ) &&
         // ต้องมีความคิดเห็น
         this.comments[participationId]?.trim()
       )

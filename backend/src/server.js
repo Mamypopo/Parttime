@@ -5,6 +5,7 @@ import jobRoutes from './routes/jobRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import evaluationRoutes from './routes/evaluationRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 import authRoutes from './routes/authRoutes.js'
 import { startNotificationCleanup, runCleanupNow } from './cron/notificationCleanup.js';
 import { startLogCleanup, runlogCleanupNow } from './cron/logCleanup.js';
@@ -34,6 +35,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
 app.use('/api', evaluationRoutes);
+
+app.use('/api', paymentRoutes);
 
 app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'ok' });
