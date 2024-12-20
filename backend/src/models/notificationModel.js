@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import prisma from '../config/prisma.js';
+
 
 export const NOTIFICATION_TYPES = {
     JOB_APPLICATION_STATUS: 'job_status',    // แจ้งเตือนสถานะการสมัครงาน

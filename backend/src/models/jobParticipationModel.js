@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/prisma.js';
 
-const prisma = new PrismaClient();
 
 // ฟังก์ชันเพื่อค้นหา Job Participation ตาม ID
 export const findJobParticipationById = async (jobParticipationId) => {

@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/prisma.js';
 
-const prisma = new PrismaClient();
 // ดึงข้อมูลการประเมินทั้งหมด
 export const getEvaluationByJobId = async (jobId) => {
     return await prisma.job.findUnique({

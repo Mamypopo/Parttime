@@ -1,17 +1,21 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
-import { useNotificationStore } from './notificationStore';
+import { useAdminStore } from './adminStore';
+import { useUserStore } from './userStore';
 
 export const usePaymentStore = defineStore('payment', {
     state: () => ({
         baseURL: import.meta.env.VITE_API_URL,
         payments: [],
+        jobParticipants: {},
+        completedJobs: [],
         currentPayment: null,
         totalItems: 0,
         totalPages: 0,
         currentPage: 1,
         pageSize: 10,
         isLoading: false,
+        selectedJobId: null,
         error: null,
         filters: {
             status: '',
@@ -22,6 +26,22 @@ export const usePaymentStore = defineStore('payment', {
     }),
 
     actions: {
+        // สร้าง headers สำหรับ authentication
+        getAuthHeaders(isFormData = false) {
+            const adminStore = useAdminStore();
+            const userStore = useUserStore();
+            const token = adminStore.token || userStore.token;
+
+            if (!token) {
+                throw new Error('กรุณาเข้าสู่ระบบใหม่');
+            }
+
+            return {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': isFormData ? 'multipart/form-data' : 'application/json'
+            };
+        },
+
         // ดึงรายการจ่ายเงินทั้งหมด
         async fetchPayments() {
             try {
@@ -31,41 +51,71 @@ export const usePaymentStore = defineStore('payment', {
                     limit: this.pageSize,
                     ...this.filters
                 };
+                const headers = this.getAuthHeaders()
 
-                const response = await axios.get('/api/payments', {
+                const response = await axios.get(`${this.baseURL}/api/payments`, {
                     params,
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    }
-                })
+                    headers
+                });
 
+                if (response.data) {
+                    this.payments = response.data.payments || [];
+                    this.totalItems = response.data.total || 0;
+                    this.totalPages = response.data.totalPages || 0;
+                }
 
-                this.payments = response.data.payments;
-                this.totalItems = response.data.total;
-                this.totalPages = response.data.totalPages;
+                return {
+                    data: this.payments,
+                    total: this.totalItems
+                };
+
             } catch (error) {
-                this.error = error.response?.data?.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล';
-                const notificationStore = useNotificationStore();
-                notificationStore.showError(this.error);
+                console.error('Error fetching payments:', error);
+                this.error = error.response?.data?.message || error.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล';
+                return { data: [], total: 0 };
             } finally {
                 this.isLoading = false;
             }
         },
 
-        // ดึงข้อมูลการจ่ายเงินตาม ID
-        async fetchPaymentById(id) {
+        async fetchCompletedJobs() {
             try {
-                this.isLoading = true;
-                const response = await axios.get(`${this.baseURL}/api/payments/${id}`);
-                this.currentPayment = response.data;
-                return response.data;
+                this.isLoading = true
+                const headers = this.getAuthHeaders()
+                const response = await axios.get(`${this.baseURL}/api/payments/completed`, {
+                    headers, params: {
+                        include: 'jobPositions' // ขอให้ backend ส่ง jobPositions มาด้วย
+                    }
+                })
+                this.completedJobs = response.data
             } catch (error) {
-                this.error = error.response?.data?.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล';
-                const notificationStore = useNotificationStore();
-                notificationStore.showError(this.error);
-                throw error;
+                console.error('Failed to fetch completed jobs:', error)
+                this.error = error.message
             } finally {
-                this.isLoading = false;
+                this.isLoading = false
+            }
+        },
+
+        async fetchJobParticipantsByJob(jobId) {
+            try {
+                this.isLoading = true
+                const headers = this.getAuthHeaders()
+                const response = await axios.get(`${this.baseURL}/api/payments/job-participants/${jobId}`, {
+                    headers
+                })
+                // ตรวจสอบข้อมูลก่อนเก็บ
+                if (response.data) {
+                    this.jobParticipants[jobId] = response.data
+                } else {
+                    this.jobParticipants[jobId] = []
+                }
+
+            } catch (error) {
+                console.error('Failed to fetch job participants:', error)
+                this.error = error.message
+                this.jobParticipants[jobId] = []
+            } finally {
+                this.isLoading = false
             }
         },
 
@@ -75,7 +125,6 @@ export const usePaymentStore = defineStore('payment', {
                 this.isLoading = true;
                 const formData = new FormData();
 
-                // เพิ่มข้อมูลเข้า FormData
                 Object.keys(paymentData).forEach(key => {
                     if (key === 'slip' && paymentData[key]) {
                         formData.append('payment_slip', paymentData[key]);
@@ -83,35 +132,63 @@ export const usePaymentStore = defineStore('payment', {
                         formData.append(key, paymentData[key]);
                     }
                 });
+                const headers = this.getAuthHeaders()
+                const response = await axios.post(`${this.baseURL}/api/payments`, formData, {
+                    headers
+                });
 
-                const response = await axios.post('/api/payments', formData, {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                        'Content-Type': 'multipart/form-data'
-                    }
-                })
+                if (response.data) {
+                    return {
+                        success: true,
+                        data: response.data,
+                        message: 'สร้างรายการจ่ายเงินสำเร็จ'
+                    };
+                }
 
-                const notificationStore = useNotificationStore();
-                notificationStore.showSuccess('สร้างรายการจ่ายเงินสำเร็จ');
-
-                return response.data;
             } catch (error) {
-                this.error = error.response?.data?.message || 'เกิดข้อผิดพลาดในการสร้างรายการ';
-                const notificationStore = useNotificationStore();
-                notificationStore.showError(this.error);
-                throw error;
+                console.error('Error fetching payments:', {
+                    message: error.message,
+                    response: error.response?.data,
+                    status: error.response?.status,
+                    request: error.request
+                });
+                this.error = error.response?.data?.message || error.message || 'เกิดข้อผิดพลาดในการสร้างรายการ';
+                return {
+                    success: false,
+                    message: this.error
+                };
             } finally {
                 this.isLoading = false;
             }
         },
 
+
+        async handleBulkPayment(payload) {
+            try {
+                // แปลงข้อมูลให้ตรงกับที่ backend ต้องการ
+                const requestData = {
+                    job_id: parseInt(payload.job_id), // แปลงเป็น integer
+                    participant_ids: payload.participant_ids.map(id => parseInt(id)), // แปลง array ของ id เป็น integer ทั้งหมด
+                    payment_method: payload.payment_method || 'cash' // กำหนดค่าเริ่มต้นถ้าไม่มี
+                }
+
+                console.log('Store sending payload:', requestData)
+
+                const response = await axios.post(`${this.baseURL}/api/payments/bulk`, requestData, {
+                    headers: this.getAuthHeaders()
+                })
+                return response.data
+            } catch (error) {
+                console.error('Store error:', error)
+                throw error
+            }
+        },
         // อัพเดทรายการจ่ายเงิน
         async updatePayment(id, paymentData) {
             try {
                 this.isLoading = true;
                 const formData = new FormData();
 
-                // เพิ่มข้อมูลเข้า FormData
                 Object.keys(paymentData).forEach(key => {
                     if (key === 'slip' && paymentData[key]) {
                         formData.append('payment_slip', paymentData[key]);
@@ -121,36 +198,47 @@ export const usePaymentStore = defineStore('payment', {
                 });
 
                 const response = await axios.put(`${this.baseURL}/api/payments/${id}`, formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
+                    headers: this.getAuthHeaders(true)
                 });
 
-                const notificationStore = useNotificationStore();
-                notificationStore.showSuccess('อัพเดทรายการจ่ายเงินสำเร็จ');
+                return {
+                    success: true,
+                    data: response.data,
+                    message: 'อัพเดทรายการจ่ายเงินสำเร็จ'
+                };
 
-                return response.data;
             } catch (error) {
-                this.error = error.response?.data?.message || 'เกิดข้อผิดพลาดในการอัพเดทรายการ';
-                const notificationStore = useNotificationStore();
-                notificationStore.showError(this.error);
-                throw error;
+                console.error('Error updating payment:', error);
+                this.error = error.response?.data?.message || error.message || 'เกิดข้อผิดพลาดในการอัพเดทรายการ';
+                return {
+                    success: false,
+                    message: this.error
+                };
             } finally {
                 this.isLoading = false;
             }
         },
 
+        formatDate(date) {
+            if (!date) return ''
+            return new Date(date).toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            })
+        },
+
         // ตั้งค่าฟิลเตอร์
         setFilters(filters) {
             this.filters = { ...this.filters, ...filters };
-            this.currentPage = 1; // รีเซ็ตหน้าเมื่อมีการเปลี่ยนฟิลเตอร์
-            this.fetchPayments();
+            this.currentPage = 1;
+            return this.fetchPayments();
         },
 
         // เปลี่ยนหน้า
         setPage(page) {
             this.currentPage = page;
-            this.fetchPayments();
+            return this.fetchPayments();
         },
 
         // รีเซ็ตฟิลเตอร์
@@ -162,7 +250,7 @@ export const usePaymentStore = defineStore('payment', {
                 dateTo: ''
             };
             this.currentPage = 1;
-            this.fetchPayments();
+            return this.fetchPayments();
         }
     }
-}); 
+});

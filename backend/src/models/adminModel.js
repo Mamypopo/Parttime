@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/prisma.js';
 import bcrypt from 'bcrypt';
 
-const prisma = new PrismaClient();
+
 // ฟังก์ชันสำหรับสร้างแอดมินใหม่
 export const createAdmin = async (adminData) => {
     const { email, password, first_name, last_name, phone, profile_pic } = adminData;
@@ -663,3 +663,5 @@ export const rejectUserFromWorkEvaluation = async (userId) => {
         throw error;
     }
 };
+
+

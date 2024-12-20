@@ -1,141 +1,387 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/prisma.js';
+import { Decimal } from '@prisma/client/runtime/library';
 
-const prisma = new PrismaClient();
 
-// สร้างรายการจ่ายเงินใหม่
-export const createPayment = async (data, adminId, ipAddress, userAgent) => {
+export const getAllPayments = async (filters, page, limit) => {
     try {
-        const payment = await prisma.paymentHistory.create({
+        const where = {};
+        const conditions = [];
+
+        if (filters.status) {
+            conditions.push({ payment_status: filters.status });
+        }
+
+        if (filters.method) {
+            conditions.push({ payment_method: filters.method });
+        }
+
+        if (filters.dateFrom) {
+            conditions.push({
+                created_at: {
+                    gte: new Date(filters.dateFrom)
+                }
+            });
+        }
+
+        if (filters.dateTo) {
+            conditions.push({
+                created_at: {
+                    lte: new Date(filters.dateTo)
+                }
+            });
+        }
+
+        if (conditions.length > 0) {
+            where.AND = conditions;
+        }
+
+        const [payments, total] = await Promise.all([
+            prisma.paymentHistory.findMany({
+                where,
+                include: {
+                    job_participation: {
+                        include: {
+                            user: {
+                                select: {
+                                    id: true,
+                                    first_name: true,
+                                    last_name: true,
+                                    email: true
+                                }
+                            },
+                            jobPosition: {
+                                include: {
+                                    job: {
+                                        select: {
+                                            id: true,
+                                            title: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    paid_by: {
+                        select: {
+                            id: true,
+                            first_name: true,
+                            last_name: true
+                        }
+                    }
+                },
+                orderBy: {
+                    created_at: 'desc'
+                },
+                skip: (page - 1) * limit,
+                take: limit
+            }),
+            prisma.paymentHistory.count({ where })
+        ]);
+
+        return {
             data: {
-                job_participation_id: data.job_participation_id,
-                amount: data.amount,
-                payment_status: data.status,
-                payment_method: data.method,
-                payment_slip: data.slip,
-                payment_note: data.note,
-                paid_at: data.status === 'paid' ? new Date() : null,
-                admin_id: adminId
+                payments,
+                total,
+                totalPages: Math.ceil(total / limit),
+                currentPage: page
+            }
+        };
+
+    } catch (error) {
+        console.error('Error in getAllPayments:', error);
+        throw new Error('ไม่สามารถดึงข้อมูลการจ่ายเงินได้: ' + error.message);
+    }
+};
+
+
+export const getPaymentById = async (id) => {
+    if (!id) {
+        throw new Error('ID is required');
+    }
+
+    try {
+        const payment = await prisma.paymentHistory.findUnique({
+            where: {
+                id: parseInt(id)
             },
             include: {
-                job_participation: {
+                jobParticipation: {
                     include: {
-                        user: true,
-                        jobPosition: true
+                        user: {
+                            select: {
+                                id: true,
+                                first_name: true,
+                                last_name: true,
+                                email: true,
+                                phone_number: true
+                            }
+                        },
+                        jobPosition: {
+                            include: {
+                                job: true
+                            }
+                        }
                     }
                 }
             }
         });
 
-        // บันทึก log
-        await prisma.paymentLog.create({
-            data: {
-                payment_id: payment.id,
-                admin_id: adminId,
-                action: 'created',
-                action_detail: {
-                    status: data.status,
-                    method: data.method,
-                    amount: data.amount,
-                    note: data.note
-                },
-                ip_address: ipAddress,
-                user_agent: userAgent
-            }
-        });
+        if (!payment) {
+            throw new Error('ไม่พบรายการจ่ายเงินที่ต้องการ');
+        }
 
         return payment;
     } catch (error) {
-        throw new Error(`ไม่สามารถสร้างรายการจ่ายเงินได้: ${error.message}`);
+        console.error('Error in getPaymentById:', error);
+        throw error;
     }
 };
 
-// อัปเดตสถานะการจ่ายเงิน
-export const updatePayment = async (id, data, adminId, ipAddress, userAgent) => {
-    try {
-        const oldPayment = await prisma.paymentHistory.findUnique({
-            where: { id: parseInt(id) }
-        });
 
+export const createPayment = async (paymentData, adminId) => {
+    try {
+        const {
+            job_participation_id,
+            amount,
+            payment_method,
+            payment_note,
+            payment_slip,
+            payment_status,
+        } = paymentData;
+
+        return await prisma.paymentHistory.create({
+            data: {
+                job_participation_id: parseInt(job_participation_id),
+                amount: new Decimal(amount),
+                payment_status: payment_status || 'pending',  // ถ้าไม่มีค่ามาให้เป็น pending
+                payment_method: payment_method || null,
+                payment_note: payment_note || null,
+                payment_slip: payment_slip || null,
+                admin_id: adminId,
+                paid_at: payment_status === 'paid' ? new Date() : null,  // ถ้าจ่ายแล้วให้เก็บเวลา
+            },
+            include: {
+                job_participation: {
+                    include: {
+                        user: true,
+                        jobPosition: {
+                            include: {
+                                job: true
+                            }
+                        }
+                    }
+                },
+                paid_by: true
+            }
+        });
+    } catch (error) {
+        console.error('Error in createPayment:', error);
+        throw error;
+    }
+};
+
+
+export const createBulkPayments = async (job_id, participant_ids, payment_method, adminId) => {
+    // ดึงข้อมูล wage จาก job_participation
+    const participations = await prisma.jobParticipation.findMany({
+        where: {
+            id: { in: participant_ids.map(id => parseInt(id)) }
+        },
+        include: {
+            jobPosition: true
+        }
+    })
+
+    if (participations.length !== participant_ids.length) {
+        throw new Error('ไม่พบข้อมูลผู้เข้าร่วมงานบางรายการ')
+    }
+
+    // สร้างรายการจ่ายเงิน
+    const payments = await prisma.$transaction(
+        participations.map(p =>
+            prisma.paymentHistory.create({
+                data: {
+                    job_participation_id: p.id,
+                    amount: p.jobPosition.wage,
+                    payment_status: 'paid',
+                    payment_method: payment_method || 'cash',
+                    paid_at: new Date(),
+                    admin_id: adminId
+                },
+                include: {
+                    job_participation: {
+                        include: {
+                            user: true,
+                            jobPosition: true
+                        }
+                    }
+                }
+            })
+        )
+    )
+
+    return payments
+}
+
+
+export const updatePayment = async (id, paymentData, adminId, ip, userAgent) => {
+    try {
         const payment = await prisma.paymentHistory.update({
             where: { id: parseInt(id) },
             data: {
-                payment_status: data.status,
-                payment_method: data.method,
-                payment_slip: data.slip || oldPayment.payment_slip,
-                payment_note: data.note,
-                paid_at: data.status === 'paid' ? new Date() : null,
+                payment_status: paymentData.payment_status,
+                payment_method: paymentData.payment_method,
+                payment_note: paymentData.payment_note,
+                payment_slip: paymentData.payment_slip || undefined,
+                admin_id: adminId,
+                paid_at: paymentData.payment_status === 'paid' ? new Date() : null,
                 updated_at: new Date()
             },
             include: {
                 job_participation: {
                     include: {
                         user: true,
-                        jobPosition: true
-                    }
-                }
-            }
-        });
-
-        // บันทึก log การเปลี่ยนแปลง
-        await prisma.paymentLog.create({
-            data: {
-                payment_id: payment.id,
-                admin_id: adminId,
-                action: 'updated',
-                action_detail: {
-                    changes: {
-                        status: {
-                            from: oldPayment.payment_status,
-                            to: data.status
-                        },
-                        method: {
-                            from: oldPayment.payment_method,
-                            to: data.method
-                        },
-                        note: {
-                            from: oldPayment.payment_note,
-                            to: data.note
+                        jobPosition: {
+                            include: {
+                                job: true
+                            }
                         }
                     }
                 },
-                ip_address: ipAddress,
-                user_agent: userAgent
+                paid_by: true
             }
         });
 
         return payment;
     } catch (error) {
-        throw new Error(`ไม่สามารถอัปเดตรายการจ่ายเงินได้: ${error.message}`);
+        console.error('Error in updatePayment:', error);
+        throw new Error('ไม่สามารถอัพเดทรายการจ่ายเงินได้');
     }
 };
 
-// บันทึกการส่งอีเมล
-export const updateEmailStatus = async (id, adminId, ipAddress, userAgent) => {
+
+export const getUnpaidParticipantsByJob = async (jobId) => {
     try {
-        const payment = await prisma.paymentHistory.update({
+        const participants = await prisma.jobParticipation.findMany({
+            where: {
+                jobPosition: {
+                    job_id: jobId
+                },
+                status: 'completed',
+                // ตรวจสอบว่ายังไม่มีการจ่ายเงิน
+                PaymentHistory: {
+                    none: {}  // ยังไม่มีประวัติการจ่ายเงิน
+                },
+
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        first_name: true,
+                        last_name: true,
+                        email: true,
+                        phone_number: true,
+                    }
+                },
+                jobPosition: {
+                    select: {
+                        id: true,
+                        position_name: true,
+                        wage: true,
+                        job: {
+                            select: {
+                                id: true,
+                                title: true,
+                                details: true
+                            }
+                        }
+                    }
+                },
+                workHistories: true,
+                PaymentHistory: true
+            }
+        });
+
+        const participantsWithAmount = participants.map(participant => {
+            const workDays = participant.workHistories.length;
+            const amountPerDay = participant.jobPosition.wage;
+            const totalAmount = workDays * amountPerDay;
+
+            return {
+                id: participant.id,
+                job_participation_id: participant.id,
+                user: participant.user,
+                job: {
+                    ...participant.jobPosition.job,
+                    position_name: participant.jobPosition.position_name,
+                    wage: participant.jobPosition.wage
+                },
+                work_days: workDays,
+                amount: totalAmount,
+                payment_status: 'pending',
+                payment_method: null,
+                payment_slip: null,
+                payment_note: null,
+                paid_at: null,
+                admin_id: null,
+                email_sent: false,
+                email_sent_at: null,
+                evaluation: participant.workHistories[0]
+            };
+        });
+
+        return participantsWithAmount;
+
+    } catch (error) {
+        console.error('Error in getUnpaidParticipantsByJob:', error);
+        throw new Error('ไม่สามารถดึงข้อมูลผู้เข้าร่วมงานที่รอรับเงินได้');
+    }
+};
+
+
+// ดึงงานที่ admin สร้างและเสร็จแล้วใช้ในการเงิน
+export const getCompletedJobs = async (adminId) => {
+    try {
+        return await prisma.job.findMany({
+            where: {
+                created_by: adminId,
+                status: 'completed'
+            },
+            include: {
+                JobPositions: {
+                    select: {
+                        id: true,
+                        position_name: true,
+                        wage: true,
+                        required_people: true,
+                        details: true,
+                        status: true
+                    }
+                }
+            },
+            orderBy: {
+                created_at: 'desc'
+            }
+        });
+    } catch (error) {
+        console.error('Error in getCompletedJobs:', error);
+        throw new Error('ไม่สามารถดึงข้อมูลงานที่เสร็จสิ้นแล้วได้');
+    }
+};
+
+
+export const updateEmailStatus = async (id, adminId, ip, userAgent) => {
+    try {
+        return await prisma.paymentHistory.update({
             where: { id: parseInt(id) },
             data: {
                 email_sent: true,
-                email_sent_at: new Date()
+                email_sent_at: new Date(),
             }
         });
-
-        await prisma.paymentLog.create({
-            data: {
-                payment_id: payment.id,
-                admin_id: adminId,
-                action: 'email_sent',
-                action_detail: {
-                    sent_at: new Date(),
-                    recipient: payment.job_participation.user.email
-                },
-                ip_address: ipAddress,
-                user_agent: userAgent
-            }
-        });
-
-        return payment;
     } catch (error) {
-        throw new Error(`ไม่สามารถอัปเดตสถานะการส่งอีเมลได้: ${error.message}`);
+        console.error('Error in updateEmailStatus:', error);
+        throw new Error('ไม่สามารถอัพเดทสถานะการส่งอีเมลได้');
     }
 };

@@ -191,14 +191,14 @@ model PaymentHistory {
   payment_method       String? // cash, transfer
   payment_slip         String? // path ของสลิป
   payment_note         String?          @db.Text
-  paid_at              DateTime?
+  paid_at              DateTime?        @db.Timestamptz
   paid_by              Admin?           @relation(fields: [admin_id], references: [id])
   admin_id             Int?
   email_sent           Boolean          @default(false)
-  email_sent_at        DateTime?
-  created_at           DateTime         @default(now())
-  updated_at           DateTime         @updatedAt
-  payment_logs         PaymentLog[] // relation กับ PaymentLog
+  email_sent_at        DateTime?        @db.Timestamptz
+  created_at           DateTime         @default(now()) @db.Timestamptz
+  updated_at           DateTime         @updatedAt @db.Timestamptz
+  payment_logs         PaymentLog[]
 }
 
 //  model สำหรับ log การเงิน

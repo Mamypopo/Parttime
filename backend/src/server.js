@@ -36,7 +36,7 @@ app.use('/api/dashboard', dashboardRoutes);
 
 app.use('/api', evaluationRoutes);
 
-app.use('/api', paymentRoutes);
+app.use('/api/payments', paymentRoutes);
 
 app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'ok' });

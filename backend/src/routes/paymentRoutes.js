@@ -9,26 +9,15 @@ const router = express.Router();
 router.use(authMiddleware);
 router.use(checkAdminRole);
 
-// สร้างรายการจ่ายเงินใหม่
-router.post(
-    '/payments',
-    uploadPaymentSlip,
-    handleMulterError,
-    paymentController.createPayment
-);
+// 1. Routes สำหรับดึงข้อมูลงาน
+router.get('/completed', paymentController.getCompletedJobs); // ดึงงานที่เสร็จแล้วของแอดมิน
+router.get('/job-participants/:jobId', paymentController.getUnpaidParticipantsByJob); // ดึงรายชื่อคนที่รอรับเงินในงานนั้นๆ
+router.post('/bulk', paymentController.createBulkPayments)
 
-// อัปเดตรายการจ่ายเงิน
-router.put(
-    '/payments/:id',
-    uploadPaymentSlip,
-    handleMulterError,
-    paymentController.updatePayment
-);
-
-// ดึงข้อมูลรายการจ่ายเงินตาม ID
-router.get('/payments/:id', paymentController.getPaymentById);
-
-// ดึงรายการจ่ายเงินทั้งหมด (พร้อมฟิลเตอร์)
-router.get('/payments', paymentController.getAllPayments);
+// 2. Routes สำหรับจัดการรายการจ่ายเงิน
+router.get('/', paymentController.getAllPayments); // ดึงรายการจ่ายเงินทั้งหมด
+router.post('/', uploadPaymentSlip, handleMulterError, paymentController.createPayment); // สร้างรายการใหม่
+router.get('/:id', paymentController.getPaymentById); // ดึงรายการตาม ID
+router.put('/:id', uploadPaymentSlip, handleMulterError, paymentController.updatePayment); // อัพเดทรายการ
 
 export default router;

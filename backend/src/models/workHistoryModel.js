@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from '../config/prisma.js';
 
-const prisma = new PrismaClient()
 
 // ฟังชั่นสร้างประวัติการทำงานหลังจาก ให้คะแนน
 export const createWorkHistory = async (data) => {

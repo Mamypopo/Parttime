@@ -20,6 +20,16 @@
                 <i class="fas fa-plus"></i>
                 <span>สร้างรายการใหม่</span>
               </button>
+              <!-- เพิ่มปุ่มจ่ายเงินหลายรายการ -->
+              <div class="flex gap-4">
+                <button
+                  @click="showBulkPayment = true"
+                  class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+                >
+                  <i class="fas fa-money-bill-wave mr-2"></i>
+                  จ่ายเงินหลายรายการ
+                </button>
+              </div>
             </div>
           </div>
         </header>
@@ -402,33 +412,28 @@
           @save="savePayment"
         />
 
-        <ConfirmationModal
-          v-if="showCancelModal"
-          title="ยืนยันการยกเลิก"
-          message="คุณต้องการยกเลิกรายการจ่ายเงินนี้ใช่หรือไม่?"
-          @confirm="cancelPayment"
-          @close="showCancelModal = false"
-        />
+        <BulkPaymentModal v-if="showBulkPayment" @close="showBulkPayment = false" />
       </main>
     </div>
   </div>
 </template>
 <script>
 import { usePaymentStore } from '@/stores/paymentStore'
-import PaymentModal from '@/components/Payment/PaymentModel.vue'
-import ConfirmationModal from '@/components/Payment/ConfirmationModal.vue'
+import PaymentModal from '@/components/Payment/PaymentModal.vue'
+import BulkPaymentModal from '@/components/Payment/BulkPaymentModal.vue'
 
 export default {
   name: 'PaymentManagement',
 
   components: {
     PaymentModal,
-    ConfirmationModal
+    BulkPaymentModal
   },
 
   data() {
     return {
       paymentStore: usePaymentStore(),
+      showBulkPayment: false,
       showCreateModal: false,
       showEditModal: false,
       showCancelModal: false,

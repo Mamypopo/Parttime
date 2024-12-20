@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/prisma.js';
 
-const prisma = new PrismaClient();
 
 // ฟังก์ชันสำหรับสร้างงานใหม่
 export const createJob = async (jobData, adminId) => {
