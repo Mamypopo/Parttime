@@ -112,13 +112,24 @@ export const upload = multer({
     { name: 'user_documents', maxCount: 5 }  // รองรับไฟล์หลายไฟล์ในฟิลด์นี้
 ]);
 
-// export  payment_slip
-export const uploadPaymentSlip = multer({
-    storage: storage,
-    fileFilter: fileFilter,
-    limits: { fileSize: 5 * 1024 * 1024 } // จำกัดขนาด 5MB
-}).single('payment_slip');
+// ฟังก์ชัน upload สำหรับ payment_slip
+export const uploadPaymentSlip = (req, res, next) => {
 
+    const multerUpload = multer({
+        storage: storage,
+        fileFilter: fileFilter,
+        limits: { fileSize: 5 * 1024 * 1024 } // จำกัดขนาดไฟล์ 5MB
+    }).single('payment_slip');
+
+    multerUpload(req, res, (err) => {
+        if (err instanceof multer.MulterError) {
+            return res.status(400).json({ message: `Multer Error: ${err.message}` });
+        } else if (err) {
+            return res.status(400).json({ message: `Upload Error: ${err.message}` });
+        }
+        next();
+    });
+};
 
 export const deleteFile = (filePath) => {
     if (fs.existsSync(filePath)) {

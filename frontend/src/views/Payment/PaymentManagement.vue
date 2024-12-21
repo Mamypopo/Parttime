@@ -1,651 +1,317 @@
 <template>
-  <div class="flex h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- Sidebar -->
-
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col overflow-hidden">
-      <!-- Top Navbar -->
-
-      <!-- Main Content Area -->
-      <main class="flex-1 overflow-x-hidden overflow-y-auto">
-        <!-- Header -->
-        <header class="bg-white dark:bg-gray-800 shadow">
-          <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between">
-              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">จัดการการเงิน</h1>
-              <button
-                @click="showCreateModal = true"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
-              >
-                <i class="fas fa-plus"></i>
-                <span>สร้างรายการใหม่</span>
-              </button>
-              <!-- เพิ่มปุ่มจ่ายเงินหลายรายการ -->
-              <div class="flex gap-4">
-                <button
-                  @click="showBulkPayment = true"
-                  class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
-                >
-                  <i class="fas fa-money-bill-wave mr-2"></i>
-                  จ่ายเงินหลายรายการ
-                </button>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <!-- Stats Cards -->
-        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <!-- การจ่ายเงินทั้งหมด -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-              <div class="flex items-center">
-                <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900">
-                  <i class="fas fa-money-bill text-blue-600 dark:text-blue-300"></i>
-                </div>
-                <div class="ml-4">
-                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    การจ่ายเงินทั้งหมด
-                  </p>
-                  <p class="text-lg font-semibold text-gray-900 dark:text-white">
-                    {{ totalPayments }}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- รอดำเนินการ -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-              <div class="flex items-center">
-                <div class="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900">
-                  <i class="fas fa-clock text-yellow-600 dark:text-yellow-300"></i>
-                </div>
-                <div class="ml-4">
-                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400">รอดำเนินการ</p>
-                  <p class="text-lg font-semibold text-gray-900 dark:text-white">
-                    {{ pendingPayments }}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- จ่ายแล้ว -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-              <div class="flex items-center">
-                <div class="p-3 rounded-full bg-green-100 dark:bg-green-900">
-                  <i class="fas fa-check text-green-600 dark:text-green-300"></i>
-                </div>
-                <div class="ml-4">
-                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400">จ่ายแล้ว</p>
-                  <p class="text-lg font-semibold text-gray-900 dark:text-white">
-                    {{ paidPayments }}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- ยกเลิก -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-              <div class="flex items-center">
-                <div class="p-3 rounded-full bg-red-100 dark:bg-red-900">
-                  <i class="fas fa-times text-red-600 dark:text-red-300"></i>
-                </div>
-                <div class="ml-4">
-                  <p class="text-sm font-medium text-gray-500 dark:text-gray-400">ยกเลิก</p>
-                  <p class="text-lg font-semibold text-gray-900 dark:text-white">
-                    {{ cancelledPayments }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Filters -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <!-- สถานะ -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >สถานะ</label
-                >
-                <select
-                  v-model="filters.status"
-                  class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700"
-                >
-                  <option value="">ทั้งหมด</option>
-                  <option value="pending">รอดำเนินการ</option>
-                  <option value="paid">จ่ายแล้ว</option>
-                  <option value="cancelled">ยกเลิก</option>
-                </select>
-              </div>
-
-              <!-- วิธีการจ่าย -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >วิธีการจ่าย</label
-                >
-                <select
-                  v-model="filters.method"
-                  class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700"
-                >
-                  <option value="">ทั้งหมด</option>
-                  <option value="cash">เงินสด</option>
-                  <option value="transfer">โอนเงิน</option>
-                </select>
-              </div>
-
-              <!-- วันที่เริ่ม -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >วันที่เริ่ม</label
-                >
-                <input
-                  type="date"
-                  v-model="filters.dateFrom"
-                  class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700"
-                />
-              </div>
-
-              <!-- วันที่สิ้นสุด -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >วันที่สิ้นสุด</label
-                >
-                <input
-                  type="date"
-                  v-model="filters.dateTo"
-                  class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Table -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
-            <!-- Mobile View -->
-            <div class="block sm:hidden">
-              <div class="divide-y divide-gray-200 dark:divide-gray-700">
-                <div v-for="payment in payments" :key="payment.id" class="p-4">
-                  <div class="flex justify-between items-start mb-2">
-                    <div>
-                      <p class="text-sm font-medium text-gray-900 dark:text-white">
-                        {{ payment.job_participation.user.first_name }}
-                        {{ payment.job_participation.user.last_name }}
-                      </p>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">รหัส: {{ payment.id }}</p>
-                    </div>
-                    <span :class="getStatusClass(payment.payment_status)">
-                      {{ getStatusText(payment.payment_status) }}
-                    </span>
-                  </div>
-                  <div class="space-y-1">
-                    <p class="text-sm text-gray-600 dark:text-gray-300">
-                      งาน: {{ payment.job_participation.jobPosition.job.title }}
-                    </p>
-                    <p class="text-sm font-medium text-gray-900 dark:text-white">
-                      จำนวนเงิน: {{ formatCurrency(payment.amount) }}
-                    </p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                      วิธีการจ่าย: {{ getMethodText(payment.payment_method) }}
-                    </p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                      วันที่: {{ formatDate(payment.created_at) }}
-                    </p>
-                  </div>
-                  <div class="mt-3 flex justify-end space-x-3">
-                    <button
-                      @click="openEditModal(payment)"
-                      class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                    >
-                      <i class="fas fa-edit"></i>
-                    </button>
-                    <button
-                      v-if="payment.payment_status === 'pending'"
-                      @click="confirmCancel(payment)"
-                      class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                    >
-                      <i class="fas fa-times"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Desktop View -->
-            <div class="hidden sm:block overflow-x-auto">
-              <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-700">
-                  <tr>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      รหัส
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      ชื่อ-นามสกุล
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      งาน
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      จำนวนเงิน
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      สถานะ
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      วิธีการจ่าย
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      วันที่
-                    </th>
-                    <th
-                      class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                    >
-                      จัดการ
-                    </th>
-                  </tr>
-                </thead>
-                <tbody
-                  class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
-                >
-                  <tr
-                    v-for="payment in payments"
-                    :key="payment.id"
-                    class="hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    <td
-                      class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
-                    >
-                      {{ payment.id }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <div class="text-sm font-medium text-gray-900 dark:text-white">
-                        {{ payment.job_participation.user.first_name }}
-                        {{ payment.job_participation.user.last_name }}
-                      </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <div class="text-sm text-gray-900 dark:text-white">
-                        {{ payment.job_participation.jobPosition.job.title }}
-                      </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {{ formatCurrency(payment.amount) }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <span :class="getStatusClass(payment.payment_status)">
-                        {{ getStatusText(payment.payment_status) }}
-                      </span>
-                    </td>
-                    <td
-                      class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
-                    >
-                      {{ getMethodText(payment.payment_method) }}
-                    </td>
-                    <td
-                      class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"
-                    >
-                      {{ formatDate(payment.created_at) }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div class="flex justify-end space-x-3">
-                        <button
-                          @click="openEditModal(payment)"
-                          class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                        >
-                          <i class="fas fa-edit"></i>
-                        </button>
-                        <button
-                          v-if="payment.payment_status === 'pending'"
-                          @click="confirmCancel(payment)"
-                          class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                        >
-                          <i class="fas fa-times"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                  <!-- Loading State -->
-                  <tr v-if="paymentStore.loading" class="animate-pulse">
-                    <td colspan="8" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                      กำลังโหลดข้อมูล...
-                    </td>
-                  </tr>
-                  <!-- Empty State -->
-                  <tr v-if="!paymentStore.loading && payments.length === 0">
-                    <td colspan="8" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                      ไม่พบข้อมูล
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- Pagination -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <!-- Mobile Pagination -->
-          <div class="flex justify-between items-center sm:hidden">
-            <button
-              @click="prevPage"
-              :disabled="currentPage === 1"
-              class="px-4 py-2 border rounded-md text-sm"
-              :class="[
-                currentPage === 1
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              ]"
-            >
-              ก่อนหน้า
-            </button>
-            <span class="text-sm text-gray-700"> หน้า {{ currentPage }} จาก {{ totalPages }} </span>
-            <button
-              @click="nextPage"
-              :disabled="currentPage === totalPages"
-              class="px-4 py-2 border rounded-md text-sm"
-              :class="[
-                currentPage === totalPages
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              ]"
-            >
-              ถัดไป
-            </button>
-          </div>
-
-          <!-- Desktop Pagination -->
-          <div class="hidden sm:flex sm:items-center sm:justify-between">
-            <div>
-              <p class="text-sm text-gray-700 dark:text-gray-300">
-                แสดง
-                <span class="font-medium">{{ startItem }}</span>
-                ถึง
-                <span class="font-medium">{{ endItem }}</span>
-                จาก
-                <span class="font-medium">{{ totalItems }}</span>
-                รายการ
-              </p>
-            </div>
-            <div>
-              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                <button
-                  v-for="page in paginationPages"
-                  :key="page"
-                  @click="setPage(page)"
-                  :class="[
-                    page === currentPage
-                      ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                      : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700',
-                    'relative inline-flex items-center px-4 py-2 border text-sm font-medium'
-                  ]"
-                >
-                  {{ page }}
-                </button>
-              </nav>
-            </div>
-          </div>
-        </div>
-
-        <!-- Modals -->
-        <PaymentModal
-          v-if="showCreateModal || showEditModal"
-          :payment="selectedPayment"
-          :mode="selectedPayment ? 'edit' : 'create'"
-          @close="closeModal"
-          @save="savePayment"
-        />
-
-        <BulkPaymentModal v-if="showBulkPayment" @close="showBulkPayment = false" />
-      </main>
+  <div class="payment-management p-4 md:p-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
+    <!-- Header -->
+    <div class="mb-6">
+      <h2 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
+        จ่ายเงินผู้เข้าร่วมงาน
+      </h2>
+      <p class="text-gray-600 dark:text-gray-400 text-sm md:text-base">
+        เลือกงานเพื่อดูรายการที่จ่ายแล้วหรือรอจ่ายเงิน
+      </p>
     </div>
+
+    <!-- Filter Tabs -->
+    <div class="mb-6 flex space-x-4">
+      <button
+        :class="{
+          'bg-blue-500 text-white': selectedStatus === 'pending',
+          'bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300':
+            selectedStatus !== 'pending'
+        }"
+        class="px-4 py-2 rounded-md"
+        @click="switchStatus('pending')"
+      >
+        รอจ่ายเงิน
+      </button>
+      <button
+        :class="{
+          'bg-blue-500 text-white': selectedStatus === 'paid',
+          'bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300': selectedStatus !== 'paid'
+        }"
+        class="px-4 py-2 rounded-md"
+        @click="switchStatus('paid')"
+      >
+        จ่ายแล้ว
+      </button>
+    </div>
+
+    <!-- Job Cards -->
+    <div
+      v-if="paginatedJobs.length > 0"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6"
+    >
+      <div
+        v-for="job in paginatedJobs"
+        :key="job.id"
+        @click="selectJob(job)"
+        class="cursor-pointer bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow p-4 hover:shadow-md transition duration-200"
+      >
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          {{ job.title }}
+        </h3>
+        <p class="text-gray-600 dark:text-gray-400 text-sm">สถานที่: {{ job.location }}</p>
+        <p class="text-gray-600 dark:text-gray-400 text-sm">
+          วันที่: {{ formatDate(job.start_time) }} - {{ formatDate(job.end_time) }}
+        </p>
+        <p class="text-gray-600 dark:text-gray-400 text-sm">
+          รายการที่{{ selectedStatus === 'pending' ? 'รอจ่ายเงิน' : 'จ่ายแล้ว' }}:
+          {{ selectedStatus === 'pending' ? job.pendingPaymentsCount : job.paidPaymentsCount }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Job Pagination -->
+    <div v-if="totalJobPages > 1" class="mt-4 flex justify-between items-center">
+      <button
+        class="bg-gray-300 dark:bg-gray-700 px-4 py-2 rounded-md"
+        :disabled="currentJobPage === 1"
+        @click="changeJobPage(currentJobPage - 1)"
+      >
+        ก่อนหน้า
+      </button>
+      <span class="text-gray-600 dark:text-gray-400">
+        หน้า {{ currentJobPage }} จาก {{ totalJobPages }}
+      </span>
+      <button
+        class="bg-gray-300 dark:bg-gray-700 px-4 py-2 rounded-md"
+        :disabled="currentJobPage === totalJobPages"
+        @click="changeJobPage(currentJobPage + 1)"
+      >
+        ถัดไป
+      </button>
+    </div>
+
+    <!-- Payment Table -->
+    <div v-if="selectedJob && !isLoading && filteredPayments.length > 0" class="overflow-x-auto">
+      <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
+        รายการ{{ selectedStatus === 'pending' ? 'ที่รอจ่ายเงิน' : 'ที่จ่ายแล้ว' }}สำหรับงาน:
+        {{ selectedJob.title }}
+      </h3>
+      <table class="min-w-full border-collapse border border-gray-300 dark:border-gray-700">
+        <thead class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+          <tr>
+            <th class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">ชื่อ</th>
+            <th class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-left">ตำแหน่ง</th>
+            <th class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-right">
+              จำนวนเงิน
+            </th>
+            <th
+              v-if="selectedStatus === 'pending'"
+              class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-center"
+            >
+              การดำเนินการ
+            </th>
+            <th
+              v-if="selectedStatus === 'paid'"
+              class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-center"
+            >
+              ดูประวัติ
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="payment in filteredPayments"
+            :key="payment.id"
+            class="hover:bg-gray-50 dark:hover:bg-gray-800"
+          >
+            <td class="border border-gray-300 dark:border-gray-700 px-4 py-2">
+              <div class="flex items-center space-x-4">
+                <img
+                  :src="getProfileImage(payment.job_participation.user.profile_image)"
+                  class="h-10 w-10 rounded-full"
+                  alt="Avatar"
+                />
+                <div>
+                  <h3 class="text-gray-900 dark:text-white font-semibold">
+                    {{ payment.job_participation.user.first_name }}
+                    {{ payment.job_participation.user.last_name }}
+                  </h3>
+                </div>
+              </div>
+            </td>
+            <td class="border border-gray-300 dark:border-gray-700 px-4 py-2">
+              {{ payment.job_participation.jobPosition.position_name }}
+            </td>
+            <td class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-right">
+              {{ formatCurrency(payment.amount) }}
+            </td>
+            <td
+              v-if="selectedStatus === 'pending'"
+              class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-center"
+            >
+              <button
+                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm"
+                @click="openPaymentDialog(payment)"
+              >
+                จ่ายเงิน
+              </button>
+            </td>
+            <td
+              v-if="selectedStatus === 'paid'"
+              class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-center"
+            >
+              <button
+                class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm"
+                @click="viewPaymentHistory(payment)"
+              >
+                ดูประวัติ
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div
+      v-else-if="selectedJob && !isLoading"
+      class="text-center py-12 text-gray-500 dark:text-gray-400"
+    >
+      ไม่พบรายการ{{ selectedStatus === 'pending' ? 'ที่รอจ่ายเงิน' : 'ที่จ่ายแล้ว' }}
+    </div>
+
+    <!-- Payment Modal -->
+    <PaymentModal
+      v-if="showPaymentDialog"
+      :show="showPaymentDialog"
+      :payment="selectedPayment"
+      @close="closePaymentDialog"
+      @confirm="handlePayment"
+    />
+
+    <!-- Payment History Modal -->
+    <PaymentHistoryModal
+      v-if="showHistoryModal"
+      :show="showHistoryModal"
+      :payment="selectedPayment"
+      @close="closeHistoryModal"
+    />
   </div>
 </template>
+
 <script>
 import { usePaymentStore } from '@/stores/paymentStore'
 import PaymentModal from '@/components/Payment/PaymentModal.vue'
-import BulkPaymentModal from '@/components/Payment/BulkPaymentModal.vue'
+import PaymentHistoryModal from '@/components/Payment/PaymentHistoryModal.vue'
 
 export default {
   name: 'PaymentManagement',
-
-  components: {
-    PaymentModal,
-    BulkPaymentModal
-  },
-
+  components: { PaymentModal, PaymentHistoryModal },
   data() {
     return {
-      paymentStore: usePaymentStore(),
-      showBulkPayment: false,
-      showCreateModal: false,
-      showEditModal: false,
-      showCancelModal: false,
+      selectedJob: null,
+      selectedStatus: 'pending', // ใช้สำหรับกรองสถานะ
+      showPaymentDialog: false,
       selectedPayment: null,
-      currentPage: 1,
-      itemsPerPage: 10,
-      totalItems: 0,
-      payments: [],
-      filters: {
-        status: '',
-        method: '',
-        dateFrom: '',
-        dateTo: ''
-      }
+      currentJobPage: 1,
+      itemsPerPage: 6,
+      totalJobPages: 1,
+      showHistoryModal: false
     }
   },
-
   computed: {
-    totalPayments() {
-      return this.totalItems
+    paymentStore() {
+      return usePaymentStore()
     },
-
-    pendingPayments() {
-      return this.payments.filter((p) => p.payment_status === 'pending').length
+    jobs() {
+      return this.paymentStore.jobs || []
     },
-
-    paidPayments() {
-      return this.payments.filter((p) => p.payment_status === 'paid').length
+    paginatedJobs() {
+      const start = (this.currentJobPage - 1) * this.itemsPerPage
+      const end = start + this.itemsPerPage
+      return this.jobs.slice(start, end)
     },
-
-    cancelledPayments() {
-      return this.payments.filter((p) => p.payment_status === 'cancelled').length
+    filteredPayments() {
+      return this.selectedStatus === 'pending'
+        ? this.paymentStore.pendingPayments
+        : this.paymentStore.paidPayments
     },
-
-    totalPages() {
-      return Math.ceil(this.totalItems / this.itemsPerPage)
+    isLoading() {
+      return this.paymentStore.isLoading
     },
-
-    startItem() {
-      return (this.currentPage - 1) * this.itemsPerPage + 1
-    },
-
-    endItem() {
-      return Math.min(this.currentPage * this.itemsPerPage, this.totalItems)
-    },
-
-    paginationPages() {
-      const pages = []
-      const maxVisiblePages = window.innerWidth < 640 ? 3 : 5 // responsive
-
-      let start = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2))
-      let end = Math.min(this.totalPages, start + maxVisiblePages - 1)
-
-      if (end - start + 1 < maxVisiblePages) {
-        start = Math.max(1, end - maxVisiblePages + 1)
-      }
-
-      for (let i = start; i <= end; i++) {
-        pages.push(i)
-      }
-
-      return pages
+    error() {
+      return this.paymentStore.error
     }
   },
-
+  async created() {
+    try {
+      await this.paymentStore.fetchJobs()
+      this.totalJobPages = Math.ceil(this.jobs.length / this.itemsPerPage)
+    } catch (error) {
+      console.error('Failed to load jobs:', error)
+    }
+  },
   methods: {
-    formatCurrency(amount) {
-      return new Intl.NumberFormat('th-TH', {
-        style: 'currency',
-        currency: 'THB'
-      }).format(amount)
+    async selectJob(job) {
+      this.selectedJob = job
+      await this.loadPayments()
     },
-
+    async loadPayments() {
+      if (!this.selectedJob) return
+      try {
+        if (this.selectedStatus === 'pending') {
+          await this.paymentStore.fetchPendingPayments(this.selectedJob.id)
+        } else {
+          await this.paymentStore.fetchPaidPayments(this.selectedJob.id)
+        }
+      } catch (error) {
+        console.error('Failed to load payments:', error)
+      }
+    },
+    switchStatus(status) {
+      this.selectedStatus = status
+      this.selectedJob = null // รีเซ็ต Job ที่เลือกเมื่อเปลี่ยนสถานะ
+    },
+    async changeJobPage(page) {
+      if (page < 1 || page > this.totalJobPages) return
+      this.currentJobPage = page
+    },
+    openPaymentDialog(payment) {
+      this.selectedPayment = payment
+      this.showPaymentDialog = true
+    },
+    closePaymentDialog() {
+      this.showPaymentDialog = false
+      this.selectedPayment = null
+    },
+    viewPaymentHistory(payment) {
+      this.selectedPayment = payment
+      this.showHistoryModal = true
+    },
+    closeHistoryModal() {
+      this.showHistoryModal = false
+      this.selectedPayment = null
+    },
+    async handlePayment(paymentData) {
+      try {
+        const result = await this.paymentStore.updatePaymentStatus(
+          this.selectedPayment.id,
+          paymentData
+        )
+        if (result.success) {
+          await this.loadPayments()
+          this.closePaymentDialog()
+        }
+      } catch (error) {
+        console.error('Payment failed:', error)
+      }
+    },
+    getProfileImage(image) {
+      return image
+        ? `${this.paymentStore.baseURL}/uploads/profiles/${image}`
+        : '/default-avatar.png'
+    },
+    formatCurrency(amount) {
+      return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(amount)
+    },
     formatDate(date) {
       return new Date(date).toLocaleDateString('th-TH', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+        day: 'numeric'
       })
-    },
-
-    getStatusClass(status) {
-      const classes = {
-        pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-        paid: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-        cancelled: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-      }
-      return `px-2 py-1 text-xs font-medium rounded-full ${classes[status] || ''}`
-    },
-
-    getStatusText(status) {
-      const texts = {
-        pending: 'รอดำเนินการ',
-        paid: 'จ่ายแล้ว',
-        cancelled: 'ยกเลิก'
-      }
-      return texts[status] || status
-    },
-
-    getMethodText(method) {
-      return method === 'cash' ? 'เงินสด' : 'โอนเงิน'
-    },
-
-    async fetchPayments() {
-      try {
-        const response = await this.paymentStore.fetchPayments({
-          page: this.currentPage,
-          limit: this.itemsPerPage,
-          ...this.filters
-        })
-        this.payments = response.data
-        this.totalItems = response.total
-      } catch (error) {
-        console.error('Failed to fetch payments:', error)
-      }
-    },
-
-    async setPage(page) {
-      if (page >= 1 && page <= this.totalPages) {
-        this.currentPage = page
-        await this.fetchPayments()
-      }
-    },
-
-    async prevPage() {
-      await this.setPage(this.currentPage - 1)
-    },
-
-    async nextPage() {
-      await this.setPage(this.currentPage + 1)
-    },
-
-    openEditModal(payment) {
-      this.selectedPayment = payment
-      this.showEditModal = true
-    },
-
-    closeModal() {
-      this.showCreateModal = false
-      this.showEditModal = false
-      this.selectedPayment = null
-    },
-
-    async savePayment(paymentData) {
-      try {
-        if (this.selectedPayment) {
-          await this.paymentStore.updatePayment(this.selectedPayment.id, paymentData)
-        } else {
-          await this.paymentStore.createPayment(paymentData)
-        }
-        this.closeModal()
-        await this.fetchPayments()
-      } catch (error) {
-        console.error('Failed to save payment:', error)
-      }
-    },
-
-    confirmCancel(payment) {
-      this.selectedPayment = payment
-      this.showCancelModal = true
-    },
-
-    async cancelPayment() {
-      try {
-        await this.paymentStore.updatePayment(this.selectedPayment.id, {
-          status: 'cancelled'
-        })
-        this.showCancelModal = false
-        this.selectedPayment = null
-        await this.fetchPayments()
-      } catch (error) {
-        console.error('Failed to cancel payment:', error)
-      }
-    },
-
-    handleResize() {
-      // Update pagination when window is resized
-      this.$forceUpdate()
     }
-  },
-
-  watch: {
-    filters: {
-      handler() {
-        this.currentPage = 1
-        this.fetchPayments()
-      },
-      deep: true
-    }
-  },
-
-  mounted() {
-    this.fetchPayments()
-    window.addEventListener('resize', this.handleResize)
-  },
-
-  beforeUnmount() {
-    window.removeEventListener('resize', this.handleResize)
   }
 }
 </script>
-
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>

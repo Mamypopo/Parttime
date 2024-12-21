@@ -1097,3 +1097,41 @@ export const searchJobsCount = async (filters = {}) => {
         where: where.AND.length > 0 ? where : undefined
     });
 };
+
+export const getJobPaymentStatus = async (jobId) => {
+    const participations = await prisma.jobParticipation.findMany({
+        where: {
+            jobPosition: {
+                job_id: parseInt(jobId)
+            },
+            status: 'completed'
+        },
+        include: {
+            PaymentHistory: {
+                select: {
+                    payment_status: true,
+                    amount: true
+                }
+            }
+        }
+    });
+    const totalRequired = participations.length;
+    const totalPaid = participations.filter(p =>
+        p.PaymentHistory?.payment_status === 'paid'
+    ).length;
+    // คำนวณเงินที่จ่ายไปแล้ว
+    const paidAmount = participations.reduce((sum, p) => {
+        if (p.PaymentHistory?.payment_status === 'paid') {
+            return sum + (p.PaymentHistory.amount || 0);
+        }
+        return sum;
+    }, 0);
+    return {
+        totalParticipants: totalRequired,
+        paidParticipants: totalPaid,
+        paidAmount: paidAmount,
+        status: totalPaid === 0 ? 'pending'
+            : totalPaid === totalRequired ? 'paid'
+                : 'partially_paid'
+    };
+};

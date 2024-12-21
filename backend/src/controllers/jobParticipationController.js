@@ -5,6 +5,7 @@ import * as notificationController from './notificationController.js'
 import * as workHistoryModel from '../models/workHistoryModel.js'
 import * as userModel from '../models/userModel.js'
 import * as adminModel from '../models/adminModel.js'
+import * as paymentModel from '../models/paymentModel.js'
 import { createLog } from '../models/logModel.js';
 
 // ฟังชั่นอนุมัติเข้าทำงาน
@@ -197,6 +198,38 @@ export const updateWorkHistory = async (req, res) => {
         // อัพเดทสถานะ JobParticipation เป็น completed เสมอ
         await jobParticipationModel.updateJobParticipationStatus(jobParticipationId, 'completed');
 
+        // สร้าง Payment Record ทันทีหลังจากสร้าง WorkHistory
+        try {
+            const paymentAmount = jobPosition.wage;
+
+            const paymentRecord = await paymentModel.createPaymentRecord({
+                job_participation_id: jobParticipationId,
+                amount: paymentAmount,
+                payment_status: 'pending',
+                created_at: new Date()
+            });
+            await jobModel.updateJobPaymentAmount(jobPosition.job.id, paymentAmount);
+            await createLog(
+                currentJobParticipation.user.id,
+                adminId,
+                'Payment Record Created',
+                req.originalUrl,
+                req.method,
+                `Payment record created for job: ${jobTitle} (${positionName}). Amount: ${paymentAmount}. Evaluation: ${isPassedEvaluation ? 'Passed' : 'Failed'}`,
+                req.ip,
+                req.headers['user-agent']
+            );
+            await notificationModel.createAdminNotification({
+                adminId: adminId,
+                content: `มีรายการรอจ่ายเงินใหม่สำหรับ ${currentJobParticipation.user.first_name} ${currentJobParticipation.user.last_name} - ${jobTitle}`,
+                type: 'PAYMENT_PENDING',
+                jobId: jobPosition.job.id,
+                userId: currentJobParticipation.user.id
+            });
+        } catch (paymentError) {
+            console.error('Error creating payment record:', paymentError);
+        }
+
         // ถ้าไม่ผ่านการประเมิน ให้อัพเดทสถานะ user
         if (!isPassedEvaluation && currentJobParticipation.user) {
             try {
@@ -235,6 +268,7 @@ export const updateWorkHistory = async (req, res) => {
                 req.headers['user-agent'] || 'Unknown User Agent'
             );
         }
+
 
         res.status(200).json({
             message: !isPassedEvaluation ? 'บันทึกการไม่ผ่านงานเรียบร้อยแล้ว' : 'บันทึกการประเมินเรียบร้อยแล้ว',

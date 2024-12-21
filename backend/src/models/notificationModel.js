@@ -8,7 +8,9 @@ export const NOTIFICATION_TYPES = {
     SYSTEM: 'system',                        // แจ้งเตือนจากระบบ
     GENERAL: 'general',                      // แจ้งเตือนทั่วไป
     USER_APPROVAL: 'user_approval',
-    JOB_APPLICATION_CANCELLED: 'job_application_cancelled'
+    JOB_APPLICATION_CANCELLED: 'job_application_cancelled',
+    PAYMENT_COMPLETED: 'payment_completed',   // เพิ่มประเภทแจ้งเตือนการจ่ายเงิน
+    PAYMENT_PENDING: 'payment_pending'        // เพิ่มประเภทแจ้งเตือนรอการจ่ายเงิน
 }
 
 export const NOTIFICATIONADMIN_TYPES = {

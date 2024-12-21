@@ -1,23 +1,36 @@
 import express from 'express';
 import * as paymentController from '../controllers/paymentController.js';
 import { authMiddleware, checkAdminRole } from '../middleware/authMiddleware.js';
-import { uploadPaymentSlip, handleMulterError } from '../utils/fileUpload.js';
+import { uploadPaymentSlip } from '../utils/fileUpload.js';
 
 const router = express.Router();
 
-// ต้องเป็น admin เท่านั้นถึงจะเข้าถึง routes เหล่านี้ได้
-router.use(authMiddleware);
-router.use(checkAdminRole);
+// Middleware สำหรับตรวจสอบสิทธิ์ (ต้องเป็นผู้ที่ล็อกอินและเป็น Admin เท่านั้น)
+router.use(authMiddleware); // ตรวจสอบการล็อกอิน
+router.use(checkAdminRole); // ตรวจสอบสิทธิ์ Admin
 
-// 1. Routes สำหรับดึงข้อมูลงาน
-router.get('/completed', paymentController.getCompletedJobs); // ดึงงานที่เสร็จแล้วของแอดมิน
-router.get('/job-participants/:jobId', paymentController.getUnpaidParticipantsByJob); // ดึงรายชื่อคนที่รอรับเงินในงานนั้นๆ
-router.post('/bulk', paymentController.createBulkPayments)
+// ดึงงานที่เสร็จและมีการประเมิน
+router.get('/jobs', paymentController.getJobsWithEvaluation);
 
-// 2. Routes สำหรับจัดการรายการจ่ายเงิน
-router.get('/', paymentController.getAllPayments); // ดึงรายการจ่ายเงินทั้งหมด
-router.post('/', uploadPaymentSlip, handleMulterError, paymentController.createPayment); // สร้างรายการใหม่
-router.get('/:id', paymentController.getPaymentById); // ดึงรายการตาม ID
-router.put('/:id', uploadPaymentSlip, handleMulterError, paymentController.updatePayment); // อัพเดทรายการ
+// ดึงรายการที่รอจ่ายเงินของงาน
+router.get(
+    '/job/:jobId/payments',
+    paymentController.getPendingPayments
+);
 
+router.get(
+    '/job/:jobId/paid',
+    paymentController.getPendingPayments
+);
+
+router.get('/:jobId/history', paymentController.getPaymentHistory);
+
+router.get('/participant/:participationId/history', paymentController.getPaymentHistoryByParticipant);
+
+// อัพเดทสถานะการจ่ายเงิน
+router.patch(
+    '/:id/status',
+    uploadPaymentSlip,
+    paymentController.updatePaymentStatus
+);
 export default router;

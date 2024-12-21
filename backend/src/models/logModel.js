@@ -29,3 +29,19 @@ export const createLog = async (
         console.error("Error creating log:", error.message);
     }
 };
+
+
+// สร้างบันทึก Log การจ่ายเงิน
+export const createPaymentLog = async (data) => {
+    return await prisma.paymentLog.create({
+        data: {
+            payment_id: data.payment_id, // ID การจ่ายเงิน
+            admin_id: data.admin_id, // ผู้ดำเนินการ
+            action: data.action, // การกระทำ เช่น "update"
+            action_detail: data.action_detail, // รายละเอียด
+            checklist_status: data.checklist_status, // สถานะการตรวจสอบ
+            ip_address: data.ip_address, // IP Address
+            user_agent: data.user_agent, // User Agent
+        },
+    });
+};

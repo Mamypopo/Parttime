@@ -1,237 +1,177 @@
 import * as paymentModel from '../models/paymentModel.js';
+import * as logModel from '../models/logModel.js'
+import * as jobModel from '../models/jobModel.js'
+import * as notificationModel from '../models/notificationModel.js'
+import { NOTIFICATION_TYPES } from '../models/notificationModel.js';
+
 import { sendPaymentNotificationEmail } from '../utils/email.js';
 
-export const createPayment = async (req, res) => {
+
+export const updatePaymentStatus = async (req, res) => {
+    const { id } = req.params; // ดึง ID ของการจ่ายเงินจากพารามิเตอร์
+    const { payment_method, payment_slip, payment_note, checklist_items } = req.body; // ดึงข้อมูลที่ต้องการอัพเดทจาก body
+    const adminId = req.user?.id; // ดึงข้อมูลผู้ดูแลระบบจาก JWT
+
     try {
-
-        console.log('Received payment data:', req.body);
-        const adminId = req.user.id;
-        const paymentData = {
-            job_participation_id: parseInt(req.body.job_participation_id),
-            amount: parseFloat(req.body.amount),
-            payment_status: 'paid',  // เปลี่ยนเป็น paid เลย
-            payment_method: req.body.payment_method || 'cash', // default เป็น cash
-            payment_note: req.body.payment_note || null,
-            payment_slip: req.file?.path || null,
-            paid_at: new Date(),  // เซ็ตวันที่จ่ายเงินเป็นวันที่สร้างรายการ
-        };
-        console.log('Processed payment data:', paymentData);
-        // ตรวจสอบว่าถ้าเป็น transfer ต้องมีไฟล์สลิป
-        if (paymentData.payment_method === 'transfer' && !req.file) {
-            return res.status(400).json({
-                message: 'กรุณาอัพโหลดสลิปการโอนเงิน'
-            });
-        }
-
-        const payment = await paymentModel.createPayment(
-            paymentData,
-            adminId
-        );
-
-
-        // ส่งอีเมลและอัพเดทสถานะพร้อมข้อมูลเพิ่มเติม
-        try {
-            await sendPaymentNotificationEmail(payment);
-            await paymentModel.updateEmailStatus(payment.id);
-        } catch (emailError) {
-            console.error('Error sending email:', emailError);
-        }
-
-        res.status(201).json({
-            message: 'สร้างรายการจ่ายเงินสำเร็จ',
-            payment
-        });
-    } catch (error) {
-        console.error('Error creating payment:', error);
-        res.status(500).json({ error: 'ไม่สามารถสร้างรายการจ่ายเงินได้' });
-    }
-};
-
-
-export const createBulkPayments = async (req, res) => {
-    try {
-        console.log('Received data:', req.body)
-        const { job_id, participant_ids, payment_method } = req.body
-        const adminId = req.user.id
-
-        // Validation
-        if (!job_id || !participant_ids?.length) {
-            return res.status(400).json({
-                error: 'กรุณาระบุข้อมูลให้ครบถ้วน'
-            })
-        }
-
-        // เรียกใช้ model
-        const payments = await paymentModel.createBulkPayments(
-            job_id,
-            participant_ids,
-            payment_method,
-            adminId
-        )
-
-        res.status(201).json({
-            message: `สร้างรายการจ่ายเงินสำเร็จ ${payments.length} รายการ`,
-            payments
-        })
-
-    } catch (error) {
-        console.error('Error creating bulk payments:', error)
-        res.status(500).json({
-            error: 'ไม่สามารถสร้างรายการจ่ายเงินได้',
-            details: error.message
-        })
-    }
-}
-
-// ดึงรายชื่อคนที่รอรับเงินในงานนั้นๆ
-export const getUnpaidParticipantsByJob = async (req, res) => {
-    try {
-        const { jobId } = req.params;
-        const participants = await paymentModel.getUnpaidParticipantsByJob(parseInt(jobId));
-
-        res.json(participants);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
-
-export const updatePayment = async (req, res) => {
-    try {
-
-        const adminId = req.user.id;
-        const { id } = req.params;
-        const paymentData = {
-            payment_status: req.body.status,   // เปลี่ยนชื่อฟิลด์
-            payment_method: req.body.method,   // เปลี่ยนชื่อฟิลด์
-            payment_note: req.body.note,       // เปลี่ยนชื่อฟิลด์
-            payment_slip: req.file?.path       // เปลี่ยนชื่อฟิลด์
-        };
-
-        // ตรวจสอบว่าถ้าเปลี่ยนเป็น transfer ต้องมีไฟล์สลิป
-        if (paymentData.payment_method === 'transfer' && !req.file && !req.body.existing_slip) {
-            return res.status(400).json({
-                message: 'กรุณาอัพโหลดสลิปการโอนเงิน'
-            });
-        }
-
-        const payment = await paymentModel.updatePayment(
-            id,
-            paymentData,
-            adminId,
-            req.ip,
-            req.headers['user-agent']
-        );
-
-        // อัพเดทการส่งอีเมล
-        if (payment.payment_status === 'paid' && !payment.email_sent) {
-            try {
-                await sendPaymentNotificationEmail(payment);
-                await paymentModel.updateEmailStatus(
-                    payment.id,
-                    adminId,
-                    req.ip,
-                    req.headers['user-agent']
-                );
-            } catch (emailError) {
-                console.error('Failed to send email:', emailError);
-            }
-        }
-
-        res.json({
-            message: 'อัพเดทรายการจ่ายเงินสำเร็จ',
-            payment
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: 'เกิดข้อผิดพลาด',
-            error: error.message
-        });
-    }
-};
-
-
-// ดึงงานที่ admin สร้างและเสร็จแล้ว
-export const getCompletedJobs = async (req, res) => {
-    try {
-        const adminId = req.user.id;
+        // ตรวจสอบสิทธิ์ของผู้ดูแลระบบ
         if (!adminId) {
-            return res.status(400).json({
-                error: 'ไม่พบข้อมูลผู้ดูแลระบบ'
-            });
-        }
-        const jobs = await paymentModel.getCompletedJobs(adminId);
-        res.json(jobs);
-    } catch (error) {
-        console.error('Controller Error:', error);
-        res.status(500).json({
-            error: 'เกิดข้อผิดพลาดในการดึงข้อมูล',
-            message: error.message
-        });
-    }
-};
-
-
-// ดึงข้อมูล payment ตาม ID
-export const getPaymentById = async (req, res) => {
-    try {
-        const { id } = req.params;
-
-        if (!id) {
-            return res.status(400).json({
-                error: 'กรุณาระบุ ID ของรายการจ่ายเงิน'
-            });
+            return res.status(403).json({ message: 'ไม่มีสิทธิ์ดำเนินการ' });
         }
 
-        const payment = await paymentModel.getPaymentById(parseInt(id));
-
+        // ตรวจสอบว่ามีข้อมูลการจ่ายเงินอยู่ในระบบหรือไม่
+        const payment = await paymentModel.getPaymentById(id);
         if (!payment) {
-            return res.status(404).json({
-                error: 'ไม่พบรายการจ่ายเงินที่ต้องการ'
-            });
+            return res.status(404).json({ message: 'ไม่พบข้อมูลการจ่ายเงิน' });
         }
 
-        res.json(payment);
+        // เตรียมข้อมูลสำหรับการอัพเดท
+        const updateData = {
+            payment_status: 'paid',
+            payment_method,
+            payment_note,
+            paid_at: new Date(),
+            admin_id: adminId,
+            checklist_completed: true,
+            checklist_items: {
+                payment_method: true,
+                slip_uploaded: req.file ? true : false,
+                amount_verified: true,
+                notes: payment_note || ''
+            }
+        };
+        // ถ้ามีไฟล์สลิป
+        if (req.file) {
+            updateData.payment_slip = req.file.filename;
+        }
+        // อัพเดทสถานะการจ่ายเงินในฐานข้อมูล
+        const updatedPayment = await paymentModel.updatePaymentStatus(id, updateData, adminId);
+
+        // ส่งผลลัพธ์กลับก่อน
+        res.status(200).json({
+            message: 'อัพเดทสถานะการจ่ายเงินเรียบร้อย',
+            data: updatedPayment
+        });
+        // ทำงานที่ใช้เวลานานแบบ async
+        Promise.all([
+            // ส่งอีเมล
+            sendPaymentNotificationEmail(updatedPayment)
+                .then(() => paymentModel.updateEmailStatus(id, adminId, req.ip, req.headers['user-agent']))
+                .catch(error => console.error('Email error:', error)),
+            // สร้าง Log
+            logModel.createPaymentLog({
+                payment_id: parseInt(id),
+                admin_id: adminId,
+                action: 'payment_completed',
+                action_detail: updateData,
+                checklist_status: updateData.checklist_items,
+                ip_address: req.ip,
+                user_agent: req.headers['user-agent']
+            }).catch(error => console.error('Log error:', error)),
+            // สร้างการแจ้งเตือน
+            notificationModel.createUserNotification(
+                updatedPayment.job_participation.user.id,
+                `การจ่ายเงินสำหรับงาน ${updatedPayment.job_participation.jobPosition.job.title} เสร็จสมบูรณ์`,
+                NOTIFICATION_TYPES.PAYMENT_COMPLETED
+            ).catch(error => console.error('Notification error:', error))
+        ]).catch(error => console.error('Background tasks error:', error));
     } catch (error) {
-        console.error('Controller Error:', error);
-        res.status(500).json({
-            error: 'เกิดข้อผิดพลาดในการดึงข้อมูล',
-            message: error.message
+        console.error('Error updating payment status:', error);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการอัพเดทสถานะ' });
+    }
+};
+
+// ดึงงานที่เสร็จและมีการประเมิน
+export const getJobsWithEvaluation = async (req, res) => {
+    try {
+        const jobs = await paymentModel.getJobsWithEvaluation();
+        return res.status(200).json({
+            success: true,
+            data: jobs
+        });
+    } catch (error) {
+        console.error('Error getting jobs with evaluation:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'เกิดข้อผิดพลาดในการดึงข้อมูลงาน'
         });
     }
 };
 
+// ดึงรายการที่รอจ่ายเงิน
+export const getPendingPayments = async (req, res) => {
+    const { jobId } = req.params; // ดึง Job ID จาก query parameter
+    const { status, page = 1, limit = 10 } = req.query; // ดึง Pagination parameter
 
-export const getAllPayments = async (req, res) => {
+    if (!jobId || isNaN(jobId)) {
+        return res.status(400).json({ message: 'Invalid jobId parameter' });
+    }
+
+    if (!['pending', 'paid'].includes(status)) {
+        return res.status(400).json({ message: 'Invalid status parameter' });
+    }
     try {
-        const {
-            page = 1,
-            limit = 10,
-            payment_status,  // เปลี่ยนจาก status
-            payment_method, // เปลี่ยนจาก method
-            dateFrom,
-            dateTo
-        } = req.query;
-
-        const filters = {
-            payment_status,  // เปลี่ยนชื่อฟิลด์
-            payment_method, // เปลี่ยนชื่อฟิลด์
-            dateFrom,
-            dateTo
-        };
-
-        const result = await paymentModel.getAllPayments(
-            filters,
+        // ดึงรายการรอจ่ายเงินพร้อมข้อมูล Pagination
+        const { data, totalRecords } = await paymentModel.getParticipantsByJob(
+            jobId,
+            status,
             parseInt(page),
             parseInt(limit)
         );
 
-        res.json(result);
-    } catch (error) {
-        res.status(500).json({
-            message: 'เกิดข้อผิดพลาด',
-            error: error.message
+        // ส่งข้อมูลกลับไปยังผู้เรียก API
+        res.status(200).json({
+            data,
+            totalRecords,
+            totalPages: Math.ceil(totalRecords / limit),
+            currentPage: parseInt(page),
         });
+    } catch (error) {
+        console.error('Error fetching pending payments:', error);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูล' });
     }
 };
 
+// ดึงประวัติทั้งงาน
+export const getPaymentHistory = async (req, res) => {
+    const { jobId } = req.params;
+    const { page = 1, limit = 10 } = req.query;
 
+    if (!jobId || isNaN(jobId)) {
+        return res.status(400).json({ message: 'Invalid jobId parameter' });
+    }
+
+    try {
+        const { data, totalRecords } = await paymentModel.getPaymentHistory(
+            jobId,
+            parseInt(page),
+            parseInt(limit)
+        );
+
+        res.status(200).json({
+            data,
+            totalRecords,
+            totalPages: Math.ceil(totalRecords / limit),
+            currentPage: parseInt(page),
+        });
+    } catch (error) {
+        console.error('Error fetching payment history:', error);
+        res.status(500).json({ message: 'Error fetching payment history' });
+    }
+};
+
+// ดึงประวัติเฉพาะคน
+export const getPaymentHistoryByParticipant = async (req, res) => {
+    const { participationId } = req.params;
+
+    if (!participationId || isNaN(participationId)) {
+        return res.status(400).json({ message: 'Invalid participationId parameter' });
+    }
+
+    try {
+        const paymentHistories = await paymentModel.getPaymentHistoryByParticipantModel(participationId);
+        res.status(200).json({ data: paymentHistories });
+    } catch (error) {
+        console.error('Error fetching payment history by participant:', error);
+        res.status(500).json({ message: 'Error fetching payment history' });
+    }
+};

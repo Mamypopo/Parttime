@@ -70,7 +70,7 @@ model Job {
   location   String // สถานที่
   start_time DateTime @db.Timestamptz // เวลาเริ่ม
   end_time   DateTime @db.Timestamptz // เวลาสิ้นสุด
-  status     String   @default("published") // เพิ่ม column status
+  status     String   @default("published") //   status
 
   details          String // รายละเอียดเพิ่มเติม
   created_by       Int // ผู้สร้างงาน (Admin)
@@ -111,7 +111,7 @@ model JobParticipation {
   PaymentHistory  PaymentHistory[]
 }
 
-// เพิ่มโมเดลใหม่สำหรับเก็บประวัติการทำงาน
+// โมเดลใหม่สำหรับเก็บประวัติการทำงาน
 model WorkHistory {
   id                 Int              @id @default(autoincrement())
   jobParticipation   JobParticipation @relation(fields: [jobParticipationId], references: [id])
@@ -150,16 +150,18 @@ model Log {
 }
 
 model Admin {
-  id             Int              @id @default(autoincrement())
-  email          String           @unique
-  password       String
-  first_name     String // ชื่อ
-  last_name      String // นามสกุล
-  role           String           @default("admin") // กำหนด role ให้เป็น admin
+  id          Int     @id @default(autoincrement())
+  email       String  @unique
+  password    String
+  first_name  String // ชื่อ
+  last_name   String // นามสกุล
+  phone       String? // เพิ่มเบอร์โทร
+  profile_pic String? // เพิ่มรูปโปรไฟล์
+  role        String  @default("admin") //  role ให้เป็น admin
+
+  // Timestamps
   created_at     DateTime         @default(now()) @db.Timestamptz
   updated_at     DateTime         @updatedAt @db.Timestamptz
-  phone          String? // เพิ่มเบอร์โทร
-  profile_pic    String? // เพิ่มรูปโปรไฟล์
   Job            Job[]
   Log            Log[]
   Notification   Notification[]
@@ -181,36 +183,62 @@ model Notification {
   type      String   @default("notification")
 }
 
-//  model ใหม่สำหรับประวัติการจ่ายเงิน
+//  model สำหรับประวัติการจ่ายเงิน
 model PaymentHistory {
   id                   Int              @id @default(autoincrement())
+  // ความสัมพันธ์กับผู้เข้าร่วมงาน
   job_participation    JobParticipation @relation(fields: [job_participation_id], references: [id])
   job_participation_id Int
-  amount               Decimal          @db.Decimal(10, 2)
-  payment_status       String // pending, paid, cancelled
-  payment_method       String? // cash, transfer
-  payment_slip         String? // path ของสลิป
-  payment_note         String?          @db.Text
-  paid_at              DateTime?        @db.Timestamptz
-  paid_by              Admin?           @relation(fields: [admin_id], references: [id])
-  admin_id             Int?
-  email_sent           Boolean          @default(false)
-  email_sent_at        DateTime?        @db.Timestamptz
-  created_at           DateTime         @default(now()) @db.Timestamptz
-  updated_at           DateTime         @updatedAt @db.Timestamptz
-  payment_logs         PaymentLog[]
+
+  // ข้อมูลการจ่ายเงิน
+  amount         Decimal @db.Decimal(10, 2) // จำนวนเงินที่ต้องจ่าย
+  payment_status String  @default("pending") // สถานะ: pending=รอจ่าย, paid=จ่ายแล้ว, cancelled=ยกเลิก
+  payment_method String? // วิธีการจ่าย: cash=เงินสด, transfer=โอน
+  payment_slip   String? // ที่อยู่ไฟล์สลิปการโอนเงิน
+  payment_note   String? @db.Text // บันทึกเพิ่มเติม
+
+  // ข้อมูลการจ่ายเงิน
+  paid_at  DateTime? @db.Timestamptz // วันเวลาที่จ่ายเงิน
+  paid_by  Admin?    @relation(fields: [admin_id], references: [id]) // แอดมินที่ทำรายการ
+  admin_id Int?
+
+  // ข้อมูลการส่งอีเมล
+  email_sent    Boolean   @default(false) // สถานะการส่งอีเมล
+  email_sent_at DateTime? @db.Timestamptz // เวลาที่ส่งอีเมล
+
+  // Timestamps
+  created_at DateTime @default(now()) @db.Timestamptz // วันที่สร้างรายการ
+  updated_at DateTime @updatedAt @db.Timestamptz // วันที่อัพเดทล่าสุด
+
+  // ข้อมูล Checklist
+  checklist_completed Boolean @default(false) // สถานะการตรวจสอบ
+  checklist_items     Json? // รายการ checklist ที่ตรวจสอบแล้ว เช่น
+  // {
+  //   "user_info_verified": true,
+  //   "amount_verified": true,
+  //   "payment_method_verified": true
+  // }
+
+  // ความสัมพันธ์
+  payment_logs PaymentLog[] // ประวัติการทำรายการ
 }
 
 //  model สำหรับ log การเงิน
 model PaymentLog {
-  id            Int            @id @default(autoincrement())
-  payment       PaymentHistory @relation(fields: [payment_id], references: [id])
-  payment_id    Int
-  admin         Admin          @relation(fields: [admin_id], references: [id])
-  admin_id      Int
-  action        String // created, updated, email_sent, cancelled
-  action_detail Json? // รายละเอียดการเปลี่ยนแปลง
-  ip_address    String?        @db.VarChar(45)
-  user_agent    String?        @db.Text
-  created_at    DateTime       @default(now())
+  id         Int            @id @default(autoincrement())
+  // ความสัมพันธ์
+  payment    PaymentHistory @relation(fields: [payment_id], references: [id])
+  payment_id Int
+  admin      Admin          @relation(fields: [admin_id], references: [id])
+  admin_id   Int
+
+  // ข้อมูลการทำรายการ
+  action           String // ประเภทการกระทำ: created=สร้าง, updated=แก้ไข, email_sent=ส่งอีเมล, cancelled=ยกเลิก
+  action_detail    Json? // รายละเอียดการเปลี่ยนแปลง
+  checklist_status Json? // สถานะ checklist ณ เวลาที่บันทึก
+
+  // ข้อมูลเพิ่มเติม
+  ip_address String?  @db.VarChar(45) // IP ผู้ทำรายการ
+  user_agent String?  @db.Text // User Agent ของผู้ทำรายการ
+  created_at DateTime @default(now()) // เวลาที่ทำรายการ
 }
