@@ -12,6 +12,12 @@ export const updatePaymentStatus = async (req, res) => {
     const { payment_method, payment_slip, payment_note, checklist_items } = req.body; // ดึงข้อมูลที่ต้องการอัพเดทจาก body
     const adminId = req.user?.id; // ดึงข้อมูลผู้ดูแลระบบจาก JWT
 
+    // Debug: ตรวจสอบค่าที่ได้รับ
+    console.log('Raw body:', req.body);
+    console.log('Parsed values:', {
+        payment_method,
+        payment_note
+    });
     try {
         // ตรวจสอบสิทธิ์ของผู้ดูแลระบบ
         if (!adminId) {

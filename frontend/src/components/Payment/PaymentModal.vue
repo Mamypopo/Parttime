@@ -10,11 +10,11 @@
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+        <div class="fixed inset-0 bg-black/30 backdrop-blur-sm" />
       </TransitionChild>
 
       <div class="fixed inset-0 overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4 text-center">
+        <div class="flex min-h-full items-center justify-center">
           <TransitionChild
             enter="ease-out duration-300"
             enter-from="opacity-0 scale-95"
@@ -22,89 +22,133 @@
             leave="ease-in duration-200"
             leave-from="opacity-100 scale-100"
             leave-to="opacity-0 scale-95"
+            class="w-full max-w-md"
           >
             <!-- Modal Content -->
             <DialogPanel
-              class="relative w-full max-w-lg transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl transition-all"
+              class="relative w-full transform rounded-2xl bg-white dark:bg-gray-900 shadow-2xl transition-all"
             >
               <!-- Loading Overlay -->
               <div
                 v-if="paymentStore.isLoading"
-                class="absolute inset-0 z-10 flex items-center justify-center bg-gray-500 bg-opacity-75 rounded-lg"
+                class="absolute inset-0 z-10 flex items-center justify-center bg-gray-700 bg-opacity-75 rounded-2xl"
               >
                 <div class="text-lg font-bold text-white animate-pulse">กำลังโหลด...</div>
               </div>
 
               <!-- Header -->
-              <DialogTitle
-                as="h3"
-                class="text-xl font-bold text-center bg-gradient-to-r from-purple-600 to-blue-500 dark:from-purple-400 dark:to-blue-300 bg-clip-text text-transparent mb-4"
-              >
-                ยืนยันการจ่ายเงิน
-              </DialogTitle>
+              <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <DialogTitle
+                  as="h3"
+                  class="text-lg font-extrabold text-center text-gray-800 dark:text-white tracking-wide"
+                >
+                  ยืนยันการจ่ายเงิน
+                </DialogTitle>
+              </div>
 
               <!-- Form -->
-              <form @submit.prevent="handleSubmit" class="space-y-6">
-                <!-- วิธีการจ่ายเงิน -->
+              <div class="px-6 py-6 space-y-6">
+                <!-- Payment Method -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label
+                    class="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-3 flex items-center"
+                  >
+                    <i class="fas fa-credit-card mr-2 text-purple-500"></i>
                     วิธีการจ่ายเงิน
                   </label>
-                  <select
-                    v-model="formData.payment_method"
-                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-300 focus:outline-none"
-                    required
-                  >
-                    <option value="">เลือกวิธีการจ่ายเงิน</option>
-                    <option value="cash">เงินสด</option>
-                    <option value="transfer">โอนเงิน</option>
-                  </select>
+                  <div class="grid grid-cols-2 gap-4">
+                    <button
+                      @click="formData.payment_method = 'cash'"
+                      :class="[
+                        'flex items-center justify-center p-4 rounded-lg border transition-all duration-200',
+                        formData.payment_method === 'cash'
+                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-purple-300'
+                      ]"
+                    >
+                      <i class="fas fa-money-bill-wave mr-2"></i>
+                      <span>เงินสด</span>
+                    </button>
+                    <button
+                      @click="formData.payment_method = 'transfer'"
+                      :class="[
+                        'flex items-center justify-center p-4 rounded-lg border transition-all duration-200',
+                        formData.payment_method === 'transfer'
+                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-purple-300'
+                      ]"
+                    >
+                      <i class="fas fa-receipt mr-2"></i>
+                      <span>โอนเงิน</span>
+                    </button>
+                  </div>
                 </div>
-
-                <!-- หลักฐานการโอนเงิน -->
-                <div v-if="formData.payment_method === 'transfer'">
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <!-- Payment Slip -->
+                <div v-if="formData.payment_method === 'transfer'" class="space-y-2">
+                  <label
+                    class="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1 flex items-center"
+                  >
+                    <i class="fas fa-file-upload mr-2 text-purple-500"></i>
                     หลักฐานการโอนเงิน
                   </label>
-                  <input
-                    type="file"
-                    accept="image/*,.pdf"
-                    @change="handleFileUpload"
-                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-300 focus:outline-none"
-                    required
-                  />
+                  <div class="relative">
+                    <label class="cursor-pointer block w-full">
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        @change="handleFileUpload"
+                        class="hidden"
+                        required
+                      />
+                      <div
+                        class="flex items-center justify-center p-4 rounded-lg border border-dashed border-purple-300 dark:border-purple-600 dark:bg-gray-800/50 hover:border-purple-500 transition-colors duration-200"
+                      >
+                        <i class="fas fa-cloud-upload-alt text-2xl text-purple-500"></i>
+                      </div>
+                    </label>
+                  </div>
                 </div>
-
-                <!-- หมายเหตุ -->
+                <!-- Payment Note -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label
+                    class="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1 flex items-center"
+                  >
+                    <i class="fas fa-sticky-note mr-2 text-purple-500"></i>
                     หมายเหตุ
                   </label>
                   <textarea
                     v-model="formData.payment_note"
-                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-300 focus:outline-none"
                     rows="3"
+                    placeholder="ระบุข้อมูลเพิ่มเติม"
+                    class="block w-full px-4 py-3 text-sm rounded-lg border dark:border-gray-700 dark:bg-gray-800/50 focus:ring-2 focus:ring-purple-400/50 focus:outline-none resize-none transition-all duration-200"
                   ></textarea>
                 </div>
+              </div>
 
-                <!-- Buttons -->
-                <div class="flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    @click="$emit('close')"
-                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 focus:ring-2 focus:ring-gray-400 dark:hover:bg-gray-600 dark:text-gray-200 dark:border-gray-600 dark:focus:ring-gray-500"
-                  >
-                    ยกเลิก
-                  </button>
-                  <button
-                    type="submit"
-                    class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-md hover:opacity-90 focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-300 hover:shadow-lg"
-                    :disabled="paymentStore.isLoading"
-                  >
+              <!-- Footer Buttons -->
+              <div
+                class="flex justify-end items-center px-6 py-4 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl"
+              >
+                <button
+                  type="button"
+                  @click="$emit('close')"
+                  class="px-6 py-2.5 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700 transition-all duration-200"
+                >
+                  <i class="fas fa-times mr-2"></i>
+                  ยกเลิก
+                </button>
+                <button
+                  type="submit"
+                  class="ml-4 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 rounded-lg shadow-lg hover:opacity-90 transition-all duration-200"
+                  :disabled="paymentStore.isLoading"
+                  @click.prevent="handleSubmit"
+                >
+                  <span class="flex items-center">
+                    <i class="fas fa-check mr-2"></i>
                     {{ paymentStore.isLoading ? 'กำลังบันทึก...' : 'บันทึก' }}
-                  </button>
-                </div>
-              </form>
+                  </span>
+                </button>
+              </div>
             </DialogPanel>
           </TransitionChild>
         </div>
@@ -129,7 +173,11 @@ export default {
   props: {
     payment: {
       type: Object,
-      required: true
+      required: true,
+      validator(value) {
+        // ตรวจสอบว่ามีข้อมูลครบไหม
+        return value.id && value.job_participation_id && value.amount
+      }
     }
   },
 
@@ -142,7 +190,10 @@ export default {
       }
     }
   },
-
+  created() {
+    // Debug: ตรวจสอบค่า props ที่ได้รับ
+    console.log('Payment props received:', this.payment)
+  },
   setup() {
     const paymentStore = usePaymentStore()
     return { paymentStore }
@@ -155,38 +206,42 @@ export default {
 
     async handleSubmit() {
       try {
-        if (!this.formData.payment_method) {
-          await Swal.fire({
-            icon: 'warning',
-            title: 'กรุณาเลือกวิธีการชำระเงิน',
-            confirmButtonText: 'ตกลง'
-          })
-          return
+        // Debug: ตรวจสอบค่า props
+        console.log('Current payment props:', this.payment)
+        const formData = new FormData()
+        formData.append('payment_method', this.formData.payment_method || 'cash')
+        formData.append('payment_note', this.formData.payment_note || '')
+        formData.append('job_participation_id', this.payment.job_participation_id) // เปลี่ยนจาก jobId เป็น job_participation_id
+        if (this.formData.payment_slip) {
+          formData.append('payment_slip', this.formData.payment_slip)
         }
-
-        if (this.formData.payment_method === 'transfer' && !this.formData.payment_slip) {
-          await Swal.fire({
-            icon: 'warning',
-            title: 'กรุณาแนบสลิปการโอนเงิน',
-            confirmButtonText: 'ตกลง'
-          })
-          return
-        }
-
-        const result = await Swal.fire({
-          title: 'ยืนยันการบันทึก?',
-          text: 'กรุณาตรวจสอบข้อมูลให้ถูกต้อง',
-          icon: 'question',
-          showCancelButton: true,
-          confirmButtonText: 'บันทึก',
-          cancelButtonText: 'ยกเลิก'
+        // Debug: ตรวจสอบข้อมูลก่อนส่ง
+        console.log('Submitting payment:', {
+          id: this.payment.id,
+          job_participation_id: this.payment.job_participation_id,
+          method: this.formData.payment_method,
+          note: this.formData.payment_note
         })
+        const result = await this.paymentStore.updatePaymentStatus(this.payment.id, formData)
 
-        if (result.isConfirmed) {
-          this.$emit('confirm', this.formData)
+        if (result.success) {
+          await Swal.fire({
+            icon: 'success',
+            title: 'บันทึกข้อมูลสำเร็จ',
+            showConfirmButton: false,
+            timer: 1500
+          })
+          this.$emit('close')
+          this.$emit('refresh')
         }
       } catch (error) {
-        console.error('Failed to submit payment:', error)
+        console.error('Submit error:', error)
+        await Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: error.message || 'ไม่สามารถบันทึกข้อมูลได้',
+          confirmButtonText: 'ตกลง'
+        })
       }
     }
   }

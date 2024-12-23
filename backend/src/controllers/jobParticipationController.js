@@ -208,7 +208,7 @@ export const updateWorkHistory = async (req, res) => {
                 payment_status: 'pending',
                 created_at: new Date()
             });
-            await jobModel.updateJobPaymentAmount(jobPosition.job.id, paymentAmount);
+            // await jobModel.updateJobPaymentAmount(jobPosition.job.id, paymentAmount);
             await createLog(
                 currentJobParticipation.user.id,
                 adminId,

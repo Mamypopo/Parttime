@@ -1,6 +1,7 @@
 <template>
   <TransitionRoot appear :show="show" as="div">
-    <Dialog as="div" @close="$emit('close')" class="relative z-50">
+    <Dialog as="div" @close="$emit('close')" class="relative modal">
+      <!-- Backdrop -->
       <TransitionChild
         enter="duration-300 ease-out"
         enter-from="opacity-0"
@@ -20,109 +21,166 @@
             leave="duration-200 ease-in"
             leave-from="opacity-100 scale-100"
             leave-to="opacity-0 scale-95"
+            class="w-full max-w-2xl"
           >
             <DialogPanel
-              class="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-xl transition-all"
+              class="w-full transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-2xl transition-all"
             >
-              <DialogTitle as="div" class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-                  ประวัติการจ่ายเงิน
-                </h3>
-                <button
-                  @click="$emit('close')"
-                  class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+              <!-- Header -->
+              <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <DialogTitle as="div" class="flex justify-between items-center">
+                  <h3 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-history mr-3 text-purple-500"></i>
+                    ประวัติการจ่ายเงิน
+                  </h3>
+                  <button
+                    @click="$emit('close')"
+                    class="p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </DialogTitle>
+              </div>
+              <div class="p-6 space-y-6">
+                <!-- Payment Details Card -->
+                <div
+                  class="bg-purple-50 dark:bg-gray-700/50 rounded-xl p-5 border border-purple-100 dark:border-purple-900"
                 >
-                  <i class="fas fa-times"></i>
-                </button>
-              </DialogTitle>
-              <div class="space-y-4">
-                <!-- Payment Details -->
-                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-                  <div class="grid grid-cols-2 gap-4 text-sm">
-                    <div class="text-gray-500 dark:text-gray-400">ชื่อ-นามสกุล</div>
-                    <div class="text-gray-900 dark:text-white">
-                      {{ payment.job_participation.user.first_name }}
-                      {{ payment.job_participation.user.last_name }}
+                  <div class="grid grid-cols-2 gap-y-4">
+                    <div class="space-y-1">
+                      <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                        <i class="fas fa-user mr-2 text-purple-500"></i>
+                        ชื่อ-นามสกุล
+                      </div>
+                      <div class="font-medium text-gray-900 dark:text-white">
+                        {{ payment.job_participation.user.first_name }}
+                        {{ payment.job_participation.user.last_name }}
+                      </div>
                     </div>
-
-                    <div class="text-gray-500 dark:text-gray-400">ตำแหน่ง</div>
-                    <div class="text-gray-900 dark:text-white">
-                      {{ payment.job_participation.jobPosition.position_name }}
+                    <div class="space-y-1">
+                      <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                        <i class="fas fa-briefcase mr-2 text-purple-500"></i>
+                        ตำแหน่ง
+                      </div>
+                      <div class="font-medium text-gray-900 dark:text-white">
+                        {{ payment.job_participation.jobPosition.position_name }}
+                      </div>
                     </div>
-
-                    <div class="text-gray-500 dark:text-gray-400">จำนวนเงิน</div>
-                    <div class="text-gray-900 dark:text-white">
-                      {{ formatCurrency(payment.amount) }}
+                    <div class="space-y-1">
+                      <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                        <i class="fas fa-money-bill-wave mr-2 text-purple-500"></i>
+                        จำนวนเงิน
+                      </div>
+                      <div class="font-medium text-gray-900 dark:text-white">
+                        {{ formatCurrency(payment.amount) }}
+                      </div>
                     </div>
-
-                    <div class="text-gray-500 dark:text-gray-400">สถานะส่งอีเมล</div>
-                    <div class="text-gray-900 dark:text-white">
-                      <span v-if="payment.email_sent">
-                        ส่งแล้วเมื่อ {{ formatDate(payment.email_sent_at) }}
-                      </span>
-                      <span v-else class="text-red-500">ยังไม่ส่ง</span>
+                    <div class="space-y-1">
+                      <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                        <i class="fas fa-envelope mr-2 text-purple-500"></i>
+                        สถานะส่งอีเมล
+                      </div>
+                      <div>
+                        <span
+                          v-if="payment.email_sent"
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                        >
+                          <i class="fas fa-check mr-1"></i>
+                          ส่งแล้วเมื่อ {{ formatDate(payment.email_sent_at) }}
+                        </span>
+                        <span
+                          v-else
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                        >
+                          <i class="fas fa-times mr-1"></i>
+                          ยังไม่ส่ง
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
                 <!-- Payment History Table -->
-                <div class="overflow-x-auto">
+                <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
                   <table class="w-full">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700/50">
                       <tr>
                         <th
-                          class="p-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300"
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                         >
-                          วันที่จ่าย
+                          <div class="flex items-center">
+                            <i class="fas fa-calendar mr-2"></i>
+                            วันที่จ่าย
+                          </div>
                         </th>
                         <th
-                          class="p-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300"
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                         >
-                          วิธีการจ่าย
+                          <div class="flex items-center">
+                            <i class="fas fa-credit-card mr-2"></i>
+                            วิธีการจ่าย
+                          </div>
                         </th>
                         <th
-                          class="p-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300"
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                         >
-                          หลักฐาน
+                          <div class="flex items-center">
+                            <i class="fas fa-receipt mr-2"></i>
+                            หลักฐาน
+                          </div>
                         </th>
                         <th
-                          class="p-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300"
+                          class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                         >
-                          วันที่ส่งอีเมล
+                          <div class="flex items-center">
+                            <i class="fas fa-envelope mr-2"></i>
+                            วันที่ส่งอีเมล
+                          </div>
                         </th>
                       </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-                      <tr v-for="history in paymentHistory" :key="history.id">
-                        <td class="p-3 text-sm text-gray-900 dark:text-white">
+                    <tbody
+                      class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800"
+                    >
+                      <tr
+                        v-for="history in paymentHistory"
+                        :key="history.id"
+                        class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                      >
+                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
                           {{ formatDate(history.paid_at) }}
                         </td>
-                        <td class="p-3">
+                        <td class="px-4 py-3">
                           <span
                             :class="[
-                              {
-                                'px-2 py-1 rounded-full text-xs': true,
-                                'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300':
-                                  history.payment_method === 'cash',
-                                'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300':
-                                  history.payment_method !== 'cash'
-                              }
+                              'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+                              history.payment_method === 'cash'
+                                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                                : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                             ]"
                           >
+                            <i
+                              :class="[
+                                'mr-1',
+                                history.payment_method === 'cash'
+                                  ? 'fas fa-money-bill-wave'
+                                  : 'fas fa-exchange-alt'
+                              ]"
+                            ></i>
                             {{ history.payment_method === 'cash' ? 'เงินสด' : 'โอนเงิน' }}
                           </span>
                         </td>
-                        <td class="p-3">
+                        <td class="px-4 py-3">
                           <button
                             v-if="history.payment_slip"
                             @click="viewSlip(history.payment_slip)"
-                            class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+                            class="inline-flex items-center text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300"
                           >
                             <i class="fas fa-receipt mr-1"></i>
                             ดูสลิป
                           </button>
                           <span v-else class="text-gray-400">-</span>
                         </td>
-                        <td class="p-3 text-sm text-gray-900 dark:text-white">
+                        <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
                           {{ history.email_sent_at ? formatDate(history.email_sent_at) : '-' }}
                         </td>
                       </tr>

@@ -27,8 +27,17 @@ const storage = multer.diskStorage({
                     uploadPath = path.join(__dirname, '../../uploads/summaries/');
                     break;
                 case 'payment_slip':
+                    // สร้าง path พื้นฐานสำหรับ payment slips
                     uploadPath = path.join(__dirname, '../../uploads/payment-slips/');
+
+                    // ถ้ามี jobId ใน request
+                    if (req.params.jobId || req.body.jobId) {
+                        const jobId = req.params.jobId || req.body.jobId;
+                        // เพิ่ม jobId เข้าไปใน path
+                        uploadPath = path.join(uploadPath, `job-${jobId}/`);
+                    }
                     break;
+
                 default:
                     return cb(new Error('Invalid field name'), null);
             }
@@ -43,8 +52,10 @@ const storage = multer.diskStorage({
         }
     },
     filename: (req, file, cb) => {
+        //  prefix ของ payment ID ถ้ามี
+        const prefix = req.params.id ? `payment-${req.params.id}-` : '';
         const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
-        cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
+        cb(null, `${prefix}${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
     }
 });
 
