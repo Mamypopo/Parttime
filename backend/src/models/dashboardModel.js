@@ -85,92 +85,136 @@ export const getCurrentMonthExpenses = (startOfMonth) => {
 
 // ฟังก์ชันดึงค่าใช้จ่ายตามช่วงเวลา
 export const getExpensesByDateRange = async (startDate, endDate) => {
-    return prisma.job.findMany({
+    return prisma.paymentHistory.findMany({
         where: {
-            work_date: {
+            paid_at: {
                 gte: startDate,
                 lte: endDate
             },
-            status: {
-                in: ['in_progress', 'completed']
-            }
+            payment_status: 'paid' // แก้จาก status: 'completed' เป็น payment_status: 'paid'
         },
         select: {
             id: true,
-            work_date: true,
-            JobPositions: {
+            amount: true,
+            paid_at: true,
+            job_participation: {
                 select: {
-                    id: true,
-                    wage: true,
-                    JobParticipation: {
-                        where: {
-                            status: {
-                                in: ['approved', 'completed']
-                            }
-                        },
+                    jobPosition: {
                         select: {
-                            id: true,
-                            workHistories: {
+                            job: {
                                 select: {
-                                    id: true
+                                    id: true,
+                                    title: true,
+                                    work_date: true,
+                                    location: true,
+                                    start_time: true,
+                                    end_time: true
                                 }
-                            }
+                            },
+                            position_name: true,
+                            wage: true,
+                            required_people: true
                         }
                     }
                 }
             }
+        },
+        orderBy: {
+            paid_at: 'desc'
         }
     })
+
 }
 
 // ฟังก์ชันสำหรับรายงานค่าใช้จ่าย
 export const getJobExpensesReport = async (month = new Date().getMonth(), year = new Date().getFullYear()) => {
     try {
         const startDate = new Date(year, month, 1)
-        const endDate = new Date(year, month + 1, 0)
-
-        return prisma.job.findMany({
+        const endDate = new Date(year, month + 1, 0, 23, 59, 59)
+        const payments = await prisma.paymentHistory.findMany({
             where: {
-                work_date: {
+                paid_at: {
                     gte: startDate,
                     lte: endDate
                 },
-                status: {
-                    in: ['in_progress', 'completed']
-                }
+                payment_status: 'paid'
             },
             select: {
                 id: true,
-                title: true,
-                location: true,
-                work_date: true,
-                start_time: true,
-                end_time: true,
-                JobPositions: {
+                amount: true,
+                paid_at: true,
+                job_participation: {
                     select: {
                         id: true,
-                        position_name: true,
-                        wage: true,
-                        required_people: true,
-                        JobParticipation: {
-                            where: {
-                                status: {
-                                    in: ['approved', 'completed']
-                                }
-                            },
+                        jobPosition: {
                             select: {
                                 id: true,
-                                status: true,
-
+                                position_name: true,
+                                wage: true,
+                                required_people: true,
+                                job: {
+                                    select: {
+                                        id: true,
+                                        title: true,
+                                        location: true,
+                                        work_date: true,
+                                        start_time: true,
+                                        end_time: true,
+                                        status: true
+                                    }
+                                }
                             }
                         }
                     }
                 }
-            },
-            orderBy: {
-                work_date: 'asc'
             }
         })
+        const jobMap = new Map()
+        for (const payment of payments) {
+            // เพิ่มการตรวจสอบข้อมูล
+            if (!payment?.job_participation?.jobPosition?.job) {
+                continue // ข้ามรายการที่ไม่มีข้อมูลครบ
+            }
+            const jobData = payment.job_participation.jobPosition.job
+            const jobId = jobData.id
+            if (!jobMap.has(jobId)) {
+                jobMap.set(jobId, {
+                    id: jobId,
+                    title: jobData.title,
+                    location: jobData.location,
+                    work_date: jobData.work_date,
+                    start_time: jobData.start_time,
+                    end_time: jobData.end_time,
+                    status: jobData.status,
+                    positions: new Map(),
+                    total_expense: 0
+                })
+            }
+            const job = jobMap.get(jobId)
+            const position = payment.job_participation.jobPosition
+            const positionId = position.id
+            if (!job.positions.has(positionId)) {
+                job.positions.set(positionId, {
+                    position_name: position.position_name,
+                    wage: position.wage,
+                    required_people: position.required_people,
+                    approved_workers: 0,
+                    total_paid: 0
+                })
+            }
+            const positionData = job.positions.get(positionId)
+            positionData.approved_workers++
+            positionData.total_paid += Number(payment.amount)
+            job.total_expense += Number(payment.amount)
+        }
+        // ถ้าไม่มีข้อมูล ให้ return array ว่าง
+        if (jobMap.size === 0) {
+            return []
+        }
+        return Array.from(jobMap.values()).map(job => ({
+            ...job,
+            positions: Array.from(job.positions.values())
+        })).sort((a, b) => new Date(a.work_date) - new Date(b.work_date))
     } catch (error) {
         console.error('Error in getJobExpensesReport:', error)
         throw new Error('ไม่สามารถดึงข้อมูลรายงานค่าใช้จ่ายได้')
@@ -468,7 +512,7 @@ export const getUserDashboardStats = async (userId) => {
                 }
             }),
 
-            // นับจำนวนงานที่เสร็จสิ้นทั้งหมด
+            // นับจำนวนงานที่เสร็จสิ��นทั้งหมด
             prisma.jobParticipation.count({
                 where: {
                     user_id: userId,
@@ -537,7 +581,7 @@ export const getUserDashboardStats = async (userId) => {
 };
 
 
-// ดึงรายได้ล่าสุด (ปรับปรุงให้ดึงเฉพาะงานที่ผ่านการประเมิน)
+// ดึงรายได้ล่าสุด (ปรับปรุง���ห้ดึงเฉพาะงานที่ผ่านการประเมิน)
 export const getRecentIncomes = async (userId) => {
     try {
         return await prisma.jobParticipation.findMany({

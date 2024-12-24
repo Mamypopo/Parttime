@@ -232,6 +232,7 @@ export default {
         evaluation: 'bg-gradient-to-br from-[#A29BFE] to-[#6C5CE7]',
         system: 'bg-gradient-to-br from-[#BDC3C7] to-[#95A5A6]',
         job_application_cancelled_admin: 'bg-gradient-to-br from-[#EB5757] to-[#C0392B]',
+        payment_pending: 'bg-gradient-to-br from-[#AFF1DA] to-[#11A89D]',
         default: 'bg-gradient-to-br from-[#89CFF0] to-[#4682B4]'
       }
       return classes[type] || classes.default
@@ -245,6 +246,7 @@ export default {
         evaluation: 'fas fa-star text-white',
         system: 'fas fa-bell text-white',
         job_application_cancelled_admin: 'fas fa-ban text-white',
+        payment_pending: 'fas fa-money-bill-wave text-white',
         default: 'fas fa-bell text-white'
       }
       return icons[type] || icons.default

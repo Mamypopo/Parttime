@@ -125,12 +125,12 @@
         </div>
 
         <!-- Navigation Menu -->
-        <div class="p-4 space-y-8">
+        <div class="p-4 space-y-4">
           <!-- Main Menu -->
           <div>
             <h2
               v-if="!sidebarStore.isCollapsed"
-              class="text-xs font-semibold text-gray-400 mb-4 px-4 dark:text-gray-500"
+              class="text-xs font-semibold text-gray-400 mb-2 px-4 dark:text-gray-500"
             >
               เมนูหลัก
             </h2>
@@ -165,7 +165,7 @@
           <div>
             <h2
               v-if="!sidebarStore.isCollapsed"
-              class="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-4 px-4"
+              class="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-2 px-4"
             >
               งาน
             </h2>
@@ -202,7 +202,7 @@
           <div>
             <h2
               v-if="!sidebarStore.isCollapsed"
-              class="text-xs font-semibold text-gray-400 mb-4 px-4"
+              class="text-xs font-semibold text-gray-400 mb-2 px-4"
             >
               การแจ้งเตือน
             </h2>

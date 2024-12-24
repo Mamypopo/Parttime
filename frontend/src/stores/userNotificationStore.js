@@ -14,7 +14,8 @@ export const useUserNotificationStore = defineStore('userNotification', {
             WORK_EVALUATION_REJECTED: 'rejected',    // แจ้งเตือนไม่ผ่านการประเมิน
             SYSTEM: 'system',                        // แจ้งเตือนจากระบบ
             GENERAL: 'general',                       // แจ้งเตือนทั่วไป
-            JOB_APPLICATION_CANCELLED: 'job_application_cancelled'
+            JOB_APPLICATION_CANCELLED: 'job_application_cancelled',
+            PAYMENT_COMPLETED: 'payment_completed',
         }
 
     }),
@@ -80,7 +81,7 @@ export const useUserNotificationStore = defineStore('userNotification', {
                     const notification = this.notifications.find(n => n.id === notificationId)
                     if (notification) {
                         notification.read = true
-                        // เพิ่มการอัพเดท state เพื่อให้ Vue รับรู้การเปลี่ยนแปลง
+                        // การอัพเดท state เพื่อให้ Vue รับรู้การเปลี่ยนแปลง
                         this.notifications = [...this.notifications]
                     }
 

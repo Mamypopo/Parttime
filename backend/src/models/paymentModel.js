@@ -29,7 +29,7 @@ export const createPaymentRecord = async (data) => {
 
 // ดึงข้อมูลการจ่ายเงินตาม ID
 export const getPaymentById = async (id) => {
-    return await prisma.paymentHistory.findUnique({
+    return await prisma.paymentHistory.findFirst({
         where: { id: parseInt(id) },
         include: {
             job_participation: {
@@ -104,7 +104,13 @@ export const getParticipantsByJob = async (jobId, status, page = 1, limit = 10) 
                     user: true,
                     jobPosition: {
                         include: {
-                            job: true,
+                            job: {
+                                select: {
+                                    id: true,
+                                    title: true,
+
+                                }
+                            }
                         },
                     },
                     workHistories: true,
@@ -242,6 +248,92 @@ export const getPaymentHistoryByParticipantModel = async (participationId) => {
         throw error; // ส่ง error กลับไปที่ Controller
     }
 };
+
+export const getJobWithPaymentDetails = async (jobId) => {
+    return await prisma.job.findUnique({
+        where: { id: parseInt(jobId) },
+        include: {
+            JobPositions: {
+                include: {
+                    JobParticipation: {
+                        include: {
+                            user: {
+                                select: {
+                                    first_name: true,
+                                    last_name: true,
+                                    phone_number: true,
+                                    email: true
+                                }
+                            },
+                            PaymentHistory: {
+                                orderBy: {
+                                    created_at: 'desc'
+                                },
+                                take: 1
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+};
+export const calculatePaymentSummary = (job) => {
+    const summary = {
+        jobInfo: {
+            id: job.id,
+            title: job.title,
+            work_date: job.work_date,
+            location: job.location
+        },
+        participants: [],
+        summary: {
+            totalParticipants: 0,
+            totalAmount: 0,
+            paidAmount: 0,
+            pendingAmount: 0,
+            paidCount: 0,
+            pendingCount: 0
+        }
+    };
+    // รวบรวมข้อมูลผู้เข้าร่วมและการจ่ายเงิน
+    job.JobPositions.forEach(position => {
+        position.JobParticipation.forEach(participation => {
+            const payment = participation.PaymentHistory[0];
+            const amount = position.wage || 0;
+
+            const paymentStatus = payment?.payment_status || 'pending';
+            summary.participants.push({
+                participationId: participation.id,
+                userId: participation.user_id,
+                firstName: participation.user.first_name,
+                lastName: participation.user.last_name,
+                phone_number: participation.user.phone_number,
+                email: participation.user.email,
+                position: position.position_name,
+                positionId: position.id,
+                amount: amount,
+                status: paymentStatus,
+                paidAt: payment?.paid_at || null,
+                paymentMethod: payment?.payment_method || null,
+                payment_note: payment?.payment_note || null
+            });
+            // คำนวณสรุปตามสถานะใหม่
+            summary.summary.totalParticipants++;
+            summary.summary.totalAmount += amount;
+
+            if (paymentStatus === 'paid') {
+                summary.summary.paidAmount += amount;
+                summary.summary.paidCount++;
+            } else {
+                summary.summary.pendingAmount += amount;
+                summary.summary.pendingCount++;
+            }
+        });
+    });
+    return summary;
+};
+
 
 export const updateEmailStatus = async (id, adminId, ip, userAgent) => {
     try {

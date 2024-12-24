@@ -100,10 +100,37 @@
                         class="hidden"
                         required
                       />
+                      <!-- แสดงพื้นที่อัพโหลด -->
                       <div
-                        class="flex items-center justify-center p-4 rounded-lg border border-dashed border-purple-300 dark:border-purple-600 dark:bg-gray-800/50 hover:border-purple-500 transition-colors duration-200"
+                        class="flex flex-col items-center justify-center p-4 rounded-lg border border-dashed border-purple-300 dark:border-purple-600 dark:bg-gray-800/50 hover:border-purple-500 transition-colors duration-200"
                       >
-                        <i class="fas fa-cloud-upload-alt text-2xl text-purple-500"></i>
+                        <!-- ถ้ามีไฟล์ที่เลือก -->
+                        <template v-if="formData.payment_slip">
+                          <div
+                            class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300"
+                          >
+                            <i class="fas fa-file-alt text-purple-500"></i>
+                            <span>{{ formData.payment_slip.name }}</span>
+                            <span class="text-xs text-gray-500">
+                              ({{ formatFileSize(formData.payment_slip.size) }})
+                            </span>
+                          </div>
+                          <!-- ปุ่มลบไฟล์ -->
+                          <button
+                            @click.prevent="removeFile"
+                            class="mt-2 text-xs text-red-500 hover:text-red-600"
+                          >
+                            <i class="fas fa-times mr-1"></i>
+                            ลบไฟล์
+                          </button>
+                        </template>
+
+                        <!-- ถ้ายังไม่มีไฟล์ -->
+                        <template v-else>
+                          <i class="fas fa-cloud-upload-alt text-2xl text-purple-500 mb-2"></i>
+                          <span class="text-sm text-gray-500">คลิกเพื่อเลือกไฟล์</span>
+                          <span class="text-xs text-gray-400 mt-1">รองรับไฟล์ภาพหรือ PDF</span>
+                        </template>
                       </div>
                     </label>
                   </div>
@@ -201,29 +228,72 @@ export default {
 
   methods: {
     handleFileUpload(event) {
-      this.formData.payment_slip = event.target.files[0]
+      const file = event.target.files[0]
+      if (file) {
+        // เช็คขนาดไฟล์ (ตัวอย่าง: จำกัดที่ 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          Swal.fire({
+            icon: 'error',
+            title: 'ไฟล์มีขนาดใหญ่เกินไป',
+            text: 'กรุณาเลือกไฟล์ขนาดไม่เกิน 5MB',
+            confirmButtonText: 'ตกลง'
+          })
+          event.target.value = '' // รีเซ็ต input
+          return
+        }
+        this.formData.payment_slip = file
+      }
     },
 
     async handleSubmit() {
       try {
-        // Debug: ตรวจสอบค่า props
-        console.log('Current payment props:', this.payment)
+        // ขั้นตอนยืนยันก่อนบันทึก
+        const confirmation = await Swal.fire({
+          title: 'ยืนยันการบันทึก?',
+          text: 'กรุณาตรวจสอบข้อมูลให้ถูกต้องก่อนดำเนินการ',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'ยืนยัน',
+          cancelButtonText: 'ยกเลิก'
+        })
+
+        if (!confirmation.isConfirmed) {
+          return // ยกเลิกการบันทึกหากไม่ได้กดยืนยัน
+        }
+
+        // ตรวจสอบว่าเลือกวิธีการชำระเงินหรือยัง
+        if (!this.formData.payment_method) {
+          throw new Error('กรุณาเลือกวิธีการชำระเงิน')
+        }
+        // ถ้าเลือกโอนเงินต้องมีสลิป
+        if (this.formData.payment_method === 'transfer' && !this.formData.payment_slip) {
+          throw new Error('กรุณาแนบหลักฐานการโอนเงิน')
+        }
+
         const formData = new FormData()
-        formData.append('payment_method', this.formData.payment_method || 'cash')
-        formData.append('payment_note', this.formData.payment_note || '')
-        formData.append('job_participation_id', this.payment.job_participation_id) // เปลี่ยนจาก jobId เป็น job_participation_id
+
+        // ข้อมูลพื้นฐาน
+        formData.append('payment_status', 'paid')
+        formData.append('payment_method', this.formData.payment_method)
+
+        // หมายเหตุ (ถ้ามี)
+        if (this.formData.payment_note?.trim()) {
+          formData.append('payment_note', this.formData.payment_note.trim())
+        }
+        // สลิปการโอน (ถ้ามี)
         if (this.formData.payment_slip) {
           formData.append('payment_slip', this.formData.payment_slip)
         }
-        // Debug: ตรวจสอบข้อมูลก่อนส่ง
-        console.log('Submitting payment:', {
-          id: this.payment.id,
-          job_participation_id: this.payment.job_participation_id,
-          method: this.formData.payment_method,
-          note: this.formData.payment_note
-        })
-        const result = await this.paymentStore.updatePaymentStatus(this.payment.id, formData)
+        // รายการตรวจสอบ
+        const checklistItems = {
+          payment_method: true,
+          slip_uploaded: this.formData.payment_slip ? true : false,
+          amount_verified: true,
+          notes: this.formData.payment_note?.trim() || ''
+        }
+        formData.append('checklist_items', JSON.stringify(checklistItems))
 
+        const result = await this.paymentStore.updatePaymentStatus(this.payment.id, formData)
         if (result.success) {
           await Swal.fire({
             icon: 'success',
@@ -233,6 +303,8 @@ export default {
           })
           this.$emit('close')
           this.$emit('refresh')
+        } else {
+          throw new Error(result.message)
         }
       } catch (error) {
         console.error('Submit error:', error)
@@ -243,6 +315,19 @@ export default {
           confirmButtonText: 'ตกลง'
         })
       }
+    },
+    removeFile() {
+      this.formData.payment_slip = null
+      // รีเซ็ต input file
+      const fileInput = this.$el.querySelector('input[type="file"]')
+      if (fileInput) fileInput.value = ''
+    },
+    formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes'
+      const k = 1024
+      const sizes = ['Bytes', 'KB', 'MB', 'GB']
+      const i = Math.floor(Math.log(bytes) / Math.log(k))
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
     }
   }
 }

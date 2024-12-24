@@ -17,15 +17,11 @@ router.get(
     '/job/:jobId/payments',
     paymentController.getPendingPayments
 );
-
+// ดึงรายการที่จ่ายเงินแล้วของงาน
 router.get(
     '/job/:jobId/paid',
     paymentController.getPendingPayments
 );
-
-router.get('/:jobId/history', paymentController.getPaymentHistory);
-
-router.get('/participant/:participationId/history', paymentController.getPaymentHistoryByParticipant);
 
 // อัพเดทสถานะการจ่ายเงิน
 router.patch(
@@ -33,4 +29,15 @@ router.patch(
     uploadPaymentSlip,
     paymentController.updatePaymentStatus
 );
+
+// สรุปการเงิน
+router.get('/jobs/:jobId/payment-summary', paymentController.getJobPaymentSummary);
+
+
+
+router.get('/:jobId/history', paymentController.getPaymentHistory);
+
+router.get('/participant/:participationId/history', paymentController.getPaymentHistoryByParticipant);
+
+
 export default router;

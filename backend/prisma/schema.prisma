@@ -240,5 +240,5 @@ model PaymentLog {
   // ข้อมูลเพิ่มเติม
   ip_address String?  @db.VarChar(45) // IP ผู้ทำรายการ
   user_agent String?  @db.Text // User Agent ของผู้ทำรายการ
-  created_at DateTime @default(now()) // เวลาที่ทำรายการ
+  created_at DateTime @default(now()) @db.Timestamptz // เวลาที่ทำรายการ
 }

@@ -2,8 +2,8 @@ import * as paymentModel from '../models/paymentModel.js';
 import * as logModel from '../models/logModel.js'
 import * as jobModel from '../models/jobModel.js'
 import * as notificationModel from '../models/notificationModel.js'
+import ExcelJS from 'exceljs';
 import { NOTIFICATION_TYPES } from '../models/notificationModel.js';
-
 import { sendPaymentNotificationEmail } from '../utils/email.js';
 
 
@@ -12,12 +12,7 @@ export const updatePaymentStatus = async (req, res) => {
     const { payment_method, payment_slip, payment_note, checklist_items } = req.body; // ดึงข้อมูลที่ต้องการอัพเดทจาก body
     const adminId = req.user?.id; // ดึงข้อมูลผู้ดูแลระบบจาก JWT
 
-    // Debug: ตรวจสอบค่าที่ได้รับ
-    console.log('Raw body:', req.body);
-    console.log('Parsed values:', {
-        payment_method,
-        payment_note
-    });
+
     try {
         // ตรวจสอบสิทธิ์ของผู้ดูแลระบบ
         if (!adminId) {
@@ -181,3 +176,34 @@ export const getPaymentHistoryByParticipant = async (req, res) => {
         res.status(500).json({ message: 'Error fetching payment history' });
     }
 };
+
+
+
+export const getJobPaymentSummary = async (req, res) => {
+    try {
+        const { jobId } = req.params;
+        // ดึงข้อมูลงานและการจ่ายเงิน
+        const job = await paymentModel.getJobWithPaymentDetails(jobId);
+        if (!job) {
+            return res.status(404).json({
+                success: false,
+                message: 'ไม่พบข้อมูลงาน'
+            });
+        }
+        // คำนวณสรุปข้อมูล
+        const paymentSummary = paymentModel.calculatePaymentSummary(job);
+        res.json({
+            success: true,
+            data: paymentSummary
+        });
+    } catch (error) {
+        console.error('Error getting job payment summary:', error);
+        res.status(500).json({
+            success: false,
+            message: 'เกิดข้อผิดพลาดในการดึงข้อมูล',
+            error: error.message
+        });
+    }
+};
+
+

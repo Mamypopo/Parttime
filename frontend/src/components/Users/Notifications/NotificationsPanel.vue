@@ -233,7 +233,8 @@ export default {
         rejected: 'bg-gradient-to-br from-[#FF6F61] to-[#D7263D]',
         system: 'bg-gradient-to-br from-[#95A5A6] to-[#7F8C8D]',
         general: 'bg-gradient-to-br from-[#F5D547] to-[#E5A623]',
-        job_application_cancelled: 'bg-gradient-to-br from-[#EB5757] to-[#C0392B]'
+        job_application_cancelled: 'bg-gradient-to-br from-[#EB5757] to-[#C0392B]',
+        payment_completed: 'bg-gradient-to-br from-[#AFF1DA] to-[#11A89D]'
       }
       return classes[type] || classes.general
     },
@@ -245,7 +246,8 @@ export default {
         rejected: 'fas fa-times-circle text-white',
         system: 'fas fa-cog text-white',
         general: 'fas fa-bell text-white',
-        job_application_cancelled: 'fas fa-ban text-white'
+        job_application_cancelled: 'fas fa-ban text-white',
+        payment_completed: 'fas fa-money-bill-wave text-white'
       }
       return icons[type] || icons.general
     },

@@ -26,6 +26,7 @@
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
     "jsonwebtoken": "^9.0.2",
+    "jspdf": "^2.5.2",
     "pinia": "^2.2.4",
     "sweetalert2": "^11.14.4",
     "tippy.js": "^6.3.7",

@@ -2,7 +2,7 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
-
+import * as paymentModel from '../models/paymentModel.js'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -27,15 +27,7 @@ const storage = multer.diskStorage({
                     uploadPath = path.join(__dirname, '../../uploads/summaries/');
                     break;
                 case 'payment_slip':
-                    // สร้าง path พื้นฐานสำหรับ payment slips
                     uploadPath = path.join(__dirname, '../../uploads/payment-slips/');
-
-                    // ถ้ามี jobId ใน request
-                    if (req.params.jobId || req.body.jobId) {
-                        const jobId = req.params.jobId || req.body.jobId;
-                        // เพิ่ม jobId เข้าไปใน path
-                        uploadPath = path.join(uploadPath, `job-${jobId}/`);
-                    }
                     break;
 
                 default:
@@ -51,11 +43,37 @@ const storage = multer.diskStorage({
             cb(error, null);
         }
     },
-    filename: (req, file, cb) => {
-        //  prefix ของ payment ID ถ้ามี
-        const prefix = req.params.id ? `payment-${req.params.id}-` : '';
-        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
-        cb(null, `${prefix}${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
+    filename: async (req, file, cb) => {
+        try {
+            let fileName;
+
+            switch (file.fieldname) {
+                case 'payment_slip':
+                    // รูปแบบพิเศษสำหรับสลิปการจ่ายเงิน
+                    const payment = await paymentModel.getPaymentById(req.params.id);
+                    const jobTitle = payment.job_participation.jobPosition.job.title
+                        .replace(/[^a-zA-Z0-9ก-๙]/g, '_')
+                        .replace(/_{2,}/g, '_')
+                        .replace(/^_|_$/g, '')
+                        .substring(0, 50);
+
+                    fileName = `job${payment.job_participation.jobPosition.job.id}_` +
+                        `${jobTitle}_` +
+                        `user${payment.job_participation.user.id}_` +
+                        `payment${payment.id}_` +
+                        `${Date.now()}${path.extname(file.originalname)}`;
+                    break;
+
+                default:
+                    // รูปแบบทั่วไปสำหรับไฟล์อื่นๆ
+                    fileName = `${file.fieldname}-${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
+            }
+
+            cb(null, fileName);
+        } catch (error) {
+            console.error('Error creating filename:', error);
+            cb(error, null);
+        }
     }
 });
 

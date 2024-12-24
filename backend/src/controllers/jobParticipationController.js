@@ -6,6 +6,7 @@ import * as workHistoryModel from '../models/workHistoryModel.js'
 import * as userModel from '../models/userModel.js'
 import * as adminModel from '../models/adminModel.js'
 import * as paymentModel from '../models/paymentModel.js'
+import { NOTIFICATIONADMIN_TYPES } from '../models/notificationModel.js';
 import { createLog } from '../models/logModel.js';
 
 // ฟังชั่นอนุมัติเข้าทำงาน
@@ -222,7 +223,7 @@ export const updateWorkHistory = async (req, res) => {
             await notificationModel.createAdminNotification({
                 adminId: adminId,
                 content: `มีรายการรอจ่ายเงินใหม่สำหรับ ${currentJobParticipation.user.first_name} ${currentJobParticipation.user.last_name} - ${jobTitle}`,
-                type: 'PAYMENT_PENDING',
+                type: NOTIFICATIONADMIN_TYPES.PAYMENT_PENDING,
                 jobId: jobPosition.job.id,
                 userId: currentJobParticipation.user.id
             });

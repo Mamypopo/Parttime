@@ -2,55 +2,42 @@ import * as DashboardModel from '../models/dashboardModel.js'
 import * as workHistoryModel from '../models/workHistoryModel.js'
 
 async function calculateExpenses() {
-    // 1. ดึงวันที่ปัจจุบัน
-    const now = new Date()
-    const todayStr = now.toISOString().split('T')[0] // เช่น "2024-11-26"
+    try {
+        // 1. กำหนดช่วงเวลา
+        const now = new Date()
 
-    // 2. คำนวณวันแรกของเดือน
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+        // วันนี้ (00:00:00 - 23:59:59)
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        startOfDay.setHours(0, 0, 0, 0)
+        const endOfDay = new Date(startOfDay)
+        endOfDay.setHours(23, 59, 59, 999)
+        // สัปดาห์นี้ (7 วันย้อนหลัง)
+        const startOfWeek = new Date(now)
+        startOfWeek.setDate(now.getDate() - 6) // นับ 7 วันย้อนหลัง (รวมวันนี้)
+        startOfWeek.setHours(0, 0, 0, 0)
 
-    // 3. ดึงข้อมูลงานทั้งหมดในเดือนนี้
-    const jobs = await DashboardModel.getExpensesByDateRange(startOfMonth, now)
-
-    // 4. คำนวณค่าใช้จ่าย
-    const expenses = {
-        daily: 0,
-        weekly: 0,
-        monthly: 0
+        // เดือนนี้
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+        startOfMonth.setHours(0, 0, 0, 0)
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+        endOfMonth.setHours(23, 59, 59, 999)
+        // 2. ดึงข้อมูลค่าใช้จ่ายแต่ละช่วง
+        const [dailyExp, weeklyExp, monthlyExp] = await Promise.all([
+            DashboardModel.getExpensesByDateRange(startOfDay, endOfDay),
+            DashboardModel.getExpensesByDateRange(startOfWeek, now),
+            DashboardModel.getExpensesByDateRange(startOfMonth, endOfMonth)
+        ])
+        // 3. คำนวณยอดรวม
+        const expenses = {
+            daily: dailyExp.reduce((sum, payment) => sum + Number(payment.amount), 0),
+            weekly: weeklyExp.reduce((sum, payment) => sum + Number(payment.amount), 0),
+            monthly: monthlyExp.reduce((sum, payment) => sum + Number(payment.amount), 0)
+        }
+        return expenses
+    } catch (error) {
+        console.error('Error calculating expenses:', error)
+        throw new Error('ไม่สามารถคำนวณค่าใช้จ่ายได้')
     }
-
-    jobs.forEach(job => {
-        // แปลงวันที่งานเป็น string format เดียวกัน
-        const workDateStr = new Date(job.work_date).toISOString().split('T')[0]
-
-        // คำนวณค่าใช้จ่ายของงาน
-        const jobExpense = job.JobPositions.reduce((total, position) => {
-            const wage = Number(position.wage) || 0
-            const approvedParticipants = position.JobParticipation.filter(p =>
-                p.workHistories?.length > 0
-            ).length
-            return total + (wage * approvedParticipants)
-        }, 0)
-
-
-
-        // ถ้าเป็นงานวันนี้
-        if (workDateStr === todayStr) {
-            expenses.daily += jobExpense
-        }
-
-        // ถ้าเป็นงาน 7 วันย้อนหลัง
-        const workDate = new Date(job.work_date)
-        const daysDiff = Math.floor((now - workDate) / (1000 * 60 * 60 * 24))
-        if (daysDiff < 7) {
-            expenses.weekly += jobExpense
-        }
-
-        // รวมทั้งเดือน
-        expenses.monthly += jobExpense
-    })
-
-    return expenses
 }
 
 
@@ -203,37 +190,35 @@ export const getDashboardStats = async (req, res) => {
 
         // แปลงข้อมูลให้เหมาะกับการใช้งาน
         const formattedJobExpenses = jobExpenses.map(job => {
+            if (!job) return null
             let totalPeople = 0
             let totalExpense = 0
 
-            const positions = job.JobPositions.map(position => {
-                const approvedWorkers = position.JobParticipation.length
-
-                totalPeople += position.required_people
-                const positionExpense = position.wage * approvedWorkers
-                totalExpense += positionExpense
-
+            const positions = job.positions?.map(position => {
+                if (!position) return null
+                totalPeople += position.required_people || 0
+                totalExpense += position.total_paid || 0
                 return {
-                    position_name: position.position_name,
-                    required_people: position.required_people,
-                    approved_workers: approvedWorkers,
-                    wage: position.wage,
-                    subtotal: positionExpense
+                    position_name: position.position_name || '',
+                    required_people: position.required_people || 0,
+                    approved_workers: position.approved_workers || 0,
+                    wage: position.wage || 0,
+                    subtotal: position.total_paid || 0
                 }
-            })
-
+            }).filter(Boolean) || []  // กรอง null ออกและป้องกัน undefined
             return {
-                id: job.id,
-                title: job.title,
-                location: job.location,
-                work_date: job.work_date,
-                start_time: job.start_time,
-                end_time: job.end_time,
-                positions,
+                id: job.id || '',
+                title: job.title || '',
+                location: job.location || '',
+                work_date: job.work_date || null,
+                start_time: job.start_time || null,
+                end_time: job.end_time || null,
+                positions: positions,
                 total_people: totalPeople,
                 total_expense: totalExpense
             }
-        })
+        }).filter(Boolean) || []
+
         // ส่งข้อมูลกลับ
         res.json({
             stats: {

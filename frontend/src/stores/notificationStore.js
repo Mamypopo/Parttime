@@ -16,7 +16,8 @@ export const useNotificationStore = defineStore('notification', {
             USER_VERIFICATION: 'user_verification',   // มีการยืนยันตัวตนใหม่
             EVALUATION: 'evaluation',                // มีการประเมินงาน
             SYSTEM: 'system',                      // แจ้งเตือนจากระบบ
-            JOB_APPLICATION_CANCELLED: 'job_application_cancelled_admin' // แจ้งเตือนการยกเลิกสมัครงาน
+            JOB_APPLICATION_CANCELLED: 'job_application_cancelled_admin',// แจ้งเตือนการยกเลิกสมัครงาน
+            PAYMENT_PENDING: 'payment_pending' // แจ้งเตือนเมื่อมีการประเมินเสร็จ รอจ่ายเงิน
         }
     }),
     getters: {
@@ -136,7 +137,7 @@ export const useNotificationStore = defineStore('notification', {
             }, 30000)
         },
 
-        // เพิ่ม action สำหรับหยุดการตรวจสอบ
+        //  action สำหรับหยุดการตรวจสอบ
         stopChecking() {
             if (this.checkInterval) {
                 clearInterval(this.checkInterval)
