@@ -35,6 +35,17 @@
             <i class="fas fa-file-pdf"></i>
             {{ isGeneratingPDF ? 'กำลังสร้างไฟล์...' : 'ดาวน์โหลดหลักฐานการโอนทั้งหมด' }}
           </button>
+
+          <!-- Download Documents Button (เพิ่มใหม่) -->
+          <button
+            v-if="selectedJob"
+            @click="downloadParticipantDocuments"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-lg border border-purple-200 dark:border-purple-800/50 hover:bg-purple-100 dark:hover:bg-purple-800/30 transition-colors duration-200"
+            :disabled="isDownloadingDocs"
+          >
+            <i class="fas fa-download"></i>
+            {{ isDownloadingDocs ? 'กำลังดาวน์โหลด...' : 'ดาวน์โหลดเอกสารผู้เข้าร่วมงาน' }}
+          </button>
         </div>
       </div>
 
@@ -77,7 +88,7 @@
       <div class="grid grid-cols-3 gap-3 md:gap-4 mb-6">
         <!-- ทั้งหมด -->
         <div
-          class="bg-blue-50 dark:bg-gray-800 p-4 rounded-xl border border-blue-200 dark:border-gray-700 hover:border-gray-500 transition-colors"
+          class="bg-blue-50 dark:bg-gray-800 p-4 rounded-xl border border-blue-200 dark:border-gray-700 transition-colors"
         >
           <div class="flex flex-col h-full">
             <p class="text-xs md:text-sm text-blue-600 dark:text-blue-400 mb-2">ทั้งหมด</p>
@@ -97,7 +108,7 @@
 
         <!-- รอจ่าย -->
         <div
-          class="bg-orange-50 dark:bg-gray-800 p-4 rounded-xl border border-orange-300 dark:border-gray-700 hover:border-gray-500 transition-colors"
+          class="bg-orange-50 dark:bg-gray-800 p-4 rounded-xl border border-orange-300 dark:border-gray-700 transition-colors"
         >
           <div class="flex flex-col h-full">
             <p class="text-xs md:text-sm text-orange-500 dark:text-orange-400 mb-2">รอจ่าย</p>
@@ -117,7 +128,7 @@
 
         <!-- จ่ายแล้ว -->
         <div
-          class="bg-green-50 dark:bg-gray-800 p-4 rounded-xl border border-green-300 dark:border-gray-700 hover:border-gray-500 transition-colors"
+          class="bg-green-50 dark:bg-gray-800 p-4 rounded-xl border border-green-300 dark:border-gray-700 transition-colors"
         >
           <div class="flex flex-col h-full">
             <p class="text-xs md:text-sm text-green-500 dark:text-green-400 mb-2">จ่ายแล้ว</p>
@@ -153,7 +164,7 @@
         </div>
         <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 md:h-2">
           <div
-            class="bg-green-500 h-full rounded-full transition-all duration-500"
+            class="bg-gradient-to-br from-green-200 to-green-400 dark:from-green-600 dark:to-green-800 h-full rounded-full transition-all duration-500"
             :style="{ width: `${paymentProgress}%` }"
           ></div>
         </div>
@@ -194,7 +205,7 @@
       <div class="p-4 flex justify-end">
         <select
           v-model="itemsPerPage"
-          class="border dark:border-gray-700 rounded px-2 py-1 text-sm"
+          class="border dark:border-gray-700 rounded px-2 py-1 text-sm focus:outline-none"
         >
           <option value="5">5 รายการ</option>
           <option value="10">10 รายการ</option>
@@ -416,6 +427,7 @@
 </template>
 <script>
 import { usePaymentStore } from '@/stores/paymentStore'
+import { useJobStore } from '@/stores/jobStore'
 import PaymentModal from '@/components/Payment/PaymentModal.vue'
 import PaymentHistoryModal from '@/components/Payment/PaymentHistoryModal.vue'
 import * as XLSX from 'xlsx'
@@ -438,7 +450,8 @@ export default {
       pendingPage: 1,
       paidPage: 1,
       activeTab: 'pending',
-      isGeneratingPDF: false
+      isGeneratingPDF: false,
+      isDownloadingDocs: false
     }
   },
   computed: {
@@ -447,6 +460,9 @@ export default {
     },
     jobs() {
       return this.paymentStore.jobs || []
+    },
+    jobStore() {
+      return useJobStore()
     },
     pendingPayments() {
       return this.paymentStore.pendingPayments || []
@@ -617,7 +633,56 @@ export default {
         })
       }
     },
+    async downloadParticipantDocuments() {
+      if (!this.selectedJob) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'กรุณาเลือกงาน',
+          text: 'โปรดเลือกงานก่อนทำการดาวน์โหลด',
+          confirmButtonText: 'ตกลง'
+        })
+        return
+      }
 
+      try {
+        // ยืนยันก่อนดาวน์โหลด
+        const confirmation = await Swal.fire({
+          title: 'ยืนยันการดาวน์โหลด',
+          text: `คุณต้องการดาวน์โหลดเอกสารของงาน "${this.selectedJob.title}" หรือไม่?`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'ยืนยัน',
+          cancelButtonText: 'ยกเลิก'
+        })
+
+        if (!confirmation.isConfirmed) {
+          return
+        }
+
+        this.isDownloadingDocs = true
+
+        // เรียก API ดาวน์โหลดเอกสาร
+        await this.jobStore.downloadParticipantDocuments(this.selectedJob.id)
+
+        // แสดงข้อความสำเร็จ
+        Swal.fire({
+          icon: 'success',
+          title: 'ดาวน์โหลดสำเร็จ',
+          text: 'เอกสารถูกดาวน์โหลดเรียบร้อยแล้ว',
+          confirmButtonText: 'ตกลง'
+        })
+      } catch (error) {
+        console.error('Error downloading documents:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'ไม่สามารถดาวน์โหลดเอกสารได้',
+          confirmButtonText: 'ตกลง'
+        })
+      } finally {
+        this.isDownloadingDocs = false
+      }
+    },
     getDocumentUrl(path, type) {
       if (!path || path === '-') return null
       const cleanPath = path.replace(/[[\]"]/g, '')

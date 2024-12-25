@@ -5,6 +5,9 @@ import * as userModel from '../models/userModel.js';
 import * as notificationModel from '../models/notificationModel.js'
 import { cacheMiddleware } from '../middleware/cacheMiddleware.js';
 import * as notificationController from './notificationController.js'
+import archiver from 'archiver'
+import path from 'path'
+import fs from 'fs'
 
 // ฟังก์ชันสร้างงานใหม่ (สำหรับแอดมิน)
 export const createJob = async (req, res) => {
@@ -675,3 +678,63 @@ export const searchJobs = async (req, res) => {
 
 
 
+
+export const downloadParticipantDocuments = async (req, res) => {
+    try {
+        const { jobId } = req.params
+        const participants = await jobModel.getJobParticipantsDocuments(jobId)
+        console.log('Participants data:', JSON.stringify(participants, null, 2))
+
+        if (!participants.length) {
+            return res.status(404).json({ error: 'ไม่พบข้อมูลผู้เข้าร่วมงานที่ได้รับการอนุมัติ' })
+        }
+
+        // สร้าง zip file
+        const archive = archiver('zip', {
+            zlib: { level: 9 }
+        })
+
+        // Set response headers
+        res.setHeader('Content-Type', 'application/zip')
+        res.setHeader('Content-Disposition', `attachment; filename=job_${jobId}_documents.zip`)
+
+        // Pipe archive data to response
+        archive.pipe(res)
+
+        for (const participant of participants) {
+            const { user, Job, jobPosition } = participant
+            // สร้างชื่อโฟลเดอร์ที่มีชื่องานและตำแหน่ง
+            const userFolder = `${Job.title}/${jobPosition.position_name}/${user.first_name}_${user.last_name}`
+
+            // เอกสารทั่วไป
+            if (user.user_documents) {
+                const documents = JSON.parse(user.user_documents)
+                for (const doc of documents) {
+                    const docPath = path.resolve('uploads/documents', doc)
+                    if (fs.existsSync(docPath)) {
+                        archive.file(docPath, {
+                            name: `${userFolder}/documents${path.extname(doc)}`
+                        })
+                    }
+                }
+            }
+
+            // วุฒิการศึกษา
+            if (user.education_certificate) {
+                const eduPath = path.resolve('uploads/certificates', user.education_certificate)
+                if (fs.existsSync(eduPath)) {
+                    archive.file(eduPath, {
+                        name: `${userFolder}/education${path.extname(user.education_certificate)}`
+                    })
+                }
+            }
+        }
+
+        // Finalize archive
+        await archive.finalize()
+
+    } catch (error) {
+        console.error('Error downloading documents:', error)
+        res.status(500).json({ error: 'ไม่สามารถดาวน์โหลดเอกสารได้' })
+    }
+}

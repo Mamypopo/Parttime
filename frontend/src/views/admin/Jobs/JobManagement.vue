@@ -116,26 +116,29 @@
                 <div class="flex gap-2">
                   <button
                     @click="generateEvaluationSummary(job.id, job.title)"
-                    class="p-2 text-[#7BC4C4] hover:text-[#5DA3A3] rounded-full hover:bg-gray-50 dark:hover:bg-gray-700"
+                    class="p-2 text-[#93C5FD] hover:text-[#60A5FA] dark:text-[#7DAEF8] dark:hover:text-[#3B82F6] rounded-full hover:bg-gray-50 dark:hover:bg-gray-700"
                     title="สร้างสรุปการประเมิน"
                   >
                     <i class="fas fa-file-export"></i>
                   </button>
                   <button
                     @click="viewJobDetails(job)"
-                    class="p-2 text-[#7BC4C4] hover:text-[#5DA3A3] rounded-full hover:bg-gray-50 dark:hover:bg-gray-700"
+                    class="p-2 text-[#A7F3D0] hover:text-[#6EE7B7] dark:text-[#81E6A9] dark:hover:text-[#4ADE80] rounded-full hover:bg-gray-50 dark:hover:bg-gray-700"
+                    title="ดูรายละเอียดงาน"
                   >
                     <i class="fas fa-eye"></i>
                   </button>
                   <button
                     @click="handleOpenEditModal(job)"
-                    class="p-2 text-[#81E2C4] hover:text-[#5DC4A7] rounded-full hover:bg-gray-50 dark:hover:bg-gray-700"
+                    class="p-2 text-[#FDE68A] hover:text-[#FCD34D] dark:text-[#FBD38D] dark:hover:text-[#FBBF24] rounded-full hover:bg-gray-50 dark:hover:bg-gray-700"
+                    title="แก้ไขงาน"
                   >
                     <i class="fas fa-edit"></i>
                   </button>
                   <button
                     @click="confirmDelete(job)"
-                    class="p-2 text-[#E98585] hover:text-[#da7171] rounded-full hover:bg-gray-50 dark:hover:bg-gray-700"
+                    class="p-2 text-[#FCA5A5] hover:text-[#F87171] dark:text-[#F98080] dark:hover:text-[#EF4444] rounded-full hover:bg-gray-50 dark:hover:bg-gray-700"
+                    title="ลบงาน"
                   >
                     <i class="fas fa-trash-alt"></i>
                   </button>

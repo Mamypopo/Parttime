@@ -16,7 +16,6 @@ export const usePaymentStore = defineStore('payment', {
     }),
 
     actions: {
-        // Helper method to create authentication headers
         getAuthHeaders() {
             const adminStore = useAdminStore();
             if (!adminStore.token) {
@@ -150,4 +149,36 @@ export const usePaymentStore = defineStore('payment', {
             }
         }
     },
+
+    // เพิ่มฟังก์ชันสำหรับดาวน์โหลดเอกสาร
+    async downloadParticipantDocuments(jobId) {
+        try {
+            this.loading = true
+            const response = await axios.get(
+                `${this.baseURL}/jobs/${jobId}/documents`,
+                {
+                    responseType: 'blob', // สำคัญ! ต้องระบุ responseType เป็น blob
+                    headers: {
+                        Authorization: `Bearer ${this.token}`
+                    }
+                }
+            )
+
+            // สร้าง URL สำหรับไฟล์ที่ดาวน์โหลด
+            const url = window.URL.createObjectURL(new Blob([response.data]))
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', `job_${jobId}_documents.zip`) // จะได้เป็นไฟล์ zip
+            document.body.appendChild(link)
+            link.click()
+            link.remove()
+            window.URL.revokeObjectURL(url)
+
+        } catch (error) {
+            console.error('Error downloading documents:', error)
+            throw error
+        } finally {
+            this.loading = false
+        }
+    }
 });

@@ -576,6 +576,10 @@ export default {
   background: #a8a8a8;
 }
 
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
 /* Dark mode scrollbar */
 @media (prefers-color-scheme: dark) {
   .overflow-y-auto::-webkit-scrollbar-track {

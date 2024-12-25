@@ -1135,3 +1135,42 @@ export const getJobPaymentStatus = async (jobId) => {
                 : 'partially_paid'
     };
 };
+
+
+
+export const getJobParticipantsDocuments = async (jobId) => {
+    try {
+        const participants = await prisma.jobParticipation.findMany({
+            where: {
+                jobId: parseInt(jobId),
+                status: 'completed'
+            },
+            include: {
+                user: {
+                    select: {
+                        first_name: true,
+                        last_name: true,
+                        user_documents: true,
+                        education_certificate: true,
+
+                    }
+                },
+                Job: {
+                    select: {
+                        title: true
+                    }
+                },
+                jobPosition: {
+                    select: {
+                        position_name: true
+                    }
+                }
+            }
+        });
+
+        return participants;
+    } catch (error) {
+        console.error('Error getting job participants documents:', error);
+        throw error;
+    }
+};

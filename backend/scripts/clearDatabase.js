@@ -4,10 +4,21 @@ const prisma = new PrismaClient();
 
 async function clearDatabase() {
     try {
-        // ลบข้อมูลตามลำดับ เริ่มจากตารางที่มี Foreign key ไปยังตารางหลัก
         console.log('เริ่มล้างข้อมูล...');
+
+        // ลบ WorkHistory
         await prisma.workHistory.deleteMany({});
-        // ลบ JobParticipation ก่อน (ถ้ามี)
+        console.log('ล้างข้อมูล WorkHistory เรียบร้อย');
+
+        // ลบ PaymentLog ก่อน PaymentHistory
+        await prisma.paymentLog.deleteMany();
+        console.log('ล้างข้อมูล PaymentLog เรียบร้อย');
+
+        // ลบ PaymentHistory
+        await prisma.paymentHistory.deleteMany();
+        console.log('ล้างข้อมูล PaymentHistory เรียบร้อย');
+
+        // ลบ JobParticipation
         await prisma.jobParticipation.deleteMany();
         console.log('ล้างข้อมูล JobParticipation เรียบร้อย');
 
@@ -23,8 +34,13 @@ async function clearDatabase() {
         await prisma.notification.deleteMany();
         console.log('ล้างข้อมูล Notification เรียบร้อย');
 
+        // ลบ PendingSkill
         await prisma.pendingSkill.deleteMany();
         console.log('ล้างข้อมูล pendingSkill เรียบร้อย');
+
+        // ลบ Log
+        await prisma.log.deleteMany();
+        console.log('ล้างข้อมูล Log เรียบร้อย');
 
         // ลบ User
         await prisma.user.deleteMany();
@@ -33,10 +49,6 @@ async function clearDatabase() {
         // ลบ Admin
         await prisma.admin.deleteMany();
         console.log('ล้างข้อมูล Admin เรียบร้อย');
-
-        // ลบ Log
-        await prisma.log.deleteMany();
-        console.log('ล้างข้อมูล Log เรียบร้อย');
 
         console.log('ล้างข้อมูลในฐานข้อมูลเรียบร้อยแล้ว');
     } catch (error) {

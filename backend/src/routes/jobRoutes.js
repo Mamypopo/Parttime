@@ -36,6 +36,9 @@ router.put('/:id/approved-rejected', checkAdminRole, jobParticipationController.
 // ให้คะแนนหลังจบงาน
 router.put('/participation/:jobParticipationId/evaluate', checkAdminRole, jobParticipationController.updateWorkHistory);
 
+// ดึง ไฟล user 
+router.get('/:jobId/documents', checkAdminRole, jobController.downloadParticipantDocuments)
+
 router.put(
     '/work-history/:jobParticipationId', checkAdminRole,
     jobParticipationController.updateWorkHistory
