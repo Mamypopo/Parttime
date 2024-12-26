@@ -121,9 +121,13 @@ export default {
   data() {
     return {
       sidebarStore: useSidebarStore(),
-      adminStore: useAdminStore(),
+      adminStore: useAdminStore()
+    }
+  },
 
-      isDarkMode: localStorage.getItem('darkMode') === 'true' || false
+  computed: {
+    isDarkMode() {
+      return this.sidebarStore.isDarkMode
     }
   },
 
@@ -187,23 +191,10 @@ export default {
       }
     },
     toggleDarkMode() {
-      this.isDarkMode = !this.isDarkMode
-
-      if (this.isDarkMode) {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
-      }
-
-      localStorage.setItem('darkMode', this.isDarkMode)
+      this.sidebarStore.toggleDarkMode()
     }
   },
-  mounted() {
-    if (localStorage.getItem('darkMode') === 'true') {
-      document.documentElement.classList.add('dark')
-      this.isDarkMode = true
-    }
-  },
+
   emits: ['close']
 }
 </script>

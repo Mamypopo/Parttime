@@ -188,6 +188,15 @@ export const useSidebarStore = defineStore('sidebar', {
             this.isMobile = width < 640
             this.isTablet = width >= 640 && width < 1024
 
+            // ปิด mobile submenu เมื่อไม่ได้อยู่ในโหมด mobile
+            if (!this.isMobile) {
+                this.showUserSubmenu = false
+                this.showJobSubmenu = false
+                this.showMoreSubmenu = false
+                this.showNotifications = false
+                this.showMobileMenu = false
+            }
+
             // Auto collapse on tablet
             if (this.isTablet) {
                 this.isCollapsed = true
