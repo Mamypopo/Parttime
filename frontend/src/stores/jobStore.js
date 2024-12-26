@@ -282,7 +282,7 @@ export const useJobStore = defineStore('job', {
             }
         },
 
-
+        // ประเมินและให้คะแนน user
         async updateWorkEvaluation({ participationId, ratings, totalScore, comment, isPassedEvaluation }) {
             try {
                 const headers = this.getAuthHeaders()

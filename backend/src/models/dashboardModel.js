@@ -91,7 +91,7 @@ export const getExpensesByDateRange = async (startDate, endDate) => {
                 gte: startDate,
                 lte: endDate
             },
-            payment_status: 'paid' // แก้จาก status: 'completed' เป็น payment_status: 'paid'
+            payment_status: 'paid'
         },
         select: {
             id: true,
@@ -581,18 +581,14 @@ export const getUserDashboardStats = async (userId) => {
 };
 
 
-// ดึงรายได้ล่าสุด (ปรับปรุง���ห้ดึงเฉพาะงานที่ผ่านการประเมิน)
+// ดึงรายได้ล่าสุด 
 export const getRecentIncomes = async (userId) => {
     try {
         return await prisma.jobParticipation.findMany({
             where: {
                 user_id: userId,
                 status: 'completed',
-                workHistories: {
-                    some: {
-                        is_passed_evaluation: true // เฉพาะงานที่ผ่านการประเมิน
-                    }
-                }
+
             },
             select: {
                 id: true,
@@ -619,6 +615,15 @@ export const getRecentIncomes = async (userId) => {
                     },
                     where: {
                         is_passed_evaluation: true
+                    }
+                },
+                PaymentHistory: {
+                    where: {
+                        payment_status: 'paid'
+                    },
+                    select: {
+                        amount: true,
+                        paid_at: true
                     }
                 }
             },

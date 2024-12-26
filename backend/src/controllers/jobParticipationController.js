@@ -287,11 +287,11 @@ export const updateWorkHistory = async (req, res) => {
             req.user?.id || null,
             adminId,
             'Job Evaluation Failed',
-            req.originalUrl,                    // requestUrl
-            req.method,                         // method
-            `Error evaluating job: ${error.message}`, // details
-            req.ip || 'Unknown IP',             // ip
-            req.headers['user-agent'] || 'Unknown User Agent' // userAgent
+            req.originalUrl,
+            req.method,
+            `Error evaluating job: ${error.message}`,
+            req.ip || 'Unknown IP',
+            req.headers['user-agent'] || 'Unknown User Agent'
         );
 
         res.status(500).json({

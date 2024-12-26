@@ -19,7 +19,7 @@
           >
             <!-- Header -->
             <div
-              class="bg-gradient-to-r from-[#A1C4FD] to-[#C2E9FB] dark:from-[#373B44] dark:to-[#A1C4FD] p-4"
+              class="bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] dark:from-[#feac5e]/80 dark:via-[#c779d0]/80 dark:to-[#4bc0c8]/80 p-4"
             >
               <div class="flex items-center gap-3">
                 <img
@@ -30,7 +30,7 @@
                   <h3 class="font-medium text-gray-800 dark:text-gray-100">
                     {{ userStore.getUser?.first_name }} {{ userStore.getUser?.last_name }}
                   </h3>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                  <p class="text-sm text-gray-600 dark:text-gray-100">
                     {{ userStore.getUser?.email }}
                   </p>
                 </div>

@@ -18,6 +18,7 @@ const prisma = new PrismaClient(); // สร้าง PrismaClient
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// ผู้ใช้ลงทะเบียน
 export const registerUser = async (req, res) => {
     const userIp = req.ip;
     const userAgent = req.headers['user-agent'] || 'unknown';
@@ -187,7 +188,7 @@ export const verifyEmail = async (req, res) => {
     }
 };
 
-
+// login ผู้ใช้
 export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
@@ -236,6 +237,7 @@ export const loginUser = async (req, res) => {
     }
 };
 
+// แก้ไขข้อมูลส่วนตัว
 export const updateUserProfile = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -333,7 +335,7 @@ export const updateUserProfile = async (req, res) => {
 export const addUserSkills = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { skills } = req.body;  // รับเป็น array ของทักษะใหม่
+        const { skills } = req.body;
 
         // ตรวจสอบว่า skills เป็น array และไม่ว่างเปล่า
         if (!Array.isArray(skills) || skills.length === 0) {
@@ -346,7 +348,7 @@ export const addUserSkills = async (req, res) => {
         // ตรวจสอบการขอในรอบสัปดาห์
         const recentRequest = await adminModel.checkWeeklySkillRequest(userId);
         if (recentRequest) {
-            const nextAvailableDate = new Date(recentRequest.created_at); // แก้เป็น created_at
+            const nextAvailableDate = new Date(recentRequest.created_at);
             nextAvailableDate.setDate(nextAvailableDate.getDate() + 7);
 
             return res.status(400).json({
@@ -355,7 +357,7 @@ export const addUserSkills = async (req, res) => {
                 currentRequest: {
                     skill: recentRequest.skill,
                     status: recentRequest.status,
-                    requestedAt: recentRequest.created_at.toISOString() // แก้เป็น created_at
+                    requestedAt: recentRequest.created_at.toISOString()
                 }
             });
         }
@@ -448,9 +450,7 @@ export const getUser = async (req, res) => {
     }
 };
 
-
-
-
+// ดึงประวัติการทำงานของ user
 export const getUserHistory = async (req, res) => {
     const { userId } = req.params;
     const { limit = 10, page = 1 } = req.query;
@@ -473,6 +473,7 @@ export const getUserHistory = async (req, res) => {
     }
 };
 
+// ดึงข้อมูลการประเมินของผู้ใช้งาน
 export const getJobEvaluation = async (req, res) => {
     try {
         const { jobId, userId } = req.params;
@@ -528,6 +529,7 @@ export const getJobEvaluation = async (req, res) => {
     }
 };
 
+// ดึงการแจ้งเตือนของ user
 export const getUserNotifications = async (req, res) => {
     try {
 
@@ -571,7 +573,7 @@ export const markAllNotificationsAsRead = async (req, res) => {
     }
 };
 
-
+// ดึง profile ของ user
 export const getProfile = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -590,29 +592,7 @@ export const getProfile = async (req, res) => {
     }
 };
 
-
-
-// แสดงผลหรือดาวน์โหลดไฟล์
-export const getProfileImage = (req, res) => {
-    try {
-        const { filename } = req.params;
-
-        // สร้างเส้นทางเต็มของไฟล์ที่เก็บอยู่บนเซิร์ฟเวอร์
-        const filePath = path.join(__dirname, '../../uploads/profiles', filename);
-
-        // ตรวจสอบว่าไฟล์มีอยู่จริง
-        if (fs.existsSync(filePath)) {
-            // ส่งไฟล์กลับไปยังผู้ใช้เพื่อดาวน์โหลดหรือแสดงผล
-            res.sendFile(filePath);
-        } else {
-            res.status(404).json({ message: 'ไม่พบไฟล์ที่ร้องขอ' });
-        }
-    } catch (error) {
-        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการเข้าถึงไฟล์' });
-    }
-};
-
-
+// แสดงว่ากำลังใช้งาน
 export const updateUserOnlineStatus = async (req, res) => {
     const userId = req.user.id;
     try {
@@ -630,7 +610,7 @@ export const updateUserOnlineStatus = async (req, res) => {
     }
 };
 
-//  endpoint สำหรับ offline
+// แสดงว่ากำลังออฟไลน์
 export const updateUserOfflineStatus = async (req, res) => {
     const userId = req.user.id;
     try {

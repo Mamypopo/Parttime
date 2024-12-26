@@ -1,10 +1,8 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-
 import * as adminModel from '../models/adminModel.js';
 import * as userModel from '../models/userModel.js';
 import * as notificationModel from '../models/notificationModel.js';
-
 import { deleteFile } from '../utils/fileUpload.js';
 import { createLog } from '../models/logModel.js';
 
@@ -194,21 +192,7 @@ export const getAdminProfile = async (req, res) => {
     }
 }
 
-// เพิ่มเอนด์พอยต์สำหรับดึงรูปโปรไฟล์
-export const getAdminProfilePic = (req, res) => {
-    try {
-        const { filename } = req.params;
-        const filePath = path.join(__dirname, '../../uploads/admin-profiles', filename);
 
-        if (fs.existsSync(filePath)) {
-            res.sendFile(filePath);
-        } else {
-            res.status(404).json({ message: 'ไม่พบรูปโปรไฟล์' });
-        }
-    } catch (error) {
-        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการเข้าถึงรูปโปรไฟล์' });
-    }
-};
 // getadmin ตาม id
 export const getAdminById = async (req, res) => {
     const { adminId } = req.params;
@@ -246,7 +230,6 @@ export const getPendingUsers = async (req, res) => {
         }
 
         // ส่ง searchParams ไปยัง Model
-
         const [users, counts] = await Promise.all([
             adminModel.findPendingUsers(limit, offset, searchParams),
             adminModel.countUsersPending(searchParams)
@@ -434,7 +417,7 @@ export const approveUser = async (req, res) => {
 };
 
 
-// admin pending skill
+// แอดมินดึงสกิลที่รออนุมัติ ทำทีหลัง
 export const getAdminPendingSkills = async (req, res) => {
     try {
         const pendingSkills = await adminModel.getAllPendingSkillsForAdmin();
@@ -459,6 +442,7 @@ export const getAdminPendingSkills = async (req, res) => {
 };
 
 
+// อัพเดทสกิล ทำทีหลัง
 export const updatePendingSkillStatus = async (req, res) => {
     try {
         const adminId = req.admin.id;
@@ -536,7 +520,7 @@ export const updatePendingSkillStatus = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error details:', error); // เพิ่ม log error
+        console.error('Error details:', error); ห
         res.status(500).json({
             message: 'เกิดข้อผิดพลาดในการอัปเดตสถานะทักษะ',
             error: error.message
@@ -545,7 +529,7 @@ export const updatePendingSkillStatus = async (req, res) => {
 };
 
 
-// notification adimin
+// ดึงการแจ้งเตือนของแอดมิน
 export const getAdminNotifications = async (req, res) => {
 
     try {
@@ -573,7 +557,7 @@ export const getAdminNotifications = async (req, res) => {
 };
 
 
-// อ่าน 1 การแจ้งเตือน
+// อ่าน 1 การแจ้งเตือนของแอดมิน
 export const markNotificationAsRead = async (req, res) => {
     try {
         const notificationId = parseInt(req.params.id, 10);
@@ -586,7 +570,7 @@ export const markNotificationAsRead = async (req, res) => {
     }
 };
 
-// อ่านการแจ้งเตือนทั้งหมด
+// อ่านการแจ้งเตือนทั้งหมดของแอดมิน
 export const markAllNotificationsAsRead = async (req, res) => {
     try {
         const adminId = req.user.id;
@@ -598,7 +582,7 @@ export const markAllNotificationsAsRead = async (req, res) => {
     }
 };
 
-
+// นับ user ที่ออนไลน์
 export const getOnlineUsersCount = async (req, res) => {
     try {
         const count = await adminModel.getOnlineUsersCount();

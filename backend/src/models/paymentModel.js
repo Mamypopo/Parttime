@@ -245,7 +245,7 @@ export const getPaymentHistoryByParticipantModel = async (participationId) => {
         return paymentHistories;
     } catch (error) {
         console.error('Error fetching payment history by participant in model:', error);
-        throw error; // ส่ง error กลับไปที่ Controller
+        throw error;
     }
 };
 
@@ -278,6 +278,8 @@ export const getJobWithPaymentDetails = async (jobId) => {
         }
     });
 };
+
+
 export const calculatePaymentSummary = (job) => {
     const summary = {
         jobInfo: {

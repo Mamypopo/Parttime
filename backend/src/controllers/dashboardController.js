@@ -1,9 +1,10 @@
 import * as DashboardModel from '../models/dashboardModel.js'
 import * as workHistoryModel from '../models/workHistoryModel.js'
 
+// คำนวณรายจ่ายเป็นช่วงเวลา
 async function calculateExpenses() {
     try {
-        // 1. กำหนดช่วงเวลา
+        // กำหนดช่วงเวลา
         const now = new Date()
 
         // วันนี้ (00:00:00 - 23:59:59)
@@ -21,13 +22,13 @@ async function calculateExpenses() {
         startOfMonth.setHours(0, 0, 0, 0)
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
         endOfMonth.setHours(23, 59, 59, 999)
-        // 2. ดึงข้อมูลค่าใช้จ่ายแต่ละช่วง
+        // ดึงข้อมูลค่าใช้จ่ายแต่ละช่วง
         const [dailyExp, weeklyExp, monthlyExp] = await Promise.all([
             DashboardModel.getExpensesByDateRange(startOfDay, endOfDay),
             DashboardModel.getExpensesByDateRange(startOfWeek, now),
             DashboardModel.getExpensesByDateRange(startOfMonth, endOfMonth)
         ])
-        // 3. คำนวณยอดรวม
+        // คำนวณยอดรวม
         const expenses = {
             daily: dailyExp.reduce((sum, payment) => sum + Number(payment.amount), 0),
             weekly: weeklyExp.reduce((sum, payment) => sum + Number(payment.amount), 0),
@@ -41,30 +42,8 @@ async function calculateExpenses() {
 }
 
 
-function calculateTotalExpenses(positions) {
-    return positions.reduce((total, position) => {
-        const wage = Number(position.wage) || 0
 
-
-
-        // นับเฉพาะผู้สมัครที่ได้รับการอนุมัติหรือทำงานเสร็จแล้ว และมีประวัติการทำงาน
-        const approvedParticipants = position.JobParticipation.filter(p => {
-            const isApprovedStatus = ['approved', 'completed'].includes(p.status)
-            const hasWorkHistory = p.workHistories?.length > 0
-
-
-
-            return isApprovedStatus && hasWorkHistory
-        }).length
-
-        const expense = wage * approvedParticipants
-
-
-
-        return total + expense
-    }, 0)
-}
-
+// ดึงข้อมูลต่างๆไปแสดงที่ dashboard ( รายจ่ายหลังจากคำนวณแล้ว งานทั้งหมด ผู้ใช้ทั้งหมด )
 export const getDashboardStats = async (req, res) => {
     try {
         // ดึงข้อมูลพื้นฐาน
@@ -89,8 +68,6 @@ export const getDashboardStats = async (req, res) => {
         // ดึงข้อมูลการเงินและการสมัคร
         const positions = await DashboardModel.getCurrentMonthExpenses(startOfMonth)
 
-
-
         const applications = await DashboardModel.getMonthlyApplicationsWithStatus(startOfMonth)
         const monthlyApplications = {
             total: applications.total,
@@ -111,7 +88,6 @@ export const getDashboardStats = async (req, res) => {
             registeredAt: user.created_at,
             status: user.approved
         }))
-
 
         // ดึงและคำนวณข้อมูลการให้คะแนน
         const workHistories = await DashboardModel.getRatedWorkHistories()
@@ -134,7 +110,7 @@ export const getDashboardStats = async (req, res) => {
                 }
             }
 
-            // เพิ่มคะแนนแต่ละด้าน
+            // คะแนนแต่ละด้าน
             if (history.appearance_score) {
                 acc[userId].scores.appearance += history.appearance_score
             }
@@ -253,7 +229,7 @@ export const getDashboardStats = async (req, res) => {
     }
 }
 
-
+// ดึงตารางงาน
 export const getCalendarEvents = async (req, res) => {
     try {
         const { month, year } = req.query
@@ -268,7 +244,7 @@ export const getCalendarEvents = async (req, res) => {
     }
 }
 
-
+// จัดอันดับผู้ใช้ที่มีคะแนนมากที่สุด
 export const getTopUsersWithRatings = async (req, res) => {
     try {
         const data = await workHistoryModel.getTopUsersWithRatings();
@@ -331,14 +307,16 @@ export const getUserDashboard = async (req, res) => {
         });
 
         // แปลงข้อมูลรายได้ให้อยู่ในรูปแบบที่ต้องการ
-        const formattedIncomes = recentIncomes.map(income => ({
-            id: income.id,
-            jobTitle: income.jobPosition.position_name,
-            workplace: income.jobPosition.job.title,
-            date: income.workHistories[0].created_at,
-            amount: income.jobPosition.wage,
-            score: income.workHistories[0].total_score
-        }));
+        const formattedIncomes = recentIncomes
+            .filter(income => income.PaymentHistory) // กรองเฉพาะรายการที่มี paymentHistory
+            .map(income => ({
+                id: income.id,
+                jobTitle: income.jobPosition.position_name,
+                workplace: income.jobPosition.job.title,
+                date: income.PaymentHistory.paid_at, // ใช้วันที่จ่ายเงินแทน
+                amount: income.PaymentHistory.amount, // ใช้จำนวนเงินจาก paymentHistory
+                score: income.workHistories[0]?.total_score || 0
+            }));
 
         res.status(200).json({
             stats,

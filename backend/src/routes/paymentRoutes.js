@@ -5,7 +5,7 @@ import { uploadPaymentSlip } from '../utils/fileUpload.js';
 
 const router = express.Router();
 
-// Middleware สำหรับตรวจสอบสิทธิ์ (ต้องเป็นผู้ที่ล็อกอินและเป็น Admin เท่านั้น)
+
 router.use(authMiddleware); // ตรวจสอบการล็อกอิน
 router.use(checkAdminRole); // ตรวจสอบสิทธิ์ Admin
 
@@ -17,6 +17,7 @@ router.get(
     '/job/:jobId/payments',
     paymentController.getPendingPayments
 );
+
 // ดึงรายการที่จ่ายเงินแล้วของงาน
 router.get(
     '/job/:jobId/paid',
@@ -33,10 +34,10 @@ router.patch(
 // สรุปการเงิน
 router.get('/jobs/:jobId/payment-summary', paymentController.getJobPaymentSummary);
 
-
-
+// ดึงประวัติการจ่ายเงินแต่ละงาน
 router.get('/:jobId/history', paymentController.getPaymentHistory);
 
+// ดึงประวัติการจ่าเงิน แต่ละ user
 router.get('/participant/:participationId/history', paymentController.getPaymentHistoryByParticipant);
 
 

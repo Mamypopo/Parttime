@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { sendResetPasswordEmail } from '../utils/email.js';
 import * as userModel from '../models/userModel.js'
 
+// ลืมรหัสผ่าน
 export const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
@@ -37,6 +38,7 @@ export const forgotPassword = async (req, res) => {
     }
 };
 
+// RESET รหัสผ่าน
 export const resetPassword = async (req, res) => {
     try {
         const { token, password } = req.body;

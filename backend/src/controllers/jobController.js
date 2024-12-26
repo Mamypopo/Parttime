@@ -3,13 +3,12 @@ import { createLog } from '../models/logModel.js';
 import * as adminModel from '../models/adminModel.js';
 import * as userModel from '../models/userModel.js';
 import * as notificationModel from '../models/notificationModel.js'
-import { cacheMiddleware } from '../middleware/cacheMiddleware.js';
 import * as notificationController from './notificationController.js'
 import archiver from 'archiver'
 import path from 'path'
 import fs from 'fs'
 
-// ฟังก์ชันสร้างงานใหม่ (สำหรับแอดมิน)
+// ฟังก์ชันสร้างงานใหม่ 
 export const createJob = async (req, res) => {
     const { title, work_date, location, start_time, end_time, details, positions } = req.body;
     const { id: adminId } = req.user;
@@ -59,7 +58,7 @@ export const createJob = async (req, res) => {
     }
 };
 
-
+// ดึงงานทั้งหมด
 export const getAllJobs = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -676,9 +675,7 @@ export const searchJobs = async (req, res) => {
 };
 
 
-
-
-
+// ดาวน์โหลดไฟล zip เอกสาร ของ user ที่สมัครงานนั้นๆ
 export const downloadParticipantDocuments = async (req, res) => {
     try {
         const { jobId } = req.params

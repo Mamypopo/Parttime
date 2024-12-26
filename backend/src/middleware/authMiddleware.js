@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 import * as adminModel from '../models/adminModel.js'
+
+// ตรวจสอบ token
 export const authMiddleware = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     if (!authHeader) {
@@ -15,7 +17,6 @@ export const authMiddleware = (req, res, next) => {
     try {
         // ตรวจสอบและถอดรหัส token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // req.user = decoded;
         req.user = {
             id: decoded.userId || decoded.id, // รองรับทั้ง userId และ id
             email: decoded.email,
@@ -27,15 +28,7 @@ export const authMiddleware = (req, res, next) => {
     }
 };
 
-
-
-// export const checkAdminRole = (req, res, next) => {
-//     if (!req.user || req.user.role !== 'admin') {
-//         return res.status(403).json({ message: 'Access denied, admin only' });
-//     }
-//     next();
-// };
-
+// ตรวจสอบว่าเป็น แอดมินหรือป่าว
 export const checkAdminRole = async (req, res, next) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
@@ -45,7 +38,6 @@ export const checkAdminRole = async (req, res, next) => {
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        // เปลี่ยนจาก decoded.id เป็น decoded.userId
         if (!decoded.userId) {
             return res.status(401).json({
                 message: 'Token ไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่'

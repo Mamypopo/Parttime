@@ -100,8 +100,8 @@ export const getJobsWithEvaluation = async (req, res) => {
 
 // ดึงรายการที่รอจ่ายเงิน
 export const getPendingPayments = async (req, res) => {
-    const { jobId } = req.params; // ดึง Job ID จาก query parameter
-    const { status, page = 1, limit = 10 } = req.query; // ดึง Pagination parameter
+    const { jobId } = req.params;
+    const { status, page = 1, limit = 10 } = req.query;
 
     if (!jobId || isNaN(jobId)) {
         return res.status(400).json({ message: 'Invalid jobId parameter' });

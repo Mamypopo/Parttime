@@ -18,6 +18,7 @@ export const createAdmin = async (adminData) => {
     });
 };
 
+
 // เพิ่มฟังก์ชันอัพเดทรูปโปรไฟล์
 export const updateAdminProfilePic = async (adminId, profilePicUrl) => {
     return prisma.admin.update({
@@ -25,6 +26,8 @@ export const updateAdminProfilePic = async (adminId, profilePicUrl) => {
         data: { profile_pic: profilePicUrl }
     });
 };
+
+
 export const verifyPassword = (password, hashedPassword) => bcrypt.compare(password, hashedPassword);
 
 
@@ -61,11 +64,8 @@ export const getAdminById = async (id) => {
 export const findAllAdmins = () => prisma.admin.findMany();
 
 
-
 export const findAdminByEmail = (email) =>
     prisma.admin.findUnique({ where: { email } });
-
-
 
 // ฟังก์ชันพื้นฐานสำหรับดึงข้อมูลผู้ใช้
 const baseUserSelect = {
@@ -361,7 +361,7 @@ export const findRejectedUsers = (limit = 10, offset = 0, searchParams = {}) => 
         approved: "rejected"
     }
 
-    // เพิ่มเงื่อนไขการค้นหา
+    // เงื่อนไขการค้นหา
     if (searchParams.userId) {
         whereClause.id = parseInt(searchParams.userId)
     }

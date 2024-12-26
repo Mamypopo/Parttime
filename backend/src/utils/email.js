@@ -10,7 +10,7 @@ export const sendVerificationEmail = async (user, token) => {
         }
     });
 
-    // สร้าง verification URL ที่ถูกต้อง
+    // สร้าง verification URL 
     const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
 
     const mailOptions = {

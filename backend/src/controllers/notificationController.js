@@ -2,10 +2,11 @@ import * as notificationModel from '../models/notificationModel.js'
 import * as jobModel from '../models/jobModel.js';
 
 
+// ฟั่งชั่นสร้างการแจ้งเตือนเมื่อมีคนมาสมัครงานใหม่
 export const createNewApplicationNotification = async (jobId, userId) => {
     try {
         const job = await jobModel.getJobById(jobId);
-        // console.log('Job data:', JSON.stringify(job, null, 2)); 
+
         if (!job) {
             throw new Error('ไม่พบงานที่ระบุ');
         }
@@ -19,6 +20,7 @@ export const createNewApplicationNotification = async (jobId, userId) => {
             throw new Error('ไม่พบตำแหน่งงานที่ระบุ');
         }
 
+        // ส่งการแจ้งเตือนไปที่แอดมินที่สร้างงาน
         const content = `มีการสมัครงานใหม่สำหรับตำแหน่ง ${jobPosition.position_name} ในงาน "${job.title}"`;
         return notificationModel.createAdminNotification({
             userId,

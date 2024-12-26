@@ -12,35 +12,42 @@ const router = express.Router();
 router.use(authMiddleware);
 
 router.get('/', jobController.getAllJobs);
-// ฟังชั่นสมัครงาน
+
+// ฟังชั่นขอสมัครงาน
 router.post('/apply', jobController.applyForJob);
+
 // ฟั่งชั่น user ขอยกเลิกการสมัครงาน
 router.post('/cancel', jobController.cancelJobApplication);
-// เส้นทางสำหรับแอดมิน
+
+// สร้างงาน  (เส้นทางสำหรับแอดมิน)
 router.post('/create', checkAdminRole, jobController.createJob);
+
 // ค้นหางาน
 router.get('/search', jobController.searchJobs);
-// ลบงาน
+
+// ลบงาน (เส้นทางสำหรับแอดมิน
 router.delete('/delete-job/:jobId', checkAdminRole, jobController.deleteJob);
-// แก้ไขงาน
+
+// แก้ไขงาน (เส้นทางสำหรับแอดมิน
 router.put('/editJob/:jobId', checkAdminRole, jobController.editJob);
-// เส้นอัพเดท สถานะงาน
+
+// อัพเดท สถานะงาน (เส้นทางสำหรับแอดมิน
 router.patch('/:id/status', checkAdminRole, jobController.updateJobStatus);
-// ดึงงานที่ตัวเองสร้าง
+
+// ดึงงานที่ตัวเองสร้าง (เส้นทางสำหรับแอดมิน
 router.get('/my-created-jobs', checkAdminRole, jobController.getMyCreatedJobs);
-// ดึงงาน
+
+// ดึงงานที่มีผู้ใช้งานสมัครเข้ามาเพื่อรออนุมัติ (เส้นทางสำหรับแอดมิน
 router.get('/getJobsWithParticipants', checkAdminRole, jobParticipationController.getJobsWithParticipants);
-// อนุมัติการสมัครงาน
+
+// อนุมัติการสมัครงาน (เส้นทางสำหรับแอดมิน
 router.put('/:id/approved-rejected', checkAdminRole, jobParticipationController.approveJobParticipation);
 
-// ให้คะแนนหลังจบงาน
+// ให้คะแนนหลังจบงาน (เส้นทางสำหรับแอดมิน
 router.put('/participation/:jobParticipationId/evaluate', checkAdminRole, jobParticipationController.updateWorkHistory);
 
-// ดึง ไฟล user 
+// ดึง ไฟล์ ต่างๆของ user  (เส้นทางสำหรับแอดมิน
 router.get('/:jobId/documents', checkAdminRole, jobController.downloadParticipantDocuments)
 
-router.put(
-    '/work-history/:jobParticipationId', checkAdminRole,
-    jobParticipationController.updateWorkHistory
-);
+
 export default router;

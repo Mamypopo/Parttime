@@ -56,7 +56,7 @@ export const useAdminStore = defineStore('admin', {
             if (sidebarStore?.resetDarkMode) {
                 sidebarStore.resetDarkMode()
             }
-            // Reset other stores (e.g., notification store)
+            // Reset other stores 
             const notificationStore = useNotificationStore()
             if (notificationStore?.resetStore) {
                 notificationStore.resetStore()
