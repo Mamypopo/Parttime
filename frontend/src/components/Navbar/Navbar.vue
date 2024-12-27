@@ -3,7 +3,7 @@
     <div class="container mx-auto px-4 sm:px-6">
       <!-- Desktop & Mobile Navbar -->
       <div
-        class="max-w-6xl mx-auto flex items-center justify-between rounded-2xl px-4 sm:px-8 py-3 bg-white/90 border border-gray-100 shadow-lg dark:bg-gray-800/90 dark:border-gray-700/50"
+        class="max-w-6xl mx-auto flex items-center justify-between rounded-2xl px-4 sm:px-8 py-3 bg-white/90 border border-gray-100 shadow-lg"
       >
         <!-- Logo -->
         <div class="flex items-center group">
@@ -30,7 +30,7 @@
         <div class="hidden lg:flex items-center gap-4">
           <router-link
             to="/contact"
-            class="px-6 py-2 text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white transition-colors duration-300 flex items-center gap-2 text-sm font-medium"
+            class="px-6 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-300 flex items-center gap-2 text-sm font-medium"
           >
             <i class="fas fa-phone-alt"></i>
             <span>ติดต่อเรา</span>
@@ -55,7 +55,7 @@
         <!-- Mobile Menu Button -->
         <button
           @click="isMenuOpen = !isMenuOpen"
-          class="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 transition-colors duration-200 focus:outline-none dark:hover:bg-gray-700"
+          class="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 transition-colors duration-200 focus:outline-none"
         >
           <i class="fas fa-bars text-gray-600 dark:text-gray-300"></i>
         </button>
@@ -72,13 +72,13 @@
       >
         <div
           v-if="isMenuOpen"
-          class="lg:hidden mt-2 max-w-6xl mx-auto bg-white/95 rounded-xl shadow-lg p-4 border border-gray-100 dark:bg-gray-800/95 dark:border-gray-700/50"
+          class="lg:hidden mt-2 max-w-6xl mx-auto bg-white/95 rounded-xl shadow-lg p-4 border border-gray-100"
         >
           <!-- Mobile Auth Buttons -->
           <div class="space-y-3">
             <router-link
               to="/contact"
-              class="w-full px-4 py-2.5 text-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm font-medium"
+              class="w-full px-4 py-2.5 text-center text-gray-700 hover:bg-gray-50 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm font-medium"
               @click="isMenuOpen = false"
             >
               <i class="fas fa-phone-alt"></i>

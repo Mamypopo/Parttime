@@ -19,13 +19,13 @@ export const createAdmin = async (adminData) => {
 };
 
 
-// เพิ่มฟังก์ชันอัพเดทรูปโปรไฟล์
-export const updateAdminProfilePic = async (adminId, profilePicUrl) => {
-    return prisma.admin.update({
-        where: { id: adminId },
-        data: { profile_pic: profilePicUrl }
-    });
-};
+// ฟังก์ชันอัพเดทรูปโปรไฟล์
+// export const updateAdminProfilePic = async (adminId, profilePicUrl) => {
+//     return prisma.admin.update({
+//         where: { id: adminId },
+//         data: { profile_pic: profilePicUrl }
+//     });
+// };
 
 
 export const verifyPassword = (password, hashedPassword) => bcrypt.compare(password, hashedPassword);
@@ -99,7 +99,7 @@ export const findPendingUsers = (limit = 10, offset = 0, searchParams = {}) => {
         approved: "pending"
     }
 
-    // เพิ่มเงื่อนไขการค้นหา
+    // เงื่อนไขการค้นหา
     if (searchParams.userId) {
         whereClause.id = parseInt(searchParams.userId)
     }
@@ -541,6 +541,7 @@ export const updateUserApprovalStatus = (userId, status) =>
 
 
 
+
 //  ดึงข้อมูล pending skills ทั้งหมดพร้อมข้อมูลผู้ใช้
 export const getAllPendingSkillsForAdmin = async () => {
     return prisma.pendingSkill.findMany({
@@ -562,8 +563,6 @@ export const getAllPendingSkillsForAdmin = async () => {
         }
     });
 };
-
-
 
 // ดึงข้อมูล pending skill ตาม id
 export const getPendingSkillById = async (id) => {
@@ -590,7 +589,6 @@ export const updatePendingSkillStatus = async (id, status) => {
         }
     });
 };
-
 
 // อัปเดต user skills
 export const updateUserSkills = async (userId, skills) => {
@@ -627,6 +625,7 @@ export const checkWeeklySkillRequest = async (userId) => {
 
     return recentRequest;
 };
+
 
 
 export const getOnlineUsersCount = async () => {

@@ -680,7 +680,7 @@ export const downloadParticipantDocuments = async (req, res) => {
     try {
         const { jobId } = req.params
         const participants = await jobModel.getJobParticipantsDocuments(jobId)
-        console.log('Participants data:', JSON.stringify(participants, null, 2))
+
 
         if (!participants.length) {
             return res.status(404).json({ error: 'ไม่พบข้อมูลผู้เข้าร่วมงานที่ได้รับการอนุมัติ' })

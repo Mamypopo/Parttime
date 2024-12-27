@@ -581,18 +581,21 @@ export const getUserDashboardStats = async (userId) => {
 };
 
 
-// ดึงรายได้ล่าสุด 
-export const getRecentIncomes = async (userId) => {
+// รายได้ที่จ่ายแล้ว
+export const getRecentPaidIncomes = async (userId) => {
     try {
         return await prisma.jobParticipation.findMany({
             where: {
                 user_id: userId,
                 status: 'completed',
-
+                PaymentHistory: {
+                    some: {
+                        payment_status: 'paid'
+                    }
+                }
             },
             select: {
                 id: true,
-                created_at: true,
                 jobPosition: {
                     select: {
                         position_name: true,
@@ -600,21 +603,9 @@ export const getRecentIncomes = async (userId) => {
                         job: {
                             select: {
                                 title: true,
-                                location: true,
-                                work_date: true,
-                                start_time: true,
-                                end_time: true
+                                work_date: true
                             }
                         }
-                    }
-                },
-                workHistories: {
-                    select: {
-                        created_at: true,
-                        total_score: true
-                    },
-                    where: {
-                        is_passed_evaluation: true
                     }
                 },
                 PaymentHistory: {
@@ -633,7 +624,55 @@ export const getRecentIncomes = async (userId) => {
             take: 5
         });
     } catch (error) {
-        console.error('Error in getRecentIncomes:', error);
+        console.error('Error in getRecentPaidIncomes:', error);
+        throw error;
+    }
+};
+
+// รายได้ที่รอจ่าย
+export const getPendingIncomes = async (userId) => {
+    try {
+        return await prisma.jobParticipation.findMany({
+            where: {
+                user_id: userId,
+                status: 'completed',
+                PaymentHistory: {
+                    some: {
+                        payment_status: 'pending'
+                    }
+                }
+            },
+            select: {
+                id: true,
+                jobPosition: {
+                    select: {
+                        position_name: true,
+                        wage: true,
+                        job: {
+                            select: {
+                                title: true,
+                                work_date: true
+                            }
+                        }
+                    }
+                },
+                PaymentHistory: {
+                    where: {
+                        payment_status: 'pending'
+                    },
+                    select: {
+                        amount: true,
+                        created_at: true
+                    }
+                }
+            },
+            orderBy: {
+                created_at: 'desc'
+            },
+            take: 5
+        });
+    } catch (error) {
+        console.error('Error in getPendingIncomes:', error);
         throw error;
     }
 };

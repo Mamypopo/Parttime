@@ -108,7 +108,7 @@ export const getParticipantsByJob = async (jobId, status, page = 1, limit = 10) 
                                 select: {
                                     id: true,
                                     title: true,
-
+                                    status: true
                                 }
                             }
                         },
@@ -125,7 +125,7 @@ export const getParticipantsByJob = async (jobId, status, page = 1, limit = 10) 
     // ดึงจำนวนรายการทั้งหมดเพื่อคำนวณหน้าทั้งหมด
     const totalRecords = await prisma.paymentHistory.count({
         where: {
-            payment_status: 'pending',
+            payment_status: status,
             job_participation: {
                 jobPosition: {
                     job_id: parseInt(jobId),
@@ -149,7 +149,9 @@ export const getParticipantsByJob = async (jobId, status, page = 1, limit = 10) 
 export const getJobsWithEvaluation = async () => {
     return await prisma.job.findMany({
         where: {
-            status: 'completed',  // งานเสร็จแล้ว
+            status: {
+                in: ['completed', 'in_progress'] // ดึงทั้งงานที่เสร็จและกำลังดำเนินการ
+            },
             JobParticipation: {
                 some: {
                     workHistories: {
@@ -163,12 +165,19 @@ export const getJobsWithEvaluation = async () => {
             title: true,
             location: true,
             work_date: true,
+            status: true,
             start_time: true,
             end_time: true,
             created_by: true,
             _count: {
                 select: {
-                    JobParticipation: true  // นับจำนวนคนที่เข้าร่วม
+                    JobParticipation: {
+                        where: {
+                            workHistories: {
+                                some: {} // นับเฉพาะคนที่มีการประเมินแล้ว
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -256,6 +265,11 @@ export const getJobWithPaymentDetails = async (jobId) => {
             JobPositions: {
                 include: {
                     JobParticipation: {
+                        where: {
+                            workHistories: {
+                                some: {} // มีการประเมินแล้ว
+                            }
+                        },
                         include: {
                             user: {
                                 select: {
@@ -270,7 +284,8 @@ export const getJobWithPaymentDetails = async (jobId) => {
                                     created_at: 'desc'
                                 },
                                 take: 1
-                            }
+                            },
+                            workHistories: true
                         }
                     }
                 }

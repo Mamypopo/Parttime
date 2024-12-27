@@ -620,7 +620,18 @@ export const getJobApplicants = async (jobId) => {
 export const deleteJobById = async (jobId) => {
     try {
         return await prisma.$transaction(async (tx) => {
-            // 1. ลบ work histories
+            // 1. ลบ payment histories
+            await tx.paymentHistory.deleteMany({
+                where: {
+                    job_participation: {
+                        jobPosition: {
+                            job_id: jobId
+                        }
+                    }
+                }
+            });
+
+            // 2. ลบ work histories
             await tx.workHistory.deleteMany({
                 where: {
                     jobParticipation: {
@@ -631,14 +642,14 @@ export const deleteJobById = async (jobId) => {
                 }
             });
 
-            // 2. ลบ notifications
+            // 3. ลบ notifications
             await tx.notification.deleteMany({
                 where: {
                     jobId: jobId
                 }
             });
 
-            // 3. ลบ job participations
+            // 4. ลบ job participations
             await tx.jobParticipation.deleteMany({
                 where: {
                     jobPosition: {
@@ -647,14 +658,14 @@ export const deleteJobById = async (jobId) => {
                 }
             });
 
-            // 4. ลบ job positions
+            // 5. ลบ job positions
             await tx.jobPosition.deleteMany({
                 where: {
                     job_id: jobId
                 }
             });
 
-            // 5. ลบตัวงาน
+            // 6. ลบตัวงาน
             return await tx.job.delete({
                 where: {
                     id: jobId

@@ -58,8 +58,20 @@
       class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-all duration-300"
     >
       <!-- Loading State -->
-      <div v-if="loading" class="flex justify-center items-center py-12">
-        <div class="loading-spinner"></div>
+      <div v-if="loading" class="grid gap-4">
+        <div v-for="n in 5" :key="n" class="animate-pulse bg-white dark:bg-gray-800 p-4 rounded-lg">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+            <div class="space-y-2 flex-1">
+              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+            </div>
+            <div class="flex space-x-2">
+              <div class="w-20 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+              <div class="w-20 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Empty State -->
@@ -195,8 +207,8 @@
         <!-- Header -->
         <div class="flex justify-between items-start">
           <div>
-            <h3 class="font-medium text-gray-900 dark:text-gray-100">{{ job.title }}</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Job ID: {{ job.id }}</p>
+            <h3 class="font-medium text-gray-900 dark:text-gray-100">งาน : {{ job.title }}</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">ID: {{ job.id }}</p>
           </div>
           <span
             class="inline-flex px-3 py-1 rounded-full text-xs whitespace-nowrap"
@@ -209,31 +221,31 @@
         <!-- Content -->
         <div class="space-y-2 text-sm">
           <div class="flex items-start gap-2">
-            <i class="fas fa-user-tie w-5 text-gray-400"></i>
+            <i class="fas fa-user-tie w-5 text-blue-500 dark:text-blue-400"></i>
             <span class="text-gray-600 dark:text-gray-300">
               {{ job.creator?.first_name || `Admin ${job.created_by}` }}
             </span>
           </div>
 
           <div class="flex items-start gap-2">
-            <i class="fas fa-map-marker-alt w-5 text-gray-400"></i>
+            <i class="fas fa-map-marker-alt w-5 text-red-500 dark:text-red-400"></i>
             <span class="text-gray-600 dark:text-gray-300">{{ job.location }}</span>
           </div>
 
           <div class="flex items-start gap-2">
-            <i class="fas fa-calendar w-5 text-gray-400"></i>
+            <i class="fas fa-calendar w-5 text-green-500 dark:text-green-400"></i>
             <span class="text-gray-600 dark:text-gray-300">{{ formatDate(job.work_date) }}</span>
           </div>
 
           <div class="flex items-start gap-2">
-            <i class="fas fa-clock w-5 text-gray-400"></i>
+            <i class="fas fa-clock w-5 text-yellow-500 dark:text-yellow-400"></i>
             <span class="text-gray-600 dark:text-gray-300">
               {{ formatTime(job.start_time) }} - {{ formatTime(job.end_time) }}
             </span>
           </div>
 
           <div class="flex items-start gap-2">
-            <i class="fas fa-briefcase w-5 text-gray-400"></i>
+            <i class="fas fa-briefcase w-5 text-purple-500 dark:text-purple-400"></i>
             <div class="flex flex-wrap gap-1">
               <span
                 v-for="position in job.JobPositions"
@@ -246,7 +258,7 @@
           </div>
 
           <div class="flex items-start gap-2">
-            <i class="fas fa-money-bill w-5 text-gray-400"></i>
+            <i class="fas fa-money-bill w-5 text-emerald-500 dark:text-emerald-400"></i>
             <div class="space-y-1">
               <div class="text-sm text-gray-500 dark:text-gray-400">
                 ประมาณการ:

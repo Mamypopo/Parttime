@@ -83,8 +83,24 @@
       <div class="p-1">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <!-- Loading State -->
-          <div v-if="loading" class="col-span-full flex justify-center py-12">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+          <div v-if="loading" class="grid gap-4">
+            <div
+              v-for="n in 5"
+              :key="n"
+              class="animate-pulse bg-white dark:bg-gray-800 p-4 rounded-lg"
+            >
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+                <div class="space-y-2 flex-1">
+                  <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+                  <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+                </div>
+                <div class="flex space-x-2">
+                  <div class="w-20 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                  <div class="w-20 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Empty State -->

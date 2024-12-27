@@ -55,305 +55,317 @@
         </div>
 
         <!-- ปุ่ม Refresh -->
-        <button
-          @click="refreshData"
-          class="p-3 rounded-xl bg-white dark:bg-gray-800/80 shadow-lg hover:shadow-xl transition-all duration-300 text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400"
-          title="รีเฟรชข้อมูล"
-        >
-          <i class="fas fa-sync-alt"></i>
-        </button>
-      </div>
-    </div>
+        <div class="relative group">
+          <button
+            @click="refreshData"
+            class="p-3 rounded-xl bg-white dark:bg-gray-800/80 shadow-lg hover:shadow-xl transition-all duration-300 text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400"
+          >
+            <i class="fas fa-sync-alt"></i>
+          </button>
 
-    <!-- Loading State -->
-    <div v-if="loading" class="grid gap-4">
-      <div v-for="n in 5" :key="n" class="animate-pulse bg-white dark:bg-gray-800 p-4 rounded-lg">
-        <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-          <div class="space-y-2 flex-1">
-            <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
-            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
-          </div>
-          <div class="flex space-x-2">
-            <div class="w-20 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-            <div class="w-20 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+          <!-- Tooltip -->
+          <div
+            class="absolute -bottom-8 left-1/2 -translate-x-1/2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap"
+          >
+            รีเฟรชข้อมูล
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Empty State -->
-    <div
-      v-else-if="formattedUsers.length === 0"
-      class="flex flex-col items-center justify-center py-12"
-    >
-      <div
-        class="w-24 h-24 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 text-gray-500 dark:text-gray-400 rounded-full flex items-center justify-center mb-4"
-      >
-        <i class="fas fa-users text-3xl text-[#EABF71] dark:text-[#F0C788]"></i>
-      </div>
-      <p class="text-gray-500 dark:text-gray-400 text-lg">ไม่พบข้อมูลผู้ใช้ที่ไม่ผ่านการอนุมัติ</p>
-      <p class="text-gray-400 dark:text-gray-500 text-sm mt-2">ลองปรับเงื่อนไขการค้นหาใหม่</p>
-    </div>
-
-    <!-- Users Table/Grid -->
-    <div
-      v-else
-      class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-all duration-300"
-    >
-      <!-- Desktop Table View -->
-      <div class="hidden md:block overflow-x-auto">
-        <table class="w-full">
-          <thead>
-            <tr
-              class="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30"
-            >
-              <th
-                class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[200px]"
-              >
-                ผู้ใช้งาน
-              </th>
-              <th
-                class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[200px]"
-              >
-                อีเมล
-              </th>
-              <th
-                class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[300px]"
-              >
-                ตำแหน่ง
-              </th>
-              <th
-                class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[150px]"
-              >
-                สถานะยืนยันอีเมล
-              </th>
-              <th
-                class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[150px]"
-              >
-                วันที่ไม่อนุมัติ
-              </th>
-              <th
-                class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[300px]"
-              >
-                การจัดการ
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="user in formattedUsers"
-              :key="user.id"
-              class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150"
-            >
-              <!-- User Profile -->
-              <td class="px-6 py-4">
-                <div class="flex items-center space-x-3 max-w-[250px]">
-                  <div class="w-10 h-10 rounded-full overflow-hidden">
-                    <img
-                      v-if="user.profileImage"
-                      :src="adminUserStore.getProfileImage(user.profileImage)"
-                      :alt="user.fullName"
-                      class="w-full h-full object-cover"
-                    />
-                    <div
-                      v-else
-                      class="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 flex items-center justify-center text-white font-medium"
-                    >
-                      {{ user.fullName.charAt(0) }}
-                    </div>
-                  </div>
-                  <div class="min-w-0">
-                    <div class="font-medium text-gray-900 dark:text-gray-100 truncate">
-                      {{ user.fullName }}
-                    </div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">ID: {{ user.id }}</div>
-                  </div>
-                </div>
-              </td>
-
-              <!-- อีเมล -->
-              <td class="px-6 py-4">
-                <div class="text-sm text-gray-900 dark:text-gray-100 truncate max-w-[200px]">
-                  {{ user.email }}
-                </div>
-              </td>
-
-              <!-- ทักษะ -->
-              <td class="px-6 py-4">
-                <div class="flex flex-wrap gap-1">
-                  <span
-                    v-for="skill in user.skills"
-                    :key="skill"
-                    class="px-2 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 whitespace-nowrap"
-                  >
-                    {{ skill }}
-                  </span>
-                </div>
-              </td>
-
-              <!-- สถานะยืนยันอีเมล -->
-              <td class="px-6 py-4">
-                <span
-                  class="px-2 py-1 text-xs rounded-full"
-                  :class="
-                    user.isVerified
-                      ? 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400'
-                      : 'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400'
-                  "
-                >
-                  {{ user.isVerified ? 'ยืนยันแล้ว' : 'ยังไม่ยืนยัน' }}
-                </span>
-              </td>
-
-              <!-- วันที่ไม่อนุมัติ -->
-              <td class="px-6 py-4">
-                <div class="text-sm text-gray-900 dark:text-gray-100">
-                  {{ user.rejectedDate }}
-                </div>
-              </td>
-
-              <!-- การจัดการ -->
-              <td class="px-6 py-4">
-                <div class="flex items-center gap-2">
-                  <!-- ปุ่มรายละเอียด -->
-                  <button
-                    @click="showUserDetails(user)"
-                    class="px-3 py-1.5 text-sm rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white hover:shadow-md hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center"
-                  >
-                    <i class="fas fa-info-circle text-xs mr-1.5"></i>
-                    <span>รายละเอียด</span>
-                  </button>
-
-                  <!-- ปุ่มประวัติการทำงาน -->
-                  <button
-                    @click="handleViewHistory(user)"
-                    class="px-3 py-1.5 text-sm rounded-lg bg-gradient-to-r from-orange-400 to-red-400 text-white hover:shadow-md hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 dark:from-orange-600 dark:to-red-500 dark:text-white flex items-center"
-                  >
-                    <i class="fas fa-history text-xs mr-1.5"></i>
-                    <span>ประวัติ</span>
-                  </button>
-
-                  <!-- ปุ่มอนุมัติ -->
-                  <button
-                    @click="handleApprove(user.id)"
-                    class="px-3 py-1.5 text-sm rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white hover:shadow-md hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center"
-                  >
-                    <i class="fas fa-check-circle text-xs mr-1.5"></i>
-                    <span>อนุมัติ</span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Mobile Grid View -->
-      <div class="md:hidden space-y-4 p-4">
-        <div
-          v-for="user in formattedUsers"
-          :key="user.id"
-          class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700"
-        >
-          <!-- User Info -->
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 rounded-full overflow-hidden">
-              <img
-                v-if="user.profileImage"
-                :src="adminUserStore.getProfileImage(user.profileImage)"
-                :alt="user.fullName"
-                class="w-full h-full object-cover"
-              />
-              <div
-                v-else
-                class="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 flex items-center justify-center text-white font-medium"
-              >
-                {{ user.fullName.charAt(0).toUpperCase() }}
-              </div>
+    <transition name="fade" mode="out-in">
+      <!-- Loading State -->
+      <div v-if="loading" class="grid gap-4">
+        <div v-for="n in 5" :key="n" class="animate-pulse bg-white dark:bg-gray-800 p-4 rounded-lg">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+            <div class="space-y-2 flex-1">
+              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
             </div>
-            <div>
-              <div class="font-medium text-gray-900 dark:text-gray-100">
-                {{ user.fullName }}
-              </div>
-              <div class="text-sm text-gray-500 dark:text-gray-400">
-                ID: {{ user.id }} : {{ user.email }}
-              </div>
+            <div class="flex space-x-2">
+              <div class="w-20 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+              <div class="w-20 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
             </div>
           </div>
+        </div>
+      </div>
 
-          <!-- Skills -->
-          <div class="space-y-2 mb-3">
-            <p class="text-sm text-gray-500 dark:text-gray-400">ทักษะ:</p>
-            <div class="flex flex-wrap gap-1.5">
-              <span
-                v-for="skill in user.skills"
-                :key="skill"
-                class="px-2.5 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400"
+      <!-- Empty State -->
+      <div
+        v-else-if="formattedUsers.length === 0"
+        class="flex flex-col items-center justify-center py-12"
+      >
+        <div
+          class="w-24 h-24 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 text-gray-500 dark:text-gray-400 rounded-full flex items-center justify-center mb-4"
+        >
+          <i class="fas fa-users text-3xl text-[#EABF71] dark:text-[#F0C788]"></i>
+        </div>
+        <p class="text-gray-500 dark:text-gray-400 text-lg">
+          ไม่พบข้อมูลผู้ใช้ที่ไม่ผ่านการอนุมัติ
+        </p>
+        <p class="text-gray-400 dark:text-gray-500 text-sm mt-2">ลองปรับเงื่อนไขการค้นหาใหม่</p>
+      </div>
+
+      <!-- Users Table/Grid -->
+      <div
+        v-else
+        class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-all duration-300"
+      >
+        <!-- Desktop Table View -->
+        <div class="hidden md:block overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr
+                class="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30"
               >
-                {{ skill }}
+                <th
+                  class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[200px]"
+                >
+                  ผู้ใช้งาน
+                </th>
+                <th
+                  class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[200px]"
+                >
+                  อีเมล
+                </th>
+                <th
+                  class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[300px]"
+                >
+                  ตำแหน่ง
+                </th>
+                <th
+                  class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[150px]"
+                >
+                  สถานะยืนยันอีเมล
+                </th>
+                <th
+                  class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[150px]"
+                >
+                  วันที่ไม่อนุมัติ
+                </th>
+                <th
+                  class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left w-[300px]"
+                >
+                  การจัดการ
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="user in formattedUsers"
+                :key="user.id"
+                class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150"
+              >
+                <!-- User Profile -->
+                <td class="px-6 py-4">
+                  <div class="flex items-center space-x-3 max-w-[250px]">
+                    <div class="w-10 h-10 rounded-full overflow-hidden">
+                      <img
+                        v-if="user.profileImage"
+                        :src="adminUserStore.getProfileImage(user.profileImage)"
+                        :alt="user.fullName"
+                        class="w-full h-full object-cover"
+                      />
+                      <div
+                        v-else
+                        class="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 flex items-center justify-center text-white font-medium"
+                      >
+                        {{ user.fullName.charAt(0) }}
+                      </div>
+                    </div>
+                    <div class="min-w-0">
+                      <div class="font-medium text-gray-900 dark:text-gray-100 truncate">
+                        {{ user.fullName }}
+                      </div>
+                      <div class="text-sm text-gray-500 dark:text-gray-400">ID: {{ user.id }}</div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- อีเมล -->
+                <td class="px-6 py-4">
+                  <div class="text-sm text-gray-900 dark:text-gray-100 truncate max-w-[200px]">
+                    {{ user.email }}
+                  </div>
+                </td>
+
+                <!-- ทักษะ -->
+                <td class="px-6 py-4">
+                  <div class="flex flex-wrap gap-1">
+                    <span
+                      v-for="skill in user.skills"
+                      :key="skill"
+                      class="px-2 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 whitespace-nowrap"
+                    >
+                      {{ skill }}
+                    </span>
+                  </div>
+                </td>
+
+                <!-- สถานะยืนยันอีเมล -->
+                <td class="px-6 py-4">
+                  <span
+                    class="px-2 py-1 text-xs rounded-full"
+                    :class="
+                      user.isVerified
+                        ? 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400'
+                        : 'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400'
+                    "
+                  >
+                    {{ user.isVerified ? 'ยืนยันแล้ว' : 'ยังไม่ยืนยัน' }}
+                  </span>
+                </td>
+
+                <!-- วันที่ไม่อนุมัติ -->
+                <td class="px-6 py-4">
+                  <div class="text-sm text-gray-900 dark:text-gray-100">
+                    {{ user.rejectedDate }}
+                  </div>
+                </td>
+
+                <!-- การจัดการ -->
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-2">
+                    <!-- ปุ่มรายละเอียด -->
+                    <button
+                      @click="showUserDetails(user)"
+                      class="px-3 py-1.5 text-sm rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white hover:shadow-md hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center"
+                    >
+                      <i class="fas fa-info-circle text-xs mr-1.5"></i>
+                      <span>รายละเอียด</span>
+                    </button>
+
+                    <!-- ปุ่มประวัติการทำงาน -->
+                    <button
+                      @click="handleViewHistory(user)"
+                      class="px-3 py-1.5 text-sm rounded-lg bg-gradient-to-r from-orange-400 to-red-400 text-white hover:shadow-md hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 dark:from-orange-600 dark:to-red-500 dark:text-white flex items-center"
+                    >
+                      <i class="fas fa-history text-xs mr-1.5"></i>
+                      <span>ประวัติ</span>
+                    </button>
+
+                    <!-- ปุ่มอนุมัติ -->
+                    <button
+                      @click="handleApprove(user.id)"
+                      class="px-3 py-1.5 text-sm rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white hover:shadow-md hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center"
+                    >
+                      <i class="fas fa-check-circle text-xs mr-1.5"></i>
+                      <span>อนุมัติ</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Grid View -->
+        <div class="md:hidden space-y-4 p-4">
+          <div
+            v-for="user in formattedUsers"
+            :key="user.id"
+            class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700"
+          >
+            <!-- User Info -->
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-10 h-10 rounded-full overflow-hidden">
+                <img
+                  v-if="user.profileImage"
+                  :src="adminUserStore.getProfileImage(user.profileImage)"
+                  :alt="user.fullName"
+                  class="w-full h-full object-cover"
+                />
+                <div
+                  v-else
+                  class="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 flex items-center justify-center text-white font-medium"
+                >
+                  {{ user.fullName.charAt(0).toUpperCase() }}
+                </div>
+              </div>
+              <div>
+                <div class="font-medium text-gray-900 dark:text-gray-100">
+                  {{ user.fullName }}
+                </div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                  ID: {{ user.id }} : {{ user.email }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Skills -->
+            <div class="space-y-2 mb-3">
+              <p class="text-sm text-gray-500 dark:text-gray-400">ทักษะ:</p>
+              <div class="flex flex-wrap gap-1.5">
+                <span
+                  v-for="skill in user.skills"
+                  :key="skill"
+                  class="px-2.5 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400"
+                >
+                  {{ skill }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Status -->
+            <div class="flex justify-between text-sm mb-2">
+              <span class="text-gray-500 dark:text-gray-400">สถานะยืนยันอีเมล:</span>
+              <span
+                class="px-2 py-1 rounded-full text-xs"
+                :class="
+                  user.isVerified
+                    ? 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400'
+                    : 'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400'
+                "
+              >
+                {{ user.isVerified ? 'ยืนยันแล้ว' : 'ยังไม่ยืนยัน' }}
               </span>
             </div>
-          </div>
 
-          <!-- Status -->
-          <div class="flex justify-between text-sm mb-2">
-            <span class="text-gray-500 dark:text-gray-400">สถานะยืนยันอีเมล:</span>
-            <span
-              class="px-2 py-1 rounded-full text-xs"
-              :class="
-                user.isVerified
-                  ? 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400'
-                  : 'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400'
-              "
-            >
-              {{ user.isVerified ? 'ยืนยันแล้ว' : 'ยังไม่ยืนยัน' }}
-            </span>
-          </div>
+            <!-- Date -->
+            <div class="flex justify-between text-sm mb-4">
+              <span class="text-gray-500 dark:text-gray-400">วันที่ไม่อนุมัติ:</span>
+              <span class="text-gray-900 dark:text-gray-100">{{ user.rejectedDate }}</span>
+            </div>
 
-          <!-- Date -->
-          <div class="flex justify-between text-sm mb-4">
-            <span class="text-gray-500 dark:text-gray-400">วันที่ไม่อนุมัติ:</span>
-            <span class="text-gray-900 dark:text-gray-100">{{ user.rejectedDate }}</span>
-          </div>
+            <!-- Actions -->
+            <div class="grid grid-cols-2 gap-2">
+              <!-- Row 1: รายละเอียด + อนุมัติ -->
+              <button
+                @click="showUserDetails(user)"
+                class="group px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
+              >
+                <i
+                  class="fas fa-info-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
+                ></i>
+                <span>รายละเอียด</span>
+              </button>
 
-          <!-- Actions -->
-          <div class="grid grid-cols-2 gap-2">
-            <!-- Row 1: รายละเอียด + อนุมัติ -->
-            <button
-              @click="showUserDetails(user)"
-              class="group px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
-            >
-              <i
-                class="fas fa-info-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
-              ></i>
-              <span>รายละเอียด</span>
-            </button>
+              <button
+                @click="handleApprove(user.id)"
+                class="group px-4 py-2.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
+              >
+                <i
+                  class="fas fa-check-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
+                ></i>
+                <span>อนุมัติ</span>
+              </button>
 
-            <button
-              @click="handleApprove(user.id)"
-              class="group px-4 py-2.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-600 dark:to-teal-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 flex items-center justify-center"
-            >
-              <i
-                class="fas fa-check-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
-              ></i>
-              <span>อนุมัติ</span>
-            </button>
-
-            <!-- Row 2: ประวัติ (ถ้ามี) -->
-            <button
-              @click="handleViewHistory(user)"
-              class="col-span-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-orange-400 to-red-400 text-white hover:shadow-md hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 dark:from-orange-600 dark:to-red-500 dark:text-white flex items-center justify-center"
-            >
-              <i
-                class="fas fa-history text-xs mr-1.5 group-hover:scale-110 transition-transform"
-              ></i>
-              <span>ประวัติ</span>
-            </button>
+              <!-- Row 2: ประวัติ (ถ้ามี) -->
+              <button
+                @click="handleViewHistory(user)"
+                class="col-span-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-orange-400 to-red-400 text-white hover:shadow-md hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 dark:from-orange-600 dark:to-red-500 dark:text-white flex items-center justify-center"
+              >
+                <i
+                  class="fas fa-history text-xs mr-1.5 group-hover:scale-110 transition-transform"
+                ></i>
+                <span>ประวัติ</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </transition>
 
     <!-- Pagination -->
     <div

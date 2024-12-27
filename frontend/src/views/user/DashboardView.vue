@@ -88,7 +88,7 @@
         </div>
       </div>
 
-      <!-- เงานที่กำลังจะมาถึง -->
+      <!-- งานที่กำลังจะมาถึง -->
       <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
         <div class="flex justify-between items-center">
           <div>
@@ -120,7 +120,7 @@
             <!-- ตัวเลือกช่วงเวลา -->
             <select
               v-model="incomeRange"
-              class="text-sm border rounded-lg px-3 py-1.5 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600"
+              class="text-sm border rounded-lg px-3 py-1.5 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:outline-none"
             >
               <option value="daily">7 วันล่าสุด</option>
               <option value="weekly">4 สัปดาห์ล่าสุด</option>
@@ -157,35 +157,67 @@
 
         <!-- Chart -->
         <div v-else class="h-48 md:h-64">
-          <IncomeChart :incomes="recentIncomes" :range="incomeRange" />
+          <IncomeChart :incomes="dashboardStore.paidIncomes" :range="incomeRange" />
         </div>
       </div>
 
-      <!-- ตารางรายได้  -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
-        <h2 class="text-base md:text-lg font-semibold text-gray-800 dark:text-white mb-4">
-          รายได้ล่าสุด
-        </h2>
-        <div class="space-y-3">
-          <div
-            v-for="income in recentIncomes"
-            :key="income.id"
-            class="flex flex-col sm:flex-row justify-between gap-2 p-3 border dark:border-gray-700 rounded-lg"
-          >
-            <div>
-              <h4 class="font-medium text-gray-800 dark:text-white">{{ income.jobTitle }}</h4>
-              <p class="text-sm text-gray-500 dark:text-gray-400">{{ income.workplace }}</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 sm:hidden">
-                {{ formatDate(income.date) }}
-              </p>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+        <!-- รายได้ล่าสุด -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
+          <h2 class="text-base md:text-lg font-semibold text-gray-800 dark:text-white mb-4">
+            รายได้ล่าสุด
+          </h2>
+          <div class="space-y-3">
+            <div
+              v-for="income in paidIncomes"
+              :key="income.id"
+              class="flex flex-col sm:flex-row justify-between gap-2 p-3 border dark:border-gray-700 rounded-lg"
+            >
+              <div>
+                <h4 class="font-medium text-gray-800 dark:text-white">{{ income.jobTitle }}</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ income.workplace }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 sm:hidden">
+                  {{ formatDate(income.date) }}
+                </p>
+              </div>
+              <div class="flex justify-between sm:block">
+                <p class="text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
+                  {{ formatDate(income.date) }}
+                </p>
+                <span class="text-base md:text-lg font-medium text-green-600 dark:text-green-400">
+                  {{ formatCurrency(income.amount) }}
+                </span>
+              </div>
             </div>
-            <div class="flex justify-between sm:block">
-              <p class="text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
-                {{ formatDate(income.date) }}
-              </p>
-              <span class="text-base md:text-lg font-medium text-green-600 dark:text-green-400">
-                {{ formatCurrency(income.amount) }}
-              </span>
+          </div>
+        </div>
+
+        <!-- รายได้ที่รอจ่าย -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
+          <h2 class="text-base md:text-lg font-semibold text-gray-800 dark:text-white mb-4">
+            รายได้ที่รอจ่าย
+          </h2>
+          <div class="space-y-3">
+            <div
+              v-for="income in pendingIncomes"
+              :key="income.id"
+              class="flex flex-col sm:flex-row justify-between gap-2 p-3 border dark:border-gray-700 rounded-lg"
+            >
+              <div>
+                <h4 class="font-medium text-gray-800 dark:text-white">{{ income.jobTitle }}</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ income.workplace }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 sm:hidden">
+                  {{ formatDate(income.date) }}
+                </p>
+              </div>
+              <div class="flex justify-between sm:block">
+                <p class="text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
+                  {{ formatDate(income.date) }}
+                </p>
+                <span class="text-base md:text-lg font-medium text-yellow-600 dark:text-yellow-400">
+                  {{ formatCurrency(income.amount) }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -312,8 +344,9 @@ export default {
       incomeRange: 'monthly'
     }
   },
-  async mounted() {
-    await this.dashboardStore.fetchDashboardData()
+
+  async created() {
+    await this.dashboardStore.fetchDashboardData(this.incomeRange)
   },
   computed: {
     // ข้อมูลผู้ใช้
@@ -350,8 +383,11 @@ export default {
     todaySchedule() {
       return this.dashboardStore.todaySchedule
     },
-    recentIncomes() {
-      return this.dashboardStore.recentIncomes
+    paidIncomes() {
+      return this.dashboardStore.paidIncomes
+    },
+    pendingIncomes() {
+      return this.dashboardStore.pendingIncomes
     },
     upcomingDeadlines() {
       return this.dashboardStore.upcomingDeadlines
@@ -363,9 +399,11 @@ export default {
       await this.dashboardStore.fetchDashboardData(this.incomeRange)
       // อัพเดทข้อมูลกราฟตามช่วงเวลาที่เลือก
     },
+
     printChart() {
       window.print()
     },
+
     exportIncome() {
       Swal.fire({
         title: 'ยืนยันการดาวน์โหลด',
@@ -379,13 +417,24 @@ export default {
       }).then((result) => {
         if (result.isConfirmed) {
           try {
-            // สร้างข้อมูลสำหรับ export
-            const data = this.recentIncomes.map((income) => ({
+            // สร้างข้อมูลสำหรับ export โดยรวมทั้งรายได้ที่จ่ายแล้วและรอจ่าย
+            const paidData = this.dashboardStore.paidIncomes.map((income) => ({
               วันที่: this.formatDate(income.date),
               งาน: income.jobTitle,
               สถานที่: income.workplace,
-              จำนวนเงิน: income.amount
+              จำนวนเงิน: income.amount,
+              สถานะ: 'จ่ายแล้ว'
             }))
+
+            const pendingData = this.dashboardStore.pendingIncomes.map((income) => ({
+              วันที่: this.formatDate(income.date),
+              งาน: income.jobTitle,
+              สถานที่: income.workplace,
+              จำนวนเงิน: income.amount,
+              สถานะ: 'รอการจ่าย'
+            }))
+
+            const data = [...paidData, ...pendingData]
 
             // สร้าง workbook
             const wb = XLSX.utils.book_new()
@@ -396,16 +445,23 @@ export default {
               { wch: 15 }, // วันที่
               { wch: 30 }, // งาน
               { wch: 25 }, // สถานที่
-              { wch: 15 } // จำนวนเงิน
+              { wch: 15 }, // จำนวนเงิน
+              { wch: 12 } // สถานะ
             ]
             ws['!cols'] = colWidths
 
-            //  worksheet ลงใน workbook
+            // เพิ่ม worksheet ลงใน workbook
             XLSX.utils.book_append_sheet(wb, ws, 'รายได้')
 
             // บันทึกไฟล์
             const fileName = `income_report_${new Date().toISOString().split('T')[0]}.xlsx`
             XLSX.writeFile(wb, fileName)
+
+            Swal.fire({
+              icon: 'success',
+              title: 'ดาวน์โหลดสำเร็จ',
+              text: 'บันทึกรายงานรายได้เรียบร้อยแล้ว'
+            })
           } catch (error) {
             console.error('Error exporting income:', error)
             Swal.fire({
@@ -495,7 +551,7 @@ export default {
       }
     },
 
-    // เพิ่ม method สำหรับไอคอนตามสถานะ
+    //  method สำหรับไอคอนตามสถานะ
     getStatusIcon(status) {
       return {
         'fa-clock': status === 'pending',

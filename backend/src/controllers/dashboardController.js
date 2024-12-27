@@ -268,13 +268,15 @@ export const getUserDashboard = async (req, res) => {
         const userId = req.user.id;
 
         // ดึงข้อมูลทั้งหมดพร้อมกัน
-        const [stats, todaySchedule, recentIncomes, upcomingDeadlines] = await Promise.all([
+        const [stats, todaySchedule, paidIncomes, pendingIncomes, upcomingDeadlines] = await Promise.all([
             DashboardModel.getUserDashboardStats(userId),
             DashboardModel.getTodaySchedule(userId),
-            DashboardModel.getRecentIncomes(userId),
+            DashboardModel.getRecentPaidIncomes(userId),
+            DashboardModel.getPendingIncomes(userId),
             DashboardModel.getUpcomingDeadlines(userId)
         ]);
 
+        console.log()
         // แปลงข้อมูลตารางงานให้อยู่ในรูปแบบที่ต้องการ
         const formattedSchedule = todaySchedule.map(job => ({
             id: job.id,
@@ -306,22 +308,29 @@ export const getUserDashboard = async (req, res) => {
             };
         });
 
-        // แปลงข้อมูลรายได้ให้อยู่ในรูปแบบที่ต้องการ
-        const formattedIncomes = recentIncomes
-            .filter(income => income.PaymentHistory) // กรองเฉพาะรายการที่มี paymentHistory
-            .map(income => ({
-                id: income.id,
-                jobTitle: income.jobPosition.position_name,
-                workplace: income.jobPosition.job.title,
-                date: income.PaymentHistory.paid_at, // ใช้วันที่จ่ายเงินแทน
-                amount: income.PaymentHistory.amount, // ใช้จำนวนเงินจาก paymentHistory
-                score: income.workHistories[0]?.total_score || 0
-            }));
+        // แปลงข้อมูลรายได้ที่จ่ายแล้ว
+        const formattedPaidIncomes = paidIncomes.map(income => ({
+            id: income.id,
+            jobTitle: income.jobPosition.position_name,
+            workplace: income.jobPosition.job.title,
+            date: income.PaymentHistory[0].paid_at,
+            amount: Number(income.PaymentHistory[0].amount)
+        }));
+
+        // แปลงข้อมูลรายได้ที่รอจ่าย
+        const formattedPendingIncomes = pendingIncomes.map(income => ({
+            id: income.id,
+            jobTitle: income.jobPosition.position_name,
+            workplace: income.jobPosition.job.title,
+            date: income.jobPosition.job.work_date,
+            amount: Number(income.jobPosition.wage)
+        }));
 
         res.status(200).json({
             stats,
             todaySchedule: formattedSchedule,
-            recentIncomes: formattedIncomes,
+            paidIncomes: formattedPaidIncomes,
+            pendingIncomes: formattedPendingIncomes,
             upcomingDeadlines: formattedDeadlines
         });
 

@@ -46,7 +46,7 @@
           <div
             class="flex justify-between items-center px-4 py-2 bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] dark:from-[#feac5e]/80 dark:via-[#c779d0]/80 dark:to-[#4bc0c8]/80"
           >
-            <h3 class="font-medium text-[#3A3A49] dark:text-white">การแจ้งเตือน</h3>
+            <h3 class="font-medium text-white">การแจ้งเตือน</h3>
             <button
               v-if="notifications.length > 0"
               @click="markAllAsRead"
@@ -92,7 +92,7 @@
                       class="text-sm font-medium"
                       :class="
                         !notification.read
-                          ? 'text-[#5DADEC] dark:text-[#A78BFA]'
+                          ? 'text-[#5DADEC] dark:text-[#A4B83C]'
                           : 'text-[#94A3B8] dark:text-[#64748B]'
                       "
                     >

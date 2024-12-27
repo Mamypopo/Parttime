@@ -1,9 +1,11 @@
 <template>
-  <Line :data="chartData" :options="chartOptions" />
+  <Line v-if="chartData" :data="chartData" :options="chartOptions" />
 </template>
 
 <script>
 import { Line } from 'vue-chartjs'
+import { useUserDashboardStore } from '@/stores/userDashboardStore'
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -31,13 +33,15 @@ export default {
   name: 'IncomeChart',
   components: { Line },
   props: {
-    incomes: {
-      type: Array,
-      required: true
-    },
     range: {
       type: String,
       default: 'monthly'
+    }
+  },
+
+  data() {
+    return {
+      store: useUserDashboardStore()
     }
   },
   computed: {
@@ -137,8 +141,6 @@ export default {
 
         case 'weekly':
           for (let i = 3; i >= 0; i--) {
-            const date = new Date(today)
-            date.setDate(date.getDate() - i * 7)
             labels.push(`สัปดาห์ที่ ${4 - i}`)
           }
           break
@@ -164,6 +166,8 @@ export default {
     },
 
     getIncomeData() {
+      if (!this.store.paidIncomes) return []
+
       const data = []
       const labels = this.getLabels()
 
@@ -176,23 +180,30 @@ export default {
     },
 
     calculateIncomeForLabel(label) {
-      return this.incomes.reduce((total, income) => {
+      if (!this.store.paidIncomes) return 0
+
+      return this.store.paidIncomes.reduce((total, income) => {
+        if (!income?.date) return total
         const incomeDate = new Date(income.date)
         const matchesLabel = this.dateMatchesLabel(incomeDate, label)
-        return total + (matchesLabel ? income.amount : 0)
+        return total + (matchesLabel ? income.amount || 0 : 0)
       }, 0)
     },
 
     dateMatchesLabel(date, label) {
+      if (!date || !label) return false
+
       switch (this.range) {
         case 'daily':
           return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }) === label
 
         case 'weekly': {
-          let weekNumber = parseInt(label.split(' ')[1])
-          let today = new Date()
-          let weekStart = new Date(today.setDate(today.getDate() - (4 - weekNumber) * 7))
-          let weekEnd = new Date(weekStart)
+          const weekNumber = parseInt(label.split(' ')[1])
+          if (isNaN(weekNumber)) return false
+
+          const today = new Date()
+          const weekStart = new Date(today.setDate(today.getDate() - (4 - weekNumber) * 7))
+          const weekEnd = new Date(weekStart)
           weekEnd.setDate(weekEnd.getDate() + 6)
           return date >= weekStart && date <= weekEnd
         }

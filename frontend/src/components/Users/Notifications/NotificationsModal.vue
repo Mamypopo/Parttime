@@ -31,7 +31,7 @@
               <div
                 class="flex justify-between items-center p-6 bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] dark:from-[#feac5e]/80 dark:via-[#c779d0]/80 dark:to-[#4bc0c8]/80"
               >
-                <HeadlessDialogTitle class="text-lg font-semibold text-[#3A3A49] dark:text-white">
+                <HeadlessDialogTitle class="text-lg font-semibold text-white">
                   การแจ้งเตือนทั้งหมด
                 </HeadlessDialogTitle>
                 <div class="flex items-center gap-4">
@@ -109,13 +109,13 @@
                       </span>
                     </div>
 
-                    <!-- Content -->
+                    <!-- Message -->
                     <div class="flex-1">
                       <p
                         class="font-medium text-lg mb-1"
                         :class="
                           !notification.read
-                            ? 'text-[#CDE45F] dark:text-[#A4B83C]'
+                            ? 'text-[#5DADEC] dark:text-[#A4B83C]'
                             : 'text-[#94A3B8] dark:text-[#64748B]'
                         "
                       >
