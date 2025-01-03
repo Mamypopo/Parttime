@@ -265,7 +265,7 @@
               <label class="flex items-center gap-3 justify-center group cursor-pointer">
                 <input
                   type="checkbox"
-                  v-model="form.acceptTerms"
+                  v-model="acceptTerms"
                   class="w-6 h-6 sm:w-5 sm:h-5 rounded border-gray-300 text-[#c779d0] focus:ring-[#c779d0] transition-all duration-200 cursor-pointer"
                 />
                 <span class="select-none">
@@ -575,6 +575,7 @@ export default {
         skills: [],
         nationalIdError: ''
       },
+      acceptTerms: false,
       // สำหรับแสดงชื่อไฟล์ที่เลือก
       profileFileName: '',
       educationFileName: '',
@@ -620,6 +621,19 @@ export default {
       }
     },
     validateForm() {
+      // เช็คการยอมรับข้อกำหนด
+      if (!this.acceptTerms) {
+        this.showTermsError = true
+        Swal.fire({
+          icon: 'warning',
+          title: 'กรุณายอมรับข้อกำหนด',
+          text: 'คุณต้องยอมรับข้อกำหนดการใช้งานและนโยบายความเป็นส่วนตัวก่อนลงทะเบียน',
+          timer: 2000,
+          showConfirmButton: false
+        })
+        return false
+      }
+      this.showTermsError = false
       // เช็คข้อมูลที่จำเป็น
       const requiredFields = {
         email: 'อีเมล',
@@ -737,6 +751,20 @@ export default {
       if (!this.validateForm()) return
 
       try {
+        // การยืนยันก่อนลงทะเบียน
+        const confirmResult = await Swal.fire({
+          title: 'ยืนยันการลงทะเบียน',
+          text: 'คุณต้องการลงทะเบียนใช่หรือไม่?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'ใช่, ลงทะเบียน',
+          cancelButtonText: 'ยกเลิก'
+        })
+
+        if (!confirmResult.isConfirmed) return
+
         // แสดง loading
         Swal.fire({
           title: 'กำลังลงทะเบียน...',
@@ -787,6 +815,7 @@ export default {
             'Content-Type': 'multipart/form-data'
           }
         })
+
         // แสดง success message
         await Swal.fire({
           icon: 'success',
@@ -808,14 +837,6 @@ export default {
           text: error.response?.data?.message || 'ไม่สามารถลงทะเบียนได้ กรุณาลองใหม่อีกครั้ง'
         })
       }
-    },
-    validateTerms() {
-      if (!this.form.acceptTerms) {
-        this.showTermsError = true
-        return false
-      }
-      this.showTermsError = false
-      return true
     },
 
     openTermsModal() {

@@ -91,7 +91,7 @@ export const useSidebarStore = defineStore('sidebar', {
                 badgeCount: 0
             },
             {
-                name: 'แจ้งเตือน',
+                name: 'การแจ้งเตือน',
                 icon: 'fas fa-bell',
                 isComponent: true,
                 hasNotification: true
@@ -159,8 +159,6 @@ export const useSidebarStore = defineStore('sidebar', {
         toggleUserSubmenu() {
             this.showUserSubmenu = !this.showUserSubmenu
         },
-
-
 
         toggleDarkMode() {
             this.isDarkMode = !this.isDarkMode

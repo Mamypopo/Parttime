@@ -410,7 +410,7 @@ export default {
     addPosition() {
       // ย่อทุกตำแหน่งที่มีอยู่
       this.expandedPositions = this.expandedPositions.map(() => false)
-      // เพิ่มตำแหน่งใหม่และกำหนดให้ขยาย
+      // ตำแหน่งใหม่และกำหนดให้ขยาย
       this.formData.positions.push({
         name: '',
         wage: 0,
@@ -586,21 +586,19 @@ export default {
   opacity: 0;
 }
 
-/* ... styles อื่นๆ เหมือนเดิม ... */
-
-/* เพิ่ม transition สำหรับ dropdown */
+/*  transition สำหรับ dropdown */
 .absolute {
   transition:
     opacity 0.2s ease,
     transform 0.2s ease;
 }
 
-/* ปรับแต่ง dropdown */
+/*  dropdown */
 .border-purple-100 {
   border-color: #ede9f5;
 }
 
-/* ปรับแต่ง hover effect */
+/*  hover effect */
 .hover\:bg-opacity-40:hover {
   background-opacity: 0.4;
 }

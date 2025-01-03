@@ -416,11 +416,6 @@ export default {
       showParticipantsModal: false,
       showWorkStatusModal: false,
       showEditModal: false,
-      searchFilters: {
-        search: '',
-        status: '',
-        date: null
-      },
       jobParticipants: []
     }
   },
@@ -489,7 +484,7 @@ export default {
     // สำหรับโหลดข้อมูลครั้งแรก
     async loadInitialData() {
       try {
-        await this.jobStore.fetchJobsAndParticipants(this.searchFilters)
+        await this.jobStore.fetchJobsAndParticipants()
       } catch (error) {
         this.showError(error.message || 'ไม่สามารถโหลดข้อมูลงานได้')
       }

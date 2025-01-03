@@ -7,7 +7,7 @@ import * as jobParticipationModel from '../models/jobParticipationModel.js'
 import { calculateAge } from '../utils/calculateAge.js';
 import { sendVerificationEmail } from '../utils/email.js';
 import { createLog } from '../models/logModel.js';
-
+import * as  notificationController from '../controllers/notificationController.js'
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
@@ -87,7 +87,7 @@ export const registerUser = async (req, res) => {
 
 
         await sendVerificationEmail(user, verificationToken);
-
+        await notificationController.createNewUserRegistrationNotification(user.id);
         // เก็บ log การลงทะเบียนสำเร็จ
         await createLog(
             user.id,

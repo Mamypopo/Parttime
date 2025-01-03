@@ -387,7 +387,7 @@ export default {
         case 'rejected':
           return 'ไม่ผ่านการอนุมัติ'
         case 'completed':
-          return 'ได้รับการประเมินแล้ว'
+          return 'ประเมินแล้ว'
         case 'cancelled':
           return 'ยกเลิกการสมัครแล้ว'
         default:

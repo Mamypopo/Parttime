@@ -90,7 +90,7 @@ const fileFilter = (req, file, cb) => {
     }
 
     if (file.fieldname === 'profile_image') {
-        if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
             return cb(new Error('โปรดอัปโหลดรูปภาพเท่านั้น'), false);
         }
         cb(null, true);
@@ -114,8 +114,8 @@ const fileFilter = (req, file, cb) => {
     }
 
     if (file.fieldname === 'payment_slip') {
-        if (!file.originalname.match(/\.(jpg|jpeg|png|pdf)$/)) {
-            return cb(new Error('อนุญาตเฉพาะไฟล์ .jpg .jpeg .png และ .pdf เท่านั้นสำหรับสลิปการโอนเงิน'), false);
+        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+            return cb(new Error('อนุญาตเฉพาะไฟล์ .jpg .jpeg  และ .png  เท่านั้นสำหรับสลิปการโอนเงิน'), false);
         }
         cb(null, true);
         return;

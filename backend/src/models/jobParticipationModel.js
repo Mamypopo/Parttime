@@ -1,6 +1,5 @@
 import prisma from '../config/prisma.js';
 
-
 // ฟังก์ชันเพื่อค้นหา Job Participation ตาม ID
 export const findJobParticipationById = async (jobParticipationId) => {
 
@@ -33,9 +32,9 @@ export const findParticipationByUserAndJob = async (userId, jobId) => {
                 jobPosition: {
                     job_id: parseInt(jobId)
                 },
-                status: 'completed', // เพิ่มเงื่อนไข completed
+                status: 'completed',
                 workHistories: {
-                    some: {} // ต้องมี workHistory
+                    some: {}
                 }
             },
             include: {

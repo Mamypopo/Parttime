@@ -96,7 +96,7 @@
               <button
                 @click="showPositionModal = true"
                 type="button"
-                class="px-4 py-2 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 text-white rounded-xl hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg"
+                class="px-4 py-2 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 text-white rounded-xl hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg focus:outline-none"
               >
                 <i class="fas fa-plus mr-2"></i>เพิ่มตำแหน่ง
               </button>

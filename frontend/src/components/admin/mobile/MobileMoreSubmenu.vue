@@ -33,7 +33,7 @@
 
             <!-- Menu Items -->
             <div class="p-4 space-y-4">
-              <router-link
+              <!-- <router-link
                 to="/admin/PaymentManagement-view"
                 @click="$emit('close')"
                 class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
@@ -43,7 +43,7 @@
                   <span class="text-gray-600 dark:text-gray-300 text-sm">การเงิน</span>
                 </div>
                 <i class="fas fa-chevron-right text-gray-400"></i>
-              </router-link>
+              </router-link> -->
 
               <!-- Dark Mode Toggle -->
               <div
@@ -151,7 +151,7 @@ export default {
 
         if (!result.isConfirmed) return
 
-        // เพิ่ม Loader ระหว่าง Logout
+        //  Loader ระหว่าง Logout
         Swal.fire({
           title: 'กำลังออกจากระบบ...',
           allowOutsideClick: false,

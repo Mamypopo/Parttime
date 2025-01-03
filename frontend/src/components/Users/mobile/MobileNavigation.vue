@@ -1,6 +1,6 @@
 <template>
   <nav
-    class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t dark:border-gray-700 z-50"
+    class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t dark:border-gray-700 px-1 py-1 z-50"
   >
     <div class="flex justify-around items-center h-16">
       <router-link

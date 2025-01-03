@@ -95,7 +95,7 @@
                     <label class="cursor-pointer block w-full">
                       <input
                         type="file"
-                        accept="image/*,.pdf"
+                        accept="image/*"
                         @change="handleFileUpload"
                         class="hidden"
                         required
@@ -129,7 +129,9 @@
                         <template v-else>
                           <i class="fas fa-cloud-upload-alt text-2xl text-purple-500 mb-2"></i>
                           <span class="text-sm text-gray-500">คลิกเพื่อเลือกไฟล์</span>
-                          <span class="text-xs text-gray-400 mt-1">รองรับไฟล์ภาพหรือ PDF</span>
+                          <span class="text-xs text-gray-400 mt-1"
+                            >รองรับไฟล์รูปภาพ JPG, JPEG, PNG</span
+                          >
                         </template>
                       </div>
                     </label>

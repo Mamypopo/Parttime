@@ -15,7 +15,7 @@
               <i class="fas mr-1.5" :class="getStatusIcon(userStore.user?.approved)"></i>
               {{ getStatusText(userStore.user?.approved) }}
             </span>
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-2 mt-1">
               <span
                 v-for="skill in userSkills"
                 :key="skill"
@@ -26,7 +26,7 @@
             </div>
           </div>
         </div>
-        <div class="text-left md:text-right mt-4 md:mt-0">
+        <div class="text-left md:text-right mt-2 md:mt-0">
           <p class="text-sm text-gray-500 dark:text-gray-400">วันที่วันนี้</p>
           <p class="text-base md:text-lg font-medium text-gray-800 dark:text-white">
             {{ currentDate }}

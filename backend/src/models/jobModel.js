@@ -328,6 +328,12 @@ export const getMyCreatedJobs = async (page = 1, pageSize = 10, filters = {}) =>
         ]
     };
 
+    if (filters.id) {
+        where.AND.push({
+            id: filters.id
+        });
+    }
+
     if (filters.title) {
         where.AND.push({
             title: { contains: filters.title, mode: 'insensitive' }
@@ -339,6 +345,7 @@ export const getMyCreatedJobs = async (page = 1, pageSize = 10, filters = {}) =>
             location: { contains: filters.location, mode: 'insensitive' }
         });
     }
+
 
     if (filters.dateFrom || filters.dateTo) {
         where.AND.push({

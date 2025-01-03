@@ -171,7 +171,7 @@ export const getJobExpensesReport = async (month = new Date().getMonth(), year =
         })
         const jobMap = new Map()
         for (const payment of payments) {
-            // เพิ่มการตรวจสอบข้อมูล
+            // การตรวจสอบข้อมูล
             if (!payment?.job_participation?.jobPosition?.job) {
                 continue // ข้ามรายการที่ไม่มีข้อมูลครบ
             }
@@ -339,7 +339,7 @@ export const getRatedWorkHistories = () => {
                             profile_image: true
                         }
                     },
-                    jobPosition: {  // เพิ่มข้อมูลงาน
+                    jobPosition: {
                         include: {
                             job: {
                                 select: {
@@ -512,7 +512,7 @@ export const getUserDashboardStats = async (userId) => {
                 }
             }),
 
-            // นับจำนวนงานที่เสร็จสิ��นทั้งหมด
+            // นับจำนวนงานที่เสร็จสิ้นทั้งหมด
             prisma.jobParticipation.count({
                 where: {
                     user_id: userId,
@@ -554,7 +554,7 @@ export const getUserDashboardStats = async (userId) => {
                 history => history.is_passed_evaluation
             );
 
-            // เพิ่มรายได้เฉพาะงานที่ผ่านการประเมิน
+            // ายได้เฉพาะงานที่ผ่านการประเมิน
             if (isPassedEvaluation) {
                 return total + Number(job.jobPosition.wage);
             }

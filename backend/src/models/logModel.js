@@ -1,7 +1,5 @@
 import prisma from '../config/prisma.js';
 
-
-
 export const createLog = async (
     userId,
     adminId,

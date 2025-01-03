@@ -122,6 +122,7 @@ export const getMyCreatedJobs = async (req, res) => {
 
         // เพิ่ม query parameters สำหรับการค้นหา
         const filters = {
+            id: req.query.id ? parseInt(req.query.id) : undefined,
             title: req.query.title,
             location: req.query.location,
             dateFrom: req.query.dateFrom,
@@ -439,15 +440,10 @@ export const applyForJob = async (req, res) => {
             });
         }
 
-
-
-
         // สร้างการสมัครงานใหม่ในตำแหน่งที่เลือก
         const jobParticipation = await jobModel.createJobParticipation(userId, jobId, jobPositionId);
 
-
         await notificationController.createNewApplicationNotification(jobId, userId);
-
 
         await createLog(userId, null, 'Apply Job successfully', '/api/jobs/apply', 'POST', `User { Name: ${user.first_name} ${user.last_name} Email: ${user.email} }  applied for Job ID: ${jobId}`, ip, userAgent);
         res.status(200).json({ message: 'สมัครงานสำเร็จ กรุณารอการอนุมัติจากแอดมินผู้สร้างงาน', jobParticipation });

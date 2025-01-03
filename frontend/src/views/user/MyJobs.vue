@@ -45,9 +45,18 @@
         <div class="space-y-2">
           <!-- ชื่อและรายละเอียดงาน -->
           <div class="flex justify-between items-start">
-            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
-              {{ job.title }}
-            </h3>
+            <div class="flex items-center gap-2">
+              <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                {{ job.title }}
+              </h3>
+              <!-- แท็กสถานะงาน -->
+              <span
+                :class="getJobStatusTagClass(job.job_status)"
+                class="text-xs px-2 py-1 rounded-full font-medium"
+              >
+                {{ getJobStatusText(job.job_status) }}
+              </span>
+            </div>
             <button
               class="text-sm flex items-center text-[#4bc0c8] hover:text-[#c779d0] dark:text-[#4bc0c8]/70 dark:hover:text-[#c779d0]/70 transition-colors"
               @click="showAdminContact(job.creator)"
@@ -253,6 +262,16 @@ export default {
       }
       return texts[status] || status
     },
+
+    getJobStatusText(status) {
+      const texts = {
+        pending: 'รอดำเนินการ',
+        in_progress: 'กำลังดำเนินการ',
+        completed: 'เสร็จสิ้น',
+        cancelled: 'ยกเลิก'
+      }
+      return texts[status] || status
+    },
     getProgressBarClass(status) {
       switch (status?.toLowerCase()) {
         case 'pending':
@@ -299,6 +318,18 @@ export default {
       }
     },
 
+    getJobStatusTagClass(status) {
+      switch (status?.toLowerCase()) {
+        case 'published': // เปิดรับสมัคร
+          return 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30'
+        case 'in_progress': // กำลังดำเนินการ
+          return 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30'
+        case 'completed': // เสร็จสิ้น
+          return 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30'
+        default:
+          return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+      }
+    },
     showEvaluation(job) {
       this.selectedJob = job
       this.showEvaluationModal = true

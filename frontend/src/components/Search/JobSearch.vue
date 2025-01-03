@@ -145,12 +145,30 @@
           </div>
 
           <!-- วันที่ -->
-          <input
+          <!-- <input
             v-model="filters.workDate"
             type="date"
             class="min-w-[120px] px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100"
-          />
+          /> -->
+          <div class="flex items-center gap-2">
+            <!-- วันที่เริ่มต้น -->
+            <input
+              v-model="filters.dateFrom"
+              type="date"
+              class="min-w-[120px] px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100"
+              @change="handleSearch"
+            />
 
+            <span class="text-gray-400">-</span>
+
+            <!-- วันที่สิ้นสุด -->
+            <input
+              v-model="filters.dateTo"
+              type="date"
+              class="min-w-[120px] px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100"
+              @change="handleSearch"
+            />
+          </div>
           <!-- ค้นหา -->
           <button
             @click="handleSearch"

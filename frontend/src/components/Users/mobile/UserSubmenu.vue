@@ -102,7 +102,7 @@
 import { Dialog, DialogPanel, TransitionRoot, TransitionChild } from '@headlessui/vue'
 import { useUserStore } from '@/stores/userStore'
 import { useSidebarStore } from '@/stores/sidebarStore'
-
+import Swal from 'sweetalert2'
 export default {
   components: {
     Dialog,
@@ -128,9 +128,36 @@ export default {
       this.sidebarStore.toggleDarkMode()
     },
     async handleLogout() {
-      await this.userStore.logout()
-      this.$router.push('/signin-user')
-      this.$emit('close')
+      const result = await Swal.fire({
+        title: 'ยืนยันการออกจากระบบ',
+        text: 'คุณต้องการออกจากระบบใช่หรือไม่?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'ใช่, ออกจากระบบ',
+        cancelButtonText: 'ยกเลิก'
+      })
+
+      if (result.isConfirmed) {
+        try {
+          this.$emit('close')
+          await this.userStore.logout()
+          await Swal.fire({
+            title: 'ออกจากระบบสำเร็จ',
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false
+          })
+          this.$router.push('/signin-user')
+        } catch (error) {
+          Swal.fire({
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถออกจากระบบได้',
+            icon: 'error'
+          })
+        }
+      }
     }
   },
 
