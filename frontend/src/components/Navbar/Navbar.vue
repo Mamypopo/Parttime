@@ -10,7 +10,7 @@
           <router-link to="/" class="flex items-center group">
             <div class="relative">
               <img
-                src="@/assets/logo.svg"
+                src="@/assets/images/logosemed.svg"
                 alt="Logo"
                 class="h-8 w-8 sm:h-9 sm:w-9 transition-transform duration-300 group-hover:scale-110"
               />
@@ -21,7 +21,7 @@
             <span
               class="ml-3 font-semibold bg-gradient-to-r from-[#6B7F5E] to-[#9FE7DD] bg-clip-text text-transparent text-sm sm:text-lg"
             >
-              Parttime by semad
+              Parttime by semed
             </span>
           </router-link>
         </div>

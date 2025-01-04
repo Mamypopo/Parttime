@@ -153,7 +153,7 @@ html {
   }
 }
 .animated-bg {
-  background: linear-gradient(-45deg, #6b7f5e, #9fe7dd, #c5b4e3, #eac6fc);
+  background: linear-gradient(-45deg, #6b8e23, #7cc576, #8ee58b, #4caf50);
   background-size: 300% 300%;
   animation: gradientBackground 15s ease infinite;
 }

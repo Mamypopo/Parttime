@@ -10,7 +10,7 @@ import fs from 'fs'
 
 // ฟังก์ชันสร้างงานใหม่ 
 export const createJob = async (req, res) => {
-    const { title, work_date, location, start_time, end_time, details, positions } = req.body;
+    const { title, work_date, location, start_time, end_time, details, positions, admins } = req.body;
     const { id: adminId } = req.user;
     const ip = req.ip;
     const userAgent = req.headers['user-agent'];
@@ -22,7 +22,7 @@ export const createJob = async (req, res) => {
         }
 
         const job = await jobModel.createJob({
-            title, work_date, location, start_time, end_time, details, positions
+            title, work_date, location, start_time, end_time, details, positions, admins
         }, adminId);
 
         await createLog(
@@ -731,3 +731,136 @@ export const downloadParticipantDocuments = async (req, res) => {
         res.status(500).json({ error: 'ไม่สามารถดาวน์โหลดเอกสารได้' })
     }
 }
+
+
+// ดึงงานที่แอดมินได้รับมอบหมาย
+export const getAssignedJobs = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 10;
+        const filters = {
+            title: req.query.title,
+            location: req.query.location,
+            dateFrom: req.query.dateFrom,
+            dateTo: req.query.dateTo,
+            status: req.query.status,
+            role: req.query.role
+        };
+        const adminId = req.user.id;
+
+        // ดึงข้อมูลงาน
+        const jobs = await jobModel.getAssignedJobs(page, pageSize, filters, adminId);
+
+        // นับจำนวนงานทั้งหมด
+        const total = await jobModel.getAssignedJobsCount(adminId, filters);
+
+        res.json({
+            data: jobs,
+            pagination: {
+                page,
+                pageSize,
+                total,
+                totalPages: Math.ceil(total / pageSize)
+            }
+        });
+    } catch (error) {
+        console.error('Error getting assigned jobs:', error);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูลงานที่ได้รับมอบหมาย' });
+    }
+};
+
+// เพิ่มแอดมินให้กับงาน
+export const addJobAdmin = async (req, res) => {
+    try {
+        const { jobId } = req.params;
+        const { adminId, role } = req.body;
+        const creatorId = req.user.id;
+
+        // ตรวจสอบว่าเป็นผู้สร้างงานหรือไม่
+        const job = await jobModel.getJobById(parseInt(jobId));
+        if (!job || job.created_by !== creatorId) {
+            return res.status(403).json({ message: 'คุณไม่มีสิทธิ์เพิ่มแอดมินในงานนี้' });
+        }
+
+        // เพิ่มแอดมิน
+        const jobAdmin = await jobModel.addJobAdmin(jobId, adminId, role);
+
+        // สร้างการแจ้งเตือนให้แอดมินที่ถูกเพิ่ม
+        await notificationModel.createAdminNotification({
+            adminId: adminId,
+            message: `คุณได้รับมอบหมายให้เป็น${role === 'manager' ? 'ผู้จัดการ' : 'ผู้ประเมิน'}งาน "${job.title}"`,
+            type: 'JOB_ASSIGNMENT',
+            jobId: parseInt(jobId)
+        });
+
+        // บันทึก log
+        await createLog(
+            parseInt(jobId),
+            creatorId,
+            'Add Job Admin',
+            req.originalUrl,
+            'POST',
+            `Added admin ${adminId} as ${role} to job ${jobId}`,
+            req.ip,
+            req.headers['user-agent']
+        );
+
+        res.status(201).json({
+            message: 'เพิ่มแอดมินสำเร็จ',
+            data: jobAdmin
+        });
+    } catch (error) {
+        console.error('Error adding job admin:', error);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการเพิ่มแอดมิน' });
+    }
+};
+
+// ลบแอดมินออกจากงาน
+export const removeJobAdmin = async (req, res) => {
+    try {
+        const { jobId, adminId } = req.params;
+        const creatorId = req.user.id;
+
+        // ตรวจสอบว่าเป็นผู้สร้างงานหรือไม่
+        const job = await jobModel.getJobById(parseInt(jobId));
+        if (!job || job.created_by !== creatorId) {
+            return res.status(403).json({ message: 'คุณไม่มีสิทธิ์ลบแอดมินในงานนี้' });
+        }
+
+        await jobModel.removeJobAdmin(jobId, adminId);
+
+        // บันทึก log
+        await createLog(
+            parseInt(jobId),
+            creatorId,
+            'Remove Job Admin',
+            req.originalUrl,
+            'DELETE',
+            `Removed admin ${adminId} from job ${jobId}`,
+            req.ip,
+            req.headers['user-agent']
+        );
+
+        res.json({ message: 'ลบแอดมินสำเร็จ' });
+    } catch (error) {
+        console.error('Error removing job admin:', error);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการลบแอดมิน' });
+    }
+};
+
+// Middleware ตรวจสอบสิทธิ์
+export const checkJobPermission = async (req, res, next) => {
+    try {
+        const { jobId } = req.params;
+        const adminId = req.user.id;
+
+        const hasPermission = await jobModel.checkJobAdminPermission(jobId, adminId);
+        if (!hasPermission) {
+            return res.status(403).json({ message: 'คุณไม่มีสิทธิ์จัดการงานนี้' });
+        }
+        next();
+    } catch (error) {
+        console.error('Error checking job permission:', error);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์' });
+    }
+};

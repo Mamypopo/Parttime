@@ -85,7 +85,7 @@ const fileFilter = (req, file, cb) => {
         if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
             return cb(new Error('อนุญาตเฉพาะไฟล์ .jpg .jpeg และ .png เท่านั้น'), false);
         }
-        cb(null, true); // อนุญาตให้อัปโหลดไฟล์
+        cb(null, true);
         return;
     }
 
@@ -98,24 +98,24 @@ const fileFilter = (req, file, cb) => {
     }
 
     if (file.fieldname === 'education_certificate') {
-        if (!file.originalname.match(/\.(pdf|jpg|jpeg|png)$/)) {
-            return cb(new Error('โปรดอัปโหลดไฟล์ PDF หรือรูปภาพเท่านั้นสำหรับวุฒิการศึกษา'), false);
+        if (!file.originalname.match(/\.(pdf|jpg)$/)) {
+            return cb(new Error('โปรดอัปโหลดไฟล์ .PDF หรือ .jpg เท่านั้นสำหรับวุฒิการศึกษา'), false);
         }
         cb(null, true);
         return;
     }
 
     if (file.fieldname === 'user_documents') {
-        if (!file.originalname.match(/\.(pdf|jpg|jpeg|png)$/)) {
-            return cb(new Error('โปรดอัปโหลดไฟล์ PDF หรือรูปภาพเท่านั้นใน user_documents'), false);
+        if (!file.originalname.match(/\.(pdf|)$/)) {
+            return cb(new Error('โปรดอัปโหลดไฟล์ .PDF หรือ .jpg เท่านั้นใน user_documents'), false);
         }
         cb(null, true);
         return;
     }
 
     if (file.fieldname === 'payment_slip') {
-        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
-            return cb(new Error('อนุญาตเฉพาะไฟล์ .jpg .jpeg  และ .png  เท่านั้นสำหรับสลิปการโอนเงิน'), false);
+        if (!file.originalname.match(/\.(jpg)$/)) {
+            return cb(new Error('อนุญาตเฉพาะไฟล์ .jpg  เท่านั้นสำหรับสลิปการโอนเงิน'), false);
         }
         cb(null, true);
         return;

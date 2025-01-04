@@ -34,7 +34,7 @@ router.get('/online-users', adminController.getOnlineUsersCount)
 // ดูข้อมูลแอดมินคนอื่นจาก ID
 router.get('/admin/:adminId', adminController.getAdminById);
 
-// ดูข้อมูลโปรไฟล์แอดมินห
+// ดูข้อมูลโปรไฟล์แอดมิน
 router.get('/profile', adminController.getAdminProfile)
 
 // อนุมัติหรือปฏิเสธผู้ใช้ (ต้องเป็นแอดมินเท่านั้น)
@@ -46,6 +46,10 @@ router.post(
     checkAdminRole,
     jobParticipationController.adminCancelJobApplication
 );
+
+// ดึงรายชื่อแอดมินที่สามารถเพิ่มเป็นผู้ดูแลงานได้
+router.get('/available', checkAdminRole, adminController.getAvailableAdmins);
+
 
 /**
  * จัดการแจ้งเตือน

@@ -26,6 +26,11 @@ async function clearDatabase() {
         await prisma.jobPosition.deleteMany();
         console.log('ล้างข้อมูล JobPosition เรียบร้อย');
 
+
+        // การลบ JobAdmins ก่อนลบ Job
+        await prisma.JobAdmins.deleteMany();
+        console.log('ล้างข้อมูล JobAdmin เรียบร้อย');
+
         // ลบ Job
         await prisma.job.deleteMany();
         console.log('ล้างข้อมูล Job เรียบร้อย');

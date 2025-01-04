@@ -107,6 +107,12 @@ const router = createRouter({
         },
 
         {
+          path: 'assigned-jobs',
+          name: 'assigned-jobs',
+          component: () => import('@/views/admin/Jobs/AssignedJobs.vue'),
+          meta: { requiresAdmin: true }
+        },
+        {
           path: 'PaymentManagement-view',
           name: 'PaymentManagement',
           component: () => import('@/views/Payment/PaymentManagement.vue'),

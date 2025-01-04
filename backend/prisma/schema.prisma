@@ -80,6 +80,7 @@ model Job {
   JobPositions     JobPosition[] // ความสัมพันธ์กับ JobPosition (หลายตำแหน่งในงานเดียว)
   JobParticipation JobParticipation[] // ผู้เข้าร่วมในงานนี้
   Notification     Notification[]
+  JobAdmins        JobAdmins[]
 
   @@index([work_date, location, title, status])
 }
@@ -111,7 +112,20 @@ model JobParticipation {
   PaymentHistory  PaymentHistory[]
 }
 
-// โมเดลใหม่สำหรับเก็บประวัติการทำงาน
+model JobAdmins {
+  id         Int      @id @default(autoincrement())
+  job_id     Int
+  admin_id   Int
+  role       String   @default("manager")
+  created_at DateTime @default(now())
+
+  job   Job   @relation(fields: [job_id], references: [id])
+  admin Admin @relation(fields: [admin_id], references: [id])
+
+  @@unique([job_id, admin_id])
+}
+
+// โมเดลสำหรับเก็บประวัติการทำงาน
 model WorkHistory {
   id                 Int              @id @default(autoincrement())
   jobParticipation   JobParticipation @relation(fields: [jobParticipationId], references: [id])
@@ -167,6 +181,7 @@ model Admin {
   Notification   Notification[]
   PaymentHistory PaymentHistory[]
   PaymentLog     PaymentLog[]
+  JobAdmins      JobAdmins[]
 }
 
 model Notification {

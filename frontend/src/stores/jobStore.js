@@ -13,6 +13,8 @@ export const useJobStore = defineStore('job', {
         loading: false,
         error: null,
         selectedJob: null,
+        currentJob: null,
+        availableAdmins: [],
         searchFilters: {
             id: '',
             title: '',
@@ -328,6 +330,7 @@ export const useJobStore = defineStore('job', {
             this.loading = true;
             this.error = null;
             try {
+
                 const adminStore = useAdminStore();
                 const response = await axios.post(`${this.baseURL}/api/jobs/create`, jobData, {
                     headers: {
@@ -340,7 +343,7 @@ export const useJobStore = defineStore('job', {
                 if (response.data && response.data.job) {
                     // ตรวจสอบว่า this.jobs เป็น array ก่อนทำการ push
                     if (Array.isArray(this.jobs)) {
-                        this.jobs.push(response.data.job);
+                        this.jobs.unshift(response.data.job);
                     } else {
                         console.error('Error: this.jobs is not an array');
                         this.jobs = [response.data.job];
@@ -599,6 +602,148 @@ export const useJobStore = defineStore('job', {
             }
         },
 
+        // ดึงรายชื่อแอดมินที่สามารถเพิ่มได้
+        async fetchAvailableAdmins() {
+            try {
+                const response = await axios.get(`${this.baseURL}/api/admin/available`)
+                this.availableAdmins = response.data;
+                return this.availableAdmins
+            } catch (error) {
+                console.error('Error fetching available admins:', error)
+                throw error
+            }
+        },
+
+        // ตรวจสอบข้อมูลก่อนสร้างงาน
+        validateJobData(form, positions) {
+            const errors = []
+
+            if (!form.title?.trim()) errors.push('กรุณาระบุชื่องาน')
+            if (!form.date) errors.push('กรุณาระบุวันที่')
+            if (!form.startDate || !form.endDate) errors.push('กรุณาระบุเวลาเริ่มและสิ้นสุด')
+            if (!form.location?.trim()) errors.push('กรุณาระบุสถานที่')
+            if (positions.length === 0) errors.push('กรุณาเพิ่มตำแหน่งงานอย่างน้อย 1 ตำแหน่ง')
+
+            if (errors.length > 0) {
+                throw new Error(errors.join('\n'))
+            }
+        },
+
+        // ดึงงานที่ได้รับมอบหมาย
+        async fetchAssignedJobs(page = 1, filters = {}) {
+            this.loading = true
+            this.error = null
+
+            try {
+                const response = await axios.get(`${this.baseURL}/api/jobs/assigned`, {
+                    params: {
+                        page,
+                        ...filters
+                    }
+                })
+
+                return response
+            } catch (error) {
+                this.error = error.response?.data?.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล'
+                throw error
+            } finally {
+                this.loading = false
+            }
+        },
+
+
+        async fetchAssignedJobsAndParticipants() {
+            this.loading = true;
+            try {
+                const headers = this.getAuthHeaders();
+                const params = new URLSearchParams();
+
+                // เพิ่มเงื่อนไขการค้นหาจาก searchFilters
+                if (this.searchFilters.id) params.append('id', this.searchFilters.id);
+                if (this.searchFilters.title) params.append('title', this.searchFilters.title);
+                if (this.searchFilters.location) params.append('location', this.searchFilters.location);
+                if (this.searchFilters.position) params.append('position', this.searchFilters.position);
+                if (this.searchFilters.status) params.append('status', this.searchFilters.status);
+                if (this.searchFilters.dateFrom) params.append('dateFrom', this.searchFilters.dateFrom);
+                if (this.searchFilters.dateTo) params.append('dateTo', this.searchFilters.dateTo);
+                if (this.searchFilters.minWage) params.append('minWage', this.searchFilters.minWage);
+                if (this.searchFilters.maxWage) params.append('maxWage', this.searchFilters.maxWage);
+                if (this.searchFilters.peopleCount) params.append('peopleCount', this.searchFilters.peopleCount);
+
+                const queryString = params.toString();
+                const endpoint = queryString ? `?${queryString}` : '';
+
+                // เรียก API พร้อมกัน
+                const [assignedJobsResponse, participantsResponse] = await Promise.all([
+                    axios.get(`${this.baseURL}/api/jobs/assigned${endpoint}`, { headers }),
+                    axios.get(`${this.baseURL}/api/jobs/getJobsWithParticipants`, { headers })
+                ]);
+
+                // แปลงโครงสร้างข้อมูลให้เหมือนกับ jobs ปกติ
+                this.jobs = assignedJobsResponse.data?.jobs?.map(assigned => assigned.job) || [];
+
+                if (this.jobs.length > 0) {
+                    this.jobs = this.jobs.map(job => {
+                        const jobWithParticipants = participantsResponse.data?.data?.find(p => p.id === job.id);
+
+                        const updatedJobPositions = Array.isArray(job.JobPositions)
+                            ? job.JobPositions.map(position => {
+                                const participations = jobWithParticipants?.JobPositions?.find(p => p.id === position.id)?.JobParticipation || [];
+
+                                // อัพเดทให้รวม workHistories
+                                const updatedParticipations = participations.map(participation => {
+                                    // เก็บ ID ของการสมัครที่มีสถานะ pending เป็น "ใหม่"
+                                    if (participation.status === 'pending') {
+                                        this.newParticipations.add(participation.id);
+                                    }
+
+                                    return {
+                                        ...participation,
+                                        workHistories: participation.workHistories || []
+                                    };
+                                });
+
+                                return {
+                                    ...position,
+                                    JobParticipation: updatedParticipations
+                                };
+                            })
+                            : [];
+
+                        return {
+                            ...job,
+                            JobPositions: updatedJobPositions
+                        };
+                    });
+                }
+
+            } catch (error) {
+                console.error('Error fetching assigned jobs:', error);
+                this.error = error.message || 'ไม่สามารถโหลดข้อมูลงานที่ได้รับมอบหมายได้';
+                throw error;
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        // // เพิ่มแอดมินให้กับงาน
+        // async addJobAdmin(jobId, adminData) {
+        //     const response = await axios.post(
+        //         `${this.baseURL}/api/jobs/${jobId}/admins`,
+        //         adminData
+        //     )
+        //     return response
+        // },
+
+        // // ลบแอดมินออกจากงาน
+        // async removeJobAdmin(jobId, adminId) {
+        //     const response = await axios.delete(
+        //         `${this.baseURL}/api/jobs/${jobId}/admins/${adminId}`
+        //     )
+        //     return response
+        // },
+
+
         //   สำหรับ set filters
         setUserSearchFilters(filters) {
             this.userSearchFilters = { ...filters }
@@ -735,18 +880,6 @@ export const useJobStore = defineStore('job', {
             return dateObj.toISOString()
         },
 
-        validateJobData(form, positions) {
-            if (positions.length === 0) {
-                throw new Error('กรุณาเพิ่มตำแหน่งงานอย่างน้อย 1 ตำแหน่ง')
-            }
-
-            if (!form.title || !form.date || !form.startDate ||
-                !form.endDate || !form.location) {
-                throw new Error('กรุณากรอกข้อมูลให้ครบทุกช่อง')
-            }
-
-            return true
-        },
 
         markAsViewed(participationId) {
             this.newParticipations.delete(participationId)

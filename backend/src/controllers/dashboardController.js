@@ -276,7 +276,6 @@ export const getUserDashboard = async (req, res) => {
             DashboardModel.getUpcomingDeadlines(userId)
         ]);
 
-        console.log()
         // แปลงข้อมูลตารางงานให้อยู่ในรูปแบบที่ต้องการ
         const formattedSchedule = todaySchedule.map(job => ({
             id: job.id,

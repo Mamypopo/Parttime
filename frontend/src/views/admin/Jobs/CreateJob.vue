@@ -85,6 +85,62 @@
                 placeholder="รายละเอียดเพิ่มเติม"
               ></textarea>
             </div>
+
+            <!-- เพิ่มในส่วน Left Column หลัง Details Textarea -->
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                เพิ่มผู้ดูแลงาน
+              </label>
+              <div class="space-y-3">
+                <div
+                  v-for="(admin, index) in selectedAdmins"
+                  :key="index"
+                  class="flex gap-3 items-center bg-gray-50 dark:bg-gray-700/50 p-3 rounded-xl"
+                >
+                  <!-- เลือกแอดมิน -->
+                  <select
+                    v-model="admin.id"
+                    class="flex-1 px-4 py-2 border dark:border-gray-700 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  >
+                    <option value="" disabled>เลือกผู้ดูแล</option>
+                    <option
+                      v-for="availableAdmin in availableAdmins"
+                      :key="availableAdmin.id"
+                      :value="availableAdmin.id"
+                    >
+                      {{ availableAdmin.first_name }} {{ availableAdmin.last_name }}
+                    </option>
+                  </select>
+
+                  <!-- เลือกบทบาท -->
+                  <select
+                    v-model="admin.role"
+                    class="px-4 py-2 border dark:border-gray-700 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  >
+                    <option value="manager">ผู้จัดการ</option>
+                    <option value="evaluator">ผู้ประเมิน</option>
+                  </select>
+
+                  <!-- ปุ่มลบ -->
+                  <button
+                    type="button"
+                    @click="removeAdmin(index)"
+                    class="text-red-500 hover:text-red-600 transition-colors"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+
+                <!-- ปุ่มเพิ่มแอดมิน -->
+                <button
+                  type="button"
+                  @click="addNewAdmin"
+                  class="w-full px-4 py-2 text-sm text-gray-600 dark:text-gray-300 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-400 dark:hover:border-purple-500 transition-colors"
+                >
+                  <i class="fas fa-plus mr-2"></i>เพิ่มผู้ดูแล
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- Right Column - Positions -->
@@ -212,17 +268,46 @@ export default {
       positions: [],
       editingPosition: null,
       selectedSkills: [],
-      showPositionModal: false
+      showPositionModal: false,
+      selectedAdmins: [], // เก็บแอดมินที่ถูกเลือก
+      availableAdmins: [] // เก็บรายชื่อแอดมินทั้งหมด
     }
   },
-  created() {
+  async created() {
     const today = new Date()
     const year = today.getFullYear()
     const month = String(today.getMonth() + 1).padStart(2, '0')
     const day = String(today.getDate()).padStart(2, '0')
-    this.form.date = `${year}-${month}-${day}`
+    ;(this.form.date = `${year}-${month}-${day}`),
+      (this.availableAdmins = await this.jobStore.fetchAvailableAdmins())
   },
+
   methods: {
+    async fetchAvailableAdmins() {
+      try {
+        const response = await this.jobStore.fetchAvailableAdmins()
+        this.availableAdmins = response.data
+      } catch (error) {
+        console.error('Error fetching admins:', error)
+      }
+    },
+    addNewAdmin() {
+      this.selectedAdmins.push({
+        id: '',
+        role: 'manager'
+      })
+    },
+
+    removeAdmin(index) {
+      this.selectedAdmins.splice(index, 1)
+    },
+
+    isAdminSelected(adminId, currentIndex) {
+      return this.selectedAdmins.some(
+        (admin, index) => index !== currentIndex && admin.id === adminId
+      )
+    },
+
     addPosition(position) {
       if (this.editingPosition) {
         const index = this.positions.findIndex((p) => p.id === position.id)
@@ -306,9 +391,13 @@ export default {
             wage: Number(pos.wage),
             details: pos.details,
             required_people: Number(pos.requiredPeople)
+          })),
+          admins: this.selectedAdmins.map((admin) => ({
+            id: parseInt(admin.id),
+            role: admin.role
           }))
         }
-
+        console.log('Submitting job data:', jobData) // log เพื่อตรวจสอบ
         await this.jobStore.createJob(jobData)
 
         await Swal.fire({

@@ -594,3 +594,18 @@ export const getOnlineUsersCount = async (req, res) => {
         });
     }
 };
+
+
+// ดึงรายชื่อแอดมินที่สามารถเพิ่มเป็นผู้ดูแลงานได้
+export const getAvailableAdmins = async (req, res) => {
+    try {
+        const admins = await adminModel.findAvailableAdmins();
+        res.json(admins);
+    } catch (error) {
+        console.error('Error getting available admins:', error);
+        res.status(500).json({
+            message: 'เกิดข้อผิดพลาดในการดึงรายชื่อแอดมิน'
+        });
+    }
+};
+

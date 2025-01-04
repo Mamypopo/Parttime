@@ -664,3 +664,18 @@ export const rejectUserFromWorkEvaluation = async (userId) => {
 };
 
 
+// ดึงรายชื่อแอดมินที่สามารถเพิ่มเป็นผู้ดูแลงานได้
+export const findAvailableAdmins = async () => {
+    return prisma.admin.findMany({
+        select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            email: true,
+            profile_pic: true
+        },
+        orderBy: {
+            first_name: 'asc'
+        }
+    });
+};

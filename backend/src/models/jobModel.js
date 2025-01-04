@@ -3,7 +3,7 @@ import prisma from '../config/prisma.js';
 
 // ฟังก์ชันสำหรับสร้างงานใหม่
 export const createJob = async (jobData, adminId) => {
-    const { title, work_date, location, start_time, end_time, details, positions } = jobData;
+    const { title, work_date, location, start_time, end_time, details, positions, admins } = jobData;
 
     // เช็คว่าวันที่ทำงานเป็นวันนี้หรือไม่
     const today = new Date();
@@ -20,6 +20,7 @@ export const createJob = async (jobData, adminId) => {
     } else {
         initialStatus = 'completed';
     }
+
     return prisma.job.create({
         data: {
             title,
@@ -37,9 +38,30 @@ export const createJob = async (jobData, adminId) => {
                     details,
                     required_people
                 }))
-            }
+            },
+
+            JobAdmins: admins ? {
+                create: admins.map(admin => ({
+                    admin_id: parseInt(admin.id)
+                }))
+            } : undefined
         },
-        include: { JobPositions: true }
+        include: {
+            JobPositions: true,
+            JobAdmins: {
+                include: {
+                    admin: {
+                        select: {
+                            id: true,
+                            first_name: true,
+                            last_name: true,
+                            email: true,
+                            profile_pic: true
+                        }
+                    }
+                }
+            }
+        }
     });
 };
 
@@ -438,6 +460,10 @@ export const getMyCreatedJobs = async (page = 1, pageSize = 10, filters = {}) =>
     });
 };
 
+
+
+
+
 // ฟังก์ชันนับจำนวนงานที่แอดมินสร้าง
 export const getMyCreatedJobsCount = async (adminId, filters = {}) => {
     const where = {
@@ -672,7 +698,14 @@ export const deleteJobById = async (jobId) => {
                 }
             });
 
-            // 6. ลบตัวงาน
+            // 6. ลบ job admins 
+            await tx.JobAdmins.deleteMany({
+                where: {
+                    job_id: jobId
+                }
+            });
+
+            // 7. ลบตัวงาน
             return await tx.job.delete({
                 where: {
                     id: jobId
@@ -1191,4 +1224,214 @@ export const getJobParticipantsDocuments = async (jobId) => {
         console.error('Error getting job participants documents:', error);
         throw error;
     }
+};
+
+
+
+// ดึงงานที่แอดมินได้รับมอบหมาย
+export const getAssignedJobs = async (page = 1, pageSize = 10, filters = {}, adminId) => {
+    const skip = (page - 1) * pageSize;
+
+    // สร้าง where clause สำหรับ filters
+    const where = {
+        AND: [
+            { admin_id: adminId }
+        ]
+    };
+
+    if (filters.id) {
+        where.AND.push({
+            job: {
+                id: parseInt(filters.id)
+            }
+        });
+    }
+
+    if (filters.title) {
+        where.AND.push({
+            job: {
+                title: { contains: filters.title, mode: 'insensitive' }
+            }
+        });
+    }
+
+    if (filters.location) {
+        where.AND.push({
+            job: {
+                location: { contains: filters.location, mode: 'insensitive' }
+            }
+        });
+    }
+
+    if (filters.dateFrom || filters.dateTo) {
+        where.AND.push({
+            job: {
+                work_date: {
+                    gte: filters.dateFrom ? new Date(filters.dateFrom) : undefined,
+                    lte: filters.dateTo ? new Date(filters.dateTo) : undefined
+                }
+            }
+        });
+    }
+
+    if (filters.status) {
+        where.AND.push({
+            job: {
+                status: filters.status
+            }
+        });
+    }
+
+    if (filters.role) {
+        where.AND.push({
+            role: filters.role
+        });
+    }
+
+    return prisma.jobAdmins.findMany({
+        skip,
+        take: pageSize,
+        where,
+        include: {
+            job: {
+                select: {
+                    id: true,
+                    title: true,
+                    work_date: true,
+                    location: true,
+                    start_time: true,
+                    end_time: true,
+                    details: true,
+                    created_by: true,
+                    created_at: true,
+                    status: true,
+                    creator: {
+                        select: {
+                            id: true,
+                            first_name: true,
+                            last_name: true,
+                            email: true
+                        }
+                    },
+                    JobPositions: {
+                        include: {
+                            JobParticipation: {
+                                select: {
+                                    id: true,
+                                    status: true,
+                                    user: {
+                                        select: {
+                                            id: true,
+                                            first_name: true,
+                                            last_name: true,
+                                            email: true,
+                                            profile_image: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        orderBy: [
+            {
+                job: {
+                    created_at: "desc"
+                }
+            },
+            {
+                job: {
+                    work_date: "desc"
+                }
+            }
+        ]
+    });
+};
+
+// นับจำนวนงานที่ได้รับมอบหมาย
+export const getAssignedJobsCount = async (adminId, filters = {}) => {
+    const where = {
+        AND: [
+            { admin_id: adminId }
+        ]
+    };
+
+    if (filters.title) {
+        where.AND.push({
+            job: {
+                title: { contains: filters.title, mode: 'insensitive' }
+            }
+        });
+    }
+
+    if (filters.location) {
+        where.AND.push({
+            job: {
+                location: { contains: filters.location, mode: 'insensitive' }
+            }
+        });
+    }
+
+    if (filters.dateFrom || filters.dateTo) {
+        where.AND.push({
+            job: {
+                work_date: {
+                    gte: filters.dateFrom ? new Date(filters.dateFrom) : undefined,
+                    lte: filters.dateTo ? new Date(filters.dateTo) : undefined
+                }
+            }
+        });
+    }
+
+    if (filters.status) {
+        where.AND.push({
+            job: {
+                status: filters.status
+            }
+        });
+    }
+
+    if (filters.role) {
+        where.AND.push({
+            role: filters.role
+        });
+    }
+
+    return prisma.jobAdmins.count({ where });
+};
+
+// เช็คสิทธิ์ของแอดมินในงาน
+export const checkJobAdminPermission = async (jobId, adminId) => {
+    const jobAdmin = await prisma.jobAdmins.findFirst({
+        where: {
+            job_id: parseInt(jobId),
+            admin_id: parseInt(adminId)
+        }
+    });
+    return jobAdmin !== null;
+};
+
+// เพิ่มแอดมินให้กับงาน
+export const addJobAdmin = async (jobId, adminId, role) => {
+    return prisma.jobAdmins.create({
+        data: {
+            job_id: parseInt(jobId),
+            admin_id: parseInt(adminId),
+            role
+        }
+    });
+};
+
+// ลบแอดมินออกจากงาน
+export const removeJobAdmin = async (jobId, adminId) => {
+    return prisma.jobAdmins.delete({
+        where: {
+            job_id_admin_id: {
+                job_id: parseInt(jobId),
+                admin_id: parseInt(adminId)
+            }
+        }
+    });
 };
