@@ -69,6 +69,38 @@
                     </div>
                   </div>
 
+                  <!-- เพิ่มส่วนแสดงผู้ดูแลงานตรงนี้ -->
+                  <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl">
+                    <h4
+                      class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center mb-3"
+                    >
+                      <i class="fas fa-user-shield mr-2 text-[#81E2C4] dark:text-[#4B9592]"></i>
+                      ผู้ดูแลงาน
+                    </h4>
+
+                    <div class="space-y-2">
+                      <div v-if="job?.JobAdmins?.length" class="grid gap-2">
+                        <div
+                          v-for="admin in job.JobAdmins"
+                          :key="admin.id"
+                          class="flex items-center gap-3 p-2 bg-white dark:bg-gray-800 rounded-lg"
+                        >
+                          <div>
+                            <div class="font-medium text-gray-900 dark:text-gray-100">
+                              {{ admin.admin.first_name }} {{ admin.admin.last_name }}
+                            </div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                              {{ admin.admin.phone }}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div v-else class="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
+                        ยังไม่มีผู้ดูแลงาน
+                      </div>
+                    </div>
+                  </div>
                   <!-- วันและเวลา -->
                   <div class="grid grid-cols-3 gap-4">
                     <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl">

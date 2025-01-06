@@ -17,7 +17,8 @@ export const useNotificationStore = defineStore('notification', {
             EVALUATION: 'evaluation',                // มีการประเมินงาน
             SYSTEM: 'system',                      // แจ้งเตือนจากระบบ
             JOB_APPLICATION_CANCELLED: 'job_application_cancelled_admin',// แจ้งเตือนการยกเลิกสมัครงาน
-            PAYMENT_PENDING: 'payment_pending' // แจ้งเตือนเมื่อมีการประเมินเสร็จ รอจ่ายเงิน
+            PAYMENT_PENDING: 'payment_pending', // แจ้งเตือนเมื่อมีการประเมินเสร็จ รอจ่ายเงิน
+            JOB_ASSIGNED: 'job_assigned' // แจ้งเตือนแอดมินที่ได้รับมอบหมายงาน
         }
     }),
     getters: {

@@ -237,6 +237,7 @@ export const getCalendarEvents = async (req, res) => {
             month ? parseInt(month) : undefined,
             year ? parseInt(year) : undefined
         )
+
         res.json({ events })
     } catch (error) {
         console.error('Error fetching calendar events:', error)

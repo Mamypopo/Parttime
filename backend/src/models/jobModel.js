@@ -177,6 +177,20 @@ export const getAllJobs = async (page = 1, pageSize = 20, filters = {}, userId =
                     }
                 }
             },
+            JobAdmins: {
+                include: {
+                    admin: {
+                        select: {
+                            id: true,
+                            first_name: true,
+                            last_name: true,
+                            email: true,
+                            profile_pic: true,
+                            phone: true
+                        }
+                    }
+                }
+            }
         },
         orderBy: [
             { created_at: 'desc' },
@@ -276,6 +290,7 @@ export const getJobById = (jobId) =>
         where: { id: jobId },
         include: {
             JobPositions: true,
+            JobAdmins: true,
             JobParticipation: {
                 where: {
                     status: 'approved'
@@ -432,7 +447,20 @@ export const getMyCreatedJobs = async (page = 1, pageSize = 10, filters = {}) =>
                     status: true,
                 }
             },
-
+            JobAdmins: {
+                include: {
+                    admin: {
+                        select: {
+                            id: true,
+                            first_name: true,
+                            last_name: true,
+                            email: true,
+                            profile_pic: true,
+                            phone: true
+                        }
+                    }
+                }
+            },
             JobParticipation: {
                 // where: {
                 //     status: 'approved'  // ดึงเฉพาะที่อนุมัติแล้ว
@@ -653,7 +681,20 @@ export const getJobApplicants = async (jobId) => {
 export const deleteJobById = async (jobId) => {
     try {
         return await prisma.$transaction(async (tx) => {
-            // 1. ลบ payment histories
+            // 1. ลบ payment logs 
+            await tx.paymentLog.deleteMany({
+                where: {
+                    payment: {
+                        job_participation: {
+                            jobPosition: {
+                                job_id: jobId
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 2. ลบ payment histories
             await tx.paymentHistory.deleteMany({
                 where: {
                     job_participation: {
@@ -664,7 +705,7 @@ export const deleteJobById = async (jobId) => {
                 }
             });
 
-            // 2. ลบ work histories
+            // 3. ลบ work histories
             await tx.workHistory.deleteMany({
                 where: {
                     jobParticipation: {
@@ -675,14 +716,14 @@ export const deleteJobById = async (jobId) => {
                 }
             });
 
-            // 3. ลบ notifications
+            // 4. ลบ notifications
             await tx.notification.deleteMany({
                 where: {
                     jobId: jobId
                 }
             });
 
-            // 4. ลบ job participations
+            // 5. ลบ job participations
             await tx.jobParticipation.deleteMany({
                 where: {
                     jobPosition: {
@@ -691,21 +732,21 @@ export const deleteJobById = async (jobId) => {
                 }
             });
 
-            // 5. ลบ job positions
+            // 6. ลบ job positions
             await tx.jobPosition.deleteMany({
                 where: {
                     job_id: jobId
                 }
             });
 
-            // 6. ลบ job admins 
+            // 7. ลบ job admins 
             await tx.JobAdmins.deleteMany({
                 where: {
                     job_id: jobId
                 }
             });
 
-            // 7. ลบตัวงาน
+            // 8. ลบตัวงาน
             return await tx.job.delete({
                 where: {
                     id: jobId
@@ -1239,60 +1280,11 @@ export const getAssignedJobs = async (page = 1, pageSize = 10, filters = {}, adm
         ]
     };
 
-    if (filters.id) {
-        where.AND.push({
-            job: {
-                id: parseInt(filters.id)
-            }
-        });
-    }
-
-    if (filters.title) {
-        where.AND.push({
-            job: {
-                title: { contains: filters.title, mode: 'insensitive' }
-            }
-        });
-    }
-
-    if (filters.location) {
-        where.AND.push({
-            job: {
-                location: { contains: filters.location, mode: 'insensitive' }
-            }
-        });
-    }
-
-    if (filters.dateFrom || filters.dateTo) {
-        where.AND.push({
-            job: {
-                work_date: {
-                    gte: filters.dateFrom ? new Date(filters.dateFrom) : undefined,
-                    lte: filters.dateTo ? new Date(filters.dateTo) : undefined
-                }
-            }
-        });
-    }
-
-    if (filters.status) {
-        where.AND.push({
-            job: {
-                status: filters.status
-            }
-        });
-    }
-
-    if (filters.role) {
-        where.AND.push({
-            role: filters.role
-        });
-    }
-
     return prisma.jobAdmins.findMany({
         skip,
         take: pageSize,
         where,
-        include: {
+        select: {
             job: {
                 select: {
                     id: true,
@@ -1310,7 +1302,8 @@ export const getAssignedJobs = async (page = 1, pageSize = 10, filters = {}, adm
                             id: true,
                             first_name: true,
                             last_name: true,
-                            email: true
+                            email: true,
+                            phone: true,
                         }
                     },
                     JobPositions: {
@@ -1328,6 +1321,20 @@ export const getAssignedJobs = async (page = 1, pageSize = 10, filters = {}, adm
                                             profile_image: true
                                         }
                                     }
+                                }
+                            }
+                        }
+                    },
+                    JobAdmins: {
+                        include: {
+                            admin: {
+                                select: {
+                                    id: true,
+                                    first_name: true,
+                                    last_name: true,
+                                    email: true,
+                                    profile_pic: true,
+                                    phone: true
                                 }
                             }
                         }
@@ -1357,61 +1364,9 @@ export const getAssignedJobsCount = async (adminId, filters = {}) => {
             { admin_id: adminId }
         ]
     };
-
-    if (filters.title) {
-        where.AND.push({
-            job: {
-                title: { contains: filters.title, mode: 'insensitive' }
-            }
-        });
-    }
-
-    if (filters.location) {
-        where.AND.push({
-            job: {
-                location: { contains: filters.location, mode: 'insensitive' }
-            }
-        });
-    }
-
-    if (filters.dateFrom || filters.dateTo) {
-        where.AND.push({
-            job: {
-                work_date: {
-                    gte: filters.dateFrom ? new Date(filters.dateFrom) : undefined,
-                    lte: filters.dateTo ? new Date(filters.dateTo) : undefined
-                }
-            }
-        });
-    }
-
-    if (filters.status) {
-        where.AND.push({
-            job: {
-                status: filters.status
-            }
-        });
-    }
-
-    if (filters.role) {
-        where.AND.push({
-            role: filters.role
-        });
-    }
-
     return prisma.jobAdmins.count({ where });
 };
 
-// เช็คสิทธิ์ของแอดมินในงาน
-export const checkJobAdminPermission = async (jobId, adminId) => {
-    const jobAdmin = await prisma.jobAdmins.findFirst({
-        where: {
-            job_id: parseInt(jobId),
-            admin_id: parseInt(adminId)
-        }
-    });
-    return jobAdmin !== null;
-};
 
 // เพิ่มแอดมินให้กับงาน
 export const addJobAdmin = async (jobId, adminId, role) => {

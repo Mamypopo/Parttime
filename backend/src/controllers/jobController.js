@@ -4,6 +4,7 @@ import * as adminModel from '../models/adminModel.js';
 import * as userModel from '../models/userModel.js';
 import * as notificationModel from '../models/notificationModel.js'
 import * as notificationController from './notificationController.js'
+import { NOTIFICATIONADMIN_TYPES } from '../models/notificationModel.js';
 import archiver from 'archiver'
 import path from 'path'
 import fs from 'fs'
@@ -25,6 +26,17 @@ export const createJob = async (req, res) => {
             title, work_date, location, start_time, end_time, details, positions, admins
         }, adminId);
 
+        // สร้างการแจ้งเตือนสำหรับแอดมินที่ได้รับมอบหมาย
+        if (admins && admins.length > 0) {
+            for (const assignedAdmin of admins) {
+                await notificationModel.createAdminNotification({
+                    adminId: assignedAdmin.id,
+                    content: `คุณได้รับมอบหมายให้ดูแลงาน "${title}" วันที่ ${new Date(work_date).toLocaleDateString('th-TH')}`,
+                    jobId: job.id,
+                    type: NOTIFICATIONADMIN_TYPES.JOB_ASSIGNED
+                });
+            }
+        }
         await createLog(
             null,
             adminId,
@@ -738,21 +750,13 @@ export const getAssignedJobs = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const pageSize = parseInt(req.query.pageSize) || 10;
-        const filters = {
-            title: req.query.title,
-            location: req.query.location,
-            dateFrom: req.query.dateFrom,
-            dateTo: req.query.dateTo,
-            status: req.query.status,
-            role: req.query.role
-        };
         const adminId = req.user.id;
 
         // ดึงข้อมูลงาน
-        const jobs = await jobModel.getAssignedJobs(page, pageSize, filters, adminId);
-
+        const jobs = await jobModel.getAssignedJobs(page, pageSize, adminId);
+        console.log(jobs)
         // นับจำนวนงานทั้งหมด
-        const total = await jobModel.getAssignedJobsCount(adminId, filters);
+        const total = await jobModel.getAssignedJobsCount(adminId);
 
         res.json({
             data: jobs,
@@ -848,19 +852,3 @@ export const removeJobAdmin = async (req, res) => {
     }
 };
 
-// Middleware ตรวจสอบสิทธิ์
-export const checkJobPermission = async (req, res, next) => {
-    try {
-        const { jobId } = req.params;
-        const adminId = req.user.id;
-
-        const hasPermission = await jobModel.checkJobAdminPermission(jobId, adminId);
-        if (!hasPermission) {
-            return res.status(403).json({ message: 'คุณไม่มีสิทธิ์จัดการงานนี้' });
-        }
-        next();
-    } catch (error) {
-        console.error('Error checking job permission:', error);
-        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์' });
-    }
-};

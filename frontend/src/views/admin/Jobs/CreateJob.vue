@@ -100,11 +100,11 @@
                   <!-- เลือกแอดมิน -->
                   <select
                     v-model="admin.id"
-                    class="flex-1 px-4 py-2 border dark:border-gray-700 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    class="flex-1 px-4 py-2 border dark:border-gray-700 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-300"
                   >
                     <option value="" disabled>เลือกผู้ดูแล</option>
                     <option
-                      v-for="availableAdmin in availableAdmins"
+                      v-for="availableAdmin in filteredAdmins"
                       :key="availableAdmin.id"
                       :value="availableAdmin.id"
                     >
@@ -112,15 +112,12 @@
                     </option>
                   </select>
 
-                  <!-- เลือกบทบาท -->
-                  <select
-                    v-model="admin.role"
-                    class="px-4 py-2 border dark:border-gray-700 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  <!-- แสดง role -->
+                  <div
+                    class="px-4 py-2 bg-gray-100 dark:bg-gray-600 rounded-xl text-gray-700 dark:text-gray-300"
                   >
-                    <option value="manager">ผู้จัดการ</option>
-                    <option value="evaluator">ผู้ประเมิน</option>
-                  </select>
-
+                    ผู้ดูแลงาน
+                  </div>
                   <!-- ปุ่มลบ -->
                   <button
                     type="button"
@@ -135,7 +132,7 @@
                 <button
                   type="button"
                   @click="addNewAdmin"
-                  class="w-full px-4 py-2 text-sm text-gray-600 dark:text-gray-300 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-400 dark:hover:border-purple-500 transition-colors"
+                  class="w-full px-4 py-2 text-sm text-gray-600 dark:text-gray-300 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-400 dark:hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-300"
                 >
                   <i class="fas fa-plus mr-2"></i>เพิ่มผู้ดูแล
                 </button>
@@ -242,11 +239,10 @@
 
 <script>
 import CreatePositionModal from '@/components/admin/Jobs/CreatePositionModal.vue'
-import axios from 'axios'
 import Swal from 'sweetalert2'
 import { useJobStore } from '@/stores/jobStore'
 import { useAdminStore } from '@/stores/adminStore'
-import router from '@/router'
+
 export default {
   name: 'CreateJob',
   components: {
@@ -281,7 +277,13 @@ export default {
     ;(this.form.date = `${year}-${month}-${day}`),
       (this.availableAdmins = await this.jobStore.fetchAvailableAdmins())
   },
-
+  computed: {
+    filteredAdmins() {
+      const adminStore = useAdminStore()
+      const currentAdminId = adminStore.admin.id
+      return this.availableAdmins.filter((admin) => admin.id !== currentAdminId)
+    }
+  },
   methods: {
     async fetchAvailableAdmins() {
       try {
@@ -291,6 +293,7 @@ export default {
         console.error('Error fetching admins:', error)
       }
     },
+
     addNewAdmin() {
       this.selectedAdmins.push({
         id: '',
@@ -397,7 +400,7 @@ export default {
             role: admin.role
           }))
         }
-        console.log('Submitting job data:', jobData) // log เพื่อตรวจสอบ
+
         await this.jobStore.createJob(jobData)
 
         await Swal.fire({

@@ -19,7 +19,8 @@ export const NOTIFICATIONADMIN_TYPES = {
     EVALUATION: 'evaluation',
     SYSTEM: 'system',
     JOB_APPLICATION_CANCELLED_ADMIN: 'job_application_cancelled_admin',
-    PAYMENT_PENDING: 'payment_pending'
+    PAYMENT_PENDING: 'payment_pending',
+    JOB_ASSIGNED: 'job_assigned'
 
 };
 

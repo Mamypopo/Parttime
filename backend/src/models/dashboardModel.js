@@ -425,6 +425,12 @@ export const getEvents = (month = new Date().getMonth(), year = new Date().getFu
         const endDate = new Date(year, month + 1, 0)
 
         return prisma.job.findMany({
+            where: {
+                work_date: {
+                    gte: startDate,
+                    lte: endDate
+                }
+            },
             select: {
                 id: true,
                 title: true,
@@ -447,12 +453,20 @@ export const getEvents = (month = new Date().getMonth(), year = new Date().getFu
                             }
                         }
                     }
-                }
-            },
-            where: {
-                work_date: {
-                    gte: startDate,
-                    lte: endDate
+                },
+                JobAdmins: {
+                    select: {
+                        id: true,
+                        admin: {
+                            select: {
+                                id: true,
+                                first_name: true,
+                                last_name: true,
+                                email: true,
+                                profile_pic: true
+                            }
+                        }
+                    }
                 }
             },
             orderBy: {

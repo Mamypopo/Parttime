@@ -56,7 +56,6 @@ router.get('/assigned', checkAdminRole, jobController.getAssignedJobs);
 router.post('/:jobId/admins', authMiddleware, jobController.addJobAdmin);
 router.delete('/:jobId/admins/:adminId', authMiddleware, jobController.removeJobAdmin);
 
-// ใช้ middleware ตรวจสอบสิทธิ์สำหรับ routes ที่ต้องการ
-router.put('/:jobId', authMiddleware, jobController.checkJobPermission, jobController.editJob);
+
 
 export default router;

@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import path from 'path';
 
 // ใช้จริง
 export const sendVerificationEmail = async (user, token) => {
@@ -147,7 +148,6 @@ export const sendResetPasswordEmail = async ({ email, first_name, resetToken }) 
 
 
 
-// ฟังก์ชันสำหรับส่งอีเมลแจ้งเตือนการจ่ายเงิน
 export const sendPaymentNotificationEmail = async (payment) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -183,20 +183,24 @@ export const sendPaymentNotificationEmail = async (payment) => {
             })}</p>
                     ${payment.payment_note ? `<p><strong>หมายเหตุ:</strong> ${payment.payment_note}</p>` : ''}
                 </div>
-
                 ${payment.payment_method === 'transfer' && payment.payment_slip ? `
-                    <div style="text-align: center; margin: 20px 0;">
-                        <p><strong>สลิปการโอนเงิน</strong></p>
-                        <img src="${process.env.BACKEND_URL}/${payment.payment_slip}" 
-                             alt="สลิปการโอนเงิน"
-                             style="max-width: 100%; height: auto; border-radius: 5px;">
-                    </div>
+                    <p>กรุณาดูไฟล์แนบสำหรับสลิปการโอนเงิน</p>
                 ` : ''}
-
                 <p>หากมีข้อสงสัยหรือต้องการสอบถามข้อมูลเพิ่มเติม กรุณาติดต่อเจ้าหน้าที่</p>
             </div>
-        `
+        `,
+        attachments: payment.payment_method === 'transfer' && payment.payment_slip ? [
+            {
+                filename: 'payment-slip.jpg',
+                path: path.resolve('uploads/payment-slips', payment.payment_slip)
+            }
+        ] : []
     };
 
-    await transporter.sendMail(mailOptions);
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log('Email sent successfully');
+    } catch (error) {
+        console.error('Error sending email:', error);
+    }
 };

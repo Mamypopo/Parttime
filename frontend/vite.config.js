@@ -32,7 +32,7 @@ export default defineConfig({
     vueDevTools(),
   ],
   optimizeDeps: {
-    include: ["vue", "axios", "pinia"], // เพิ่ม libraries ที่ต้องการ pre-bundle
+    include: ["vue", "axios", "pinia"],
   },
   resolve: {
     alias: {

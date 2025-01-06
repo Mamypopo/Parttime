@@ -34,8 +34,17 @@ export const approveJobParticipation = async (req, res) => {
             return res.status(404).json({ message: 'ไม่พบการสมัครงานในระบบ' });
         }
 
+        // ตรวจสอบว่าเป็นผู้สร้างงานหรือแอดมินที่ได้รับมอบหมาย
         const job = await jobModel.getJobById(jobParticipation.jobId);
-        if (!job || job.created_by !== adminId) {
+        if (!job) {
+            return res.status(404).json({ message: 'ไม่พบข้อมูลงาน' });
+        }
+
+        // ตรวจสอบว่าเป็นผู้สร้างงานหรือแอดมินที่ได้รับมอบหมาย
+        const isCreator = job.created_by === adminId;
+        const isAssignedAdmin = job.JobAdmins?.some(admin => admin.admin_id === adminId);
+
+        if (!isCreator && !isAssignedAdmin) {
             return res.status(403).json({ message: 'คุณไม่มีสิทธิ์อนุมัติการสมัครงานนี้' });
         }
 

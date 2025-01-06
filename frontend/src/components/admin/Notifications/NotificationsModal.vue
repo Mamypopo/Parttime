@@ -26,7 +26,7 @@
           >
             <!-- Modal Container -->
             <HeadlessDialogPanel
-              class="w-full max-w-6xl rounded-xl shadow-xl overflow-hidden bg-white dark:bg-gray-800"
+              class="w-full max-w-7xl rounded-xl shadow-xl overflow-hidden bg-white dark:bg-gray-800"
               @click.stop
             >
               <!-- Header -->
@@ -197,6 +197,7 @@ export default {
         { label: 'ยืนยันตัวตน', value: 'user_verification' },
         { label: 'ประเมินผล', value: 'evaluation' },
         { label: 'การเงิน', value: 'payment_pending' },
+        { label: 'งานที่ได้รับมอบ', value: 'job_assigned' },
         { label: 'ยกเลิก', value: 'job_application_cancelled_admin' },
         { label: 'ระบบ', value: 'system' }
       ]
@@ -230,7 +231,8 @@ export default {
         system: 'bg-gradient-to-br from-[#BDC3C7] to-[#95A5A6]',
         job_application_cancelled_admin: 'bg-gradient-to-br from-[#EB5757] to-[#C0392B]',
         payment_pending: 'bg-gradient-to-br from-[#AFF1DA] to-[#11A89D]',
-        default: 'bg-gradient-to-br from-[#89CFF0] to-[#4682B4]'
+        default: 'bg-gradient-to-br from-[#89CFF0] to-[#4682B4]',
+        job_assigned: 'bg-gradient-to-br from-[#B794F4] to-[#553C9A]'
       }
       return classes[type] || classes.default
     },
@@ -244,7 +246,8 @@ export default {
         system: 'fas fa-bell text-white',
         job_application_cancelled_admin: 'fas fa-ban text-white',
         payment_pending: 'fas fa-money-bill-wave text-white',
-        default: 'fas fa-bell text-white'
+        default: 'fas fa-bell text-white',
+        job_assigned: 'fas fa-clipboard-list text-white'
       }
       return icons[type] || icons.default
     },
@@ -259,7 +262,8 @@ export default {
         evaluation: 'fas fa-star text-[#6FCF97] ',
         system: 'fas fa-cog text-[#95A5A6] ',
         job_application_cancelled_admin: 'fas fa-ban text-[#FF6F61] ',
-        payment_pending: 'fas fa-money-bill-wave text-[#AFF1DA]'
+        payment_pending: 'fas fa-money-bill-wave text-[#AFF1DA]',
+        job_assigned: 'fas fa-clipboard-list text-[#B794F4]'
       }
       return icons[value]
     },

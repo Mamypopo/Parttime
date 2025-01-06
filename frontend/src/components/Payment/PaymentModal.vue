@@ -96,6 +96,7 @@
                       <input
                         type="file"
                         accept="image/*"
+                        ref="fileInputRef"
                         @change="handleFileUpload"
                         class="hidden"
                         required
@@ -117,7 +118,7 @@
                           </div>
                           <!-- ปุ่มลบไฟล์ -->
                           <button
-                            @click.prevent="removeFile"
+                            @click="removeFile"
                             class="mt-2 text-xs text-red-500 hover:text-red-600"
                           >
                             <i class="fas fa-times mr-1"></i>
@@ -190,6 +191,7 @@
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { usePaymentStore } from '@/stores/paymentStore'
 import Swal from 'sweetalert2'
+import { ref } from 'vue'
 
 export default {
   components: {
@@ -243,7 +245,7 @@ export default {
           event.target.value = '' // รีเซ็ต input
           return
         }
-        this.formData.payment_slip = file
+        this.formData.payment_slip = file // เก็บข้อมูลไฟล์ใน formData
       }
     },
 
@@ -319,10 +321,11 @@ export default {
       }
     },
     removeFile() {
-      this.formData.payment_slip = null
-      // รีเซ็ต input file
-      const fileInput = this.$el.querySelector('input[type="file"]')
-      if (fileInput) fileInput.value = ''
+      this.formData.payment_slip = null // ลบข้อมูลไฟล์
+      // รีเซ็ต input file ด้วย ref
+      if (this.$refs.fileInputRef) {
+        this.$refs.fileInputRef.value = '' // รีเซ็ตค่าใน input file
+      }
     },
     formatFileSize(bytes) {
       if (bytes === 0) return '0 Bytes'
@@ -331,6 +334,9 @@ export default {
       const i = Math.floor(Math.log(bytes) / Math.log(k))
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
     }
+  },
+  mounted() {
+    this.fileInputRef = ref(null)
   }
 }
 </script>

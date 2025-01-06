@@ -165,7 +165,11 @@ export const useDashboardStore = defineStore('dashboard', {
                 JobPositions: this.formatJobPositions(event.JobPositions),
                 creator: event.creator,
                 created_at: event.created_at,
-                updated_at: event.updated_at
+                updated_at: event.updated_at,
+                JobAdmins: event.JobAdmins?.map(item => ({
+                    id: item.id || item.admin.id,
+                    admin: item.admin
+                })) || []
             }
         },
 

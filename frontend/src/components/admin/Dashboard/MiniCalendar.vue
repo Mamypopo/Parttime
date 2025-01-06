@@ -178,7 +178,7 @@ export default {
       const lastDay = new Date(year, month + 1, 0)
       const dates = []
 
-      // เพิ่มวันจากเดือนก่อนหน้า
+      // วันจากเดือนก่อนหน้า
       for (let i = 0; i < firstDay.getDay(); i++) {
         const date = new Date(year, month, -i)
         dates.unshift({
@@ -188,7 +188,7 @@ export default {
         })
       }
 
-      // เพิ่มวันในเดือนปัจจุบัน
+      // วันในเดือนปัจจุบัน
       for (let i = 1; i <= lastDay.getDate(); i++) {
         const date = new Date(year, month, i)
         dates.push({
@@ -198,7 +198,7 @@ export default {
         })
       }
 
-      // เพิ่มวันจากเดือนถัดไป
+      // วันจากเดือนถัดไป
       const remainingDays = 42 - dates.length
       for (let i = 1; i <= remainingDays; i++) {
         const date = new Date(year, month + 1, i)

@@ -343,7 +343,13 @@
                     <!-- ปุ่มประเมิน -->
                     <button
                       @click="openWorkStatusModal(job)"
-                      class="px-4 py-2 text-sm rounded-lg transition-all duration-300 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 text-white shadow-md hover:opacity-90 hover:shadow-lg whitespace-nowrap"
+                      :disabled="!canEvaluate(job)"
+                      class="px-4 py-2 text-sm rounded-lg transition-all duration-300"
+                      :class="[
+                        canEvaluate(job)
+                          ? 'bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 text-white shadow-md hover:opacity-90 hover:shadow-lg'
+                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      ]"
                     >
                       <i class="fas fa-star mr-2"></i>
                       ประเมินผลงาน
@@ -540,6 +546,7 @@ export default {
         })
       }
     },
+
     async loadJobs() {
       try {
         await this.jobStore.fetchJobsAndParticipants()
@@ -712,6 +719,10 @@ export default {
       }
     },
 
+    canEvaluate(job) {
+      // ประเมินได้เฉพาะงานที่ status เป็น 'in_progress' หรือ 'completed' เท่านั้น
+      return ['in_progress', 'completed'].includes(job.status)
+    },
     async generateEvaluationSummary(jobId, jobTitle) {
       try {
         const result = await Swal.fire({

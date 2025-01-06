@@ -38,9 +38,9 @@ export const useSidebarStore = defineStore('sidebar', {
                 badge: true
             },
             {
-                name: 'งานที่ได้รับมอบหมาย',  // เพิ่มเมนูนี้
+                name: 'งานที่ได้รับมอบหมาย',
                 path: '/admin/assigned-jobs',
-                icon: 'fas fa-tasks'
+                icon: 'fas fa-clipboard-list '
             },
             { name: 'การเงิน', path: '/admin/PaymentManagement-view', icon: 'fas fa-money-bill-wave' },
         ],

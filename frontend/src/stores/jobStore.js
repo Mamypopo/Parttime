@@ -126,7 +126,7 @@ export const useJobStore = defineStore('job', {
                     ...this.searchFilters
                 }
 
-                // ลบ params ที่เป็นค่าว่าง เหมือน adminUserStore
+
                 Object.keys(params).forEach(key => {
                     if (params[key] === '') delete params[key]
                 })
@@ -602,7 +602,7 @@ export const useJobStore = defineStore('job', {
             }
         },
 
-        // ดึงรายชื่อแอดมินที่สามารถเพิ่มได้
+        // ดึงรายชื่อแอดมินที่สามารถมอบหมายงานได้
         async fetchAvailableAdmins() {
             try {
                 const response = await axios.get(`${this.baseURL}/api/admin/available`)
@@ -630,7 +630,7 @@ export const useJobStore = defineStore('job', {
         },
 
         // ดึงงานที่ได้รับมอบหมาย
-        async fetchAssignedJobs(page = 1, filters = {}) {
+        async fetchAssignedJobs(page = 1) {
             this.loading = true
             this.error = null
 
@@ -638,7 +638,6 @@ export const useJobStore = defineStore('job', {
                 const response = await axios.get(`${this.baseURL}/api/jobs/assigned`, {
                     params: {
                         page,
-                        ...filters
                     }
                 })
 
@@ -651,71 +650,28 @@ export const useJobStore = defineStore('job', {
             }
         },
 
-
         async fetchAssignedJobsAndParticipants() {
             this.loading = true;
             try {
                 const headers = this.getAuthHeaders();
-                const params = new URLSearchParams();
+                const response = await axios.get(
+                    `${this.baseURL}/api/jobs/assigned`,
+                    { headers }
+                );
 
-                // เพิ่มเงื่อนไขการค้นหาจาก searchFilters
-                if (this.searchFilters.id) params.append('id', this.searchFilters.id);
-                if (this.searchFilters.title) params.append('title', this.searchFilters.title);
-                if (this.searchFilters.location) params.append('location', this.searchFilters.location);
-                if (this.searchFilters.position) params.append('position', this.searchFilters.position);
-                if (this.searchFilters.status) params.append('status', this.searchFilters.status);
-                if (this.searchFilters.dateFrom) params.append('dateFrom', this.searchFilters.dateFrom);
-                if (this.searchFilters.dateTo) params.append('dateTo', this.searchFilters.dateTo);
-                if (this.searchFilters.minWage) params.append('minWage', this.searchFilters.minWage);
-                if (this.searchFilters.maxWage) params.append('maxWage', this.searchFilters.maxWage);
-                if (this.searchFilters.peopleCount) params.append('peopleCount', this.searchFilters.peopleCount);
-
-                const queryString = params.toString();
-                const endpoint = queryString ? `?${queryString}` : '';
-
-                // เรียก API พร้อมกัน
-                const [assignedJobsResponse, participantsResponse] = await Promise.all([
-                    axios.get(`${this.baseURL}/api/jobs/assigned${endpoint}`, { headers }),
-                    axios.get(`${this.baseURL}/api/jobs/getJobsWithParticipants`, { headers })
-                ]);
-
-                // แปลงโครงสร้างข้อมูลให้เหมือนกับ jobs ปกติ
-                this.jobs = assignedJobsResponse.data?.jobs?.map(assigned => assigned.job) || [];
+                this.jobs = response.data?.data || [];
 
                 if (this.jobs.length > 0) {
-                    this.jobs = this.jobs.map(job => {
-                        const jobWithParticipants = participantsResponse.data?.data?.find(p => p.id === job.id);
-
-                        const updatedJobPositions = Array.isArray(job.JobPositions)
-                            ? job.JobPositions.map(position => {
-                                const participations = jobWithParticipants?.JobPositions?.find(p => p.id === position.id)?.JobParticipation || [];
-
-                                // อัพเดทให้รวม workHistories
-                                const updatedParticipations = participations.map(participation => {
-                                    // เก็บ ID ของการสมัครที่มีสถานะ pending เป็น "ใหม่"
-                                    if (participation.status === 'pending') {
-                                        this.newParticipations.add(participation.id);
-                                    }
-
-                                    return {
-                                        ...participation,
-                                        workHistories: participation.workHistories || []
-                                    };
-                                });
-
-                                return {
-                                    ...position,
-                                    JobParticipation: updatedParticipations
-                                };
-                            })
-                            : [];
+                    this.jobs = this.jobs.map(jobAdmin => {
+                        const job = jobAdmin.job;
 
                         return {
                             ...job,
-                            JobPositions: updatedJobPositions
+                            JobPositions: job.JobPositions || []
                         };
                     });
                 }
+
 
             } catch (error) {
                 console.error('Error fetching assigned jobs:', error);
@@ -856,6 +812,7 @@ export const useJobStore = defineStore('job', {
         },
 
 
+
         formatNumber(value) {
             try {
                 // ตรวจสอบว่าเป็นตัวเลขหรือไม่
@@ -949,6 +906,7 @@ export const useJobStore = defineStore('job', {
                 return position.JobParticipation.some(p => this.newParticipations.has(p.id))
             })
         },
+
         getPendingCount(job) {
             if (!job?.JobPositions) return 0
             return job.JobPositions.reduce((count, position) => {
