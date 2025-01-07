@@ -34,7 +34,10 @@
               >
                 <DialogTitle class="text-lg font-semibold text-white">
                   <i class="fas fa-clipboard-list mr-2"></i>
-                  รายละเอียดงาน #{{ job?.id }} / {{ job?.title }}
+                  รายละเอียดงาน #{{ job?.id }} / {{ job?.title }} /
+                  {{ job?.creator?.first_name || 'ไม่ระบุ' }}
+
+                  {{ job?.creator?.last_name || 'ไม่ระบุ' }}
                 </DialogTitle>
                 <button
                   @click="closeModal"
@@ -69,7 +72,7 @@
                     </div>
                   </div>
 
-                  <!-- เพิ่มส่วนแสดงผู้ดูแลงานตรงนี้ -->
+                  <!-- ส่วนแสดงผู้ดูแลงานตรงนี้ -->
                   <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl">
                     <h4
                       class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center mb-3"

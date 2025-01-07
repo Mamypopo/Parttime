@@ -181,7 +181,7 @@ export default {
         { label: 'ยืนยันตัวตน', value: 'user_verification' },
         { label: 'ประเมินผล', value: 'evaluation' },
         { label: 'การเงิน', value: 'payment_pending' },
-        { label: 'งานที่ได้รับมอบ', value: 'job_assigned' },
+        { label: 'งานที่ได้รับ', value: 'job_assigned' },
         { label: 'ยกเลิก', value: 'job_application_cancelled_admin' },
         { label: 'ระบบ', value: 'system' }
       ]

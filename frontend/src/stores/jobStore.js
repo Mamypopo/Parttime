@@ -43,7 +43,6 @@ export const useJobStore = defineStore('job', {
             totalItems: 0
         },
 
-
     }),
 
     getters: {
@@ -126,28 +125,29 @@ export const useJobStore = defineStore('job', {
                     ...this.searchFilters
                 }
 
-
+                // ลบ key ที่มีค่าเป็น '', null, หรือ undefined
                 Object.keys(params).forEach(key => {
-                    if (params[key] === '') delete params[key]
+                    if (!params[key] && params[key] !== 0) delete params[key]
                 })
 
-
+                const queryString = new URLSearchParams(params).toString()
 
                 const response = await axios.get(
-                    `${this.baseURL}/api/jobs?${params.toString()}`,
-                    {
-                        params,
-                        headers
-                    }
+                    `${this.baseURL}/api/jobs?${queryString}`,
+                    { headers }
                 )
+
                 if (response.data) {
-                    this.jobs = response.data.jobs
+                    this.jobs = response.data.jobs || []
                     if (response.data.pagination) {
-                        this.pagination.totalItems = parseInt(response.data.pagination.total)
+                        this.pagination.totalItems = parseInt(response.data.pagination.total || 0)
+                    } else {
+                        this.pagination.totalItems = 0
                     }
                 }
             } catch (error) {
                 console.error('Error fetching jobs:', error)
+                // จัดการกรณี error
                 this.jobs = []
                 this.pagination.totalItems = 0
             } finally {
@@ -630,52 +630,25 @@ export const useJobStore = defineStore('job', {
         },
 
         // ดึงงานที่ได้รับมอบหมาย
-        async fetchAssignedJobs(page = 1) {
-            this.loading = true
-            this.error = null
-
-            try {
-                const response = await axios.get(`${this.baseURL}/api/jobs/assigned`, {
-                    params: {
-                        page,
-                    }
-                })
-
-                return response
-            } catch (error) {
-                this.error = error.response?.data?.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล'
-                throw error
-            } finally {
-                this.loading = false
-            }
-        },
-
-        async fetchAssignedJobsAndParticipants() {
+        async fetchAssignedJobs(page = 1, pageSize = 10) {
             this.loading = true;
             try {
-                const headers = this.getAuthHeaders();
-                const response = await axios.get(
-                    `${this.baseURL}/api/jobs/assigned`,
-                    { headers }
-                );
+                const response = await axios.get(`${this.baseURL}/api/jobs/assigned`, {
+                    params: { page, pageSize },
+                });
 
                 this.jobs = response.data?.data || [];
 
-                if (this.jobs.length > 0) {
-                    this.jobs = this.jobs.map(jobAdmin => {
-                        const job = jobAdmin.job;
+                // จัดการข้อมูลเพิ่มเติม
+                this.jobs = this.jobs.map((jobAdmin) => ({
+                    ...jobAdmin.job,
+                    JobPositions: jobAdmin.job?.JobPositions || [],
+                }));
 
-                        return {
-                            ...job,
-                            JobPositions: job.JobPositions || []
-                        };
-                    });
-                }
-
-
+                return response;
             } catch (error) {
                 console.error('Error fetching assigned jobs:', error);
-                this.error = error.message || 'ไม่สามารถโหลดข้อมูลงานที่ได้รับมอบหมายได้';
+                this.error = error.response?.data?.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล';
                 throw error;
             } finally {
                 this.loading = false;

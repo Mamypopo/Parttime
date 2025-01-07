@@ -754,7 +754,7 @@ export const getAssignedJobs = async (req, res) => {
 
         // ดึงข้อมูลงาน
         const jobs = await jobModel.getAssignedJobs(page, pageSize, adminId);
-        console.log(jobs)
+
         // นับจำนวนงานทั้งหมด
         const total = await jobModel.getAssignedJobsCount(adminId);
 

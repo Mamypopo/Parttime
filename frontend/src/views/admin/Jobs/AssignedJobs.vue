@@ -53,7 +53,7 @@
         <div class="flex items-center gap-2 mb-4 text-sm text-gray-600 dark:text-gray-400">
           <div class="flex items-center gap-2">
             <i class="fas fa-user-edit text-xs text-gray-400"></i>
-            <span>ผู้สร้างงาน:</span>
+            <span>เจ้าของงาน:</span>
           </div>
           <div class="flex items-center gap-1.5">
             <span class="font-medium text-gray-700 dark:text-gray-300">
@@ -121,8 +121,14 @@
 
           <!-- Open Evaluation -->
           <button
+            :disabled="!canEvaluate(item?.job)"
             @click="openEvaluation(item)"
-            class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 hover:text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400 dark:hover:bg-yellow-900/30 dark:hover:text-yellow-300 rounded-lg shadow-sm transition-all"
+            :class="[
+              'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg shadow-sm transition-all',
+              canEvaluate(item?.job)
+                ? 'bg-yellow-50 text-yellow-600 hover:bg-yellow-100 hover:text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400 dark:hover:bg-yellow-900/30 dark:hover:text-yellow-300'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
+            ]"
           >
             <i class="fas fa-star text-sm"></i>
             <span>ประเมินผล</span>
@@ -151,8 +157,8 @@
     </div>
 
     <!-- Loading State -->
-    <div v-if="jobStore.loading" class="text-center py-8">
-      <i class="fas fa-spinner fa-spin text-2xl text-gray-500"></i>
+    <div v-if="jobStore.loading" class="flex justify-center items-center py-8">
+      <i class="fas fa-spinner fa-spin text-4xl text-purple-500"></i>
     </div>
 
     <!-- Empty State -->
@@ -161,7 +167,8 @@
       class="text-center py-8 text-gray-500"
     >
       <i class="fas fa-inbox text-4xl mb-2"></i>
-      <p>ไม่พบงานที่ได้รับมอบหมาย</p>
+      <p class="text-lg font-semibold">ยังไม่มีงานที่ได้รับมอบหมาย</p>
+      <p class="text-sm">กรุณาตรวจสอบสถานะงานหรือสร้างงานใหม่</p>
     </div>
 
     <!-- Modals -->
@@ -192,7 +199,7 @@ import { useJobStore } from '@/stores/jobStore'
 import JobDetailsModal from '@/components/admin/Jobs/JobDetailModal.vue'
 import UpdateWorkStatusModal from '@/components/admin/Jobs/UpdateWorkStatusModal.vue'
 import ParticipantsModal from '@/components/admin/Jobs/ParticipantsModal.vue'
-
+import Swal from 'sweetalert2'
 export default {
   name: 'AssignedJobs',
 
@@ -205,6 +212,7 @@ export default {
   data() {
     return {
       jobs: [],
+      currentPage: 1,
       statusFilter: '',
       showDetailsModal: false,
       showEvaluationModal: false,
@@ -217,10 +225,21 @@ export default {
     filteredJobs() {
       let jobs = this.jobs
       if (this.statusFilter) {
-        jobs = jobs.filter((item) => item.job.status === this.statusFilter)
+        jobs = jobs.filter((item) => item?.job?.status === this.statusFilter)
       }
 
-      return jobs
+      // กรองข้อมูลซ้ำซ้อน
+      const uniqueJobs = []
+      const seen = new Set()
+
+      jobs.forEach((item) => {
+        if (!seen.has(item.job.id)) {
+          seen.add(item.job.id)
+          uniqueJobs.push(item)
+        }
+      })
+
+      return uniqueJobs
     },
 
     jobStore() {
@@ -232,16 +251,16 @@ export default {
     await this.jobStore.fetchJobsAndParticipants()
   },
   methods: {
-    async fetchJobs() {
+    async fetchJobs(page = 1) {
+      this.jobStore.loading = true
       try {
-        const filters = {
-          status: this.statusFilter
-        }
-        const response = await this.jobStore.fetchAssignedJobs(filters)
+        const response = await this.jobStore.fetchAssignedJobs(page, 10) // โหลดข้อมูลทีละหน้า (pagination)
         this.jobs = response?.data?.data || []
       } catch (error) {
-        console.error('Error fetching assigned jobs:', error)
+        console.error('Error fetching assigned jobs:', error.message || error)
         this.jobs = []
+      } finally {
+        this.jobStore.loading = false
       }
     },
 
@@ -255,44 +274,44 @@ export default {
       this.selectedJob = null
     },
 
-    async handleApprove(participationId, resolve) {
+    async handleApprove(participationId) {
       try {
-        const response = await this.jobStore.approveOrRejectParticipation(
-          participationId,
-          'approved'
-        )
-        resolve({
-          success: true,
-          message: 'อนุมัติการสมัครสำเร็จ'
+        await this.jobStore.approveOrRejectParticipation(participationId, 'approved')
+        Swal.fire({
+          icon: 'success',
+          title: 'สำเร็จ',
+          text: 'อนุมัติผู้สมัครสำเร็จ',
+          timer: 1500,
+          showConfirmButton: false
         })
-        if (response) {
-          await this.jobStore.fetchAssignedJobsAndParticipants()
-        }
+        await this.fetchJobs() // ใช้ fetchJobs แทน fetchAssignedJobs
+        this.closeParticipantsModal()
       } catch (error) {
-        resolve({
-          success: false,
-          message: error.message || 'ไม่สามารถอนุมัติการสมัครได้'
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: error.message || 'ไม่สามารถอนุมัติผู้สมัครได้'
         })
       }
     },
 
-    async handleReject(participationId, resolve) {
+    async handleReject(participationId) {
       try {
-        const response = await this.jobStore.approveOrRejectParticipation(
-          participationId,
-          'rejected'
-        )
-        resolve({
-          success: true,
-          message: 'ปฏิเสธการสมัครสำเร็จ'
+        await this.jobStore.approveOrRejectParticipation(participationId, 'rejected')
+        Swal.fire({
+          icon: 'success',
+          title: 'สำเร็จ',
+          text: 'ปฏิเสธผู้สมัครสำเร็จ',
+          timer: 1500,
+          showConfirmButton: false
         })
-        if (response) {
-          await this.jobStore.fetchAssignedJobsAndParticipants()
-        }
+        await this.fetchJobs()
+        this.closeParticipantsModal()
       } catch (error) {
-        resolve({
-          success: false,
-          message: error.message || 'ไม่สามารถปฏิเสธการสมัครได้'
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: error.message || 'ไม่สามารถปฏิเสธผู้สมัครได้'
         })
       }
     },
@@ -300,12 +319,17 @@ export default {
     updateJob(updatedJob) {
       this.selectedJob = updatedJob
     },
-    async viewJobDetails(job) {
-      await this.jobStore.fetchAssignedJobsAndParticipants()
-      const foundJob = this.jobStore.jobs.find((j) => j.id === job.job_id)
-      if (foundJob) {
-        this.selectedJob = foundJob
-        this.showDetailsModal = true
+
+    async viewJobDetails(item) {
+      try {
+        if (!item || !item.job) {
+          console.error('Invalid job item:', item)
+          return
+        }
+        this.selectedJob = item.job // กำหนด job ที่เลือก
+        this.showDetailsModal = true // เปิด Modal
+      } catch (error) {
+        console.error('Error opening JobDetailsModal:', error.message || error)
       }
     },
 
@@ -314,12 +338,22 @@ export default {
       this.selectedJob = null
     },
 
-    async openEvaluation(job) {
-      await this.jobStore.fetchAssignedJobsAndParticipants()
-      const foundJob = this.jobStore.jobs.find((j) => j.id === job.job_id)
-      if (foundJob) {
-        this.selectedJob = foundJob
+    canEvaluate(job) {
+      // ประเมินได้เฉพาะงานที่ status เป็น 'in_progress' หรือ 'completed' เท่านั้น
+      return ['in_progress', 'completed'].includes(job?.status)
+    },
+
+    async openEvaluation(item) {
+      try {
+        if (!item || !item.job) {
+          console.error('Invalid job item for evaluation:', item)
+          return
+        }
+
+        this.selectedJob = item.job
         this.showEvaluationModal = true
+      } catch (error) {
+        console.error('Error opening evaluation modal:', error.message || error)
       }
     },
 
@@ -378,7 +412,8 @@ export default {
 
   watch: {
     statusFilter() {
-      this.fetchJobs()
+      this.currentPage = 1 // รีเซ็ตหน้าแรก
+      this.fetchJobs() // โหลดข้อมูลใหม่
     }
   },
 

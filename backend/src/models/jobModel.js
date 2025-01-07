@@ -1270,20 +1270,15 @@ export const getJobParticipantsDocuments = async (jobId) => {
 
 
 // ดึงงานที่แอดมินได้รับมอบหมาย
-export const getAssignedJobs = async (page = 1, pageSize = 10, filters = {}, adminId) => {
+export const getAssignedJobs = async (page = 1, pageSize = 10, adminId) => {
     const skip = (page - 1) * pageSize;
-
-    // สร้าง where clause สำหรับ filters
-    const where = {
-        AND: [
-            { admin_id: adminId }
-        ]
-    };
 
     return prisma.jobAdmins.findMany({
         skip,
         take: pageSize,
-        where,
+        where: {
+            admin_id: adminId, // ดึงเฉพาะงานที่มอบหมายให้ adminId
+        },
         select: {
             job: {
                 select: {
@@ -1309,9 +1304,25 @@ export const getAssignedJobs = async (page = 1, pageSize = 10, filters = {}, adm
                     JobPositions: {
                         include: {
                             JobParticipation: {
-                                select: {
-                                    id: true,
-                                    status: true,
+                                include: {
+                                    workHistories: {
+                                        select: {
+                                            id: true,
+                                            appearance_score: true,
+                                            quality_score: true,
+                                            quantity_score: true,
+                                            manner_score: true,
+                                            punctuality_score: true,
+                                            total_score: true,
+                                            comment: true,
+                                            is_passed_evaluation: true,
+                                            created_at: true
+                                        },
+                                        orderBy: {
+                                            created_at: 'desc'
+                                        },
+                                        take: 1
+                                    },
                                     user: {
                                         select: {
                                             id: true,
@@ -1327,14 +1338,14 @@ export const getAssignedJobs = async (page = 1, pageSize = 10, filters = {}, adm
                     },
                     JobAdmins: {
                         include: {
-                            admin: {
+                            admin: { // ดึงข้อมูล admin แต่ละคนที่มอบหมายให้กับงาน
                                 select: {
                                     id: true,
                                     first_name: true,
                                     last_name: true,
                                     email: true,
-                                    profile_pic: true,
-                                    phone: true
+                                    phone: true,
+                                    profile_pic: true
                                 }
                             }
                         }
@@ -1343,30 +1354,20 @@ export const getAssignedJobs = async (page = 1, pageSize = 10, filters = {}, adm
             }
         },
         orderBy: [
-            {
-                job: {
-                    created_at: "desc"
-                }
-            },
-            {
-                job: {
-                    work_date: "desc"
-                }
-            }
+            { job: { created_at: "desc" } },
+            { job: { work_date: "desc" } }
         ]
     });
 };
 
 // นับจำนวนงานที่ได้รับมอบหมาย
-export const getAssignedJobsCount = async (adminId, filters = {}) => {
-    const where = {
-        AND: [
-            { admin_id: adminId }
-        ]
-    };
-    return prisma.jobAdmins.count({ where });
+export const getAssignedJobsCount = async (adminId) => {
+    return prisma.jobAdmins.count({
+        where: {
+            admin_id: adminId, // นับเฉพาะงานที่เกี่ยวข้องกับ adminId
+        },
+    });
 };
-
 
 // เพิ่มแอดมินให้กับงาน
 export const addJobAdmin = async (jobId, adminId, role) => {
