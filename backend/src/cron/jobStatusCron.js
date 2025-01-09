@@ -103,10 +103,12 @@ export const updateJobStatuses = async () => {
                     }
                 }
 
+
                 // รวบรวมผู้เข้าร่วมงานจากทุกตำแหน่ง
-                const participants = updatedJob.JobPositions.flatMap(position =>
+                const participants = job.JobPositions.flatMap(position =>
                     position.JobParticipation.map(participation => participation.user)
                 );
+
                 // แจ้งเตือนผู้สมัครงาน
                 if (participants.length > 0 && userMessage) {
                     const notificationPromises = participants.map(participant =>

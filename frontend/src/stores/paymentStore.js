@@ -8,6 +8,8 @@ export const usePaymentStore = defineStore('payment', {
         pendingPayments: [],
         paidPayments: [],
         jobs: [],
+        payments: [],
+        currentPayment: null,
         isLoading: false,
         error: null,
         totalPages: 1, // จำนวนหน้าทั้งหมด
@@ -147,38 +149,41 @@ export const usePaymentStore = defineStore('payment', {
             } finally {
                 this.isLoading = false;
             }
+        },
+
+
+
+        // ดึงรายการจ่ายเงินของ user
+        async fetchUserPayments() {
+            try {
+                this.isLoading = true;
+                const response = await axios.get(`${this.baseURL}/api/payments/user/payments`);
+                this.payments = response.data.data || [];
+            } catch (error) {
+                this.error = error.response?.data?.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล';
+                throw error;
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        // ดึงรายละเอียดการจ่ายเงิน
+        async fetchPaymentDetail(paymentId) {
+            try {
+                this.isLoading = true;
+                const response = await axios.get(`${this.baseURL}/api/payments/user/payments/${paymentId}`);
+                this.currentPayment = response.data.data || null;
+                return response.data.data;
+            } catch (error) {
+                this.error = error.response?.data?.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล';
+                throw error;
+            } finally {
+                this.isLoading = false;
+            }
         }
     },
 
-    // เพิ่มฟังก์ชันสำหรับดาวน์โหลดเอกสาร
-    async downloadParticipantDocuments(jobId) {
-        try {
-            this.loading = true
-            const response = await axios.get(
-                `${this.baseURL}/jobs/${jobId}/documents`,
-                {
-                    responseType: 'blob', // สำคัญ! ต้องระบุ responseType เป็น blob
-                    headers: {
-                        Authorization: `Bearer ${this.token}`
-                    }
-                }
-            )
 
-            // สร้าง URL สำหรับไฟล์ที่ดาวน์โหลด
-            const url = window.URL.createObjectURL(new Blob([response.data]))
-            const link = document.createElement('a')
-            link.href = url
-            link.setAttribute('download', `job_${jobId}_documents.zip`) // จะได้เป็นไฟล์ zip
-            document.body.appendChild(link)
-            link.click()
-            link.remove()
-            window.URL.revokeObjectURL(url)
 
-        } catch (error) {
-            console.error('Error downloading documents:', error)
-            throw error
-        } finally {
-            this.loading = false
-        }
-    }
+
 });

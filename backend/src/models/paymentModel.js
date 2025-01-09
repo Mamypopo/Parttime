@@ -366,3 +366,101 @@ export const updateEmailStatus = async (id, adminId, ip, userAgent) => {
         throw new Error('ไม่สามารถอัพเดทสถานะการส่งอีเมลได้');
     }
 };
+
+
+// ฟังชั่น ดูการจ่ายเงินของ user
+export const getUserPaymentStatus = async (userId) => {
+    return await prisma.paymentHistory.findMany({
+        where: {
+            job_participation: {
+                user_id: userId,
+                // เฉพาะงานที่เสร็จและมีการประเมินแล้ว
+                status: 'completed',
+                workHistories: {
+                    some: {}
+                }
+            }
+        },
+        include: {
+            job_participation: {
+                include: {
+                    jobPosition: {
+                        include: {
+                            job: {
+                                select: {
+                                    id: true,
+                                    title: true,
+                                    work_date: true,
+                                    location: true,
+                                }
+                            }
+                        }
+                    },
+                    workHistories: {
+                        select: {
+                            total_score: true,
+                            comment: true,
+                        }
+                    }
+                }
+            },
+            paid_by: {
+                select: {
+                    first_name: true,
+                    last_name: true,
+                }
+            }
+        },
+        orderBy: {
+            created_at: 'desc'
+        }
+    });
+};
+
+// ฟังก์ชันดึงรายละเอียดการจ่ายเงินเฉพาะรายการ ของ user
+export const getUserPaymentDetail = async (paymentId, userId) => {
+    return await prisma.paymentHistory.findFirst({
+        where: {
+            id: parseInt(paymentId),
+            job_participation: {
+                user_id: userId
+            }
+        },
+        include: {
+            job_participation: {
+                include: {
+                    jobPosition: {
+                        include: {
+                            job: {
+                                select: {
+                                    id: true,
+                                    title: true,
+                                    work_date: true,
+                                    location: true,
+                                    start_time: true,
+                                    end_time: true,
+                                    status: true,
+                                    details: true,
+                                    created_by: true,
+                                    created_at: true,
+                                    updated_at: true
+                                }
+                            }
+                        }
+                    },
+                    workHistories: true
+                }
+            },
+            paid_by: true,
+            payment_logs: {
+                include: {
+                    admin: true
+                },
+                orderBy: {
+                    created_at: 'desc'
+                }
+            }
+        }
+    });
+};
+

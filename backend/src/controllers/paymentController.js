@@ -52,7 +52,7 @@ export const updatePaymentStatus = async (req, res) => {
             message: 'อัพเดทสถานะการจ่ายเงินเรียบร้อย',
             data: updatedPayment
         });
-        // ทำงานที่ใช้เวลานานแบบ async
+
         Promise.all([
             // ส่งอีเมล
             sendPaymentNotificationEmail(updatedPayment)
@@ -207,5 +207,68 @@ export const getJobPaymentSummary = async (req, res) => {
 };
 
 
+// ฟังชั่น ดูการจ่ายเงินของ user
+export const getUserPayments = async (req, res) => {
+    try {
+        const userId = req.user.id; // ดึง ID ของ user จาก token
+        const payments = await paymentModel.getUserPaymentStatus(userId);
+
+        // จัดรูปแบบข้อมูลให้เหมาะสมกับการแสดงผล
+        const formattedPayments = payments.map(payment => ({
+            id: payment.id,
+            jobTitle: payment.job_participation.jobPosition.job.title,
+            workDate: payment.job_participation.jobPosition.job.work_date,
+            location: payment.job_participation.jobPosition.job.location,
+            position: payment.job_participation.jobPosition.position_name,
+            amount: payment.amount,
+            status: payment.payment_status,
+            paidAt: payment.paid_at,
+            paymentMethod: payment.payment_method,
+            evaluation: {
+                score: payment.job_participation.workHistories[0]?.total_score,
+                comment: payment.job_participation.workHistories[0]?.comment
+            },
+            paidBy: payment.paid_by ? `${payment.paid_by.first_name} ${payment.paid_by.last_name}` : null
+        }));
+
+        res.status(200).json({
+            success: true,
+            data: formattedPayments
+        });
+    } catch (error) {
+        console.error('Error fetching user payments:', error);
+        res.status(500).json({
+            success: false,
+            message: 'เกิดข้อผิดพลาดในการดึงข้อมูลการจ่ายเงิน'
+        });
+    }
+};
+
+// ฟังก์ชันดูรายละเอียด การจ่ายเงินของ user
+export const getUserPaymentDetail = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { paymentId } = req.params;
+
+        const payment = await paymentModel.getUserPaymentDetail(paymentId, userId);
+
+        if (!payment) {
+            return res.status(404).json({
+                success: false,
+                message: 'ไม่พบข้อมูลการจ่ายเงิน'
+            });
+        }
 
 
+        res.status(200).json({
+            success: true,
+            data: payment
+        });
+    } catch (error) {
+        console.error('Error fetching payment detail:', error);
+        res.status(500).json({
+            success: false,
+            message: 'เกิดข้อผิดพลาดในการดึงข้อมูลรายละเอียดการจ่ายเงิน'
+        });
+    }
+};

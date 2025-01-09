@@ -73,6 +73,11 @@ export const useSidebarStore = defineStore('sidebar', {
                 badge: true,
                 badgeCount: 0  // จะอัพเดทจาก API
             },
+            {
+                path: '/user/payment-View',
+                name: 'การเงิน',
+                icon: 'fas fa-money-bill-wave'
+            },
         ],
 
 

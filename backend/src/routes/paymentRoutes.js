@@ -7,6 +7,11 @@ const router = express.Router();
 
 
 router.use(authMiddleware); // ตรวจสอบการล็อกอิน
+
+// ฝั่ง user
+router.get('/user/payments', paymentController.getUserPayments);
+router.get('/user/payments/:paymentId', paymentController.getUserPaymentDetail);
+
 router.use(checkAdminRole); // ตรวจสอบสิทธิ์ Admin
 
 // ดึงงานที่เสร็จและมีการประเมิน

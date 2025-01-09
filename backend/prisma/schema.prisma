@@ -228,11 +228,6 @@ model PaymentHistory {
   // ข้อมูล Checklist
   checklist_completed Boolean @default(false) // สถานะการตรวจสอบ
   checklist_items     Json? // รายการ checklist ที่ตรวจสอบแล้ว เช่น
-  // {
-  //   "user_info_verified": true,
-  //   "amount_verified": true,
-  //   "payment_method_verified": true
-  // }
 
   // ความสัมพันธ์
   payment_logs PaymentLog[] // ประวัติการทำรายการ
