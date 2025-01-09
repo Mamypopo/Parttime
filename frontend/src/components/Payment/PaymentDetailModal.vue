@@ -273,9 +273,8 @@ export default {
         this.loading = false
       }
     },
-    handleImageError(e) {
-      console.error('Error loading payment slip image')
-      e.target.src = '/images/error-image.png' // รูป fallback กรณีโหลดไม่สำเร็จ
+    handleImageError(event) {
+      console.error('Error loading payment slip image:', event.target.src)
       this.imageError = true
     },
     closeModal() {
