@@ -121,7 +121,7 @@
                   <div class="space-y-4">
                     <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
                       <h4 class="font-medium text-gray-900 dark:text-white mb-3">ข้อมูลงาน</h4>
-                      <div class="space-y-2 text-sm">
+                      <div class="space-y-3 text-sm">
                         <p class="flex justify-between">
                           <span class="text-gray-500 dark:text-gray-400">ตำแหน่ง:</span>
                           <span class="text-gray-900 dark:text-white">{{
@@ -146,10 +146,13 @@
                             {{ formatTime(job.start_time) }} - {{ formatTime(job.end_time) }}
                           </span>
                         </p>
-                        <p class="flex justify-between">
+                        <!-- ปรับส่วนแสดงสถานที่ -->
+                        <div class="flex flex-col space-y-1">
                           <span class="text-gray-500 dark:text-gray-400">สถานที่:</span>
-                          <span class="text-gray-900 dark:text-white">{{ job.location }}</span>
-                        </p>
+                          <span class="text-gray-900 dark:text-white text-right break-words">{{
+                            job.location
+                          }}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
