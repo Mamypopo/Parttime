@@ -16,6 +16,7 @@ export const useSidebarStore = defineStore('sidebar', {
         showUserSubmenu: false,
         showJobSubmenu: false,
         showMoreSubmenu: false,
+        showMyJobsSubmenu: false,
         showNotificationSubmenu: false,
         showAllNotifications: false,
 
@@ -94,13 +95,6 @@ export const useSidebarStore = defineStore('sidebar', {
                 icon: 'fas fa-briefcase'
             },
             {
-                path: '/user/my-jobs',
-                name: 'งานของฉัน',
-                icon: 'fas fa-tasks',
-                badge: true,
-                badgeCount: 0
-            },
-            {
                 name: 'การแจ้งเตือน',
                 icon: 'fas fa-bell',
                 isComponent: true,
@@ -126,7 +120,8 @@ export const useSidebarStore = defineStore('sidebar', {
             this.showUserSubmenu = false
             this.showJobSubmenu = false
             this.showMoreSubmenu = false
-            this.showNotifications = false
+            this.showNotifications = false,
+                this.showMyJobsSubmenu = false
         },
 
         toggleSubmenu(menu) {
@@ -159,6 +154,9 @@ export const useSidebarStore = defineStore('sidebar', {
                     break
                 case 'การแจ้งเตือน':
                     this.showNotifications = true
+                    break
+                case 'งานของฉัน':
+                    this.showMyJobsSubmenu = true
                     break
                 case 'เพิ่มเติม':
                     this.showMoreSubmenu = true

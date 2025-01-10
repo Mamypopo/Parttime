@@ -32,7 +32,7 @@
                 <DialogTitle
                   class="text-lg font-medium text-gray-900 dark:text-white flex items-center"
                 >
-                  <i class="fas fa-receipt mr-2 text-blue-500"></i>
+                  <i class="fas fa-receipt mr-2 text-emerald-500"></i>
                   รายละเอียดการจ่ายเงิน
                 </DialogTitle>
               </div>
@@ -49,13 +49,13 @@
                   <div class="flex justify-between items-start">
                     <div>
                       <h4 class="font-medium text-gray-900 dark:text-white flex items-center">
-                        <i class="fas fa-briefcase mr-2 text-gray-400"></i>
+                        <i class="fas fa-briefcase mr-2 text-indigo-500"></i>
                         {{ payment.job_participation.jobPosition.job.title }}
                       </h4>
                       <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
-                        <i class="far fa-calendar mr-2"></i>
+                        <i class="far fa-calendar mr-2 text-orange-500"></i>
                         {{ formatDate(payment.job_participation.jobPosition.job.work_date) }}
-                        <i class="far fa-clock mx-2"></i>
+                        <i class="far fa-clock mx-2 text-sky-500"></i>
                         {{ formatTime(payment.job_participation.jobPosition.job.start_time) }} -
                         {{ formatTime(payment.job_participation.jobPosition.job.end_time) }}
                       </p>
@@ -75,7 +75,7 @@
                     <div class="grid grid-cols-2 gap-3 text-sm">
                       <div>
                         <span class="text-gray-500 dark:text-gray-400 flex items-center">
-                          <i class="fas fa-coins mr-2"></i>
+                          <i class="fas fa-coins mr-2 text-yellow-500"></i>
                           จำนวนเงิน
                         </span>
                         <p class="font-medium text-gray-900 dark:text-white">
@@ -84,7 +84,7 @@
                       </div>
                       <div v-if="payment.payment_status === 'paid'">
                         <span class="text-gray-500 dark:text-gray-400 flex items-center">
-                          <i class="far fa-calendar-check mr-2"></i>
+                          <i class="far fa-calendar-check mr-2 text-green-500"></i>
                           วันที่จ่ายเงิน
                         </span>
                         <p class="text-gray-900 dark:text-white">
@@ -93,7 +93,7 @@
                       </div>
                       <div v-if="payment.payment_status === 'paid'">
                         <span class="text-gray-500 dark:text-gray-400 flex items-center">
-                          <i class="fas fa-money-bill-wave mr-2"></i>
+                          <i class="fas fa-money-bill-wave mr-2 text-teal-500"></i>
                           วิธีการจ่ายเงิน
                         </span>
                         <p class="text-gray-900 dark:text-white">
@@ -102,7 +102,7 @@
                       </div>
                       <div v-if="payment.payment_status === 'paid'">
                         <span class="text-gray-500 dark:text-gray-400 flex items-center">
-                          <i class="fas fa-user-check mr-2"></i>
+                          <i class="fas fa-user-check mr-2 text-purple-500"></i>
                           ผู้จ่ายเงิน
                         </span>
                         <p class="text-gray-900 dark:text-white">
@@ -116,7 +116,10 @@
                       v-if="payment.payment_status === 'paid'"
                       class="mt-3 flex items-center text-sm"
                     >
-                      <span class="text-gray-500 dark:text-gray-400 mr-2">สถานะอีเมล:</span>
+                      <span class="text-gray-500 dark:text-gray-400 flex items-center mr-2">
+                        <i class="fas fa-envelope mr-2 text-blue-500"></i>
+                        สถานะอีเมล:
+                      </span>
                       <span
                         :class="[
                           'inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full',
@@ -163,7 +166,7 @@
                     <p
                       class="text-sm font-medium text-gray-900 dark:text-white mb-2 flex items-center"
                     >
-                      <i class="fas fa-history mr-2"></i>
+                      <i class="fas fa-history mr-2 text-rose-500"></i>
                       ประวัติการทำรายการ
                     </p>
                     <div class="space-y-2 text-sm">
@@ -172,7 +175,7 @@
                         :key="log.created_at"
                         class="flex gap-2"
                       >
-                        <i class="fas fa-circle-dot text-blue-500 mt-1 text-xs"></i>
+                        <i class="fas fa-circle-dot text-cyan-500 text-xs"></i>
                         <div>
                           <span class="text-gray-500 dark:text-gray-400">
                             {{ formatDate(log.created_at) }}
@@ -189,22 +192,29 @@
 
               <!-- Footer -->
               <div class="border-t dark:border-gray-700 px-4 py-3 flex gap-2">
+                <!-- ปุ่มปิด -->
                 <button
                   type="button"
-                  class="flex-1 inline-flex items-center justify-center gap-2 rounded-md bg-gray-100 dark:bg-gray-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 transition-colors duration-200"
+                  class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-lg shadow-gray-500/10 dark:shadow-gray-900/30 hover:from-gray-200 hover:to-gray-300 dark:hover:from-gray-600 dark:hover:to-gray-700 hover:shadow-gray-600/20 dark:hover:shadow-gray-900/40 hover:-translate-y-0.5 active:shadow-none active:translate-y-0 transform transition-all duration-200 group"
                   @click="closeModal"
                 >
-                  <i class="fas fa-xmark"></i>
-                  ปิด
+                  <i
+                    class="fas fa-xmark text-red-500 group-hover:text-red-600 transition-colors"
+                  ></i>
+                  <span class="relative inline-flex">ปิด</span>
                 </button>
+
+                <!-- ปุ่มดาวน์โหลด -->
                 <button
                   v-if="payment?.payment_slip"
                   type="button"
-                  class="flex-1 inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition-colors duration-200"
+                  class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-500/30 hover:from-blue-600 hover:to-indigo-700 hover:shadow-blue-600/40 hover:-translate-y-0.5 active:shadow-none active:translate-y-0 transform transition-all duration-200 group"
                   @click="downloadSlip"
                 >
-                  <i class="fas fa-download"></i>
-                  ดาวน์โหลดสลิป
+                  <i
+                    class="fas fa-download text-white/90 group-hover:text-white transition-opacity"
+                  ></i>
+                  <span class="relative inline-flex"> ดาวน์โหลดสลิป </span>
                 </button>
               </div>
             </DialogPanel>
@@ -273,10 +283,12 @@ export default {
         this.loading = false
       }
     },
+
     handleImageError(event) {
       console.error('Error loading payment slip image:', event.target.src)
       this.imageError = true
     },
+
     closeModal() {
       this.$emit('close')
     },

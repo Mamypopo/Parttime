@@ -438,7 +438,17 @@ export const getEvents = (month = new Date().getMonth(), year = new Date().getFu
                 start_time: true,
                 end_time: true,
                 location: true,
+                details: true,
                 status: true,
+                creator: {
+                    select: {
+                        id: true,
+                        first_name: true,
+                        last_name: true,
+                        email: true,
+                        phone: true
+                    }
+                },
                 JobPositions: {
                     select: {
                         id: true,
@@ -446,6 +456,7 @@ export const getEvents = (month = new Date().getMonth(), year = new Date().getFu
                         required_people: true,
                         wage: true,
                         status: true,
+                        details: true,
                         JobParticipation: {
                             select: {
                                 id: true,
@@ -463,7 +474,8 @@ export const getEvents = (month = new Date().getMonth(), year = new Date().getFu
                                 first_name: true,
                                 last_name: true,
                                 email: true,
-                                profile_pic: true
+                                profile_pic: true,
+                                phone: true,
                             }
                         }
                     }

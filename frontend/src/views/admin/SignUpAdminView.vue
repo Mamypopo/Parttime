@@ -27,9 +27,10 @@
               <!-- Profile Picture -->
               <div>
                 <label class="block text-sm text-gray-600 mb-1">รูปโปรไฟล์</label>
+                <!-- Profile Picture Preview -->
                 <div class="flex items-center space-x-4">
                   <div
-                    class="relative w-20 h-20 rounded-full overflow-hidden bg-gray-50 border border-gray-200"
+                    class="relative w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-[#C5B4E3] to-[#EAC6FC] border border-gray-200 flex items-center justify-center"
                   >
                     <img
                       v-if="previewImage"
@@ -39,9 +40,9 @@
                     />
                     <div
                       v-else
-                      class="w-full h-full flex items-center justify-center text-gray-400"
+                      class="w-full h-full flex items-center justify-center text-white font-semibold text-2xl"
                     >
-                      <i class="fas fa-user text-2xl"></i>
+                      {{ form.first_name ? form.first_name.charAt(0).toUpperCase() : 'A' }}
                     </div>
                   </div>
                   <div class="flex-1">
@@ -120,7 +121,7 @@
                 <input
                   type="password"
                   v-model="form.admin_secret"
-                  placeholder="Your secret !!!"
+                  placeholder="รหัสพิเศษของแอดมิน"
                   class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#EAC6FC]/50 transition-all duration-200 placeholder:text-gray-400"
                 />
               </div>
@@ -129,7 +130,9 @@
                 <input
                   type="tel"
                   v-model="form.phone"
-                  placeholder="เบอร์โทรศัพท์"
+                  @input="formatPhoneNumber"
+                  maxlength="12"
+                  placeholder="0xx-xxx-xxxx"
                   class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#EAC6FC]/50 transition-all duration-200 placeholder:text-gray-400"
                 />
               </div>
@@ -248,16 +251,53 @@ export default {
           throw new Error('กรุณากรอกรหัสลับแอดมิน')
         }
 
+        if (!this.form.phone?.trim()) {
+          throw new Error('กรุณากรอกเบอร์โทรศัพท์')
+        }
+
+        const cleanPhone = this.form.phone.replace(/-/g, '')
+        if (cleanPhone.length !== 10) {
+          throw new Error('เบอร์โทรศัพท์ต้องมี 10 หลัก')
+        }
+
+        // ตรวจสอบว่าเป็นตัวเลขทั้งหมด
+        if (!/^\d+$/.test(cleanPhone)) {
+          throw new Error('เบอร์โทรศัพท์ต้องเป็นตัวเลขเท่านั้น')
+        }
+
+        // แสดง Swal ยืนยันการสมัคร
+        const result = await Swal.fire({
+          title: 'ยืนยันการสมัครสมาชิกแอดมิน',
+          html: `
+        <div class="text-left">
+          <p class="mb-2"><strong>ชื่อ:</strong> ${this.form.first_name} ${this.form.last_name}</p>
+          <p class="mb-2"><strong>อีเมล:</strong> ${this.form.email}</p>
+          <p class="mb-2"><strong>เบอร์โทร:</strong> ${this.form.phone || '-'}</p>
+          <p class="mb-2"><strong>รูปโปรไฟล์:</strong> ${this.form.profilePic ? 'มี' : 'ไม่มี'}</p>
+        </div>
+      `,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'ยืนยัน',
+          cancelButtonText: 'ยกเลิก',
+          reverseButtons: true
+        })
+
+        // ถ้ากด cancel ให้ return ออก
+        if (!result.isConfirmed) {
+          this.loading = false
+          return
+        }
+
         const formData = new FormData()
         formData.append('email', this.form.email)
         formData.append('password', this.form.password)
         formData.append('first_name', this.form.first_name)
         formData.append('last_name', this.form.last_name)
         formData.append('admin_secret', this.form.admin_secret)
-
-        if (this.form.phone) {
-          formData.append('phone', this.form.phone)
-        }
+        formData.append('phone', cleanPhone)
 
         if (this.form.profilePic) {
           formData.append('profile_pic', this.form.profilePic)
@@ -317,6 +357,29 @@ export default {
 
       this.form.profilePic = file
       this.previewImage = URL.createObjectURL(file)
+    },
+    formatPhoneNumber() {
+      // ลบทุกอย่างที่ไม่ใช่ตัวเลข
+      let phoneNumber = this.form.phone.replace(/\D/g, '')
+
+      // จำกัดให้เหลือแค่ 10 ตัว
+      phoneNumber = phoneNumber.substring(0, 10)
+
+      // จัดรูปแบบ xxx-xxx-xxxx
+      if (phoneNumber.length >= 3) {
+        phoneNumber = phoneNumber.replace(
+          /(\d{3})(\d{0,3})(\d{0,4})/,
+          function (match, p1, p2, p3) {
+            let formatted = p1
+            if (p2) formatted += '-' + p2
+            if (p3) formatted += '-' + p3
+            return formatted
+          }
+        )
+      }
+
+      // อัพเดทค่าในฟอร์ม
+      this.form.phone = phoneNumber
     }
   }
 }

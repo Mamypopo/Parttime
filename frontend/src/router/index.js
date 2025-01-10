@@ -176,13 +176,28 @@ router.beforeEach(async (to, from, next) => {
 
 
   try {
-
-    // ถ้าพยายามเข้าหน้า signin-admin ทั้งที่มี token อยู่แล้ว ให้ redirect ไปหน้า dashboard
+    const userToken = localStorage.getItem('token')
+    const adminToken = localStorage.getItem('admin_token')
+    // ถ้ามี token และพยายามเข้าหน้าแรก (/) ให้ redirect ไปหน้าที่เหมาะสม
+    if (to.path === '/') {
+      if (adminToken) {
+        // ตรวจสอบการหมดอายุของ admin token
+        if (checkTokenExpiration(adminToken)) {
+          return next('/admin/dashboard')
+        }
+      } else if (userToken) {
+        // ตรวจสอบการหมดอายุของ user token
+        if (checkTokenExpiration(userToken)) {
+          return next('/user/dashboard')
+        }
+      }
+    }
+    // ถ้าพยายามเข้าหน้า signin ทั้งที่มี token อยู่แล้ว ให้ redirect ไปหน้า dashboard
     if (to.name === 'signInadmin' && adminStore.token) {
       return next({ name: 'AdminDashboard' })
     }
     if (to.name === 'signinuser' && userStore.token) {
-      return next({ name: 'home' })
+      return next({ name: 'UserDashboard' })
     }
 
     // จัดการเส้นทางสำหรับ Admin

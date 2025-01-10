@@ -163,7 +163,12 @@ export const useDashboardStore = defineStore('dashboard', {
                 details: event.details || '',
                 status: event.status || 'PENDING',
                 JobPositions: this.formatJobPositions(event.JobPositions),
-                creator: event.creator,
+                creator: event.creator ? {
+                    id: event.creator.id,
+                    first_name: event.creator.first_name || 'ไม่ระบุ',
+                    last_name: event.creator.last_name || 'ไม่ระบุ',
+                    phone: event.creator.phone
+                } : null,
                 created_at: event.created_at,
                 updated_at: event.updated_at,
                 JobAdmins: event.JobAdmins?.map(item => ({

@@ -34,7 +34,7 @@
               >
                 <DialogTitle class="text-lg font-semibold text-white">
                   <i class="fas fa-clipboard-list mr-2"></i>
-                  รายละเอียดงาน #{{ job?.id }} / {{ job?.title }} /
+                  รายละเอียดงาน #ID: {{ job?.id }} / {{ job?.title }} /
                   {{ job?.creator?.first_name || 'ไม่ระบุ' }}
 
                   {{ job?.creator?.last_name || 'ไม่ระบุ' }}

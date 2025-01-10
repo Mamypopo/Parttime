@@ -100,7 +100,6 @@ export const registerUser = async (req, res) => {
             userAgent
         );
         res.status(201).json({
-            message: 'ลงทะเบียนผู้ใช้สำเร็จ',
             user, profile_image_url: fullProfileImagePath,
             education_certificate_url: fullEducationCertificatePath,
             user_documents_url: fullUserDocumentsPaths,

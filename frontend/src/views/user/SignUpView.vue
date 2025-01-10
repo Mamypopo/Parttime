@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen relative flex flex-col">
-    <!-- Hero Section with Gradient Background -->
     <div
       class="absolute ml-5 mr-5 top-0 left-0 right-0 h-[45vh] bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] rounded-b-[30px] opacity-95"
     ></div>
@@ -158,7 +157,9 @@
                       <input
                         type="tel"
                         v-model="form.phone"
-                        placeholder="เบอร์โทรศัพท์ของคุณ"
+                        @input="formatPhoneNumber"
+                        maxlength="12"
+                        placeholder="0xx-xxx-xxxx"
                         class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200 placeholder:text-gray-400"
                       />
                     </div>
@@ -620,6 +621,22 @@ export default {
         this.nationalIdError = ''
       }
     },
+    formatPhoneNumber() {
+      // ลบทุกอย่างที่ไม่ใช่ตัวเลข
+      let cleaned = this.form.phone.replace(/\D/g, '')
+      // จำกัดให้ไม่เกิน 10 ตัว
+      cleaned = cleaned.slice(0, 10)
+
+      // จัดรูปแบบ xxx-xxx-xxxx
+      if (cleaned.length >= 3) {
+        cleaned = cleaned.slice(0, 3) + (cleaned.length > 3 ? '-' : '') + cleaned.slice(3)
+      }
+      if (cleaned.length >= 7) {
+        cleaned = cleaned.slice(0, 7) + (cleaned.length > 7 ? '-' : '') + cleaned.slice(7)
+      }
+
+      this.form.phone = cleaned
+    },
     validateForm() {
       // เช็คการยอมรับข้อกำหนด
       if (!this.acceptTerms) {
@@ -776,6 +793,7 @@ export default {
         })
 
         const formData = new FormData()
+        const cleanPhone = this.form.phone.replace(/-/g, '')
 
         // เพิ่มข้อมูลทั่วไป
         formData.append('email', this.form.email)
@@ -786,7 +804,7 @@ export default {
         formData.append('national_id', this.form.nationalId)
         formData.append('gender', this.form.gender)
         formData.append('birth_date', this.form.birthdate)
-        formData.append('phone_number', this.form.phone)
+        formData.append('phone_number', cleanPhone)
         formData.append('line_id', this.form.lineId)
         formData.append('skills', JSON.stringify(this.form.skills))
 
@@ -809,8 +827,7 @@ export default {
           })
         }
 
-        // ส่งข้อมูลไปยัง API
-        const response = await axios.post(`${baseURL}/api/users/register`, formData, {
+        await axios.post(`${baseURL}/api/users/register`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
@@ -820,13 +837,24 @@ export default {
         await Swal.fire({
           icon: 'success',
           title: 'ลงทะเบียนสำเร็จ',
-          text: response.data.message || 'กรุณาเข้าสู่ระบบเพื่อใช้งาน',
-          showConfirmButton: false,
-          timer: 2000
+          html: `
+          <div class="text-center">
+            <p class="mb-2">ระบบได้ส่งลิงก์ยืนยันไปที่อีเมลของคุณแล้ว</p>
+            <p class="text-sm text-gray-600">กรุณาตรวจสอบอีเมลและคลิกลิงก์เพื่อยืนยันตัวตน<br>ก่อนเข้าสู่ระบบ</p>
+          </div>
+        `,
+          confirmButtonText: 'ตกลง',
+          allowOutsideClick: false,
+          customClass: {
+            confirmButton:
+              'swal2-confirm bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] text-white px-6 py-2.5 rounded-xl hover:shadow-lg transition-all duration-200'
+          },
+          buttonsStyling: false
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.$router.push('/signin-user')
+          }
         })
-
-        // redirect ไปหน้า login
-        this.$router.push('/signin-user')
       } catch (error) {
         console.error('Registration error:', error)
 

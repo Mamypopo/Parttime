@@ -1,17 +1,20 @@
 <template>
-  <div class="max-w-5xl p-4 md:p-6 transition-all duration-300 ease-in-out">
+  <div class="p-4 md:p-6 transition-all duration-300 ease-in-out">
     <!-- Header -->
-    <div class="text-center mb-8">
-      <h1 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white">สถานะการจ่ายเงิน</h1>
-      <p class="text-gray-500 dark:text-gray-400 mt-2">ตรวจสอบสถานะการจ่ายเงินของคุณ</p>
+    <div
+      class="flex justify-between items-center bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] text-white py-4 px-6 rounded-lg shadow-md mb-6"
+    >
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-semibold">สถานะการจ่ายเงิน</h1>
+        <p class="text-sm text-white/90 mt-1">ตรวจสอบสถานะการจ่ายเงินของคุณ</p>
+      </div>
     </div>
 
     <!-- Loading State -->
-    <div v-if="paymentStore.isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div v-if="paymentStore.isLoading" class="flex justify-center items-center py-12">
       <div
-        v-for="n in 3"
-        :key="n"
-        class="animate-pulse bg-gray-100 dark:bg-gray-800 h-32 rounded-lg"
+        class="animate-spin rounded-full h-12 w-12 border-4 border-t-transparent"
+        style="border-color: #4bc0c8 transparent #c779d0 transparent"
       ></div>
     </div>
 
@@ -23,25 +26,22 @@
       {{ error }}
     </div>
 
-    <!-- Content -->
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Payment Cards -->
+    <div
+      v-else-if="payments.length > 0"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+    >
       <div
         v-for="payment in payments"
         :key="payment.id"
-        class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition duration-300"
+        class="p-4 group bg-white dark:bg-gray-800 rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-[#c779d0]/50 dark:hover:border-[#4bc0c8]/50 hover:shadow-lg hover:shadow-[#c779d0]/10 dark:hover:shadow-[#4bc0c8]/10"
       >
         <!-- Card Header -->
-        <div class="p-4 border-b dark:border-gray-700">
-          <h3 class="text-lg font-semibold text-gray-800 dark:text-white truncate">
-            {{ payment.jobTitle }}
-          </h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">{{ formatDate(payment.workDate) }}</p>
-        </div>
-
-        <!-- Card Body -->
-        <div class="p-4">
-          <div class="flex justify-between items-center mb-2">
-            <p class="text-sm text-gray-500 dark:text-gray-400">สถานะ</p>
+        <div class="space-y-2">
+          <div class="flex justify-between items-start">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
+              {{ payment.jobTitle }}
+            </h3>
             <span
               :class="[
                 'px-3 py-1 text-xs font-medium rounded-full',
@@ -59,20 +59,26 @@
             </span>
           </div>
 
-          <div class="flex justify-between items-center">
-            <p class="text-sm text-gray-500 dark:text-gray-400">จำนวนเงิน</p>
-            <p class="font-medium text-gray-800 dark:text-white">
-              {{ formatCurrency(payment.amount) }}
+          <!-- Payment Details -->
+          <div class="space-y-2">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              <i class="fas fa-calendar-alt mr-2 text-[#feac5e] dark:text-[#feac5e]/70"></i>
+              {{ formatDate(payment.workDate) }}
+            </p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              <i class="fas fa-coins mr-2 text-[#c779d0] dark:text-[#c779d0]/70"></i>
+              จำนวนเงิน: {{ formatCurrency(payment.amount) }} บาท
             </p>
           </div>
         </div>
 
         <!-- Card Footer -->
-        <div class="p-4 border-t dark:border-gray-700 text-center">
+        <div class="mt-4">
           <button
             @click="openModal(payment.id)"
-            class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition"
+            class="w-full py-2 bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] text-white rounded-lg shadow-md hover:opacity-90 transition-all duration-200"
           >
+            <i class="fas fa-info-circle mr-2"></i>
             ดูรายละเอียด
           </button>
         </div>
@@ -80,8 +86,11 @@
     </div>
 
     <!-- Empty State -->
-    <div v-if="payments.length === 0 && !paymentStore.isLoading" class="text-center py-12">
-      <p class="text-gray-500 dark:text-gray-400">ไม่พบข้อมูลการจ่ายเงิน</p>
+    <div v-else class="flex flex-col items-center justify-center py-12">
+      <i
+        class="fas fa-money-bill-wave text-6xl mb-4 bg-gradient-to-r from-[#feac5e] via-[#c779d0] to-[#4bc0c8] text-transparent bg-clip-text"
+      ></i>
+      <p class="text-lg text-gray-500 dark:text-gray-400">ยังไม่มีรายการการจ่ายเงิน</p>
     </div>
 
     <!-- Modal -->
