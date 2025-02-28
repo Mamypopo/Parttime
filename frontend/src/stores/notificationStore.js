@@ -1,13 +1,12 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
 import { useAdminStore } from './adminStore'
+import api from '@/service/axios'
 
 export const useNotificationStore = defineStore('notification', {
     state: () => ({
         notifications: [],
         loading: false,
         error: null,
-        baseURL: import.meta.env.VITE_API_URL,
         adminStore: useAdminStore(),
         checkInterval: null,
         NOTIFICATION_TYPES: {
@@ -39,7 +38,7 @@ export const useNotificationStore = defineStore('notification', {
             }
 
             try {
-                const response = await axios.get(`${this.baseURL}/api/admin/notifications`, {
+                const response = await api.get('api/admin/notifications', {
                     headers: {
                         'Authorization': `Bearer ${this.adminStore.token}`
                     }
@@ -88,7 +87,7 @@ export const useNotificationStore = defineStore('notification', {
             }
 
             try {
-                await axios.patch(`${this.baseURL}/api/admin/notifications/${notificationId}/read`, {}, {
+                await api.patch(`/api/admin/notifications/${notificationId}/read`, {}, {
                     headers: {
                         'Authorization': `Bearer ${adminStore.token}`
                     }
@@ -114,7 +113,7 @@ export const useNotificationStore = defineStore('notification', {
 
             try {
 
-                await axios.patch(`${this.baseURL}/api/admin/notifications/mark-all-read`, {}, {
+                await api.patch('/api/admin/notifications/mark-all-read', {}, {
                     headers: {
                         'Authorization': `Bearer ${adminStore.token}`
                     }

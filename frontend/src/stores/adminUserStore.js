@@ -1,10 +1,9 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import api from '@/service/axios'
 import Swal from 'sweetalert2'
 
 export const useAdminUserStore = defineStore('adminUser', {
     state: () => ({
-        baseURL: import.meta.env.VITE_API_URL,
         users: [], // approved users
         pendingUsers: [], // pending users
         rejectedUsers: [], // rejected users
@@ -32,6 +31,8 @@ export const useAdminUserStore = defineStore('adminUser', {
     }),
 
     getters: {
+        baseApiUrl: () => import.meta.env.VITE_API_URL,
+
         totalPages: (state) => {
             if (!state.pagination.totalItems || isNaN(state.pagination.totalItems)) {
                 return 1
@@ -83,7 +84,7 @@ export const useAdminUserStore = defineStore('adminUser', {
                     if (params[key] === '') delete params[key]
                 })
 
-                const response = await axios.get(`${this.baseURL}/api/admin/approved`, { params })
+                const response = await api.get('/api/admin/approved', { params })
 
                 if (response.data) {
                     this.users = response.data.users
@@ -120,7 +121,7 @@ export const useAdminUserStore = defineStore('adminUser', {
                     if (params[key] === '') delete params[key]
                 })
 
-                const response = await axios.get(`${this.baseURL}/api/admin/pending`, { params })
+                const response = await api.get('/api/admin/pending', { params })
 
                 if (response.data) {
                     this.pendingUsers = response.data.users.map(this.formatUserData)
@@ -151,7 +152,7 @@ export const useAdminUserStore = defineStore('adminUser', {
         // อนุมัติ user
         async approveUser(userId) {
             try {
-                await axios.post(`${this.baseURL}/api/admin/approve-reject-user/${userId}`, {
+                await api.post(`/api/admin/approve-reject-user/${userId}`, {
                     status: 'approved'
                 })
             } catch (error) {
@@ -163,7 +164,7 @@ export const useAdminUserStore = defineStore('adminUser', {
         // ปฏิเสธ user
         async rejectUser(userId) {
             try {
-                await axios.post(`${this.baseURL}/api/admin/approve-reject-user/${userId}`, {
+                await api.post(`/api/admin/approve-reject-user/${userId}`, {
                     status: 'rejected'
                 })
             } catch (error) {
@@ -188,7 +189,7 @@ export const useAdminUserStore = defineStore('adminUser', {
                     if (params[key] === '') delete params[key]
                 })
 
-                const response = await axios.get(`${this.baseURL}/api/admin/rejected`, { params })
+                const response = await api.get('/api/admin/rejected', { params })
 
                 if (response.data) {
                     this.rejectedUsers = response.data.users.map(this.formatUserData)
@@ -235,7 +236,7 @@ export const useAdminUserStore = defineStore('adminUser', {
         // ดึงคนที่ online
         async fetchOnlineUsers() {
             try {
-                const response = await axios.get(`${this.baseURL}/api/admin/online-users`)
+                const response = await api.get('/api/admin/online-users')
                 this.onlineUsersCount = response.data.onlineCount || 0
             } catch (error) {
                 console.error('Error fetching online users:', error)
@@ -244,10 +245,8 @@ export const useAdminUserStore = defineStore('adminUser', {
         },
 
         getProfileImage(image) {
-            if (image) {
-                return `${this.baseURL}/uploads/profiles/${image}`
-            }
-            return null
+            if (!image) return '/default-avatar.png'
+            return `${this.baseApiUrl}/uploads/profiles/${image}`
         },
 
 

@@ -144,7 +144,7 @@
                   <div v-if="payment?.payment_method === 'transfer' && payment?.payment_slip">
                     <div v-if="!imageError" class="relative">
                       <img
-                        :src="`${baseURL}/uploads/payment-slips/${payment.payment_slip}`"
+                        :src="getPaymentSlipUrl(payment.payment_slip)"
                         :alt="`สลิปการโอนเงิน - ${payment.id}`"
                         class="w-full max-h-48 object-contain rounded-lg"
                         @error="handleImageError"
@@ -256,7 +256,6 @@ export default {
       paymentStore: usePaymentStore(),
       payment: null,
       loading: false,
-      baseURL: import.meta.env.VITE_API_URL,
       imageError: false
     }
   },
@@ -283,7 +282,10 @@ export default {
         this.loading = false
       }
     },
-
+    getPaymentSlipUrl(filename) {
+      if (!filename) return null
+      return `${import.meta.env.VITE_API_URL}/uploads/payment-slips/${filename}`
+    },
     handleImageError(event) {
       console.error('Error loading payment slip image:', event.target.src)
       this.imageError = true
@@ -296,9 +298,7 @@ export default {
       if (!this.payment?.payment_slip) return
 
       try {
-        const response = await fetch(
-          `${this.baseURL}/uploads/payment-slips/${this.payment.payment_slip}`
-        )
+        const response = await fetch(this.getPaymentSlipUrl(this.payment.payment_slip))
         const blob = await response.blob()
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')

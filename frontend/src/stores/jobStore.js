@@ -1,10 +1,9 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import api from '@/service/axios'
 import { useAdminStore } from './adminStore'
 import { useUserStore } from './userStore'
 export const useJobStore = defineStore('job', {
     state: () => ({
-        baseURL: import.meta.env.VITE_API_URL,
         jobs: [],
         jobParticipants: [],
         jobsWithParticipants: [],
@@ -46,6 +45,8 @@ export const useJobStore = defineStore('job', {
     }),
 
     getters: {
+        baseApiUrl: () => import.meta.env.VITE_API_URL,
+
         pendingApplicationsCount(state) {
             return state.jobs.reduce((count, job) => {
                 return count + job.JobPositions.reduce((posCount, position) => {
@@ -132,8 +133,8 @@ export const useJobStore = defineStore('job', {
 
                 const queryString = new URLSearchParams(params).toString()
 
-                const response = await axios.get(
-                    `${this.baseURL}/api/jobs?${queryString}`,
+                const response = await api.get(
+                    `/api/jobs?${queryString}`,
                     { headers }
                 )
 
@@ -179,8 +180,8 @@ export const useJobStore = defineStore('job', {
                 const endpoint = queryString ? `?${queryString}` : '';
                 // เรียก API พร้อมกัน
                 const [jobsResponse, participantsResponse] = await Promise.all([
-                    axios.get(`${this.baseURL}/api/jobs/my-created-jobs${endpoint}`, { headers }),
-                    axios.get(`${this.baseURL}/api/jobs/getJobsWithParticipants`, { headers })
+                    api.get(`/api/jobs/my-created-jobs${endpoint}`, { headers }),
+                    api.get('/api/jobs/getJobsWithParticipants', { headers })
                 ]);
 
                 // ตรวจสอบว่า jobsResponse มีข้อมูลและเป็น array
@@ -238,8 +239,8 @@ export const useJobStore = defineStore('job', {
 
 
 
-                const response = await axios.put(
-                    `${this.baseURL}/api/jobs/${id}/approved-rejected`,
+                const response = await api.put(
+                    `/api/jobs/${id}/approved-rejected`,
                     { status },
                     { headers }
                 )
@@ -288,8 +289,8 @@ export const useJobStore = defineStore('job', {
         async updateWorkEvaluation({ participationId, ratings, totalScore, comment, isPassedEvaluation }) {
             try {
                 const headers = this.getAuthHeaders()
-                const response = await axios.put(
-                    `${this.baseURL}/api/jobs/participation/${participationId}/evaluate`,
+                const response = await api.put(
+                    `/api/jobs/participation/${participationId}/evaluate`,
                     {
                         ...(isPassedEvaluation ? {
                             ratings,
@@ -314,8 +315,8 @@ export const useJobStore = defineStore('job', {
         async fetchEvaluationHistory(userId) {
             try {
                 const headers = this.getAuthHeaders()
-                const response = await axios.get(
-                    `${this.baseURL}/api/jobs/evaluation-history/${userId}`,
+                const response = await api.get(
+                    `/api/jobs/evaluation-history/${userId}`,
                     { headers }
                 )
                 return response.data
@@ -332,7 +333,7 @@ export const useJobStore = defineStore('job', {
             try {
 
                 const adminStore = useAdminStore();
-                const response = await axios.post(`${this.baseURL}/api/jobs/create`, jobData, {
+                const response = await api.post('/api/jobs/create', jobData, {
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${adminStore.token}`
@@ -367,7 +368,7 @@ export const useJobStore = defineStore('job', {
             try {
 
                 const headers = this.getAuthHeaders()
-                const response = await axios.put(`${this.baseURL}/api/jobs/editJob/${jobId}`, jobData, { headers })
+                const response = await api.put(`/api/jobs/editJob/${jobId}`, jobData, { headers })
 
                 // อัพเดท state ทันทีหลังจากแก้ไข
                 const updatedJobIndex = this.jobs.findIndex(job => job.id === jobId)
@@ -394,7 +395,7 @@ export const useJobStore = defineStore('job', {
         async deleteJob(jobId) {
             this.loading = true
             try {
-                await axios.delete(`${this.baseURL}/api/jobs/delete-job/${jobId}`)
+                await api.delete(`/api/jobs/delete-job/${jobId}`)
                 // ลบออกจาก state
                 this.jobs = this.jobs.filter(job => job.id !== jobId)
 
@@ -415,8 +416,8 @@ export const useJobStore = defineStore('job', {
 
 
                 const headers = this.getAuthHeaders()
-                const response = await axios.post(
-                    `${this.baseURL}/api/jobs/apply`,
+                const response = await api.post(
+                    `/api/jobs/apply`,
                     {
                         jobId,
                         jobPositionId
@@ -453,8 +454,8 @@ export const useJobStore = defineStore('job', {
             try {
                 const headers = this.getAuthHeaders()
 
-                const response = await axios.get(
-                    `${this.baseURL}/api/users/my-jobs`,
+                const response = await api.get(
+                    `/api/users/my-jobs`,
                     { headers }
                 )
 
@@ -476,8 +477,8 @@ export const useJobStore = defineStore('job', {
         async cancelJobApplication(jobId, jobPositionId) {
             try {
 
-                const response = await axios.post(
-                    `${this.baseURL}/api/jobs/cancel`,
+                const response = await api.post(
+                    `/api/jobs/cancel`,
                     {
                         jobId,
                         jobPositionId
@@ -497,8 +498,8 @@ export const useJobStore = defineStore('job', {
             this.loading = true;
             try {
                 const headers = this.getAuthHeaders();
-                const response = await axios.post(
-                    `${this.baseURL}/api/admin/jobs/participation/cancel`,
+                const response = await api.post(
+                    `/api/admin/jobs/participation/cancel`,
                     { jobId, jobPositionId, userId },
                     { headers }
                 );
@@ -523,8 +524,8 @@ export const useJobStore = defineStore('job', {
                     limit: this.pagination.perPage,
                 }
 
-                const response = await axios.get(
-                    `${this.baseURL}/api/jobs/search`,
+                const response = await api.get(
+                    '/api/jobs/search',
                     {
                         params,
                         headers: this.getAuthHeaders()
@@ -552,7 +553,7 @@ export const useJobStore = defineStore('job', {
         async generateEvaluationSummary(jobId) {
             try {
                 // เรียก API ใหม่สำหรับ Excel
-                const response = await axios.get(`${this.baseURL}/api/evaluations/${jobId}/excel`, {
+                const response = await api.get(`/api/evaluations/${jobId}/excel`, {
                     responseType: 'blob' // ระบุ response เป็นไฟล์ Blob สำหรับ Excel
                 });
 
@@ -577,8 +578,8 @@ export const useJobStore = defineStore('job', {
         async downloadParticipantDocuments(jobId) {
             try {
                 this.loading = true
-                const response = await axios.get(
-                    `${this.baseURL}/api/jobs/${jobId}/documents`,
+                const response = await api.get(
+                    `/api/jobs/${jobId}/documents`,
                     {
                         responseType: 'blob',
                         headers: this.getAuthHeaders()
@@ -605,7 +606,7 @@ export const useJobStore = defineStore('job', {
         // ดึงรายชื่อแอดมินที่สามารถมอบหมายงานได้
         async fetchAvailableAdmins() {
             try {
-                const response = await axios.get(`${this.baseURL}/api/admin/available`)
+                const response = await api.get('/api/admin/available')
                 this.availableAdmins = response.data;
                 return this.availableAdmins
             } catch (error) {
@@ -633,7 +634,7 @@ export const useJobStore = defineStore('job', {
         async fetchAssignedJobs(page = 1, pageSize = 10) {
             this.loading = true;
             try {
-                const response = await axios.get(`${this.baseURL}/api/jobs/assigned`, {
+                const response = await api.get('/api/jobs/assigned', {
                     params: { page, pageSize },
                 });
 
@@ -657,7 +658,7 @@ export const useJobStore = defineStore('job', {
 
         // // เพิ่มแอดมินให้กับงาน
         // async addJobAdmin(jobId, adminData) {
-        //     const response = await axios.post(
+        //     const response = await api.post(
         //         `${this.baseURL}/api/jobs/${jobId}/admins`,
         //         adminData
         //     )
@@ -666,7 +667,7 @@ export const useJobStore = defineStore('job', {
 
         // // ลบแอดมินออกจากงาน
         // async removeJobAdmin(jobId, adminId) {
-        //     const response = await axios.delete(
+        //     const response = await api.delete(
         //         `${this.baseURL}/api/jobs/${jobId}/admins/${adminId}`
         //     )
         //     return response
@@ -743,7 +744,8 @@ export const useJobStore = defineStore('job', {
         },
 
         getProfileImage(image) {
-            return image ? `${this.baseURL}/uploads/profiles/${image}` : '/default-avatar.png'
+            if (!image) return '/default-avatar.png'
+            return `${this.baseApiUrl}/uploads/profiles/${image}`
         },
 
         calculateEstimatedCost(job) {

@@ -1,10 +1,8 @@
 import { defineStore } from 'pinia';
-import axios from 'axios';
-import { useAdminStore } from './adminStore';
+import api from '@/service/axios'
 
 export const usePaymentStore = defineStore('payment', {
     state: () => ({
-        baseURL: import.meta.env.VITE_API_URL,
         pendingPayments: [],
         paidPayments: [],
         jobs: [],
@@ -17,26 +15,19 @@ export const usePaymentStore = defineStore('payment', {
         paymentSummary: null
     }),
 
-    actions: {
-        getAuthHeaders() {
-            const adminStore = useAdminStore();
-            if (!adminStore.token) {
-                throw new Error('กรุณาเข้าสู่ระบบใหม่');
-            }
+    getters: {
+        baseApiUrl: () => import.meta.env.VITE_API_URL,
+    },
 
-            return {
-                Authorization: `Bearer ${adminStore.token}`
-            };
-        },
+    actions: {
 
         // ดึงรายการงานที่เสร็จและมีการประเมิน
         async fetchJobs() {
             this.isLoading = true;
             this.error = null;
             try {
-                const response = await axios.get(
-                    `${this.baseURL}/api/payments/jobs`,
-                    { headers: this.getAuthHeaders() }
+                const response = await api.get(
+                    '/api/payments/jobs'
                 );
 
                 this.jobs = response.data.data || [];
@@ -54,12 +45,10 @@ export const usePaymentStore = defineStore('payment', {
             this.isLoading = true;
             try {
                 const [pendingResponse, paidResponse] = await Promise.all([
-                    axios.get(`${this.baseURL}/api/payments/job/${jobId}/payments`, {
-                        headers: this.getAuthHeaders(),
+                    api.get('/api/payments/job/${jobId}/payments', {
                         params: { status: 'pending' }
                     }),
-                    axios.get(`${this.baseURL}/api/payments/job/${jobId}/payments`, {
-                        headers: this.getAuthHeaders(),
+                    api.get(`/api/payments/job/${jobId}/payments`, {
                         params: { status: 'paid' }
                     })
                 ]);
@@ -82,11 +71,9 @@ export const usePaymentStore = defineStore('payment', {
         async fetchPaymentHistoryByParticipant(participationId) {
             this.isLoading = true;
             this.error = null;
-
             try {
-                const response = await axios.get(
-                    `${this.baseURL}/api/payments/participant/${participationId}/history`,
-                    { headers: this.getAuthHeaders() }
+                const response = await api.get(
+                    `/api/payments/participant/${participationId}/history`,
                 );
                 return { history: response.data.data || [] };
             } catch (error) {
@@ -104,11 +91,9 @@ export const usePaymentStore = defineStore('payment', {
             this.error = null;
 
             try {
-                const response = await axios.get(
-                    `${this.baseURL}/api/payments/jobs/${jobId}/payment-summary`,
-                    {
-                        headers: this.getAuthHeaders()
-                    }
+                const response = await api.get(
+                    `/api/payments/jobs/${jobId}/payment-summary`,
+
                 );
                 this.paymentSummary = response.data;
                 return response.data;
@@ -129,10 +114,9 @@ export const usePaymentStore = defineStore('payment', {
             this.error = null;
             try {
 
-                const response = await axios.patch(
-                    `${this.baseURL}/api/payments/${id}/status`,
+                const response = await api.patch(
+                    `/api/payments/${id}/status`,
                     paymentData,
-                    { headers: this.getAuthHeaders(true) }
                 );
                 return {
                     success: true,
@@ -157,7 +141,7 @@ export const usePaymentStore = defineStore('payment', {
         async fetchUserPayments() {
             try {
                 this.isLoading = true;
-                const response = await axios.get(`${this.baseURL}/api/payments/user/payments`);
+                const response = await api.get('/api/payments/user/payments');
                 this.payments = response.data.data || [];
             } catch (error) {
                 this.error = error.response?.data?.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล';
@@ -171,7 +155,7 @@ export const usePaymentStore = defineStore('payment', {
         async fetchPaymentDetail(paymentId) {
             try {
                 this.isLoading = true;
-                const response = await axios.get(`${this.baseURL}/api/payments/user/payments/${paymentId}`);
+                const response = await api.get(`/api/payments/user/payments/${paymentId}`);
                 this.currentPayment = response.data.data || null;
                 return response.data.data;
             } catch (error) {

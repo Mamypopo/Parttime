@@ -1,9 +1,8 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import api from '@/service/axios'
 
 export const useDashboardStore = defineStore('dashboard', {
     state: () => ({
-        baseURL: import.meta.env.VITE_API_URL,
         loading: false,
         error: null,
         // ข้อมูลสถิติต่างๆ
@@ -53,8 +52,8 @@ export const useDashboardStore = defineStore('dashboard', {
             try {
                 this.loading = true
                 const [dashboardResponse, eventsResponse,] = await Promise.all([
-                    axios.get(`${this.baseURL}/api/dashboard/stats`),
-                    axios.get(`${this.baseURL}/api/dashboard/calendar-events`, {
+                    api.get('/api/dashboard/stats'),
+                    api.get('/api/dashboard/calendar-events', {
                         params: { month, year }
                     })
                 ])
@@ -106,7 +105,7 @@ export const useDashboardStore = defineStore('dashboard', {
         // ดึงรายละเอียดงาน
         async fetchEventDetails(eventId) {
             try {
-                const response = await axios.get(`${this.baseURL}/api/jobs/${eventId}`)
+                const response = await api.get(`/api/jobs/${eventId}`)
                 this.selectedEvent = this.formatEventDetails(response.data)
                 return this.selectedEvent
             } catch (error) {
@@ -120,7 +119,7 @@ export const useDashboardStore = defineStore('dashboard', {
             this.error = null;
 
             try {
-                const response = await axios.get(`${this.baseURL}/api/dashboard/users-ratings`);
+                const response = await api.get('/api/dashboard/users-ratings');
                 if (response.data.data) {
 
                     this.averageRating = response.data.data.averageScore;
@@ -247,7 +246,7 @@ export const useDashboardStore = defineStore('dashboard', {
 
         getProfileImageUrl(profileImage) {
             if (!profileImage) return '/default-avatar.png'
-            return `${this.baseURL}/uploads/profiles/${profileImage}`
+            return `${this.baseApiUrl}/uploads/profiles/${profileImage}`
         }
     },
 
@@ -257,6 +256,9 @@ export const useDashboardStore = defineStore('dashboard', {
 
 
     getters: {
+
+        baseApiUrl: () => import.meta.env.VITE_API_URL,
+
         sortedUsers: (state) => (sortOption) => {
             if (!state.topUsers?.length) return []
 

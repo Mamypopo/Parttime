@@ -182,7 +182,7 @@
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import Swal from 'sweetalert2'
 import { useUserStore } from '@/stores/userStore'
-import axios from 'axios'
+import api from '@/service/axios'
 
 export default {
   name: 'EditProfileModal',
@@ -285,16 +285,12 @@ export default {
           })
         }
 
-        const response = await axios.put(
-          `${import.meta.env.VITE_API_URL}/api/users/update-profile`,
-          formData,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
+        const response = await api.put('/api/users/update-profile', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${localStorage.getItem('token')}`
           }
-        )
+        })
 
         if (response.data) {
           // อัพเดท user store

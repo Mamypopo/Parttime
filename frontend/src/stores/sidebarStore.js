@@ -1,10 +1,5 @@
 import { defineStore } from 'pinia'
-import { useAdminStore } from './adminStore'
-import { useNotificationStore } from './notificationStore'
 
-import { useJobStore } from './jobStore'
-
-import Swal from 'sweetalert2'
 export const useSidebarStore = defineStore('sidebar', {
     state: () => ({
         isCollapsed: false,

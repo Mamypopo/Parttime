@@ -843,7 +843,7 @@ export default {
     },
     getProfileImage(image) {
       return image
-        ? `${this.paymentStore.baseURL}/uploads/profiles/${image}`
+        ? `${this.paymentStore.baseApiUrl}/uploads/profiles/${image}`
         : '/default-avatar.png'
     },
     formatCurrency(amount) {

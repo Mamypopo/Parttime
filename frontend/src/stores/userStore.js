@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { useSidebarStore } from './sidebarStore'
-import axios from 'axios'
+import api from '@/service/axios'
+
 export const useUserStore = defineStore('user', {
     state: () => ({
         user: {
@@ -31,7 +32,7 @@ export const useUserStore = defineStore('user', {
             this.token = token
             localStorage.setItem('token', token)
             this.isAuthenticated = true
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`
         },
 
         logout() {
@@ -68,7 +69,7 @@ export const useUserStore = defineStore('user', {
             if (sidebarStore?.resetDarkMode) {
                 sidebarStore.resetDarkMode()
             }
-            delete axios.defaults.headers.common['Authorization']
+            delete api.defaults.headers.common['Authorization']
 
 
         },
@@ -96,7 +97,7 @@ export const useUserStore = defineStore('user', {
 
         async fetchUser() {
             try {
-                const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/profile`, {
+                const response = await api.get('/api/users/profile', {
                     headers: {
                         Authorization: `Bearer ${this.token}`
                     }
@@ -117,7 +118,7 @@ export const useUserStore = defineStore('user', {
         startHeartbeat() {
             this.heartbeatInterval = setInterval(async () => {
                 try {
-                    await axios.post(`${this.baseURL}/api/user/heartbeat`);
+                    await api.post('/api/user/heartbeat');
                 } catch (error) {
                     console.error('Heartbeat failed:', error);
                 }

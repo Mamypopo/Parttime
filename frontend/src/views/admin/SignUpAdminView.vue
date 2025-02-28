@@ -203,13 +203,12 @@
 </template>
 
 <script>
-import axios from 'axios'
+import api from '@/service/axios'
 import Swal from 'sweetalert2'
 
 export default {
   data() {
     return {
-      baseURL: import.meta.env.VITE_API_URL,
       form: {
         email: '',
         password: '',
@@ -303,7 +302,7 @@ export default {
           formData.append('profile_pic', this.form.profilePic)
         }
 
-        const response = await axios.post(`${this.baseURL}/api/admin/register-admin`, formData, {
+        const response = await api.post('/api/admin/register-admin', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }

@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import api from '@/service/axios'
 import Swal from 'sweetalert2'
 
 export default {
@@ -51,7 +51,7 @@ export default {
     }
 
     try {
-      await axios.get(`${import.meta.env.VITE_API_URL}/api/users/verify-email`, {
+      await api.get('/api/users/verify-email', {
         params: { token: this.token }
       })
       await this.showSuccess()

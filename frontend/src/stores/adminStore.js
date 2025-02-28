@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { useNotificationStore } from '@/stores/notificationStore'
 import { useSidebarStore } from '@/stores/sidebarStore'
-import axios from 'axios'
+import api from '@/service/axios'
 
 export const useAdminStore = defineStore('admin', {
     state: () => ({
@@ -25,7 +25,7 @@ export const useAdminStore = defineStore('admin', {
             this.token = token
             localStorage.setItem('admin_token', token)
             this.isAuthenticated = true
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`
         },
 
         logout() {
@@ -49,8 +49,8 @@ export const useAdminStore = defineStore('admin', {
             localStorage.removeItem('admin_token')
 
 
-            // Clear axios header
-            delete axios.defaults.headers.common['Authorization']
+            // Clear api header
+            delete api.defaults.headers.common['Authorization']
             // Reset sidebar store (darkmode)
             const sidebarStore = useSidebarStore()
             if (sidebarStore?.resetDarkMode) {

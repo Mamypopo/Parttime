@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import api from '@/service/axios'
 import { useUserStore } from './userStore'
 
 export const useUserNotificationStore = defineStore('userNotification', {
@@ -7,7 +7,6 @@ export const useUserNotificationStore = defineStore('userNotification', {
         notifications: [],
         loading: false,
         error: null,
-        baseURL: import.meta.env.VITE_API_URL,
         NOTIFICATION_TYPES: {
             JOB_APPLICATION_STATUS: 'job_status',    // แจ้งเตือนสถานะการสมัครงาน
             WORK_EVALUATION: 'evaluation',           // แจ้งเตือนผลการประเมิน
@@ -38,7 +37,7 @@ export const useUserNotificationStore = defineStore('userNotification', {
             const userStore = useUserStore()
             if (!userStore.token) return
             try {
-                const response = await axios.get(`${this.baseURL}/api/users/notifications`, {
+                const response = await api.get('/api/users/notifications', {
                     headers: {
                         'Authorization': `Bearer ${userStore.token}`
                     }
@@ -68,8 +67,8 @@ export const useUserNotificationStore = defineStore('userNotification', {
             if (!userStore.token || !notificationId) return
 
             try {
-                const response = await axios.patch(
-                    `${this.baseURL}/api/users/notifications/${notificationId}/read`,
+                const response = await api.patch(
+                    `/api/users/notifications/${notificationId}/read`,
                     {},
                     { headers: { 'Authorization': `Bearer ${userStore.token}` } }
                 )
@@ -96,8 +95,7 @@ export const useUserNotificationStore = defineStore('userNotification', {
             if (!userStore.token) return
 
             try {
-                await axios.patch(
-                    `${this.baseURL}/api/users/notifications/mark-all-read`,
+                await api.patch('/api/users/notifications/mark-all-read',
                     {},
                     { headers: { 'Authorization': `Bearer ${userStore.token}` } }
                 )

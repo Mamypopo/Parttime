@@ -252,11 +252,8 @@
 import { useUserStore } from '@/stores/userStore'
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogTitle } from '@headlessui/vue'
 
-import axios from 'axios'
-
+import api from '@/service/axios'
 import Swal from 'sweetalert2'
-
-const baseURL = import.meta.env.VITE_API_URL
 
 export default {
   name: 'SignInView',
@@ -316,7 +313,7 @@ export default {
           }
         })
 
-        const response = await axios.post(`${baseURL}/api/users/login`, {
+        const response = await api.post('/api/users/login', {
           email: this.form.email,
           password: this.form.password
         })

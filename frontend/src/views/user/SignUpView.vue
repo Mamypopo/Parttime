@@ -543,11 +543,9 @@
 </template>
 
 <script>
-import axios from 'axios'
+import api from '@/service/axios'
 import Swal from 'sweetalert2'
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogTitle } from '@headlessui/vue'
-
-const baseURL = import.meta.env.VITE_API_URL
 
 export default {
   name: 'SignUpView',
@@ -827,7 +825,7 @@ export default {
           })
         }
 
-        await axios.post(`${baseURL}/api/users/register`, formData, {
+        await api.post('/api/users/register', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }

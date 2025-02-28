@@ -402,7 +402,6 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
 import Swal from 'sweetalert2'
 import SearchUsersBar from '@/components/Search/SearchUsersBar.vue'
 import UserDetailsModal from '@/components/Users/UserDetailsModal.vue'

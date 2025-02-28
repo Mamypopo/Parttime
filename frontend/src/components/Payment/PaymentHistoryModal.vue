@@ -251,8 +251,8 @@ export default {
     paymentStore() {
       return usePaymentStore()
     },
-    baseURL() {
-      return this.paymentStore.baseURL
+    baseApiUrl() {
+      return this.paymentStore.baseApiUrl
     }
   },
   methods: {
@@ -299,7 +299,7 @@ export default {
       const cleanPath = path.replace(/[[\]"]/g, '')
       const uploadFolder = type === 'slip' ? 'payment-slips' : 'documents'
 
-      return `${this.baseURL}/uploads/${uploadFolder}/${cleanPath}`
+      return `${this.baseApiUrl}/uploads/${uploadFolder}/${cleanPath}`
     }
   },
   watch: {

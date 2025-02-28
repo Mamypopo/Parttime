@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import axios from 'axios'
+import api from '@/service/axios'
 import Swal from 'sweetalert2'
 import { useUserStore } from '@/stores/userStore'
 import { useAdminStore } from '../stores/adminStore'
-import { checkTokenExpiration } from '@/utils/auth'
+import { checkTokenExpiration } from '@/service/auth'
 
 
 
@@ -207,7 +207,7 @@ router.beforeEach(async (to, from, next) => {
       // ตรวจสอบการหมดอายุของ token
       if (adminToken) {
         const isTokenValid = checkTokenExpiration(adminToken)
-        // console.log('Admin token validation:', isTokenValid)
+
         // ถ้า token ไม่ valid (หมดอายุ) ถึงจะ logout
         if (isTokenValid === false) {  // หรือใช้ !isTokenValid
           adminStore.logout()
@@ -222,10 +222,10 @@ router.beforeEach(async (to, from, next) => {
       }
 
 
-      // ตั้งค่า token ใน axios header
-      axios.defaults.headers.common['Authorization'] = `Bearer ${adminToken}`        // ดึงข้อมูล profile admin
+      // // ตั้งค่า token ใน axios header
+      // axios.defaults.headers.common['Authorization'] = `Bearer ${adminToken}`        // ดึงข้อมูล profile admin
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/admin/profile`)
+        const response = await api.get('/api/admin/profile')
         adminStore.setAdmin(response.data)
         adminStore.setToken(adminToken)
       } catch (error) {
@@ -260,9 +260,9 @@ router.beforeEach(async (to, from, next) => {
     }
 
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      // axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/profile`)
+        const response = await api.get('/api/users/profile')
         userStore.setUser(response.data)
         userStore.setToken(token)
       } catch (error) {
@@ -309,7 +309,7 @@ router.beforeEach(async (to, from, next) => {
         localStorage.clear()
         userStore.logout()
         adminStore.logout()
-        delete axios.defaults.headers.common['Authorization']
+        delete api.defaults.headers.common['Authorization']
         next({ name: 'NotFound' })
         return
       }
@@ -317,7 +317,7 @@ router.beforeEach(async (to, from, next) => {
     localStorage.clear()
     userStore.logout()
     adminStore.logout()
-    delete axios.defaults.headers.common['Authorization']
+    delete api.defaults.headers.common['Authorization']
     next({ name: 'NotFound' })
 
   }

@@ -359,8 +359,7 @@ export default {
     return {
       userStore: useUserStore(),
       isEditModalOpen: false,
-      isImagePreviewOpen: false,
-      baseURL: import.meta.env.VITE_API_URL
+      isImagePreviewOpen: false
     }
   },
   computed: {
@@ -409,7 +408,7 @@ export default {
       if (!path || path === '-') return null
       const cleanPath = path.replace(/[[\]"]/g, '')
       const uploadFolder = type === 'certificate' ? 'certificates' : 'documents'
-      return `${this.baseURL}/uploads/${uploadFolder}/${cleanPath}`
+      return `${import.meta.env.VITE_API_URL}/uploads/${uploadFolder}/${cleanPath}`
     },
     openImagePreview() {
       if (this.user.profile_image) {

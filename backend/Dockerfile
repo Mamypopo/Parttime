@@ -1,35 +1,30 @@
-FROM node:18-alpine
+# Stage 1: Build the Node.js backend application with Node.js Alpine
+FROM node:20.15-alpine AS builder
 
+# Set the working directory
 WORKDIR /app
 
-# ติดตั้ง dependencies
-RUN apk add --no-cache make gcc g++ python3 openssl
-
-# Copy package files และ prisma
+# Copy package.json and package-lock.json (if it exists)
 COPY package*.json ./
-COPY prisma ./prisma/
 
-# ติดตั้ง dependencies
+# Install dependencies
 RUN npm install
-
-RUN npm install -g nodemon
-# Copy source code
+# Copy the rest of the application files
 COPY . .
 
-# Generate Prisma Client และ migrate
 RUN npx prisma generate
 
-# Rebuild bcrypt
-RUN npm rebuild bcrypt --build-from-source
+# Stage 2: Production-ready image
+FROM node:20.15-alpine
 
-# For file uploads
-RUN mkdir -p uploads/admin-profiles uploads/certificates uploads/documents uploads/profiles
-RUN chmod 777 uploads/admin-profiles uploads/certificates uploads/documents uploads/profiles
+# Set the working directory
+WORKDIR /app
 
+# Copy the node_modules from the builder stage to the production stage
+COPY --from=builder /app /app
+
+# Expose port 8000
 EXPOSE 8000
 
-# เพิ่ม script สำหรับ migrate และ start
-COPY docker-entrypoint.sh /
-RUN chmod +x /docker-entrypoint.sh
-
-ENTRYPOINT ["/docker-entrypoint.sh"]
+# Start the app using npm start (defined in package.json)
+CMD ["npm", "start"]

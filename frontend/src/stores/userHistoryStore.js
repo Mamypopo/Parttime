@@ -1,9 +1,8 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import api from '@/service/axios'
 
 export const useUserHistoryStore = defineStore('userHistory', {
     state: () => ({
-        baseURL: import.meta.env.VITE_API_URL,
         jobHistory: {
             data: [],
             totalJobs: 0,
@@ -22,7 +21,7 @@ export const useUserHistoryStore = defineStore('userHistory', {
             this.error = null
 
             try {
-                const response = await axios.get(`${this.baseURL}/api/users/history/${userId}`)
+                const response = await api.get(`/api/users/history/${userId}`)
 
                 this.history = response.data.jobHistory.map(job => ({
                     id: job.id,
@@ -56,8 +55,8 @@ export const useUserHistoryStore = defineStore('userHistory', {
         async fetchJobEvaluation(userId, jobId) {
             try {
                 this.loading = true
-                const response = await axios.get(
-                    `${this.baseURL}/api/users/evaluation/${jobId}/${userId}`
+                const response = await api.get(
+                    `/api/users/evaluation/${jobId}/${userId}`
                 )
                 console.log('Evaluation Response:', response.data);
                 if (!response.data) {

@@ -52,7 +52,7 @@
             <div class="w-8 h-8 rounded-full overflow-hidden">
               <img
                 v-if="job.creator?.profile_pic"
-                :src="`${jobStore.baseURL}/uploads/admin-profiles/${job.creator.profile_pic}`"
+                :src="getProfileImageUrl(job.creator.profile_pic)"
                 :alt="`${job.creator.first_name}'s profile`"
                 class="w-full h-full object-cover"
               />
@@ -410,6 +410,10 @@ export default {
         default:
           return 'from-blue-400 via-gray-300 to-gray-400'
       }
+    },
+    getProfileImageUrl(profilePic) {
+      if (!profilePic) return null
+      return `${import.meta.env.VITE_API_URL}/uploads/admin-profiles/${profilePic}`
     },
     handleJobApplied() {
       this.closeApplyModal()

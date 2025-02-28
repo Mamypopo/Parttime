@@ -48,7 +48,7 @@
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { useAdminStore } from '@/stores/adminStore'
-import axios from 'axios'
+import api from '@/service/axios'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -59,7 +59,7 @@ const clearAndGoHome = () => {
   localStorage.clear()
   userStore.logout()
   adminStore.logout()
-  delete axios.defaults.headers.common['Authorization']
+  delete api.defaults.headers.common['Authorization']
 
   // กลับหน้าหลัก
   router.push('/')

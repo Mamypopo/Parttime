@@ -1,9 +1,8 @@
 import { defineStore } from 'pinia';
-import axios from 'axios';
+import api from '@/service/axios'
 
 export const useUserDashboardStore = defineStore('userDashboard', {
     state: () => ({
-        baseURL: import.meta.env.VITE_API_URL,
         stats: {
             averageRating: 0,
             completedJobs: 0,
@@ -18,6 +17,9 @@ export const useUserDashboardStore = defineStore('userDashboard', {
         error: null
     }),
 
+    getters: {
+        baseApiUrl: () => import.meta.env.VITE_API_URL,
+    },
     actions: {
         async fetchDashboardData(range = 'monthly') {
             this.loading = true;
@@ -25,7 +27,7 @@ export const useUserDashboardStore = defineStore('userDashboard', {
 
             try {
 
-                const response = await axios.get(`${this.baseURL}/api/dashboard/user/dashboard`, {
+                const response = await api.get('/api/dashboard/user/dashboard', {
                     params: { range },
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`

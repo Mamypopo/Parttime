@@ -99,7 +99,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import api from '@/service/axios'
 import Swal from 'sweetalert2'
 
 export default {
@@ -140,13 +140,10 @@ export default {
       try {
         this.loading = true
 
-        const response = await axios.post(
-          `${import.meta.env.VITE_API_URL}/api/auth/reset-password`,
-          {
-            token: this.token,
-            password: this.password
-          }
-        )
+        const response = await api.post('/api/auth/reset-password', {
+          token: this.token,
+          password: this.password
+        })
 
         await Swal.fire({
           icon: 'success',
