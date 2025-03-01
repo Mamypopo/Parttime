@@ -13,7 +13,10 @@ import cors from 'cors';
 import { initJobStatusCron } from './cron/jobStatusCron.js';
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: ['https://parttime.semedcheckup.com'],
+    credentials: true
+}));
 
 dotenv.config();
 

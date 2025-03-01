@@ -98,7 +98,7 @@ export const sendResetPasswordEmail = async ({ email, first_name, resetToken }) 
         });
 
         // ส่งลิงก์ไปที่ frontend โดยตรง
-        const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
+        const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
         const mailOptions = {
             from: '"ระบบรับสมัครงาน" <noreply@parttime.com>',
             to: email,
