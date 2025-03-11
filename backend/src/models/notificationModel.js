@@ -1,6 +1,5 @@
 import prisma from '../config/prisma.js';
 
-
 export const NOTIFICATION_TYPES = {
     JOB_APPLICATION_STATUS: 'job_status',    // แจ้งเตือนสถานะการสมัครงาน
     WORK_EVALUATION: 'evaluation',           // แจ้งเตือนผลการประเมิน
@@ -23,6 +22,7 @@ export const NOTIFICATIONADMIN_TYPES = {
     JOB_ASSIGNED: 'job_assigned'
 
 };
+
 
 // สร้างการแจ่้งเตือนสำหรับ users
 export const createUserNotification = async (userId, message, type) => {
@@ -180,5 +180,30 @@ export const notifyAdminJobStatusChange = async (job, oldStatus, newStatus) => {
         );
     } catch (error) {
         console.error('Error notifying admin:', error);
+    }
+};
+
+// ลบการแจ้งเตือนที่เก่ากว่าจำนวนวันที่กำหนด
+export const NOTIFICATION_RETENTION_DAYS = 30; // เก็บการแจ้งเตือนไว้ 30 วัน
+export const deleteOldNotifications = async () => {
+    const cutoffDate = new Date(Date.now() - NOTIFICATION_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+
+    try {
+        const result = await prisma.notification.deleteMany({
+            where: {
+                createdAt: {
+                    lt: cutoffDate
+                }
+            }
+        });
+
+        return {
+            count: result.count,
+            cutoffDate,
+            daysKept: NOTIFICATION_RETENTION_DAYS
+        };
+    } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการลบการแจ้งเตือนเก่า:', error);
+        throw error;
     }
 };

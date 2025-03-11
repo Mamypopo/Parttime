@@ -155,7 +155,6 @@ export const useUserStore = defineStore('user', {
                 skills: this.user.skills || [],
                 email_verified: this.user.email_verified,
                 approved: this.user.approved,
-                // เพิ่ม computed values
                 fullName: this.user.first_name && this.user.last_name ?
                     `${this.user.prefix} ${this.user.first_name} ${this.user.last_name}` : ''
             }

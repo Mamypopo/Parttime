@@ -281,7 +281,7 @@ router.beforeEach(async (to, from, next) => {
     }
 
   } catch (error) {
-    if (axios.isAxiosError(error)) {
+    if (api.isAxiosError(error)) {
       if (error.response?.data?.message === 'token expired') {
         if (to.meta.requiresAdmin) {
           adminStore.logout()

@@ -13,9 +13,14 @@ import cors from 'cors';
 import { initJobStatusCron } from './cron/jobStatusCron.js';
 
 const app = express();
+
 app.use(cors({
-    origin: ['https://parttime.semedcheckup.com'],
-    credentials: true
+    origin: [
+        'http://localhost:3002',
+        'https://parttime.semedcheckup.com'
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
 }));
 
 dotenv.config();
@@ -61,7 +66,7 @@ startLogCleanup();
 
 
 
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 8002;
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });

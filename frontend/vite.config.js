@@ -18,13 +18,14 @@ export default defineConfig({
     }
   },
   server: {
-    port: 3000,
+    port: 3002,
     open: true, // เปิด browser อัตโนมัติเมื่อรัน
     host: true, // เปิดให้เข้าถึงจากภายนอกได้
     watch: {
       usePolling: true
     },
     strictPort: true, // จะ error ถ้า port ถูกใช้งานอยู่
+
   },
   plugins: [
     vue(),

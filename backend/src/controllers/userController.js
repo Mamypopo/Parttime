@@ -190,7 +190,8 @@ export const verifyEmail = async (req, res) => {
 // login ผู้ใช้
 export const loginUser = async (req, res) => {
     const { email, password } = req.body;
-
+    const userAgent = req.headers['user-agent'];
+    const ip = req.ip || req.connection.remoteAddress;
     try {
         const user = await userModel.getUserByEmail(email);
 

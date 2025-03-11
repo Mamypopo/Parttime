@@ -23,8 +23,14 @@ WORKDIR /app
 # Copy the node_modules from the builder stage to the production stage
 COPY --from=builder /app /app
 
-# Expose port 8000
-EXPOSE 8000
+# สร้างโฟลเดอร์สำหรับเก็บไฟล์อัพโหลด
+RUN mkdir -p /app/uploads
+
+# กำหนด Volume สำหรับเก็บไฟล์
+VOLUME ["/app/uploads"]
+
+# Expose port 8002
+EXPOSE 8002
 
 # Start the app using npm start (defined in package.json)
 CMD ["npm", "start"]

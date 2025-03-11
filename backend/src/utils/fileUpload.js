@@ -10,26 +10,40 @@ const storage = multer.diskStorage({
     destination: async (req, file, cb) => {
         try {
             let uploadPath;
+            // ตรวจสอบว่ากำลังรันใน Docker หรือไม่
+            const isDocker = process.env.DOCKER === 'true';
+
             switch (file.fieldname) {
                 case 'profile_pic':
-                    uploadPath = path.join(__dirname, '../../uploads/admin-profiles/');
+                    uploadPath = isDocker
+                        ? '/app/uploads/admin-profiles/'
+                        : path.join(__dirname, '../../uploads/admin-profiles/');
                     break;
                 case 'profile_image':
-                    uploadPath = path.join(__dirname, '../../uploads/profiles/');
+                    uploadPath = isDocker
+                        ? '/app/uploads/profiles/'
+                        : path.join(__dirname, '../../uploads/profiles/');
                     break;
                 case 'education_certificate':
-                    uploadPath = path.join(__dirname, '../../uploads/certificates/');
+                    uploadPath = isDocker
+                        ? '/app/uploads/certificates/'
+                        : path.join(__dirname, '../../uploads/certificates/');
                     break;
                 case 'user_documents':
-                    uploadPath = path.join(__dirname, '../../uploads/documents/');
+                    uploadPath = isDocker
+                        ? '/app/uploads/documents/'
+                        : path.join(__dirname, '../../uploads/documents/');
                     break;
                 case 'summaries':
-                    uploadPath = path.join(__dirname, '../../uploads/summaries/');
+                    uploadPath = isDocker
+                        ? '/app/uploads/summaries/'
+                        : path.join(__dirname, '../../uploads/summaries/');
                     break;
                 case 'payment_slip':
-                    uploadPath = path.join(__dirname, '../../uploads/payment-slips/');
+                    uploadPath = isDocker
+                        ? '/app/uploads/payment-slips/'
+                        : path.join(__dirname, '../../uploads/payment-slips/');
                     break;
-
                 default:
                     return cb(new Error('Invalid field name'), null);
             }
@@ -43,6 +57,7 @@ const storage = multer.diskStorage({
             cb(error, null);
         }
     },
+
     filename: async (req, file, cb) => {
         try {
             let fileName;
@@ -76,8 +91,6 @@ const storage = multer.diskStorage({
         }
     }
 });
-
-
 
 const fileFilter = (req, file, cb) => {
     // ตรวจสอบ fieldname ที่ถูกส่งมา
@@ -130,7 +143,6 @@ export const adminUpload = multer({
     limits: { fileSize: 2 * 1024 * 1024 } // จำกัดขนาด 2MB
 }).single('profile_pic');
 
-
 export const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
@@ -143,7 +155,6 @@ export const upload = multer({
 
 // ฟังก์ชัน upload สำหรับ payment_slip
 export const uploadPaymentSlip = (req, res, next) => {
-
     const multerUpload = multer({
         storage: storage,
         fileFilter: fileFilter,
