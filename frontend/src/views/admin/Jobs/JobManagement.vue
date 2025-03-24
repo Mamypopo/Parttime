@@ -298,13 +298,24 @@
                     class="flex -space-x-2 overflow-hidden"
                     v-if="getAllParticipants(job).length"
                   >
-                    <img
+                    <div
                       v-for="participant in getAllParticipants(job).slice(0, 3)"
                       :key="participant.user.id"
-                      :src="getProfileImage(participant.user.profile_image)"
-                      :alt="participant.user.first_name"
-                      class="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 shadow-sm"
-                    />
+                      class="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 shadow-sm overflow-hidden bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 text-white flex items-center justify-center text-sm font-semibold"
+                    >
+                      <img
+                        v-if="
+                          participant.user.profile_image &&
+                          participant.user.profile_image.trim() !== ''
+                        "
+                        :src="getProfileImage(participant.user.profile_image)"
+                        :alt="participant.user.first_name"
+                        class="w-full h-full object-cover"
+                      />
+                      <span v-else>
+                        {{ participant.user.first_name?.charAt(0).toUpperCase() || '?' }}
+                      </span>
+                    </div>
                     <span
                       v-if="getAllParticipants(job).length > 3"
                       class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 border-2 border-white dark:border-gray-800 shadow-sm"

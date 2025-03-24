@@ -707,18 +707,7 @@ export default {
         return false
       }
       // เช็คไฟล์ที่จำเป็น
-      const profileInput = this.$refs.profileInput
       const educationInput = this.$refs.educationInput
-
-      if (!profileInput?.files[0]) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'กรุณาเลือกรูปโปรไฟล์',
-          timer: 1500,
-          showConfirmButton: false
-        })
-        return false
-      }
 
       if (!educationInput?.files[0]) {
         Swal.fire({
@@ -732,6 +721,7 @@ export default {
 
       return true
     },
+
     handleFileChange(type, event) {
       if (!event || !event.target || !event.target.files) {
         console.error('Invalid file event')
@@ -837,11 +827,14 @@ export default {
           icon: 'success',
           title: 'ลงทะเบียนสำเร็จ',
           html: `
-          <div class="text-center">
-            <p class="mb-2">ระบบได้ส่งลิงก์ยืนยันไปที่อีเมลของคุณแล้ว</p>
-            <p class="text-sm text-gray-600">กรุณาตรวจสอบอีเมลและคลิกลิงก์เพื่อยืนยันตัวตน<br>ก่อนเข้าสู่ระบบ</p>
-          </div>
-        `,
+  <div class="text-center">
+    <p class="mb-2">สมัครสมาชิกเรียบร้อยแล้ว</p>
+    <p class="text-sm text-gray-600">
+      กรุณารอผู้ดูแลระบบตรวจสอบและอนุมัติบัญชีของคุณ<br>
+      เมื่อได้รับการอนุมัติแล้ว คุณจะสามารถเข้าสู่ระบบได้
+    </p>
+  </div>
+`,
           confirmButtonText: 'ตกลง',
           allowOutsideClick: false,
           customClass: {

@@ -260,11 +260,22 @@
                         <div class="p-4">
                           <!-- User Info  -->
                           <div class="flex items-center space-x-3 mb-4">
-                            <img
-                              :src="getProfileImage(participant.user.profile_image)"
-                              class="w-12 h-12 rounded-full object-cover"
-                              alt="Profile"
-                            />
+                            <div
+                              class="w-12 h-12 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 text-white flex items-center justify-center text-lg font-semibold"
+                            >
+                              <img
+                                v-if="
+                                  participant.user.profile_image &&
+                                  participant.user.profile_image.trim() !== ''
+                                "
+                                :src="getProfileImage(participant.user.profile_image)"
+                                class="w-full h-full object-cover"
+                                alt="Profile"
+                              />
+                              <span v-else>
+                                {{ participant.user.first_name?.charAt(0).toUpperCase() || '?' }}
+                              </span>
+                            </div>
                             <div class="flex-1">
                               <!-- ชื่อและเบอร์โทร -->
                               <h4 class="font-medium text-gray-900 dark:text-gray-100">

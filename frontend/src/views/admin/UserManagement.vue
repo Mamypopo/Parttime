@@ -30,7 +30,7 @@
             v-model="searchQuery"
             type="text"
             placeholder="ชื่อ, อีเมล, เลขบัตรประชาชน"
-            class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200"
+            class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200"
             @input="handleSearch"
           />
         </div>
@@ -38,7 +38,7 @@
           <label class="block text-sm font-medium mb-2">สถานะ</label>
           <select
             v-model="filterStatus"
-            class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200"
+            class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200"
             @change="handleSearch"
           >
             <option value="">ทั้งหมด</option>

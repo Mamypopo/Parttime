@@ -89,7 +89,7 @@
                         <div class="flex justify-between items-center mb-4">
                           <div>
                             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                              {{ job.jobPosition?.job?.title }}
+                              {{ job.jobPosition?.job?.location }}
                             </h3>
                             <p class="text-sm text-gray-500 dark:text-gray-400">
                               {{ job.jobPosition?.position_name }}

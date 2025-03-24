@@ -204,7 +204,8 @@ export default {
         'มะเร็งปากมดลูก',
         'อัลตร้าซาวด์',
         'ผู้ช่วยแพทย์',
-        'วัดความดัน'
+        'วัดความดัน',
+        'ยานพาหนะ'
       ],
       showPositionList: false
     }
@@ -235,12 +236,7 @@ export default {
   },
   computed: {
     isFormValid() {
-      return (
-        this.form.position.trim() !== '' &&
-        this.form.wage > 0 &&
-        this.form.requiredPeople > 0 &&
-        this.form.detail.trim() !== ''
-      )
+      return this.form.position.trim() !== '' && this.form.wage > 0 && this.form.requiredPeople > 0
     }
   },
   methods: {
@@ -272,14 +268,14 @@ export default {
         Swal.fire({
           icon: 'warning',
           title: 'กรุณากรอกข้อมูลให้ครบถ้วน',
-          text: 'กรุณากรอกตำแหน่ง, ค่าแรง, จำนวนคน ให้ครบถ้วน',
+          text: 'กรุณากรอกตำแหน่ง, ค่าแรง และจำนวนคน ให้ครบถ้วน',
           confirmButtonText: 'ตกลง'
         })
         return
       }
       const formData = {
         ...this.form,
-        id: this.editingPosition?.id // ส่ง id ไปด้วยถ้าเป็นการแก้ไข
+        id: this.editingPosition?.id
       }
       this.$emit('add-position', formData)
       this.closeModal()

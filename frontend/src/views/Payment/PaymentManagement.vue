@@ -247,10 +247,24 @@
             <tr v-for="payment in paginatedPendingPayments" :key="payment.id">
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
-                  <img
-                    :src="getProfileImage(payment.job_participation.user.profile_image)"
-                    class="h-10 w-10 rounded-full mr-3"
-                  />
+                  <div
+                    class="h-10 w-10 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 text-white flex items-center justify-center font-semibold text-sm mr-3"
+                  >
+                    <img
+                      v-if="
+                        payment.job_participation.user.profile_image &&
+                        payment.job_participation.user.profile_image.trim() !== ''
+                      "
+                      :src="getProfileImage(payment.job_participation.user.profile_image)"
+                      class="w-full h-full object-cover"
+                      alt="User Avatar"
+                    />
+                    <span v-else>
+                      {{
+                        payment.job_participation.user.first_name?.charAt(0).toUpperCase() || '?'
+                      }}
+                    </span>
+                  </div>
                   <div>
                     <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
                       {{ payment.job_participation.user.first_name }}
@@ -325,10 +339,24 @@
             <tr v-for="payment in paginatedPaidPayments" :key="payment.id">
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
-                  <img
-                    :src="getProfileImage(payment.job_participation.user.profile_image)"
-                    class="h-10 w-10 rounded-full mr-3"
-                  />
+                  <div
+                    class="h-10 w-10 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 text-white flex items-center justify-center font-semibold text-sm mr-3"
+                  >
+                    <img
+                      v-if="
+                        payment.job_participation.user.profile_image &&
+                        payment.job_participation.user.profile_image.trim() !== ''
+                      "
+                      :src="getProfileImage(payment.job_participation.user.profile_image)"
+                      class="w-full h-full object-cover"
+                      alt="User Avatar"
+                    />
+                    <span v-else>
+                      {{
+                        payment.job_participation.user.first_name?.charAt(0).toUpperCase() || '?'
+                      }}
+                    </span>
+                  </div>
                   <div>
                     <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
                       {{ payment.job_participation.user.first_name }}

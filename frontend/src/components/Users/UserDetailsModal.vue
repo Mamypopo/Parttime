@@ -63,7 +63,7 @@
                       v-else
                       class="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 flex items-center justify-center text-white font-medium text-3xl"
                     >
-                      {{ user.fullName.charAt(0) }}
+                      {{ user.fullName?.split(' ')[1]?.charAt(0).toUpperCase() || '-' }}
                     </div>
                   </div>
                   <div

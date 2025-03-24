@@ -23,9 +23,13 @@
             :alt="`${user.name}'s avatar`"
             class="w-10 h-10 rounded-full object-cover"
           />
-          <div v-else class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-            <i class="fas fa-user text-gray-400"></i>
+          <div
+            v-else
+            class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 flex items-center justify-center text-white font-semibold uppercase"
+          >
+            {{ user.fullName?.split(' ')[1]?.charAt(0) || '?' }}
           </div>
+
           <div>
             <div class="font-medium">{{ user.fullName }}</div>
             <div class="text-sm text-gray-600 dark:text-gray-400">{{ user.email }}</div>

@@ -48,16 +48,20 @@
               <form @submit.prevent="handleSubmit" class="space-y-6">
                 <!-- ข้อมูลพื้นฐาน -->
                 <div
-                  class="p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300"
+                  class="p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-md transition-all duration-30"
                 >
-                  <h3 class="text-lg font-medium text-gray-700 mb-4">ข้อมูลส่วนตัว</h3>
+                  <h3 class="text-lg font-medium text-gray-700 dark:text-gray-200 mb-4">
+                    ข้อมูลส่วนตัว
+                  </h3>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="grid grid-cols-7 gap-3">
                       <div class="col-span-3">
-                        <label class="block text-sm text-gray-600 mb-1">คำนำหน้า</label>
+                        <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
+                          >คำนำหน้า</label
+                        >
                         <select
                           v-model="formData.prefix"
-                          class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200"
+                          class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 dark:focus:ring-purple-500/30 transition-all duration-200"
                           required
                         >
                           <option value="นาย">นาย</option>
@@ -66,40 +70,48 @@
                         </select>
                       </div>
                       <div class="col-span-4">
-                        <label class="block text-sm text-gray-600 mb-1">ชื่อ</label>
+                        <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
+                          >ชื่อ</label
+                        >
                         <input
                           v-model="formData.first_name"
                           type="text"
-                          class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200"
+                          class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 dark:focus:ring-purple-500/30 transition-all duration-200"
                           required
                         />
                       </div>
                     </div>
                     <div>
-                      <label class="block text-sm text-gray-600 mb-1">นามสกุล</label>
+                      <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
+                        >นามสกุล</label
+                      >
                       <input
                         v-model="formData.last_name"
                         type="text"
-                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200"
+                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 dark:focus:ring-purple-500/30 transition-all duration-200"
                         required
                       />
                     </div>
                     <div>
-                      <label class="block text-sm text-gray-600 mb-1">เลขบัตรประชาชน</label>
+                      <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
+                        >เลขบัตรประชาชน</label
+                      >
                       <input
                         v-model="formData.national_id"
                         type="text"
                         maxlength="13"
-                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200"
+                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 dark:focus:ring-purple-500/30 transition-all duration-200"
                         required
                       />
                     </div>
                     <div class="grid grid-cols-5 gap-3">
                       <div class="col-span-2">
-                        <label class="block text-sm text-gray-600 mb-1">เพศ</label>
+                        <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
+                          >เพศ</label
+                        >
                         <select
                           v-model="formData.gender"
-                          class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200"
+                          class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 dark:focus:ring-purple-500/30 transition-all duration-200"
                           required
                         >
                           <option value="ชาย">ชาย</option>
@@ -107,32 +119,38 @@
                         </select>
                       </div>
                       <div class="col-span-3">
-                        <label class="block text-sm text-gray-600 mb-1">วันเกิด</label>
+                        <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
+                          >วันเกิด</label
+                        >
                         <div class="date-input-container">
                           <input
                             v-model="formData.birth_date"
                             type="date"
-                            class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200"
+                            class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 dark:focus:ring-purple-500/30 transition-all duration-200"
                             required
                           />
                         </div>
                       </div>
                     </div>
                     <div>
-                      <label class="block text-sm text-gray-600 mb-1">เบอร์โทรศัพท์</label>
+                      <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
+                        >เบอร์โทรศัพท์</label
+                      >
                       <input
                         v-model="formData.phone_number"
                         type="tel"
-                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200"
+                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 dark:focus:ring-purple-500/30 transition-all duration-200"
                         required
                       />
                     </div>
                     <div>
-                      <label class="block text-sm text-gray-600 mb-1">Line ID</label>
+                      <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
+                        >Line ID</label
+                      >
                       <input
                         v-model="formData.line_id"
                         type="text"
-                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200"
+                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 dark:focus:ring-purple-500/30 transition-all duration-200"
                       />
                     </div>
                   </div>
@@ -141,25 +159,31 @@
                 <!-- รหัสผ่าน (เฉพาะเพิ่มใหม่) -->
                 <div
                   v-if="!isEditing"
-                  class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300"
+                  class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all duration-300"
                 >
-                  <h3 class="text-lg font-medium text-gray-700 mb-4">Email และ Password</h3>
+                  <h3 class="text-lg font-medium text-gray-700 dark:text-gray-200 mb-4">
+                    Email และ Password
+                  </h3>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label class="block text-sm text-gray-600 mb-1">อีเมล</label>
+                      <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
+                        >อีเมล</label
+                      >
                       <input
                         v-model="formData.email"
                         type="email"
-                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200"
+                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 dark:focus:ring-purple-500/30 transition-all duration-200"
                         required
                       />
                     </div>
                     <div>
-                      <label class="block text-sm text-gray-600 mb-1">รหัสผ่าน</label>
+                      <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
+                        >รหัสผ่าน</label
+                      >
                       <input
                         v-model="formData.password"
                         type="password"
-                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200"
+                        class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 dark:focus:ring-purple-500/30 transition-all duration-200"
                         required
                       />
                     </div>
@@ -168,24 +192,30 @@
 
                 <!-- ทักษะและการศึกษา -->
                 <div
-                  class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300"
+                  class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all duration-300"
                 >
-                  <h3 class="text-lg font-medium text-gray-700 mb-4">ทักษะและการศึกษา</h3>
+                  <h3 class="text-lg font-medium text-gray-700 dark:text-gray-200 mb-4">
+                    ทักษะและการศึกษา
+                  </h3>
                   <div class="space-y-4">
                     <!-- ทักษะความสามารถ -->
                     <div>
-                      <label class="block text-sm text-gray-600 mb-1">ทักษะความสามารถ</label>
-                      <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                      <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">
+                        ทักษะความสามารถ
+                      </label>
+                      <div
+                        class="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-200 dark:border-gray-600"
+                      >
                         <div class="flex flex-wrap gap-2">
                           <label
                             v-for="skill in availableSkills"
                             :key="skill"
                             class="inline-flex items-center px-3 py-1.5 rounded-full border cursor-pointer transition-all duration-200"
-                            :class="
+                            :class="[
                               formData.skills.includes(skill)
-                                ? 'bg-purple-100 border-purple-300 text-purple-800'
-                                : 'bg-white border-gray-200 hover:bg-gray-50'
-                            "
+                                ? 'bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-700 text-purple-800 dark:text-purple-200'
+                                : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                            ]"
                           >
                             <input
                               type="checkbox"
@@ -203,13 +233,17 @@
 
                 <!-- เอกสารและรูปภาพ -->
                 <div
-                  class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300"
+                  class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all duration-300"
                 >
-                  <h3 class="text-lg font-medium text-gray-700 mb-4">เอกสารและรูปภาพ</h3>
+                  <h3 class="text-lg font-medium text-gray-700 dark:text-gray-200 mb-4">
+                    เอกสารและรูปภาพ
+                  </h3>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- รูปโปรไฟล์ -->
                     <div>
-                      <label class="block text-sm text-gray-600 mb-2">รูปโปรไฟล์</label>
+                      <label class="block text-sm text-gray-600 dark:text-gray-300 mb-2"
+                        >รูปโปรไฟล์</label
+                      >
                       <div class="flex items-center space-x-4">
                         <div class="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100">
                           <img
@@ -240,7 +274,7 @@
                           <button
                             type="button"
                             @click="$refs.profileInput.click()"
-                            class="px-4 py-2 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 text-sm w-full transition-all duration-200"
+                            class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 text-sm w-full transition-all duration-200 text-gray-700 dark:text-gray-200"
                           >
                             <i class="fas fa-upload mr-2"></i>
                             เลือกรูปใหม่
@@ -252,7 +286,9 @@
                     <!-- เอกสาร -->
                     <div class="space-y-4">
                       <div>
-                        <label class="block text-sm text-gray-600 mb-2">วุฒิการศึกษา (PDF)</label>
+                        <label class="block text-sm text-gray-600 dark:text-gray-300 mb-2"
+                          >วุฒิการศึกษา</label
+                        >
                         <div class="space-y-2">
                           <div
                             v-if="formData.education_certificate && !educationFileName"
@@ -278,7 +314,7 @@
                             <button
                               type="button"
                               @click="$refs.educationInput.click()"
-                              class="px-4 py-2 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 text-sm w-full transition-all duration-200"
+                              class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 text-sm w-full transition-all duration-200 text-gray-700 dark:text-gray-200"
                             >
                               <i class="fas fa-upload mr-2"></i>
                               {{ educationFileName || 'อัปโหลดไฟล์ใหม่' }}
@@ -288,8 +324,8 @@
                       </div>
 
                       <div>
-                        <label class="block text-sm text-gray-600 mb-2"
-                          >เอกสารเพิ่มเติม (PDF)</label
+                        <label class="block text-sm text-gray-600 dark:text-gray-300 mb-2"
+                          >เอกสารเพิ่มเติม</label
                         >
                         <div class="space-y-2">
                           <div
@@ -299,7 +335,7 @@
                             <a
                               :href="`${baseURL}/uploads/documents/${formData.user_documents}`"
                               target="_blank"
-                              class="text-purple-600 hover:text-purple-700 text-sm flex items-center"
+                              class="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 text-sm flex items-center"
                             >
                               <i class="fas fa-file-pdf mr-2"></i>
                               ดูไฟล์ปัจจุบัน
@@ -316,7 +352,7 @@
                             <button
                               type="button"
                               @click="$refs.additionalDocsInput.click()"
-                              class="px-4 py-2 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 text-sm w-full transition-all duration-200"
+                              class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 text-sm w-full transition-all duration-200 text-gray-700 dark:text-gray-200"
                             >
                               <i class="fas fa-upload mr-2"></i>
                               {{ additionalDocsFileName || 'อัปโหลดไฟล์ใหม่' }}
@@ -333,7 +369,7 @@
                   <button
                     type="button"
                     @click="closeModal"
-                    class="px-6 py-2.5 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-200"
+                    class="px-6 py-2.5 text-white bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-blue-600 rounded-xl hover:opacity-90 transition-all duration-200"
                   >
                     ยกเลิก
                   </button>

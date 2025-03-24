@@ -51,17 +51,18 @@
           <div class="flex items-center gap-3 mb-3">
             <!-- รูปโปรไฟล์ -->
             <div class="w-8 h-8 rounded-full overflow-hidden">
-              <img
-                v-if="job.creator?.profile_pic"
-                :src="getProfileImageUrl(job.creator.profile_pic)"
-                :alt="`${job.creator.first_name}'s profile`"
-                class="w-full h-full object-cover"
-              />
               <div
-                v-else
-                class="w-full h-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white"
+                class="w-full h-full rounded-full overflow-hidden bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white font-semibold text-lg"
               >
-                {{ job.creator?.first_name?.[0] || 'U' }}
+                <img
+                  v-if="job.creator?.profile_pic && job.creator.profile_pic.trim() !== ''"
+                  :src="getProfileImageUrl(job.creator.profile_pic)"
+                  :alt="`${job.creator.first_name}'s profile`"
+                  class="w-full h-full object-cover"
+                />
+                <span v-else>
+                  {{ job.creator?.first_name?.charAt(0).toUpperCase() || 'U' }}
+                </span>
               </div>
             </div>
 

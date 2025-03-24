@@ -123,10 +123,17 @@ export const loginUser = async (req, res) => {
             return res.status(401).json({ message: 'รหัสผ่านไม่ถูกต้อง' });
         }
 
+        if (user.approved !== 'approved') {
+            return res.status(403).json({
+                message: 'บัญชีของคุณยังไม่ได้รับการอนุมัติ กรุณารอการตรวจสอบจากผู้ดูแลระบบ',
+                status: user.approved
+            });
+        }
+
         const token = jwt.sign(
             { userId: user.id, email: user.email, role: user.role },
             process.env.JWT_SECRET,
-            { expiresIn: '24h' }
+            { expiresIn: '8h' }
         );
 
 

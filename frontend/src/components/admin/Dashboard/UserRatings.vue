@@ -68,12 +68,22 @@
               >
                 <i class="fa-solid fa-fire"></i>
               </div>
-              <img
-                :src="dashboardStore.getProfileImageUrl(user.profile_image)"
-                :alt="user.name"
-                class="w-12 h-12 rounded-xl object-cover border-2 transition-transform duration-300 group-hover:scale-105"
-                :class="getBorderClass(index)"
-              />
+              <div class="relative w-12 h-12">
+                <img
+                  v-if="user.profile_image && user.profile_image.trim() !== ''"
+                  :src="dashboardStore.getProfileImageUrl(user.profile_image)"
+                  :alt="user.name"
+                  class="w-12 h-12 rounded-xl object-cover border-2 transition-transform duration-300 group-hover:scale-105"
+                  :class="getBorderClass(index)"
+                />
+                <div
+                  v-else
+                  class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 text-white font-semibold flex items-center justify-center border-2 transition-transform duration-300 group-hover:scale-105"
+                  :class="getBorderClass(index)"
+                >
+                  {{ user.name?.split(' ')[0]?.charAt(0).toUpperCase() || '?' }}
+                </div>
+              </div>
             </div>
             <div>
               <div class="font-medium text-gray-900 dark:text-gray-100">{{ user.name }}</div>

@@ -330,11 +330,23 @@ export default {
 
         this.$router.push('/user/dashboard')
       } catch (err) {
+        let errorMessage = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ'
+        let errorTitle = 'เข้าสู่ระบบไม่สำเร็จ'
+
+        if (err.response?.status === 403) {
+          errorTitle = 'ไม่สามารถเข้าสู่ระบบได้'
+          errorMessage = 'บัญชีของคุณยังไม่ได้รับการอนุมัติ กรุณารอการตรวจสอบจากผู้ดูแลระบบ'
+        } else {
+          errorMessage = err.response?.data?.message || errorMessage
+        }
+
         Swal.fire({
           icon: 'error',
-          title: 'เข้าสู่ระบบไม่สำเร็จ',
-          text: err.response?.data?.message || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ'
+          title: errorTitle,
+          text: errorMessage,
+          confirmButtonText: 'ตกลง'
         })
+
         this.userStore.logout()
       }
     },

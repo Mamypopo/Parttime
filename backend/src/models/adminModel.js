@@ -568,6 +568,7 @@ export const findUsers = async (limit, offset, searchParams = {}) => {
             updated_at: true,
             gender: true,
             birth_date: true,
+            user_documents: true,
             education_certificate: true,
             line_id: true,
             skills: true

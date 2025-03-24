@@ -253,7 +253,6 @@
 
                       <button
                         @click="submitEvaluation"
-                        :disabled="!isFormValid(selectedParticipant?.id)"
                         class="flex-1 px-4 py-2 bg-[#6ED7D1] dark:bg-[#4B9592] text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm md:text-base"
                       >
                         <i class="fas fa-check mr-2"></i>
@@ -385,7 +384,7 @@ export default {
 
   methods: {
     async submitEvaluation() {
-      if (!this.isFormValid(this.selectedParticipant.id)) return
+      // if (!this.isFormValid(this.selectedParticipant.id)) return
 
       // ยืนยันก่อนดำเนินการ
       const confirmResult = await Swal.fire({
@@ -406,7 +405,7 @@ export default {
         reverseButtons: true
       })
 
-      if (!confirmResult.isConfirmed) return // ยกเลิกถ้าผู้ใช้ไม่ยืนยัน
+      if (!confirmResult.isConfirmed) return
 
       try {
         const ratings = {
@@ -535,16 +534,16 @@ export default {
     //   }
     // },
 
-    isFormValid(participationId) {
-      return (
-        // ต้องให้คะแนนครบทุกด้าน
-        // Object.keys(this.ratingCategories).every(
-        //   (category) => this.getRatingScore(participationId, category) > 0
-        // ) &&
-        // ต้องมีความคิดเห็น
-        this.comments[participationId]?.trim()
-      )
-    },
+    // isFormValid(participationId) {
+    //   return (
+    //     // ต้องให้คะแนนครบทุกด้าน
+    //     // Object.keys(this.ratingCategories).every(
+    //     //   (category) => this.getRatingScore(participationId, category) > 0
+    //     // ) &&
+    //     // ต้องมีความคิดเห็น
+    //     this.comments[participationId]?.trim()
+    //   )
+    // },
 
     getProfileImage(image) {
       return this.jobStore.getProfileImage(image)

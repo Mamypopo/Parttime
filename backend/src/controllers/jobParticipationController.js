@@ -79,8 +79,8 @@ export const approveJobParticipation = async (req, res) => {
 
         // สร้างข้อความแจ้งเตือนตามสถานะ
         const notificationMessage = status === 'approved'
-            ? `คุณได้รับการอนุมัติให้เข้าร่วมงาน ${job.title} ในตำแหน่ง ${jobPosition.position_name}`
-            : `คำขอเข้าร่วมงาน ${job.title} ในตำแหน่ง ${jobPosition.position_name} ของคุณไม่ได้รับการอนุมัติ`;
+            ? `คุณได้รับการอนุมัติให้เข้าร่วมงาน ${job.location} ในตำแหน่ง ${jobPosition.position_name}`
+            : `คำขอเข้าร่วมงาน ${job.location} ในตำแหน่ง ${jobPosition.position_name} ของคุณไม่ได้รับการอนุมัติ`;
 
         // สร้างการแจ้งเตือนสำหรับผู้ใช้
         await notificationModel.createUserNotification(
@@ -252,8 +252,8 @@ export const updateWorkHistory = async (req, res) => {
 
         // สร้างการแจ้งเตือน
         const notificationMessage = !isPassedEvaluation
-            ? `คุณไม่ผ่านการประเมินงาน "${jobTitle}" ตำแหน่ง "${positionName}" และไม่สามารถใช้งานระบบได้ชั่วคราว`
-            : `งาน "${jobTitle}" ตำแหน่ง "${positionName}" ได้รับการประเมินแล้ว คุณได้ ${workHistoryData.total_score || 0}/10 คะแนน`;
+            ? `คุณไม่ผ่านการประเมินงาน "${location}" ตำแหน่ง "${positionName}" และไม่สามารถใช้งานระบบได้ชั่วคราว`
+            : `งาน "${location}" ตำแหน่ง "${positionName}" ได้รับการประเมินแล้ว คุณได้ ${workHistoryData.total_score || 0}/10 คะแนน`;
 
         if (currentJobParticipation.user) {
             await notificationModel.createUserNotification(
@@ -362,7 +362,7 @@ export const adminCancelJobApplication = async (req, res) => {
         // ส่งการแจ้งเตือนไปยังผู้ใช้
         await notificationModel.createUserNotification(
             userId,
-            `คำขอสมัครงานของคุณสำหรับงาน "${application.jobPosition.job.title}" ถูกยกเลิกโดยแอดมิน`,
+            `คำขอสมัครงานของคุณสำหรับงาน "${application.jobPosition.job.location}" ถูกยกเลิกโดยแอดมิน`,
             notificationModel.NOTIFICATION_TYPES.JOB_APPLICATION_CANCELLED
         );
 
