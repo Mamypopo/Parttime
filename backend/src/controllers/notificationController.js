@@ -45,13 +45,15 @@ export const createNewUserRegistrationNotification = async (newUserId) => {
         // ดึงข้อมูล user ที่สมัครใหม่
         const newUser = await userModel.getUserById(newUserId);
         if (!newUser) {
-            throw new Error('ไม่พบข้อมูลผู้ใช้ที่สมัครใหม่');
+            console.warn('ไม่พบข้อมูลผู้ใช้ที่สมัครใหม่');
+            return;
         }
 
         // ดึงรายการ admin ทั้งหมด
         const admins = await adminModel.findAllAdmins();
         if (!admins || admins.length === 0) {
-            throw new Error('ไม่พบข้อมูลแอดมินในระบบ');
+            console.log('ไม่มีแอดมินในระบบ ข้ามการสร้างการแจ้งเตือน');
+            return;
         }
 
         // สร้างเนื้อหาการแจ้งเตือน
@@ -69,9 +71,9 @@ export const createNewUserRegistrationNotification = async (newUserId) => {
 
         // รอให้สร้างการแจ้งเตือนทั้งหมดเสร็จ
         await Promise.all(notificationPromises);
-
+        return;
     } catch (error) {
         console.error('เกิดข้อผิดพลาดในการสร้างการแจ้งเตือนผู้สมัครใหม่:', error);
-        throw error;
+        return;
     }
 };

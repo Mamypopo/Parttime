@@ -50,7 +50,7 @@
                     <div>
                       <h4 class="font-medium text-gray-900 dark:text-white flex items-center">
                         <i class="fas fa-briefcase mr-2 text-indigo-500"></i>
-                        {{ payment.job_participation.jobPosition.job.title }}
+                        {{ payment.job_participation.jobPosition.job.location }}
                       </h4>
                       <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
                         <i class="far fa-calendar mr-2 text-orange-500"></i>
@@ -157,36 +157,6 @@
                       </p>
                     </div>
                   </div>
-
-                  <!-- Payment Logs -->
-                  <div
-                    v-if="payment.payment_logs?.length"
-                    class="border-t dark:border-gray-700 pt-3"
-                  >
-                    <p
-                      class="text-sm font-medium text-gray-900 dark:text-white mb-2 flex items-center"
-                    >
-                      <i class="fas fa-history mr-2 text-rose-500"></i>
-                      ประวัติการทำรายการ
-                    </p>
-                    <div class="space-y-2 text-sm">
-                      <div
-                        v-for="log in payment.payment_logs"
-                        :key="log.created_at"
-                        class="flex gap-2"
-                      >
-                        <i class="fas fa-circle-dot text-cyan-500 text-xs"></i>
-                        <div>
-                          <span class="text-gray-500 dark:text-gray-400">
-                            {{ formatDate(log.created_at) }}
-                          </span>
-                          <span class="text-gray-900 dark:text-white ml-2">
-                            {{ log.action }} โดย {{ log.admin.first_name }}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
 
@@ -263,7 +233,6 @@ export default {
   watch: {
     isOpen(newVal) {
       if (newVal && this.paymentId) {
-        // เช็คว่ามี paymentId ก่อนเรียก API
         this.fetchPaymentDetail()
       }
     }
@@ -282,18 +251,26 @@ export default {
         this.loading = false
       }
     },
+
     getPaymentSlipUrl(filename) {
-      if (!filename) return null
-      return `${import.meta.env.VITE_API_URL}/uploads/payment-slips/${filename}`
+      if (!filename) return ''
+      try {
+        return `${import.meta.env.VITE_API_URL}/uploads/payment_slip/${filename}`
+      } catch (error) {
+        console.error('Error generating payment slip URL:', error)
+        return ''
+      }
     },
-    handleImageError(event) {
-      console.error('Error loading payment slip image:', event.target.src)
+
+    handleImageError() {
+      // console.error('ไม่สามารถโหลดรูปสลิปได้:', this.payment?.payment_slip)
       this.imageError = true
     },
 
     closeModal() {
       this.$emit('close')
     },
+
     async downloadSlip() {
       if (!this.payment?.payment_slip) return
 
@@ -303,7 +280,7 @@ export default {
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = `slip-${this.payment.id}.jpg`
+        a.download = `slip-${this.payment.id}${this.getFileExtension(this.payment.payment_slip)}`
         document.body.appendChild(a)
         a.click()
         window.URL.revokeObjectURL(url)
@@ -312,6 +289,11 @@ export default {
         console.error('Error downloading slip:', error)
       }
     },
+
+    getFileExtension(filename) {
+      return filename.substring(filename.lastIndexOf('.'))
+    },
+
     formatDate(date) {
       return new Date(date).toLocaleDateString('th-TH', {
         year: 'numeric',

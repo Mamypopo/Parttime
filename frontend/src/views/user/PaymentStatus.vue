@@ -40,7 +40,8 @@
         <div class="space-y-2">
           <div class="flex justify-between items-start">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
-              {{ payment.jobTitle }}
+              <i class="fas fa-map-marker-alt mr-2 text-[#c779d0] dark:text-[#c779d0]/70"></i>
+              {{ payment.location }}
             </h3>
             <span
               :class="[

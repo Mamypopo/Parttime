@@ -66,7 +66,6 @@
                       {{ user.fullName.charAt(0) }}
                     </div>
                   </div>
-                  <!-- เพิ่มส่วน overlay กับไอคอนกล้อง -->
                   <div
                     class="absolute w-32 h-32 md:w-40 md:h-40 inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full"
                     @click="openImagePreview"

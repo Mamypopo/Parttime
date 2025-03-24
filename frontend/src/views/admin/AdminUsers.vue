@@ -13,29 +13,13 @@
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
           <div
             class="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 p-4 rounded-xl shadow-sm dark:shadow-gray-900/10"
           >
             <div class="text-sm text-gray-500 dark:text-gray-400">ผู้ใช้ทั้งหมด</div>
             <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">
               {{ totalUsers }}
-            </div>
-          </div>
-          <div
-            class="bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/30 dark:to-teal-900/30 p-4 rounded-xl shadow-sm dark:shadow-gray-900/10"
-          >
-            <div class="text-sm text-gray-500 dark:text-gray-400">ยืนยันอีเมลแล้ว</div>
-            <div class="text-2xl font-bold text-green-600 dark:text-green-400">
-              {{ verifiedUsers }}
-            </div>
-          </div>
-          <div
-            class="hidden md:block bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/30 dark:to-orange-900/30 p-4 rounded-xl shadow-sm dark:shadow-gray-900/10"
-          >
-            <div class="text-sm text-gray-500 dark:text-gray-400">ออนไลน์</div>
-            <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-              {{ onlineUsers }}
             </div>
           </div>
         </div>
@@ -133,11 +117,6 @@
                 <th
                   class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left"
                 >
-                  สถานะยืนยันอีเมล
-                </th>
-                <th
-                  class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left"
-                >
                   วันที่อนุมัติ
                 </th>
                 <th
@@ -156,20 +135,20 @@
                 <td class="px-6 py-4">
                   <div class="flex items-center space-x-3">
                     <!-- User Avatar -->
-                    <div class="w-10 h-10 rounded-full overflow-hidden">
+                    <div
+                      class="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 flex items-center justify-center text-white font-semibold text-base sm:text-lg"
+                    >
                       <img
                         v-if="user.profileImage"
                         :src="adminUserStore.getProfileImage(user.profileImage)"
                         :alt="user.fullName"
                         class="w-full h-full object-cover"
                       />
-                      <div
-                        v-else
-                        class="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 flex items-center justify-center text-white font-medium"
-                      >
-                        {{ user.fullName.charAt(0) }}
-                      </div>
+                      <span v-else class="text-white">
+                        {{ user.fullName?.split(' ')[1]?.charAt(0) || '?' }}
+                      </span>
                     </div>
+
                     <!-- User Info -->
                     <div>
                       <div class="font-medium text-gray-900 dark:text-gray-100">
@@ -196,20 +175,6 @@
                       {{ skill }}
                     </span>
                   </div>
-                </td>
-
-                <!-- Verification Status -->
-                <td class="px-6 py-4">
-                  <span
-                    class="px-2 py-1 rounded-full text-xs"
-                    :class="
-                      user.isVerified
-                        ? 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400'
-                        : 'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400'
-                    "
-                  >
-                    {{ user.isVerified ? 'ยืนยันแล้ว' : 'ยังไม่ยืนยัน' }}
-                  </span>
                 </td>
 
                 <!-- Approval Date -->
@@ -257,20 +222,20 @@
           >
             <!-- User Info -->
             <div class="flex items-center gap-3 mb-3">
-              <div class="w-10 h-10 rounded-full overflow-hidden">
+              <div
+                class="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 flex items-center justify-center text-white font-semibold text-base sm:text-lg"
+              >
                 <img
                   v-if="user.profileImage"
                   :src="adminUserStore.getProfileImage(user.profileImage)"
                   :alt="user.fullName"
                   class="w-full h-full object-cover"
                 />
-                <div
-                  v-else
-                  class="w-full h-full bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 flex items-center justify-center text-white font-medium"
-                >
-                  {{ user.fullName.charAt(0).toUpperCase() }}
-                </div>
+                <span v-else>
+                  {{ user.fullName?.split(' ')[1]?.charAt(0).toUpperCase() || '?' }}
+                </span>
               </div>
+
               <div>
                 <div class="font-medium text-gray-900 dark:text-gray-100">{{ user.fullName }}</div>
                 <div class="text-sm text-gray-500 dark:text-gray-400">
@@ -291,21 +256,6 @@
                   {{ skill }}
                 </span>
               </div>
-            </div>
-
-            <!-- Status -->
-            <div class="flex justify-between text-sm mb-2">
-              <span class="text-gray-500 dark:text-gray-400">สถานะยืนยันอีเมล:</span>
-              <span
-                class="px-2 py-1 rounded-full text-xs"
-                :class="
-                  user.isVerified
-                    ? 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400'
-                    : 'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400'
-                "
-              >
-                {{ user.isVerified ? 'ยืนยันแล้ว' : 'ยังไม่ยืนยัน' }}
-              </span>
             </div>
 
             <!-- Date -->
@@ -451,13 +401,6 @@ export default {
     if (window.innerWidth < 768) {
       window.addEventListener('scroll', this.handleScroll)
     }
-    try {
-      this.adminUserStore.fetchOnlineUsers()
-
-      this.adminUserStore.startOnlineTracking()
-    } catch (error) {
-      console.error('Error initializing online tracking:', error)
-    }
   },
 
   onBeforeUnmount() {
@@ -496,13 +439,6 @@ export default {
       return this.adminUserStore.pagination.totalItems
     },
 
-    // User Stats
-    verifiedUsers() {
-      return this.formattedUsers.filter((user) => user.isVerified).length
-    },
-    onlineUsers() {
-      return this.adminUserStore.onlineUsersCount
-    },
     isSidebarCollapsed() {
       return this.sidebarStore.isCollapsed
     }

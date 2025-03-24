@@ -11,21 +11,29 @@ import { startNotificationCleanup, runCleanupNow } from './cron/notificationClea
 import { startLogCleanup, runlogCleanupNow } from './cron/logCleanup.js';
 import cors from 'cors';
 import { initJobStatusCron } from './cron/jobStatusCron.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const allowedOrigins = [
+    'https://parttime.semedcheckup.com',
+    'http://localhost:3002'
+].filter(Boolean);
+
 app.use(cors({
-    origin: [
-        'http://localhost:3002',
-        'https://parttime.semedcheckup.com'
-    ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 }));
 
 dotenv.config();
 
 app.use('/uploads', express.static('uploads'))
+app.use('/uploads', express.static(path.join(__dirname, '../../uploads')))
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

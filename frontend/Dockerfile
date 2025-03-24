@@ -33,4 +33,4 @@ RUN npm install --production
 EXPOSE 3002
 
 # Command to start the application
-CMD ["npx", "serve", "-s", "dist", "-l", "3000"]
+CMD ["npx", "serve", "-s", "dist", "-l", "3002"]

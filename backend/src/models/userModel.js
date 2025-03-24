@@ -1,12 +1,9 @@
 import prisma from '../config/prisma.js';
 import bcrypt from 'bcrypt';
 
-
-
 // สร้าง users
 export const createUser = async (userData) => {
     const { password, ...otherData } = userData;
-    // ตรวจสอบว่ามีรหัสผ่านหรือไม่
     if (!password) {
         throw new Error('Password is required');
     }
@@ -24,17 +21,6 @@ export const createUser = async (userData) => {
 // เช็ค password
 export const verifyPassword = (password, hashedPassword) =>
     bcrypt.compare(password, hashedPassword);
-
-
-// ฟังก์ชันอัปเดตสถานะการยืนยันอีเมล
-export const verifyUserEmail = (email) =>
-    prisma.user.update({
-        where: { email },
-        data: {
-            email_verified: true,
-            verification_token: null
-        },
-    });
 
 
 // อัพเดทข้อมูล user
@@ -107,7 +93,7 @@ export const getUserJobHistory = (userId, limit = 10, offset = 0) =>
         where: {
             user_id: parseInt(userId),
             workHistories: {
-                some: {} // มีประวัติการทำงาน
+                some: {}
             }
         },
         select: {
@@ -115,7 +101,7 @@ export const getUserJobHistory = (userId, limit = 10, offset = 0) =>
             created_at: true,
             updated_at: true,
             status: true,
-            user: {  // เพิ่มข้อมูลผู้ใช้
+            user: {
                 select: {
                     id: true,
                     first_name: true,
@@ -169,89 +155,10 @@ export const getTotalJobHistoryCount = (userId) =>
         where: {
             user_id: parseInt(userId),
             workHistories: {
-                some: {} // มีประวัติการทำงาน
+                some: {}
             }
         },
     });
-
-// export const getJobEvaluation = async (jobParticipationId) => {
-//     try {
-//         return await prisma.workHistory.findFirst({
-//             where: {
-//                 jobParticipationId: parseInt(jobParticipationId)
-//             },
-//             select: {
-//                 appearance_score: true,
-//                 quality_score: true,
-//                 quantity_score: true,
-//                 manner_score: true,
-//                 punctuality_score: true,
-//                 comment: true,
-//                 is_passed_evaluation: true,
-//                 total_score: true,
-//                 jobParticipation: {
-//                     select: {
-//                         jobPosition: {
-//                             select: {
-//                                 job: {
-//                                     select: {
-//                                         title: true
-//                                     }
-//                                 }
-//                             }
-//                         }
-//                     }
-//                 }
-//             }
-//         })
-//     } catch (error) {
-//         console.error('Error in getJobEvaluation:', error)
-//         throw error
-//     }
-// }
-
-// สร้าง pending skill ใหม่
-export const createPendingSkill = async (userId, skill) => {
-    return prisma.pendingSkill.create({
-        data: {
-            userId,
-            skill,
-            status: 'pending'
-        }
-    });
-};
-
-
-export const updateUserOnlineStatus = async (userId) => {
-    try {
-        return await prisma.user.update({
-            where: { id: userId },
-            data: {
-                last_active: new Date(),
-                is_online: true
-            }
-        });
-    } catch (error) {
-        console.error('Error updating user online status:', error);
-        throw new Error('ไม่สามารถอัพเดทสถานะออนไลน์ได้');
-    }
-};
-
-
-
-export const updateUserOfflineStatus = async (userId) => {
-    try {
-        return await prisma.user.update({
-            where: { id: userId },
-            data: {
-                is_online: false
-            }
-        });
-    } catch (error) {
-        console.error('Error updating user offline status:', error);
-        throw new Error('ไม่สามารถอัพเดทสถานะออฟไลน์ได้');
-    }
-};
 
 
 // ฟังก์ชันสำหรับอัพเดท reset token
@@ -305,5 +212,28 @@ export const resetUserPassword = async (userId, hashedPassword) => {
     }
 };
 
+export const findUserById = async (userId) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                id: parseInt(userId)
+            },
+            select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                email: true,
+                role: true,
+                phone_number: true,
+                profile_image: true,
+                skills: true
+            }
+        });
+        return user;
+    } catch (error) {
+        console.error('Error finding user by ID:', error);
+        throw error;
+    }
+};
 
 

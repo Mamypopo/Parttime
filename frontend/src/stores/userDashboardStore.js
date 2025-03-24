@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import api from '@/service/axios'
+import api from '@/services/axios'
 
 export const useUserDashboardStore = defineStore('userDashboard', {
     state: () => ({
@@ -35,13 +35,14 @@ export const useUserDashboardStore = defineStore('userDashboard', {
                 });
 
                 const { stats, todaySchedule, paidIncomes, pendingIncomes, upcomingDeadlines } = response.data;
-
+                console.log(upcomingDeadlines)
 
                 // จัดการข้อมูลรายได้
                 this.paidIncomes = Array.isArray(paidIncomes) ? paidIncomes.map(income => ({
                     id: income?.id || '',
                     jobTitle: income?.jobTitle || '',
                     workplace: income?.workplace || '',
+                    location: income?.location || '',
                     date: income?.date || '',
                     amount: Number(income?.amount || 0)
                 })) : []
@@ -50,6 +51,7 @@ export const useUserDashboardStore = defineStore('userDashboard', {
                     id: income?.id || '',
                     jobTitle: income?.jobTitle || '',
                     workplace: income?.workplace || '',
+                    location: income?.location || '',
                     date: income?.date || '',
                     amount: Number(income?.amount || 0)
                 })) : []

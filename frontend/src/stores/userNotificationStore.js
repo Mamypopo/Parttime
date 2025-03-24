@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import api from '@/service/axios'
+import api from '@/services/axios'
 import { useUserStore } from './userStore'
 
 export const useUserNotificationStore = defineStore('userNotification', {

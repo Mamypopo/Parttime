@@ -6,43 +6,33 @@ import * as paymentModel from '../models/paymentModel.js'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const rootPath = process.env.DOCKER === 'true'
+    ? '/app'
+    : path.join(__dirname, '../../../');
+// const rootPath = path.join(__dirname, '../../../');
 const storage = multer.diskStorage({
     destination: async (req, file, cb) => {
         try {
             let uploadPath;
-            // ตรวจสอบว่ากำลังรันใน Docker หรือไม่
-            const isDocker = process.env.DOCKER === 'true';
 
             switch (file.fieldname) {
                 case 'profile_pic':
-                    uploadPath = isDocker
-                        ? '/app/uploads/admin-profiles/'
-                        : path.join(__dirname, '../../uploads/admin-profiles/');
+                    uploadPath = path.join(rootPath, 'uploads', 'admin-profiles');
                     break;
                 case 'profile_image':
-                    uploadPath = isDocker
-                        ? '/app/uploads/profiles/'
-                        : path.join(__dirname, '../../uploads/profiles/');
+                    uploadPath = path.join(rootPath, 'uploads', 'profiles');
                     break;
                 case 'education_certificate':
-                    uploadPath = isDocker
-                        ? '/app/uploads/certificates/'
-                        : path.join(__dirname, '../../uploads/certificates/');
+                    uploadPath = path.join(rootPath, 'uploads', 'certificates');
                     break;
                 case 'user_documents':
-                    uploadPath = isDocker
-                        ? '/app/uploads/documents/'
-                        : path.join(__dirname, '../../uploads/documents/');
+                    uploadPath = path.join(rootPath, 'uploads', 'documents');
                     break;
                 case 'summaries':
-                    uploadPath = isDocker
-                        ? '/app/uploads/summaries/'
-                        : path.join(__dirname, '../../uploads/summaries/');
+                    uploadPath = path.join(rootPath, 'uploads', 'summaries');
                     break;
                 case 'payment_slip':
-                    uploadPath = isDocker
-                        ? '/app/uploads/payment-slips/'
-                        : path.join(__dirname, '../../uploads/payment-slips/');
+                    uploadPath = path.join(rootPath, 'uploads', 'payment_slip');
                     break;
                 default:
                     return cb(new Error('Invalid field name'), null);
@@ -52,6 +42,8 @@ const storage = multer.diskStorage({
             if (!fs.existsSync(uploadPath)) {
                 fs.mkdirSync(uploadPath, { recursive: true });
             }
+
+
             cb(null, uploadPath);
         } catch (error) {
             cb(error, null);
@@ -80,7 +72,6 @@ const storage = multer.diskStorage({
                     break;
 
                 default:
-                    // รูปแบบทั่วไปสำหรับไฟล์อื่นๆ
                     fileName = `${file.fieldname}-${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
             }
 
@@ -93,7 +84,6 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-    // ตรวจสอบ fieldname ที่ถูกส่งมา
     if (file.fieldname === 'profile_pic') {
         if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
             return cb(new Error('อนุญาตเฉพาะไฟล์ .jpg .jpeg และ .png เท่านั้น'), false);
@@ -171,16 +161,26 @@ export const uploadPaymentSlip = (req, res, next) => {
     });
 };
 
-export const deleteFile = (filePath) => {
-    if (fs.existsSync(filePath)) {
-        try {
-            fs.unlinkSync(filePath);
-            console.log(`ลบไฟล์ ${filePath} สำเร็จ`);
-        } catch (error) {
-            console.error(`เกิดข้อผิดพลาดในการลบไฟล์ ${filePath}:`, error);
+export const deleteFile = async (filePath) => {
+    try {
+        const absolutePath = path.isAbsolute(filePath)
+            ? filePath
+            : path.join(rootPath, filePath);
+        if (fs.existsSync(absolutePath)) {
+            await fs.promises.unlink(absolutePath);
+            console.log(`Successfully deleted file: ${absolutePath}`);
+            return true;
+        } else {
+            const alternativePath = path.join(process.cwd(), filePath);
+            if (fs.existsSync(alternativePath)) {
+                await fs.promises.unlink(alternativePath);
+                return true;
+            }
+            return false;
         }
-    } else {
-        console.log(`ไม่พบไฟล์ที่ต้องการลบ: ${filePath}`);
+    } catch (error) {
+        console.error('Error in deleteFile:', error);
+        throw error;
     }
 };
 
@@ -191,6 +191,9 @@ export const handleMulterError = (err, req, res, next) => {
             return res.status(400).json({
                 message: 'ไฟล์มีขนาดใหญ่เกินไป (ไม่เกิน 2MB)'
             });
+        }
+        if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+            return res.status(400).json({ message: 'ไม่พบฟิลด์ที่ระบุสำหรับไฟล์นี้' });
         }
         return res.status(400).json({
             message: `เกิดข้อผิดพลาดในการอัพโหลดไฟล์: ${err.message}`

@@ -252,7 +252,7 @@
 import { useUserStore } from '@/stores/userStore'
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogTitle } from '@headlessui/vue'
 
-import api from '@/service/axios'
+import api from '@/services/axios'
 import Swal from 'sweetalert2'
 
 export default {

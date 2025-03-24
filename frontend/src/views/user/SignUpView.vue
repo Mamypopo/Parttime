@@ -543,7 +543,7 @@
 </template>
 
 <script>
-import api from '@/service/axios'
+import api from '@/services/axios'
 import Swal from 'sweetalert2'
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogTitle } from '@headlessui/vue'
 
@@ -598,7 +598,8 @@ export default {
         'มะเร็งปากมดลูก',
         'อัลตร้าซาวด์',
         'ผู้ช่วยแพทย์',
-        'วัดความดัน'
+        'วัดความดัน',
+        'ยานพาหนะ'
       ],
       loading: false,
       passwordsMatch: true,

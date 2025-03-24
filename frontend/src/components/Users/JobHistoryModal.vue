@@ -263,30 +263,30 @@ export default {
     },
 
     getScoreClass(score) {
-      if (score === null) return 'text-red-500 dark:text-red-600' // สีแดงเข้มสำหรับค่า null (ไม่ผ่าน)
+      if (score === null) return 'text-red-500 dark:text-red-600'
       const numScore = Number(score) || 0
-      if (numScore >= 2) return 'text-green-500 dark:text-green-400' // สีเขียวสำหรับคะแนนสูง
-      if (numScore >= 1) return 'text-blue-500 dark:text-blue-400' // สีฟ้าสำหรับคะแนนปานกลาง
-      return 'text-red-500 dark:text-red-400' // สีแดงสำหรับคะแนนต่ำ
+      if (numScore >= 2) return 'text-green-500 dark:text-green-400'
+      if (numScore >= 1) return 'text-blue-500 dark:text-blue-400'
+      return 'text-red-500 dark:text-red-400'
     },
 
     getProgressBarClass(job) {
       const score = this.getTotalScore(job)
       if (score >= 8)
-        return 'bg-gradient-to-r from-green-200 to-green-400 dark:from-green-600 dark:to-green-800' // สีพาสเทลเขียวสำหรับดีมาก
+        return 'bg-gradient-to-r from-green-200 to-green-400 dark:from-green-600 dark:to-green-800'
       if (score >= 6)
-        return 'bg-gradient-to-r from-yellow-200 to-yellow-400 dark:from-yellow-600 dark:to-yellow-800' // สีพาสเทลเหลืองสำหรับปานกลาง
+        return 'bg-gradient-to-r from-yellow-200 to-yellow-400 dark:from-yellow-600 dark:to-yellow-800'
       if (score >= 4)
-        return 'bg-gradient-to-r from-orange-200 to-orange-400 dark:from-orange-600 dark:to-orange-800' // สีพาสเทลส้มสำหรับค่อนข้างต่ำ
-      return 'bg-gradient-to-r from-red-200 to-red-400 dark:from-red-600 dark:to-red-800' // สีพาสเทลแดงสำหรับคะแนนต่ำ
+        return 'bg-gradient-to-r from-orange-200 to-orange-400 dark:from-orange-600 dark:to-orange-800'
+      return 'bg-gradient-to-r from-red-200 to-red-400 dark:from-red-600 dark:to-red-800'
     },
 
     getTotalScoreClass(workHistory) {
       const total = this.getTotalScore(workHistory)
-      if (total >= 8) return 'text-green-600 dark:text-green-400' // ดีมาก
-      if (total >= 6) return 'text-yellow-600 dark:text-yellow-400' // ปานกลาง
-      if (total >= 4) return 'text-orange-600 dark:text-orange-400' // ค่อนข้างต่ำ
-      return 'text-red-600 dark:text-red-400' // ต่ำ
+      if (total >= 8) return 'text-green-600 dark:text-green-400'
+      if (total >= 6) return 'text-yellow-600 dark:text-yellow-400'
+      if (total >= 4) return 'text-orange-600 dark:text-orange-400'
+      return 'text-red-600 dark:text-red-400'
     },
 
     getOverallScore() {

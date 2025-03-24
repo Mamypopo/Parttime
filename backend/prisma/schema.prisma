@@ -32,35 +32,17 @@ model User {
   line_id               String? // Line ID
   profile_image         String? // รูปโปรไฟล์
   skills                String // ทักษะความสามารถ
-  email_verified        Boolean            @default(false)
-  verification_token    String? // โทเค็นยืนยันอีเมล
   approved              String             @default("pending")
-  role                  String             @default("user") // บทบาท
+  role                  String             @default("user")
   created_at            DateTime           @default(now()) @db.Timestamptz
   updated_at            DateTime           @updatedAt @db.Timestamptz
   user_documents        String? // เอกสารของผู้ใช้
-  last_active           DateTime?
-  is_online             Boolean            @default(false)
   reset_password_token  String? // โทเค็นสำหรับรีเซ็ตรหัสผ่าน
   reset_token_expires   DateTime? // วันหมดอายุของโทเค็น
   workHistories         WorkHistory[] // ความสัมพันธ์กับ WorkHistory ผ่าน JobParticipation
   JobParticipation      JobParticipation[] // ความสัมพันธ์กับงานที่สมัคร
   Log                   Log[]
   notifications         Notification[] // ความสัมพันธ์กับ Notification
-  pending_skills        PendingSkill[]
-}
-
-model PendingSkill {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  skill      String
-  status     String   @default("pending") // pending, approved, rejected
-  created_at DateTime @default(now()) @db.Timestamptz
-  updated_at DateTime @updatedAt @db.Timestamptz
-  user       User     @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-  @@map("pending_skills") // ชื่อตารางใน database
 }
 
 model Job {

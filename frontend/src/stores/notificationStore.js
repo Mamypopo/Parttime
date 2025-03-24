@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useAdminStore } from './adminStore'
-import api from '@/service/axios'
+import api from '@/services/axios'
 
 export const useNotificationStore = defineStore('notification', {
     state: () => ({

@@ -61,7 +61,9 @@
                       <i class="fas fa-upload"></i>
                       อัพโหลดรูป
                     </button>
-                    <p class="mt-1 text-xs text-gray-500">รองรับไฟล์: JPG, PNG ขนาดไม่เกิน 2MB</p>
+                    <p class="mt-1 text-xs text-gray-500">
+                      รองรับไฟล์: JPG, PNG ขนาดไม่เกิน 2MB (ไม่บังคับ)
+                    </p>
                   </div>
                 </div>
               </div>
@@ -203,7 +205,7 @@
 </template>
 
 <script>
-import api from '@/service/axios'
+import api from '@/services/axios'
 import Swal from 'sweetalert2'
 
 export default {
@@ -229,7 +231,6 @@ export default {
         this.loading = true
         this.error = null
 
-        // ตรวจสอบรหัสผ่านตรงกัน
         if (this.form.password !== this.form.confirmPassword) {
           throw new Error('รหัสผ่านไม่ตรงกัน')
         }
@@ -259,12 +260,10 @@ export default {
           throw new Error('เบอร์โทรศัพท์ต้องมี 10 หลัก')
         }
 
-        // ตรวจสอบว่าเป็นตัวเลขทั้งหมด
         if (!/^\d+$/.test(cleanPhone)) {
           throw new Error('เบอร์โทรศัพท์ต้องเป็นตัวเลขเท่านั้น')
         }
 
-        // แสดง Swal ยืนยันการสมัคร
         const result = await Swal.fire({
           title: 'ยืนยันการสมัครสมาชิกแอดมิน',
           html: `
@@ -284,7 +283,6 @@ export default {
           reverseButtons: true
         })
 
-        // ถ้ากด cancel ให้ return ออก
         if (!result.isConfirmed) {
           this.loading = false
           return
@@ -330,11 +328,10 @@ export default {
         this.loading = false
       }
     },
+
     handleFileChange(event) {
       const file = event.target.files[0]
       if (!file) return
-
-      // ตรวจสอบขนาดไฟล์ (2MB)
       if (file.size > 2 * 1024 * 1024) {
         Swal.fire({
           icon: 'error',
@@ -344,7 +341,6 @@ export default {
         return
       }
 
-      // ตรวจสอบประเภทไฟล์
       if (!['image/jpeg', 'image/png'].includes(file.type)) {
         Swal.fire({
           icon: 'error',
@@ -357,14 +353,10 @@ export default {
       this.form.profilePic = file
       this.previewImage = URL.createObjectURL(file)
     },
+
     formatPhoneNumber() {
-      // ลบทุกอย่างที่ไม่ใช่ตัวเลข
       let phoneNumber = this.form.phone.replace(/\D/g, '')
-
-      // จำกัดให้เหลือแค่ 10 ตัว
       phoneNumber = phoneNumber.substring(0, 10)
-
-      // จัดรูปแบบ xxx-xxx-xxxx
       if (phoneNumber.length >= 3) {
         phoneNumber = phoneNumber.replace(
           /(\d{3})(\d{0,3})(\d{0,4})/,
@@ -377,7 +369,6 @@ export default {
         )
       }
 
-      // อัพเดทค่าในฟอร์ม
       this.form.phone = phoneNumber
     }
   }

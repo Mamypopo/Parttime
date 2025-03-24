@@ -33,13 +33,13 @@ export const createLog = async (
 export const createPaymentLog = async (data) => {
     return await prisma.paymentLog.create({
         data: {
-            payment_id: data.payment_id, // ID การจ่ายเงิน
-            admin_id: data.admin_id, // ผู้ดำเนินการ
-            action: data.action, // การกระทำ เช่น "update"
-            action_detail: data.action_detail, // รายละเอียด
-            checklist_status: data.checklist_status, // สถานะการตรวจสอบ
-            ip_address: data.ip_address, // IP Address
-            user_agent: data.user_agent, // User Agent
+            payment_id: data.payment_id,
+            admin_id: data.admin_id,
+            action: data.action,
+            action_detail: data.action_detail,
+            checklist_status: data.checklist_status,
+            ip_address: data.ip_address,
+            user_agent: data.user_agent,
         },
     });
 };

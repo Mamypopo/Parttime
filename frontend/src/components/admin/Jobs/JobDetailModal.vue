@@ -34,10 +34,7 @@
               >
                 <DialogTitle class="text-lg font-semibold text-white">
                   <i class="fas fa-clipboard-list mr-2"></i>
-                  รายละเอียดงาน #ID: {{ job?.id }} / {{ job?.title }} /
-                  {{ job?.creator?.first_name || 'ไม่ระบุ' }}
-
-                  {{ job?.creator?.last_name || 'ไม่ระบุ' }}
+                  รายละเอียดงาน #ID: {{ job?.id }} / {{ job?.location }}
                 </DialogTitle>
                 <button
                   @click="closeModal"
@@ -52,7 +49,7 @@
                 <div class="space-y-4">
                   <!-- ข้อมูลพื้นฐาน -->
                   <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl">
+                    <!-- <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl">
                       <h4
                         class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center"
                       >
@@ -60,7 +57,7 @@
                         >ชื่องาน
                       </h4>
                       <p class="mt-1 text-gray-900 dark:text-gray-100">{{ job?.title }}</p>
-                    </div>
+                    </div> -->
                     <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-xl">
                       <h4
                         class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center"

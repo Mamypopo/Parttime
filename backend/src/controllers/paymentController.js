@@ -8,9 +8,9 @@ import { sendPaymentNotificationEmail } from '../utils/email.js';
 
 
 export const updatePaymentStatus = async (req, res) => {
-    const { id } = req.params; // ดึง ID ของการจ่ายเงินจากพารามิเตอร์
-    const { payment_method, payment_slip, payment_note, checklist_items } = req.body; // ดึงข้อมูลที่ต้องการอัพเดทจาก body
-    const adminId = req.user?.id; // ดึงข้อมูลผู้ดูแลระบบจาก JWT
+    const { id } = req.params;
+    const { payment_method, payment_slip, payment_note, checklist_items } = req.body;
+    const adminId = req.user?.id;
 
 
     try {
@@ -40,25 +40,20 @@ export const updatePaymentStatus = async (req, res) => {
                 notes: payment_note || ''
             }
         };
-        // ถ้ามีไฟล์สลิป
         if (req.file) {
             updateData.payment_slip = req.file.filename;
         }
-        // อัพเดทสถานะการจ่ายเงินในฐานข้อมูล
         const updatedPayment = await paymentModel.updatePaymentStatus(id, updateData, adminId);
 
-        // ส่งผลลัพธ์กลับก่อน
         res.status(200).json({
             message: 'อัพเดทสถานะการจ่ายเงินเรียบร้อย',
             data: updatedPayment
         });
 
         Promise.all([
-            // ส่งอีเมล
             sendPaymentNotificationEmail(updatedPayment)
                 .then(() => paymentModel.updateEmailStatus(id, adminId, req.ip, req.headers['user-agent']))
                 .catch(error => console.error('Email error:', error)),
-            // สร้าง Log
             logModel.createPaymentLog({
                 payment_id: parseInt(id),
                 admin_id: adminId,
@@ -68,10 +63,9 @@ export const updatePaymentStatus = async (req, res) => {
                 ip_address: req.ip,
                 user_agent: req.headers['user-agent']
             }).catch(error => console.error('Log error:', error)),
-            // สร้างการแจ้งเตือน
             notificationModel.createUserNotification(
                 updatedPayment.job_participation.user.id,
-                `การจ่ายเงินสำหรับงาน ${updatedPayment.job_participation.jobPosition.job.title} เสร็จสมบูรณ์`,
+                `การจ่ายเงินสำหรับงาน ${updatedPayment.job_participation.jobPosition.job.location} เสร็จสมบูรณ์`,
                 NOTIFICATION_TYPES.PAYMENT_COMPLETED
             ).catch(error => console.error('Notification error:', error))
         ]).catch(error => console.error('Background tasks error:', error));
@@ -81,7 +75,6 @@ export const updatePaymentStatus = async (req, res) => {
     }
 };
 
-// ดึงงานที่เสร็จและมีการประเมิน
 export const getJobsWithEvaluation = async (req, res) => {
     try {
         const jobs = await paymentModel.getJobsWithEvaluation();
@@ -111,15 +104,12 @@ export const getPendingPayments = async (req, res) => {
         return res.status(400).json({ message: 'Invalid status parameter' });
     }
     try {
-        // ดึงรายการรอจ่ายเงินพร้อมข้อมูล Pagination
         const { data, totalRecords } = await paymentModel.getParticipantsByJob(
             jobId,
             status,
             parseInt(page),
             parseInt(limit)
         );
-
-        // ส่งข้อมูลกลับไปยังผู้เรียก API
         res.status(200).json({
             data,
             totalRecords,

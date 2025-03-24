@@ -21,47 +21,99 @@ export const createJob = async (jobData, adminId) => {
         initialStatus = 'completed';
     }
 
-    return prisma.job.create({
-        data: {
-            title,
-            work_date: new Date(work_date),
-            location,
-            start_time: new Date(start_time),
-            end_time: new Date(end_time),
-            details,
-            created_by: adminId,
-            status: initialStatus,
-            JobPositions: {
-                create: positions.map(({ name, wage, details, required_people }) => ({
-                    position_name: name,
-                    wage,
-                    details,
-                    required_people
-                }))
-            },
+    return await prisma.$transaction(async (prisma) => {
+        // สร้างงาน
+        const job = await prisma.job.create({
+            data: {
+                title,
+                work_date: new Date(work_date),
+                location,
+                start_time: new Date(start_time),
+                end_time: new Date(end_time),
+                details,
+                created_by: adminId,
+                status: initialStatus,
+            }
+        });
 
-            JobAdmins: admins ? {
-                create: admins.map(admin => ({
-                    admin_id: parseInt(admin.id)
+        // สร้างตำแหน่งงานและเพิ่มผู้ใช้
+        for (const position of positions) {
+            const jobPosition = await prisma.jobPosition.create({
+                data: {
+                    position_name: position.name,
+                    wage: position.wage,
+                    details: position.details,
+                    required_people: position.required_people,
+                    job: {
+                        connect: {
+                            id: job.id
+                        }
+                    }
+                }
+            });
+
+            // เพิ่มผู้ใช้ที่ถูกเลือกไว้ล่วงหน้า
+            if (position.selected_users?.length > 0) {
+                await prisma.jobParticipation.createMany({
+                    data: position.selected_users.map(user => ({
+                        jobId: job.id,
+                        job_position_id: jobPosition.id,
+                        user_id: parseInt(user.user_id),
+                        status: 'approved',
+                        created_at: new Date(),
+                        updated_at: new Date()
+                    }))
+                });
+            }
+        }
+
+        // เพิ่มแอดมินที่ดูแลงาน
+        if (admins?.length > 0) {
+            await prisma.jobAdmin.createMany({
+                data: admins.map(admin => ({
+                    job_id: job.id,
+                    admin_id: parseInt(admin.id),
+                    role: admin.role
                 }))
-            } : undefined
-        },
-        include: {
-            JobPositions: true,
-            JobAdmins: {
-                include: {
-                    admin: {
-                        select: {
-                            id: true,
-                            first_name: true,
-                            last_name: true,
-                            email: true,
-                            profile_pic: true
+            });
+        }
+
+        // ดึงข้อมูลงานที่สร้างพร้อมความสัมพันธ์ทั้งหมด
+        return await prisma.job.findUnique({
+            where: { id: job.id },
+            include: {
+                JobPositions: {
+                    include: {
+                        JobParticipation: {
+                            include: {
+                                user: {
+                                    select: {
+                                        id: true,
+                                        first_name: true,
+                                        last_name: true,
+                                        email: true,
+                                        profile_image: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                JobAdmins: {
+                    include: {
+                        admin: {
+                            select: {
+                                id: true,
+                                first_name: true,
+                                last_name: true,
+                                email: true,
+                                profile_pic: true
+                            }
                         }
                     }
                 }
             }
-        }
+        });
     });
 };
 
@@ -1390,4 +1442,99 @@ export const removeJobAdmin = async (jobId, adminId) => {
             }
         }
     });
+};
+
+export const getAvailableUsers = async () => {
+    return await prisma.user.findMany({
+        where: {
+            role: 'user'
+        },
+        select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            skills: true,
+            email: true,
+            profile_image: true,
+            phone_number: true,
+            JobParticipation: {
+                select: {
+                    id: true,
+                    status: true,
+                    created_at: true,
+                    Job: {
+                        select: {
+                            id: true,
+                            title: true,
+                            work_date: true
+                        }
+                    },
+                    jobPosition: {
+                        select: {
+                            position_name: true,
+                            wage: true
+                        }
+                    },
+                    workHistories: {
+                        select: {
+                            total_score: true,
+                            appearance_score: true,
+                            quality_score: true,
+                            quantity_score: true,
+                            manner_score: true,
+                            punctuality_score: true,
+                            comment: true,
+                            is_passed_evaluation: true,
+                            created_at: true
+                        },
+                        take: 1,
+                        orderBy: {
+                            created_at: 'desc'
+                        }
+                    }
+                },
+                where: {
+                    status: {
+                        in: ['completed', 'approved']
+                    }
+                },
+                take: 5,
+                orderBy: {
+                    created_at: 'desc'
+                }
+            }
+        },
+        orderBy: {
+            first_name: 'asc'
+        }
+    });
+};
+
+export const formatUserData = (users) => {
+    return users.map(user => ({
+        id: user.id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        profile_image: user.profile_image,
+        phone_number: user.phone_number,
+        skills: user.skills ? JSON.parse(user.skills) : [],
+        recent_jobs: user.JobParticipation.map(participation => ({
+            status: participation.status,
+            job_title: participation.Job?.title,
+            work_date: participation.Job?.work_date,
+            position: participation.jobPosition?.position_name,
+            wage: participation.jobPosition?.wage,
+            total_score: participation.workHistories[0]?.total_score,
+            scores: {
+                appearance: participation.workHistories[0]?.appearance_score,
+                quality: participation.workHistories[0]?.quality_score,
+                quantity: participation.workHistories[0]?.quantity_score,
+                manner: participation.workHistories[0]?.manner_score,
+                punctuality: participation.workHistories[0]?.punctuality_score
+            },
+            comment: participation.workHistories[0]?.comment,
+            is_passed: participation.workHistories[0]?.is_passed_evaluation
+        }))
+    }));
 };

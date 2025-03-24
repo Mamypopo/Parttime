@@ -22,6 +22,25 @@ export const createJob = async (req, res) => {
             return res.status(404).json({ message: "ไม่พบข้อมูลผู้ดูแลระบบ" });
         }
 
+        for (const position of positions) {
+            if (position.selected_users?.length > 0) {
+                if (position.selected_users.length > position.required_people) {
+                    return res.status(400).json({
+                        message: `ตำแหน่ง ${position.name} มีผู้ใช้ที่ถูกเลือกเกินจำนวนที่ต้องการ`
+                    });
+                }
+
+                for (const user of position.selected_users) {
+                    const existingUser = await userModel.findUserById(user.user_id);
+                    if (!existingUser) {
+                        return res.status(404).json({
+                            message: `ไม่พบข้อมูลผู้ใช้ ID: ${user.user_id}`
+                        });
+                    }
+                }
+            }
+        }
+
         const job = await jobModel.createJob({
             title, work_date, location, start_time, end_time, details, positions, admins
         }, adminId);
@@ -37,13 +56,26 @@ export const createJob = async (req, res) => {
                 });
             }
         }
+
+        for (const position of positions) {
+            if (position.selected_users?.length > 0) {
+                for (const user of position.selected_users) {
+                    await notificationModel.createUserNotification(
+                        user.user_id,
+                        `คุณได้รับมอบหมายงาน "${location}" ในตำแหน่ง ${position.name} วันที่ ${new Date(work_date).toLocaleDateString('th-TH')}`,
+                        'JOB_APPLICATION_STATUS'
+                    );
+                }
+            }
+        }
+
         await createLog(
             null,
             adminId,
             'Create Job',
             req.originalUrl,
             req.method,
-            `Job ID: ${job.id} created by Admin { Name: ${admin.first_name} ${admin.last_name} Email: ${admin.email} } `,
+            `Job ID: ${job.id} created by Admin { Name: ${admin.first_name} ${admin.last_name} Email: ${admin.email} } with ${positions.reduce((total, pos) => total + (pos.selected_users?.length || 0), 0)} pre-selected users`,
             ip,
             userAgent
         );
@@ -234,7 +266,7 @@ export const editJob = async (req, res) => {
             const notificationPromises = applicants.map(applicant =>
                 notificationModel.createUserNotification(
                     applicant.id,
-                    `งาน"${updatedJob.title}" ที่คุณสมัครได้รับการอัปเดต โปรดตรวจสอบรายละเอียด`,
+                    `งาน"${updatedJob.location}" ที่คุณสมัครได้รับการอัปเดต โปรดตรวจสอบรายละเอียด`,
                     'JOB_UPDATED',
                     { jobId: jobId }
                 )
@@ -316,7 +348,7 @@ export const deleteJob = async (req, res) => {
             const notificationPromises = applicants.map(applicant =>
                 notificationModel.createUserNotification(
                     applicant.id,
-                    `งาน "${job.title}" ที่คุณสมัครได้ถูกยกเลิก`,
+                    `งาน "${job.location}" ที่คุณสมัครได้ถูกยกเลิก`,
                     'JOB_DELETED',
                     { jobId: jobIdInt }
                 )
@@ -365,16 +397,6 @@ export const applyForJob = async (req, res) => {
             return res.status(400).json({ message: 'ไม่พบ userId กรุณาเข้าสู่ระบบใหม่' });
         }
 
-
-
-        if (!user.email_verified) {
-            return res.status(400).json({
-                message: 'กรุณายืนยันอีเมลก่อนสมัครงาน',
-
-            });
-        }
-
-
         // แก้ไขการตรวจสอบสถานะการอนุมัติ
         if (user.approved !== 'approved') {
             let message = 'ไม่สามารถสมัครงานได้ เนื่องจาก';
@@ -397,14 +419,12 @@ export const applyForJob = async (req, res) => {
             return res.status(404).json({ message: 'ไม่พบงานที่ระบุ' });
         }
 
-        // เพิ่มการเช็คสถานะงาน
         if (job.status === 'completed') {
             return res.status(400).json({
                 message: 'ไม่สามารถสมัครงานนี้ได้ เนื่องจากงานสำเร็จแล้ว'
             });
         }
 
-        // เช็ควันที่ทำงาน
         const workDate = new Date(job.work_date);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -421,7 +441,6 @@ export const applyForJob = async (req, res) => {
             return res.status(404).json({ message: 'ตำแหน่งงานไม่ถูกต้อง' });
         }
 
-        // การตรวจสอบ skills
         const hasMatchingSkills = await jobModel.checkUserSkillsMatch(userId, jobPositionId);
         if (!hasMatchingSkills) {
             return res.status(400).json({
@@ -434,17 +453,15 @@ export const applyForJob = async (req, res) => {
             return res.status(400).json({ message: 'จำนวนผู้เข้าร่วมงานเต็มแล้ว' });
         }
 
-        // ตรวจสอบว่าผู้ใช้สมัครตำแหน่งนี้ในงานนี้แล้วหรือไม่
         const existingApplication = await jobModel.findExistingJobParticipation(userId, jobId, jobPositionId);
         if (existingApplication) {
             return res.status(400).json({ message: 'คุณได้สมัครตำแหน่งนี้ในงานนี้แล้ว' });
         }
 
-        // ตรวจสอบการสมัครงานในวันเดียวกัน
         const existingDayApplication = await jobModel.findExistingDayApplication(userId, job.work_date);
         if (existingDayApplication) {
             const status = existingDayApplication.status === 'approved' ? 'ได้รับการอนุมัติ' : 'รอการอนุมัติ';
-            const jobTitle = existingDayApplication.Job?.title || 'ไม่ระบุชื่องาน';
+            const jobTitle = existingDayApplication.Job?.location || 'ไม่ระบุชื่องาน';
             const positionName = existingDayApplication.jobPosition?.position_name || 'ไม่ระบุตำแหน่ง';
             return res.status(400).json({
                 success: false,
@@ -452,7 +469,6 @@ export const applyForJob = async (req, res) => {
             });
         }
 
-        // สร้างการสมัครงานใหม่ในตำแหน่งที่เลือก
         const jobParticipation = await jobModel.createJobParticipation(userId, jobId, jobPositionId);
 
         await notificationController.createNewApplicationNotification(jobId, userId);
@@ -517,7 +533,7 @@ export const cancelJobApplication = async (req, res) => {
         // ส่งการแจ้งเตือน
         await notificationModel.createUserNotification(
             userId,
-            `คุณได้ยกเลิกคำขอสมัครงานสำหรับงาน Titie: ${application.jobPosition.job.title} ID: ${jobId} โปรดตรวจสอบรายละเอียด`,
+            `คุณได้ยกเลิกคำขอสมัครงานสำหรับงาน : ${application.jobPosition.job.location} ID: ${jobId} โปรดตรวจสอบรายละเอียด`,
             notificationModel.NOTIFICATION_TYPES.JOB_APPLICATION_CANCELLED,
 
         );
@@ -590,7 +606,6 @@ export const updateJobStatus = async (req, res) => {
 
         const updatedJob = await jobModel.updateJobStatus(parseInt(id), status);
 
-        // สร้าง log การอัพเดทสถานะ
         await createLog(
             null,
             adminId,
@@ -608,7 +623,7 @@ export const updateJobStatus = async (req, res) => {
             const notificationPromises = applicants.map(applicant =>
                 notificationModel.createUserNotification(
                     applicant.id,
-                    `งาน "${job.title}" มีการเปลี่ยนสถานะเป็น ${status}`,
+                    `งาน "${job.location}" มีการเปลี่ยนสถานะเป็น ${status}`,
                     'JOB_STATUS_UPDATED',
                     { jobId: id, status }
                 )
@@ -623,7 +638,6 @@ export const updateJobStatus = async (req, res) => {
     } catch (error) {
         console.error('Error updating job status:', error);
 
-        // สร้าง log กรณีเกิดข้อผิดพลาด
         await createLog(
             null,
             adminId,
@@ -645,10 +659,8 @@ export const searchJobs = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const pageSize = parseInt(req.query.pageSize) || 10;
-        const userId = req.user?.id; // ดึง user ID จาก token
+        const userId = req.user?.id;
 
-
-        // สร้าง filters object จาก query parameters
         const filters = {
             title: req.query.title,
             location: req.query.location,
@@ -657,11 +669,10 @@ export const searchJobs = async (req, res) => {
             maxWage: req.query.maxWage ? parseInt(req.query.maxWage) : undefined,
             workDate: req.query.workDate,
             status: req.query.status, // 'all', 'published', 'in_progress', 'completed'
-            matchSkills: req.query.matchSkills === 'true', // ค้นหาเฉพาะงานที่ตรงกับทักษะ
-            userId: userId // ส่ง userId ไปด้วยถ้าต้องการกรองตามทักษะ
+            matchSkills: req.query.matchSkills === 'true',
+            userId: userId
         };
 
-        // เรียกใช้ฟังก์ชันจาก Model
         const jobs = await jobModel.searchJobs(page, pageSize, filters);
         const totalCount = await jobModel.searchJobsCount(filters);
 
@@ -709,7 +720,7 @@ export const downloadParticipantDocuments = async (req, res) => {
         for (const participant of participants) {
             const { user, Job, jobPosition } = participant
             // สร้างชื่อโฟลเดอร์ที่มีชื่องานและตำแหน่ง
-            const userFolder = `${Job.title}/${jobPosition.position_name}/${user.first_name}_${user.last_name}`
+            const userFolder = `${Job.location}/${jobPosition.position_name}/${user.first_name}_${user.last_name}`
 
             // เอกสารทั่วไป
             if (user.user_documents) {
@@ -773,23 +784,19 @@ export const getAssignedJobs = async (req, res) => {
     }
 };
 
-// เพิ่มแอดมินให้กับงาน
 export const addJobAdmin = async (req, res) => {
     try {
         const { jobId } = req.params;
         const { adminId, role } = req.body;
         const creatorId = req.user.id;
 
-        // ตรวจสอบว่าเป็นผู้สร้างงานหรือไม่
         const job = await jobModel.getJobById(parseInt(jobId));
         if (!job || job.created_by !== creatorId) {
             return res.status(403).json({ message: 'คุณไม่มีสิทธิ์เพิ่มแอดมินในงานนี้' });
         }
 
-        // เพิ่มแอดมิน
         const jobAdmin = await jobModel.addJobAdmin(jobId, adminId, role);
 
-        // สร้างการแจ้งเตือนให้แอดมินที่ถูกเพิ่ม
         await notificationModel.createAdminNotification({
             adminId: adminId,
             message: `คุณได้รับมอบหมายให้เป็น${role === 'manager' ? 'ผู้จัดการ' : 'ผู้ประเมิน'}งาน "${job.title}"`,
@@ -797,7 +804,6 @@ export const addJobAdmin = async (req, res) => {
             jobId: parseInt(jobId)
         });
 
-        // บันทึก log
         await createLog(
             parseInt(jobId),
             creatorId,
@@ -819,13 +825,11 @@ export const addJobAdmin = async (req, res) => {
     }
 };
 
-// ลบแอดมินออกจากงาน
 export const removeJobAdmin = async (req, res) => {
     try {
         const { jobId, adminId } = req.params;
         const creatorId = req.user.id;
 
-        // ตรวจสอบว่าเป็นผู้สร้างงานหรือไม่
         const job = await jobModel.getJobById(parseInt(jobId));
         if (!job || job.created_by !== creatorId) {
             return res.status(403).json({ message: 'คุณไม่มีสิทธิ์ลบแอดมินในงานนี้' });
@@ -833,7 +837,6 @@ export const removeJobAdmin = async (req, res) => {
 
         await jobModel.removeJobAdmin(jobId, adminId);
 
-        // บันทึก log
         await createLog(
             parseInt(jobId),
             creatorId,
@@ -852,3 +855,20 @@ export const removeJobAdmin = async (req, res) => {
     }
 };
 
+
+export const getAvailableUsers = async (req, res) => {
+    try {
+        const users = await jobModel.getAvailableUsers();
+        const formattedUsers = jobModel.formatUserData(users);
+        res.json({
+            success: true,
+            data: formattedUsers
+        });
+    } catch (error) {
+        console.error('Error fetching available users:', error);
+        res.status(500).json({
+            success: false,
+            message: 'เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้'
+        });
+    }
+};

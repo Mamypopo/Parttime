@@ -5,53 +5,63 @@ import * as userModel from '../models/userModel.js';
 import * as notificationModel from '../models/notificationModel.js';
 import { deleteFile } from '../utils/fileUpload.js';
 import { createLog } from '../models/logModel.js';
+import { validateEmail, validateNationalId } from '../utils/validation.js';
+import { hashPassword } from '../utils/auth.js';
+import { calculateAge } from '../utils/calculateAge.js';
+import { fileURLToPath } from 'url';
 
+import path from 'path';
 
 // register admin
 export const registerAdmin = async (req, res) => {
     const { ip, headers: { 'user-agent': userAgent } } = req;
     let uploadedFile = null;
     try {
-        if (!req.file) {
-            return res.status(400).json({ message: 'กรุณาอัปโหลดรูปโปรไฟล์' });
-        }
         uploadedFile = req.file;
         const { email, password, first_name, last_name, admin_secret, phone } = req.body;
 
-        // ตรวจสอบข้อมูลที่จำเป็น
         if (!email || !password || !first_name || !last_name || !admin_secret || !phone) {
-            // ลบไฟล์ถ้าข้อมูลไม่ครบ
-            deleteFile(`uploads/admin-profiles/${uploadedFile.filename}`);
+            if (uploadedFile) {
+                const filePath = path.join(uploadedFile.destination, uploadedFile.filename);
+                await deleteFile(filePath);
+            }
             return res.status(400).json({
                 message: "กรุณากรอกข้อมูลให้ครบถ้วน"
             });
         }
 
         if (admin_secret !== process.env.ADMIN_SECRET) {
-            deleteFile(`uploads/admin-profiles/${uploadedFile.filename}`);
+            if (uploadedFile) {
+                const filePath = path.join(uploadedFile.destination, uploadedFile.filename);
+                await deleteFile(filePath);
+            }
             return res.status(403).json({ message: "รหัสลับของผู้ดูแลระบบไม่ถูกต้อง" });
         }
 
         const existingAdmin = await adminModel.checkExistingAdmin(email);
         if (existingAdmin) {
-            deleteFile(`uploads/admin-profiles/${uploadedFile.filename}`);
+            if (uploadedFile) {
+                const filePath = path.join(uploadedFile.destination, uploadedFile.filename);
+                await deleteFile(filePath);
+            }
             return res.status(400).json({ message: "อีเมลนี้มีอยู่ในระบบแล้ว" });
         }
 
         if (!/^[0-9]{10}$/.test(phone)) {
-            deleteFile(`uploads/admin-profiles/${uploadedFile.filename}`);
+            if (uploadedFile) {
+                const filePath = path.join(uploadedFile.destination, uploadedFile.filename);
+                await deleteFile(filePath);
+            }
             return res.status(400).json({ message: "รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง" });
         }
 
-
-        // สร้างแอดมินใหม่
         const newAdmin = await adminModel.createAdmin({
             email,
             password,
             first_name,
             last_name,
             phone,
-            profile_pic: uploadedFile.filename
+            profile_pic: uploadedFile ? uploadedFile.filename : null
         });
 
 
@@ -65,6 +75,7 @@ export const registerAdmin = async (req, res) => {
             ip,
             userAgent
         );
+
         res.status(201).json({
             message: 'ลงทะเบียนแอดมินสำเร็จ',
             admin: {
@@ -78,7 +89,8 @@ export const registerAdmin = async (req, res) => {
         });
     } catch (error) {
         if (uploadedFile) {
-            deleteFile(`uploads/admin-profiles/${uploadedFile.filename}`);
+            const filePath = path.join(uploadedFile.destination, uploadedFile.filename);
+            await deleteFile(filePath);
         }
 
         try {
@@ -235,6 +247,8 @@ export const getPendingUsers = async (req, res) => {
             adminModel.countUsersPending(searchParams)
         ]);
 
+        const totalPages = Math.ceil(counts.total / limit);
+
         res.json({
             users,
             pagination: {
@@ -242,10 +256,7 @@ export const getPendingUsers = async (req, res) => {
                 page,
                 limit
             },
-            stats: {
-                totalVerified: counts.totalVerified,
-                totalNotVerified: counts.totalNotVerified
-            }
+
         })
     } catch (error) {
         console.error('Controller Error:', error)
@@ -336,13 +347,6 @@ export const approveUser = async (req, res) => {
         if (!user) {
             return res.status(400).json({ message: "ไม่พบผู้ใช้ กรุณาตรวจสอบและลองอีกครั้ง" });
         }
-        if (status === 'approved' && !user.email_verified) {
-            return res.status(400).json({
-                message: "ไม่สามารถอนุมัติได้เนื่องจากผู้ใช้ยังไม่ได้ยืนยันอีเมล กรุณารอให้ผู้ใช้ยืนยันอีเมลก่อน",
-                email_verified: false
-            });
-        }
-
 
         if (user.approved === "approved") {
             return res.status(400).json({ message: 'ผู้ใช้นี้ได้รับการอนุมัติไปแล้ว' });
@@ -357,8 +361,6 @@ export const approveUser = async (req, res) => {
             });
         }
 
-
-
         const updatedUser = await adminModel.updateUserApprovalStatus(userIdAsInt, status);
         if (!updatedUser) {
             throw new Error('ไม่สามารถอัปเดตสถานะผู้ใช้ได้');
@@ -371,15 +373,12 @@ export const approveUser = async (req, res) => {
 
         await notificationModel.createUserNotification(userIdAsInt, notificationMessage, adminId, notificationModel.NOTIFICATION_TYPES.SYSTEM);
 
-
-        // ดึงข้อมูลแอดมิน
         const admin = await adminModel.findAdminById(adminId);
         if (!admin) {
             throw new Error('ไม่พบข้อมูลผู้ดูแลระบบ');
         }
 
         const adminName = `${admin.first_name} ${admin.last_name}`;
-        // บันทึก log พร้อมสถานะที่ได้รับ
         const logMessage = `User { Name: ${user.first_name} ${user.last_name} } Status: ${status} by Admin { Name: ${adminName} }`;
         await createLog(
             userIdAsInt,
@@ -393,11 +392,10 @@ export const approveUser = async (req, res) => {
         );
 
         res.status(200).json({
-            message: `อัปเดตสถานะผู้ใช้เป็น ${status} สำเร็จ${!user.email_verified && status === 'approved' ? ' (รอการยืนยันอีเมล)' : ''}`,
+            message: `อัปเดตสถานะผู้ใช้เป็น ${status} สำเร็จ`,
             user: {
                 id: updatedUser.id,
                 status: updatedUser.approved,
-                email_verified: updatedUser.email_verified
             }
         });
     } catch (error) {
@@ -413,118 +411,6 @@ export const approveUser = async (req, res) => {
             userAgent
         );
         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดำเนินการ กรุณาลองใหม่อีกครั้งหรือติดต่อผู้ดูแลระบบ', error: error.message });
-    }
-};
-
-
-// แอดมินดึงสกิลที่รออนุมัติ ทำทีหลัง
-export const getAdminPendingSkills = async (req, res) => {
-    try {
-        const pendingSkills = await adminModel.getAllPendingSkillsForAdmin();
-
-        if (!pendingSkills || pendingSkills.length === 0) {
-            return res.status(200).json({
-                message: 'ไม่พบทักษะที่รออนุมัติ',
-                pendingSkills: []
-            });
-        }
-
-        res.status(200).json({
-            pendingSkills
-        });
-
-    } catch (error) {
-        console.error('เกิดข้อผิดพลาดในการดึงข้อมูลทักษะที่รออนุมัติ:', error);
-        res.status(500).json({
-            message: 'เกิดข้อผิดพลาดในการดึงข้อมูลทักษะที่รออนุมัติ'
-        });
-    }
-};
-
-
-// อัพเดทสกิล ทำทีหลัง
-export const updatePendingSkillStatus = async (req, res) => {
-    try {
-        const adminId = req.admin.id;
-        const skillId = parseInt(req.params.id || req.params.pendingSkillId);
-        const { action } = req.body;
-
-
-        if (!skillId) {
-            return res.status(400).json({
-                message: 'กรุณาระบุ ID'
-            });
-        }
-
-        // ตรวจสอบ action
-        if (!['approve', 'reject'].includes(action)) {
-            return res.status(400).json({
-                message: 'Action ไม่ถูกต้อง กรุณาระบุ approve หรือ reject'
-            });
-        }
-
-
-        const pendingSkill = await adminModel.getPendingSkillById(skillId);
-        if (!pendingSkill) {
-            return res.status(404).json({ message: 'ไม่พบข้อมูลทักษะที่รอดำเนินการ' });
-        }
-
-        // ดึงข้อมูล user และ admin
-        const user = await userModel.getUserById(pendingSkill.user.id);
-        const admin = await adminModel.getAdminById(adminId);
-
-        if (!req.admin || !req.admin.id) {
-            return res.status(401).json({
-                message: 'ไม่พบข้อมูลผู้ดูแลระบบ กรุณาเข้าสู่ระบบอีกครั้ง'
-            });
-        }
-        const status = action === 'approve' ? 'approved' : 'rejected';
-        // อัปเดตสถานะ
-        const updatedPendingSkill = await adminModel.updatePendingSkillStatus(skillId, status);
-        // ถ้าอนุมัติ อัพเดทสกิลของผู้ใช้
-        if (action === 'approve') {
-            const currentSkills = user.skills ? user.skills.split(',').filter(Boolean) : [];
-            if (!currentSkills.includes(pendingSkill.skill)) {
-                currentSkills.push(pendingSkill.skill);
-                await adminModel.updateUserSkills(user.id, currentSkills.join(','));
-            }
-        }
-
-        // บันทึก log
-        const logTitle = action === 'approve' ? 'Skill approved' : 'Skill rejected';
-        const logDescription = `Admin { Name: ${admin.first_name} ${admin.last_name} Email: ${admin.email} } ${action}ed skill: ${pendingSkill.skill} for User { Name: ${user.first_name} ${user.last_name} Email: ${user.email} }`;
-
-        await createLog(
-            pendingSkill.user.id,
-            adminId,
-            logTitle,
-            req.originalUrl,
-            req.method,
-            logDescription,
-            req.ip,
-            req.headers['user-agent']
-        );
-        try {
-            const notificationMessage = `Skill "${pendingSkill.skill}" has been ${action === 'approve' ? 'approved' : 'rejected'} by administrator`;
-            await notificationModel.createUserNotification(
-                pendingSkill.user.id,
-                notificationMessage
-            );
-        } catch (notificationError) {
-            console.error('Failed to create notification:', notificationError);
-        }
-
-        res.status(200).json({
-            message: `${action === 'approve' ? 'อนุมัติ' : 'ปฏิเสธ'}ทักษะเรียบร้อยแล้ว`,
-            pendingSkill: updatedPendingSkill
-        });
-
-    } catch (error) {
-        console.error('Error details:', error); ห
-        res.status(500).json({
-            message: 'เกิดข้อผิดพลาดในการอัปเดตสถานะทักษะ',
-            error: error.message
-        });
     }
 };
 
@@ -582,19 +468,6 @@ export const markAllNotificationsAsRead = async (req, res) => {
     }
 };
 
-// นับ user ที่ออนไลน์
-export const getOnlineUsersCount = async (req, res) => {
-    try {
-        const count = await adminModel.getOnlineUsersCount();
-        res.status(200).json({ onlineCount: count });
-    } catch (error) {
-        console.error('Controller - getOnlineUsersCount error:', error);
-        res.status(500).json({
-            message: error.message || 'เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้ออนไลน์'
-        });
-    }
-};
-
 
 // ดึงรายชื่อแอดมินที่สามารถเพิ่มเป็นผู้ดูแลงานได้
 export const getAvailableAdmins = async (req, res) => {
@@ -606,6 +479,225 @@ export const getAvailableAdmins = async (req, res) => {
         res.status(500).json({
             message: 'เกิดข้อผิดพลาดในการดึงรายชื่อแอดมิน'
         });
+    }
+};
+
+
+// ดึงรายการผู้ใช้ทั้งหมด
+export const getUsers = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        const searchParams = {
+            search: req.query.search || '',
+            status: req.query.status
+        };
+
+        const [users, total] = await Promise.all([
+            adminModel.findUsers(limit, offset, searchParams),
+            adminModel.countUsers(searchParams)
+        ]);
+
+        res.json({
+            users,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        });
+    } catch (error) {
+        console.error('Error in getUsers:', error);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้' });
+    }
+};
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+export const createUser = async (req, res) => {
+    const ip = req.ip || req.connection.remoteAddress;
+    const userAgent = req.headers['user-agent'];
+    try {
+
+        const birthDate = new Date(req.body.birth_date);
+        if (isNaN(birthDate.getTime())) {
+            return res.status(400).json({
+                message: 'รูปแบบวันที่ไม่ถูกต้อง'
+            });
+        }
+
+        const uploadBasePath = process.env.DOCKER
+            ? '/app/uploads'
+            : path.join(__dirname, '../../uploads');
+
+        const profileImagePath = req.files?.profile_image?.[0]?.filename || null;
+        const educationCertificatePath = req.files?.education_certificate?.[0]?.filename;
+        const userDocumentsPaths = req.files?.user_documents
+            ? req.files.user_documents.map(file => file.filename)
+            : [];
+        const fullProfileImagePath = profileImagePath ? path.join(uploadBasePath, 'profiles', profileImagePath) : null;
+        const fullEducationCertificatePath = educationCertificatePath ? path.join(uploadBasePath, 'certificates', educationCertificatePath) : null;
+        const fullUserDocumentsPaths = userDocumentsPaths.map(doc => path.join(uploadBasePath, 'documents', doc));
+
+
+        const age = calculateAge(req.body.birth_date);
+        const hashedPassword = await hashPassword(req.body.password);
+
+        const userData = {
+            prefix: req.body.prefix,
+            first_name: req.body.first_name,
+            last_name: req.body.last_name,
+            email: req.body.email,
+            password: hashedPassword,
+            national_id: req.body.national_id,
+            phone_number: req.body.phone_number,
+            gender: req.body.gender,
+            age: age,
+            birth_date: birthDate.toISOString(),
+            line_id: req.body.line_id,
+            skills: req.body.skills,
+            approved: 'approved',
+            profile_image: profileImagePath,
+            education_certificate: educationCertificatePath,
+            user_documents: userDocumentsPaths.length ? JSON.stringify(userDocumentsPaths) : undefined,
+            role: 'user'
+        };
+
+        if (req.files) {
+            if (req.files.profile_image?.[0]) {
+                userData.profile_image = req.files.profile_image[0].filename;
+            }
+            if (req.files.education_certificate?.[0]) {
+                userData.education_certificate = req.files.education_certificate[0].filename;
+            }
+            if (req.files.user_documents?.[0]) {
+                userData.user_documents = req.files.user_documents[0].filename;
+            }
+        }
+
+        if (!userData.email || !userData.password || !userData.national_id ||
+            !userData.first_name || !userData.last_name || !userData.phone_number) {
+            return res.status(400).json({
+                message: 'กรุณากรอกข้อมูลให้ครบถ้วน',
+                receivedData: userData
+            });
+        }
+
+        if (!validateEmail(userData.email)) {
+            return res.status(400).json({ message: 'รูปแบบอีเมลไม่ถูกต้อง' });
+        }
+
+        if (!validateNationalId(userData.national_id)) {
+            return res.status(400).json({ message: 'รูปแบบเลขบัตรประชาชนไม่ถูกต้อง' });
+        }
+
+        const existingUser = await userModel.checkExistingUser(userData.email, userData.national_id);
+        if (existingUser) {
+            return res.status(400).json({ message: 'อีเมลหรือเลขบัตรประชาชนนี้มีในระบบแล้ว' });
+        }
+
+        const newUser = await adminModel.createUserByAdmin(userData);
+
+        await createLog(
+            null,
+            req.user.id,
+            'Create User by Admin',
+            req.originalUrl,
+            req.method,
+            `Admin created new user: ${newUser.first_name} ${newUser.last_name} (${newUser.email})`,
+            ip,
+            userAgent
+        );
+
+        res.status(201).json({
+            message: 'สร้างผู้ใช้สำเร็จ',
+            user: {
+                id: newUser.id,
+                prefix: newUser.prefix,
+                first_name: newUser.first_name,
+                last_name: newUser.last_name,
+                email: newUser.email,
+                national_id: newUser.national_id,
+                phone_number: newUser.phone_number,
+                profile_image_url: fullProfileImagePath,
+                education_certificate_url: fullEducationCertificatePath,
+                user_documents_url: fullUserDocumentsPaths,
+                approved: newUser.approved,
+                created_at: newUser.created_at
+            }
+        });
+    } catch (error) {
+        console.error('Error in createUser:', error);
+
+        try {
+            await createLog(
+                null,
+                req.user.id,
+                'Create User Failed',
+                req.originalUrl,
+                req.method,
+                `Failed to create user. Error: ${error.message}`,
+                ip,
+                userAgent
+            );
+        } catch (logError) {
+            console.error('Error creating log:', logError);
+        }
+
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการสร้างผู้ใช้' });
+    }
+};
+
+// อัพเดทข้อมูลผู้ใช้
+export const updateUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userData = { ...req.body };
+
+        delete userData.id;
+        delete userData.created_at;
+        delete userData.updated_at;
+        delete userData.email;
+
+        // ตรวจสอบว่ามีผู้ใช้นี้ในระบบหรือไม่
+        const existingUser = await userModel.getUserById(id);
+        if (!existingUser) {
+            return res.status(404).json({ message: 'ไม่พบผู้ใช้นี้ในระบบ' });
+        }
+
+        if (userData.skills) {
+            try {
+                const skillsArray = JSON.parse(userData.skills);
+                userData.skills = JSON.stringify(skillsArray);
+            } catch (e) {
+                console.error('Error parsing skills:', e);
+                userData.skills = '[]';
+            }
+        }
+
+
+        if (req.files?.profile_image?.[0]) {
+            userData.profile_image = req.files.profile_image[0].filename;
+        }
+        if (req.files?.education_certificate?.[0]) {
+            userData.education_certificate = req.files.education_certificate[0].filename;
+        }
+        if (req.files?.user_documents?.[0]) {
+            userData.user_documents = req.files.user_documents[0].filename;
+        }
+
+        const updatedUser = await adminModel.updateUserByAdmin(parseInt(id), userData);
+
+        res.json({
+            message: 'อัพเดทข้อมูลสำเร็จ',
+            user: updatedUser
+        });
+    } catch (error) {
+        console.error('Error in updateUser:', error);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการอัพเดทข้อมูล' });
     }
 };
 

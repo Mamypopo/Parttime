@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import api from '@/service/axios'
+import api from '@/services/axios'
 
 export const usePaymentStore = defineStore('payment', {
     state: () => ({
@@ -45,7 +45,7 @@ export const usePaymentStore = defineStore('payment', {
             this.isLoading = true;
             try {
                 const [pendingResponse, paidResponse] = await Promise.all([
-                    api.get('/api/payments/job/${jobId}/payments', {
+                    api.get(`/api/payments/job/${jobId}/payments`, {
                         params: { status: 'pending' }
                     }),
                     api.get(`/api/payments/job/${jobId}/payments`, {

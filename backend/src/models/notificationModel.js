@@ -64,9 +64,8 @@ export const createAdminNotification = async ({ userId, content, jobId, adminId,
     if (!content) {
         throw new Error('ต้องระบุเนื้อหาการแจ้งเตือน');
     }
-    // ตรวจสอบ type ที่ถูกส่งมา
     if (type && !Object.values(NOTIFICATIONADMIN_TYPES).includes(type)) {
-        type = NOTIFICATIONADMIN_TYPES.SYSTEM; // ถ้าไม่ตรงกับที่กำหนด ให้เป็น system
+        type = NOTIFICATIONADMIN_TYPES.SYSTEM;
     }
 
     try {

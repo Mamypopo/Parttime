@@ -175,7 +175,7 @@
             >
               <div>
                 <h4 class="font-medium text-gray-800 dark:text-white">{{ income.jobTitle }}</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ income.workplace }}</p>
+                <!-- <p class="text-sm text-gray-500 dark:text-gray-400">{{ income.workplace }}</p> -->
                 <p class="text-xs text-gray-500 dark:text-gray-400 sm:hidden">
                   {{ formatDate(income.date) }}
                 </p>
@@ -205,7 +205,7 @@
             >
               <div>
                 <h4 class="font-medium text-gray-800 dark:text-white">{{ income.jobTitle }}</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ income.workplace }}</p>
+                <!-- <p class="text-sm text-gray-500 dark:text-gray-400">{{ income.workplace }}</p> -->
                 <p class="text-xs text-gray-500 dark:text-gray-400 sm:hidden">
                   {{ formatDate(income.date) }}
                 </p>
@@ -251,11 +251,11 @@
                   </span>
                 </div>
                 <h4 class="font-medium mt-1 text-gray-800 dark:text-white">
-                  {{ schedule.title }}
+                  {{ schedule.location }}
                 </h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
+                <!-- <p class="text-sm text-gray-500 dark:text-gray-400">
                   {{ schedule.workplace || schedule.location }}
-                </p>
+                </p> -->
               </div>
               <div class="flex items-center gap-2">
                 <span
@@ -450,7 +450,7 @@ export default {
             ]
             ws['!cols'] = colWidths
 
-            // เพิ่ม worksheet ลงใน workbook
+            //  worksheet ลงใน workbook
             XLSX.utils.book_append_sheet(wb, ws, 'รายได้')
 
             // บันทึกไฟล์

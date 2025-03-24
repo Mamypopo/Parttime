@@ -3,6 +3,7 @@ import * as adminController from '../controllers/adminController.js';
 import { authMiddleware, checkAdminRole } from '../middleware/authMiddleware.js';
 import * as  jobParticipationController from '../controllers/jobParticipationController.js'
 import { adminUpload, handleMulterError } from '../utils/fileUpload.js'
+import { upload } from '../utils/fileUpload.js'
 
 const router = express.Router();
 
@@ -27,9 +28,6 @@ router.get('/approved', checkAdminRole, adminController.getApprovedUsers);
 
 // ดึงข้อมูลคนที่ถูกปฏิเสธ (ต้องเป็นแอดมินเท่านั้น)
 router.get('/rejected', checkAdminRole, adminController.getRejectedUsers);
-
-// ดูจำนวนคนที่ออนไลน์อยู่ตอนนี้
-router.get('/online-users', adminController.getOnlineUsersCount)
 
 // ดูข้อมูลแอดมินคนอื่นจาก ID
 router.get('/admin/:adminId', adminController.getAdminById);
@@ -65,15 +63,10 @@ router.patch('/notifications/:id/read', checkAdminRole, adminController.markNoti
 router.patch('/notifications/mark-all-read', checkAdminRole, adminController.markAllNotificationsAsRead);
 
 
-/**
- * จัดการสกิลของผู้ใช้ทำต่อทีหลัง api ครบแล้ว
- */
-
-// ดูสกิลที่รอให้แอดมินอนุมัติ (ต้องเป็นแอดมินเท่านั้น)
-router.get('/pending-skills', checkAdminRole, adminController.getAdminPendingSkills);
-
-// อัปเดตสถานะของสกิลที่รออนุมัติ (ต้องเป็นแอดมินเท่านั้น) 
-router.put('/pending-skills/:pendingSkillId', checkAdminRole, adminController.updatePendingSkillStatus);
+// User management routes
+router.get('/users', adminController.getUsers);
+router.post('/create-users', checkAdminRole, upload, adminController.createUser);
+router.put('/users/:id', checkAdminRole, upload, adminController.updateUser);
 
 
 export default router;

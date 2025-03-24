@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import api from '@/service/axios'
+import api from '@/services/axios'
 import { useAdminStore } from './adminStore'
 import { useUserStore } from './userStore'
 export const useJobStore = defineStore('job', {
@@ -175,7 +175,6 @@ export const useJobStore = defineStore('job', {
                 if (this.searchFilters.minWage) params.append('minWage', this.searchFilters.minWage);
                 if (this.searchFilters.maxWage) params.append('maxWage', this.searchFilters.maxWage);
                 if (this.searchFilters.peopleCount) params.append('peopleCount', this.searchFilters.peopleCount);
-
                 const queryString = params.toString();
                 const endpoint = queryString ? `?${queryString}` : '';
                 // เรียก API พร้อมกัน
@@ -184,8 +183,10 @@ export const useJobStore = defineStore('job', {
                     api.get('/api/jobs/getJobsWithParticipants', { headers })
                 ]);
 
-                // ตรวจสอบว่า jobsResponse มีข้อมูลและเป็น array
+
+                //  ตรวจสอบว่า jobsResponse มีข้อมูลและเป็น array
                 this.jobs = Array.isArray(jobsResponse.data?.jobs) ? jobsResponse.data.jobs : [];
+
 
                 if (this.jobs.length > 0) {
                     this.jobs = this.jobs.map(job => {
@@ -656,23 +657,16 @@ export const useJobStore = defineStore('job', {
             }
         },
 
-        // // เพิ่มแอดมินให้กับงาน
-        // async addJobAdmin(jobId, adminData) {
-        //     const response = await api.post(
-        //         `${this.baseURL}/api/jobs/${jobId}/admins`,
-        //         adminData
-        //     )
-        //     return response
-        // },
-
-        // // ลบแอดมินออกจากงาน
-        // async removeJobAdmin(jobId, adminId) {
-        //     const response = await api.delete(
-        //         `${this.baseURL}/api/jobs/${jobId}/admins/${adminId}`
-        //     )
-        //     return response
-        // },
-
+        async fetchAvailableUsers() {
+            try {
+                const headers = this.getAuthHeaders()
+                const response = await api.get('/api/jobs/available-users', { headers })
+                return response.data
+            } catch (error) {
+                console.error('Error fetching available users:', error)
+                throw error
+            }
+        },
 
         //   สำหรับ set filters
         setUserSearchFilters(filters) {

@@ -36,7 +36,8 @@
         >
           <div class="flex justify-between items-start gap-4 mb-3">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 line-clamp-2">
-              {{ job.title }}
+              <i class="fas fa-map-marker-alt mr-2 text-[#c779d0] dark:text-[#c779d0]/70"></i>
+              {{ job.location }}
             </h3>
             <span
               class="flex-shrink-0 px-3 py-1 text-xs font-medium rounded-full"
@@ -75,12 +76,6 @@
               </span>
             </div>
           </div>
-
-          <!-- Location -->
-          <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-            <i class="fas fa-map-marker-alt mr-2 text-[#c779d0] dark:text-[#c779d0]/70"></i>
-            {{ job.location }}
-          </p>
         </div>
 
         <!-- Job Details -->

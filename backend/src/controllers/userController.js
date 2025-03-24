@@ -5,7 +5,6 @@ import * as userModel from '../models/userModel.js';
 import * as notificationModel from '../models/notificationModel.js'
 import * as jobParticipationModel from '../models/jobParticipationModel.js'
 import { calculateAge } from '../utils/calculateAge.js';
-import { sendVerificationEmail } from '../utils/email.js';
 import { createLog } from '../models/logModel.js';
 import * as  notificationController from '../controllers/notificationController.js'
 import path from 'path';
@@ -34,23 +33,13 @@ export const registerUser = async (req, res) => {
             return res.status(400).json({ message: "กรุณาระบุรหัสผ่าน" });
         }
 
-        // ตรวจสอบว่าผู้ใช้มีในระบบแล้วหรือไม่
         const existingUser = await userModel.checkExistingUser(email, national_id);
         if (existingUser) {
             return res.status(400).json({ message: "อีเมลหรือเลขบัตรประชาชนนี้มีอยู่ในระบบแล้ว" });
         }
 
-
         const age = calculateAge(birth_date);
         const skillsString = Array.isArray(skills) ? skills.join(',') : skills;
-
-
-        // สร้าง verification token สำหรับส่ง email ยืนยันตัวตน
-        const verificationToken = jwt.sign(
-            { email: email },
-            process.env.JWT_SECRET,
-            { expiresIn: '24h' }
-        );
 
         const uploadBasePath = path.join(__dirname, '../../uploads');
         // อัปโหลดไฟล์ก่อนการสร้างผู้ใช้
@@ -74,21 +63,16 @@ export const registerUser = async (req, res) => {
             gender,
             birth_date: new Date(birth_date),
             age,
-            education_certificate: educationCertificatePath || undefined,  // เช็คก่อนบันทึก
+            education_certificate: educationCertificatePath || undefined,
             phone_number,
             line_id,
-            profile_image: profileImagePath || undefined,  // เช็คก่อนบันทึก
-            user_documents: userDocumentsPaths.length ? JSON.stringify(userDocumentsPaths) : undefined,  // เช็คก่อนบันทึก
+            profile_image: profileImagePath || undefined,
+            user_documents: userDocumentsPaths.length ? JSON.stringify(userDocumentsPaths) : undefined,
             skills: skillsString,
-
             role: 'user',
-            verification_token: verificationToken
         });
 
-
-        await sendVerificationEmail(user, verificationToken);
         await notificationController.createNewUserRegistrationNotification(user.id);
-        // เก็บ log การลงทะเบียนสำเร็จ
         await createLog(
             user.id,
             null,
@@ -121,71 +105,6 @@ export const registerUser = async (req, res) => {
     }
 };
 
-// ฟังก์ชันยืนยันอีเมล
-export const verifyEmail = async (req, res) => {
-    const { token } = req.query;
-    const ip = req.ip || 'Unknown IP';
-    const userAgent = req.headers['user-agent'] || 'Unknown User Agent';
-
-    try {
-        // ตรวจสอบความถูกต้องของ token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await userModel.getUserByEmail(decoded.email)
-
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        if (user.verification_token !== token) {
-            return res.status(400).json({ message: 'โทเค็นไม่ตรงกัน' });
-        }
-
-        if (user.email_verified) {
-            return res.status(400).json({ message: 'อีเมลได้รับการยืนยันแล้ว' });
-        }
-
-        await userModel.verifyUserEmail(decoded.email);
-        await createLog(
-            user.id,
-            null,
-            'Email Verification successfully',
-            '/api/users/verify-email',
-            'GET',
-            `Email verified successfully for User ID ${user.id}`,
-            req.ip,
-            userAgent
-        );
-
-        res.status(200).json({ message: 'ยืนยันอีเมลสำเร็จ' });
-    } catch (error) {
-        console.error("เกิดข้อผิดพลาดในการยืนยัน:", error);
-
-        let responseMessage = 'โทเค็นไม่ถูกต้องหรือหมดอายุ';
-        let statusCode = 400;
-
-        if (error.name === 'TokenExpiredError') {
-            responseMessage = 'โทเค็นหมดอายุ กรุณาขอโทเค็นใหม่';
-            statusCode = 401;
-        }
-
-        try {
-            await createLog(
-                null,
-                null,
-                'Email Verification Failed',
-                '/api/users/verify-email',
-                'GET',
-                `Email verification failed: ${error.message}`,
-                req.ip,
-                userAgent
-            );
-        } catch (logError) {
-            console.error('ไม่สามารถสร้างบันทึกสำหรับการยืนยันอีเมลที่ล้มเหลวได้:', logError);
-        }
-
-        res.status(statusCode).json({ message: responseMessage });
-    }
-};
 
 // login ผู้ใช้
 export const loginUser = async (req, res) => {
@@ -252,7 +171,6 @@ export const updateUserProfile = async (req, res) => {
             return res.status(404).json({ message: "ไม่พบข้อมูลผู้ใช้" });
         }
 
-        const uploadBasePath = path.join(__dirname, '../../uploads');
         // จัดการการอัปโหลดไฟล์ (หากมีไฟล์ใหม่)
         const newProfileImagePath = req.files?.profile_image ? req.files.profile_image[0].filename : null;
         const newEducationCertificatePath = req.files?.education_certificate ? req.files.education_certificate[0].filename : null;
@@ -260,25 +178,36 @@ export const updateUserProfile = async (req, res) => {
 
         // ลบไฟล์เก่าถ้ามีการอัปโหลดไฟล์ใหม่
         if (newProfileImagePath && existingUser.profile_image) {
-            const oldProfileImagePath = path.join(uploadBasePath, 'profiles', existingUser.profile_image);
-            fileUploadUtils.deleteFile(oldProfileImagePath); // ลบไฟล์รูปโปรไฟล์เก่า
+            try {
+                const oldImagePath = path.join(req.files.profile_image[0].destination, existingUser.profile_image);
+                console.log('Full path of old image:', oldImagePath);
+                await fileUploadUtils.deleteFile(oldImagePath);
+            } catch (deleteError) {
+                console.error('Error deleting old profile image:', deleteError);
+            }
         }
 
         if (newEducationCertificatePath && existingUser.education_certificate) {
-            const oldEducationCertificatePath = path.join(uploadBasePath, 'certificates', existingUser.education_certificate);
-            fileUploadUtils.deleteFile(oldEducationCertificatePath); // ลบไฟล์วุฒิการศึกษาเก่า
+            try {
+                const oldCertPath = path.join(req.files.education_certificate[0].destination, existingUser.education_certificate);
+                await fileUploadUtils.deleteFile(oldCertPath);
+            } catch (error) {
+                console.error('Error deleting old certificate:', error);
+            }
         }
 
         // ลบไฟล์เอกสารเก่า ถ้ามีการอัปโหลดเอกสารใหม่
         if (newUserDocumentsPaths.length && existingUser.user_documents) {
-            const oldUserDocumentsPaths = JSON.parse(existingUser.user_documents);
-            oldUserDocumentsPaths.forEach((docPath) => {
-                const fullOldDocumentPath = path.join(uploadBasePath, 'documents', docPath);
-                fileUploadUtils.deleteFile(fullOldDocumentPath); // ลบไฟล์เอกสารเก่า
-            });
+            try {
+                const oldUserDocumentsPaths = JSON.parse(existingUser.user_documents);
+                for (const oldDoc of oldUserDocumentsPaths) {
+                    const oldDocPath = path.join(req.files.user_documents[0].destination, oldDoc);
+                    await fileUploadUtils.deleteFile(oldDocPath);
+                }
+            } catch (error) {
+                console.error('Error deleting old documents:', error);
+            }
         }
-
-
 
 
         const updatedUser = await userModel.updateUser(userId, {
@@ -331,82 +260,6 @@ export const updateUserProfile = async (req, res) => {
     }
 };
 
-// สำหรับเพิ่มทักษะ
-export const addUserSkills = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const { skills } = req.body;
-
-        // ตรวจสอบว่า skills เป็น array และไม่ว่างเปล่า
-        if (!Array.isArray(skills) || skills.length === 0) {
-            return res.status(400).json({
-                message: 'กรุณาระบุทักษะที่ต้องการเพิ่ม'
-            });
-        }
-        const user = await userModel.getUserById(userId);
-
-        // ตรวจสอบการขอในรอบสัปดาห์
-        const recentRequest = await adminModel.checkWeeklySkillRequest(userId);
-        if (recentRequest) {
-            const nextAvailableDate = new Date(recentRequest.created_at);
-            nextAvailableDate.setDate(nextAvailableDate.getDate() + 7);
-
-            return res.status(400).json({
-                message: 'คุณสามารถขอเพิ่มสกิลได้สัปดาห์ละ 1 ครั้งเท่านั้น',
-                nextAvailableDate: nextAvailableDate.toISOString(),
-                currentRequest: {
-                    skill: recentRequest.skill,
-                    status: recentRequest.status,
-                    requestedAt: recentRequest.created_at.toISOString()
-                }
-            });
-        }
-        const existingUser = await userModel.getUserById(userId);
-        const existingSkills = existingUser.skills ? existingUser.skills.split(',') : [];
-
-
-        // กรองเฉพาะทักษะที่ยังไม่มี
-        const newSkills = skills.filter(skill =>
-            !existingSkills.includes(skill.trim())
-        );
-        if (newSkills.length === 0) {
-            return res.status(400).json({
-                message: 'ทักษะที่ระบุมีอยู่ในระบบแล้วทั้งหมด'
-            });
-        }
-
-        // สร้าง pending skills
-        const pendingSkillPromises = newSkills.map(skill =>
-            userModel.createPendingSkill(userId, skill.trim())
-        );
-
-        const createdPendingSkills = await Promise.all(pendingSkillPromises);
-
-
-        for (const skill of newSkills) {
-            await createLog(
-                userId,
-                null,
-                'Request new skill',
-                '/api/users/skills',
-                'POST',
-                `User { Name: ${user.first_name} ${user.last_name}  Email: ${user.email} } requested to add new skill: ${skill}`,
-                req.ip,
-                req.headers['user-agent']
-            );
-        }
-
-
-        res.status(200).json({
-            message: 'ส่งคำขอเพิ่มทักษะสำเร็จ กรุณารอการอนุมัติ',
-            pendingSkills: createdPendingSkills
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: 'เกิดข้อผิดพลาดในการเพิ่มทักษะ'
-        });
-    }
-};
 
 // ฟังก์ชันดึงข้อมูลผู้ใช้ตาม ID หรือ Email หรือทั้งหมด
 export const getUser = async (req, res) => {
@@ -592,38 +445,3 @@ export const getProfile = async (req, res) => {
     }
 };
 
-// แสดงว่ากำลังใช้งาน
-export const updateUserOnlineStatus = async (req, res) => {
-    const userId = req.user.id;
-    try {
-        await userModel.updateUserOnlineStatus(userId);
-        res.status(200).json({
-            success: true,
-            message: 'อัพเดทสถานะออนไลน์สำเร็จ'
-        });
-    } catch (error) {
-        console.error('Controller - updateUserOnlineStatus error:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message || 'เกิดข้อผิดพลาดในการอัพเดทสถานะ'
-        });
-    }
-};
-
-// แสดงว่ากำลังออฟไลน์
-export const updateUserOfflineStatus = async (req, res) => {
-    const userId = req.user.id;
-    try {
-        await userModel.updateUserOfflineStatus(userId);
-        res.status(200).json({
-            success: true,
-            message: 'อัพเดทสถานะออฟไลน์สำเร็จ'
-        });
-    } catch (error) {
-        console.error('Controller - updateUserOfflineStatus error:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message || 'เกิดข้อผิดพลาดในการอัพเดทสถานะ'
-        });
-    }
-};

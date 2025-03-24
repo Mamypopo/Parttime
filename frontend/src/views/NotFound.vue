@@ -48,7 +48,7 @@
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { useAdminStore } from '@/stores/adminStore'
-import api from '@/service/axios'
+import api from '@/services/axios'
 
 const router = useRouter()
 const userStore = useUserStore()

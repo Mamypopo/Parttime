@@ -47,7 +47,8 @@
           <div class="flex justify-between items-start">
             <div class="flex items-center gap-2">
               <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                {{ job.title }}
+                <i class="fas fa-map-marker-alt mr-2 text-[#c779d0] dark:text-[#c779d0]/70"></i>
+                {{ job.location }}
               </h3>
               <!-- แท็กสถานะงาน -->
               <span
@@ -65,10 +66,7 @@
               ติดต่อ
             </button>
           </div>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
-            <i class="fas fa-map-marker-alt mr-2 text-[#c779d0] dark:text-[#c779d0]/70"></i>
-            {{ job.location }}
-          </p>
+
           <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
             <i class="fas fa-calendar-alt mr-2 text-[#feac5e] dark:text-[#feac5e]/70"></i>
             {{ jobStore.formatDate(job.work_date) }}

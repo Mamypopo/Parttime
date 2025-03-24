@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import api from '@/service/axios'
+import api from '@/services/axios'
 
 export const useUserHistoryStore = defineStore('userHistory', {
     state: () => ({

@@ -313,6 +313,7 @@ export const getUserDashboard = async (req, res) => {
             id: income.id,
             jobTitle: income.jobPosition.position_name,
             workplace: income.jobPosition.job.title,
+            location: income.jobPosition.job.location,
             date: income.PaymentHistory[0].paid_at,
             amount: Number(income.PaymentHistory[0].amount)
         }));
@@ -322,6 +323,7 @@ export const getUserDashboard = async (req, res) => {
             id: income.id,
             jobTitle: income.jobPosition.position_name,
             workplace: income.jobPosition.job.title,
+            location: income.jobPosition.job.location,
             date: income.jobPosition.job.work_date,
             amount: Number(income.jobPosition.wage)
         }));

@@ -262,12 +262,11 @@ export default {
     },
 
     canProceed() {
-      // เช็คเงื่อนไขสำหรับแต่ละ step
       switch (this.currentStep) {
         case 1:
-          return !!this.selectedPosition // ต้องเลือกตำแหน่งก่อน
+          return !!this.selectedPosition
         case 2:
-          return true // step ยืนยันข้อมูล สามารถกดต่อได้เลย
+          return true
         default:
           return false
       }
@@ -306,7 +305,6 @@ export default {
 
     async nextStep() {
       if (this.currentStep === 1 && !this.selectedPosition) {
-        // แจ้งเตือนถ้าไม่ได้เลือกตำแหน่ง
         await Swal.fire({
           icon: 'warning',
           title: 'กรุณาเลือกตำแหน่ง',
@@ -326,10 +324,7 @@ export default {
       if (this.currentStep === 2) {
         try {
           const jobStore = useJobStore()
-          // รอให้ API call เสร็จก่อน
           await jobStore.applyForJob(this.job.id, this.selectedPosition.id)
-
-          // หลังจาก API success แล้วค่อยแสดง success message
           await Swal.fire({
             icon: 'success',
             title: 'สมัครงานสำเร็จ!',
@@ -339,11 +334,9 @@ export default {
             timerProgressBar: true
           })
 
-          // เมื่อ Swal ปิดแล้วค่อยเปลี่ยน step
           this.currentStep++
           this.$emit('applied')
         } catch (error) {
-          // กรณี error ให้แสดง error message
           await Swal.fire({
             icon: 'warning',
             title: error.response?.data?.message || 'ไม่สามารถสมัครงานได้',
@@ -354,7 +347,6 @@ export default {
             confirmButtonText: 'เข้าใจแล้ว',
             confirmButtonColor: '#06B6D4'
           })
-          // ปิด modal หลังกดปุ่ม
           this.closeModal()
         }
       } else {

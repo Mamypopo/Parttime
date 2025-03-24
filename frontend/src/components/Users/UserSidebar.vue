@@ -244,19 +244,16 @@ export default {
   },
 
   computed: {
-    // ใช้ menuItems จาก sidebarStore
     menuItems() {
       return this.sidebarStore.userMenuItems
     },
 
-    // ใช้ isDarkMode จาก sidebarStore
     isDarkMode() {
       return this.sidebarStore.isDarkMode
     }
   },
 
   methods: {
-    // ใช้ toggleDarkMode จาก sidebarStore
     toggleDarkMode() {
       this.sidebarStore.toggleDarkMode()
     },
@@ -274,11 +271,9 @@ export default {
         })
 
         if (result.isConfirmed) {
-          // หยุดเช็คการแจ้งเตือนเมื่อ logout
           this.notificationStore.stopChecking()
           await this.userStore.logout()
 
-          // เคลียร์ค่าใน sidebarStore
           if (this.sidebarStore.$reset) {
             this.sidebarStore.$reset()
           } else {
@@ -308,15 +303,13 @@ export default {
     this.sidebarStore.initializeResponsive()
     this.sidebarStore.initializeTheme()
 
-    // เริ่มเช็คการแจ้งเตือนเมื่อ login แล้ว
     if (this.userStore.isLoggedIn) {
-      await this.notificationStore.fetchNotifications() // เช็คครั้งแรก
-      this.notificationStore.startChecking() // เริ่มการเช็คอัตโนมัติ
+      await this.notificationStore.fetchNotifications()
+      this.notificationStore.startChecking()
     }
   },
   beforeUnmount() {
     this.sidebarStore.cleanup()
-    // หยุดเช็คการแจ้งเตือนเมื่อออกจาก layout
     this.notificationStore.stopChecking()
   }
 }

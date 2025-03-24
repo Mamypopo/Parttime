@@ -297,7 +297,7 @@ export default {
       if (!path || path === '-') return null
 
       const cleanPath = path.replace(/[[\]"]/g, '')
-      const uploadFolder = type === 'slip' ? 'payment-slips' : 'documents'
+      const uploadFolder = type === 'slip' ? 'payment_slip' : 'documents'
 
       return `${this.baseApiUrl}/uploads/${uploadFolder}/${cleanPath}`
     }

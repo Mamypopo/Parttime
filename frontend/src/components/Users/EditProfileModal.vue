@@ -182,7 +182,7 @@
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import Swal from 'sweetalert2'
 import { useUserStore } from '@/stores/userStore'
-import api from '@/service/axios'
+import api from '@/services/axios'
 
 export default {
   name: 'EditProfileModal',
@@ -265,14 +265,12 @@ export default {
 
         const formData = new FormData()
 
-        // เพิ่มข้อมูลพื้นฐาน
         Object.keys(this.form).forEach((key) => {
           if (this.form[key]) {
             formData.append(key, this.form[key])
           }
         })
 
-        // เพิ่มไฟล์
         if (this.files.profile_image) {
           formData.append('profile_image', this.files.profile_image)
         }
@@ -293,7 +291,6 @@ export default {
         })
 
         if (response.data) {
-          // อัพเดท user store
           const userStore = useUserStore()
           await userStore.fetchUser()
 
@@ -324,7 +321,6 @@ export default {
       const file = event.target.files[0]
       if (file) {
         this.files.profile_image = file
-        // สร้าง preview
         this.localPreviewImage = URL.createObjectURL(file)
       }
     },
@@ -342,7 +338,6 @@ export default {
     },
     closeModal() {
       this.$emit('close')
-      // รีเซ็ตฟอร์มและไฟล์
       this.localPreviewImage = null
       this.files = {
         profile_image: null,

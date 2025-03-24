@@ -146,7 +146,7 @@
 
 <script>
 import { useAdminStore } from '@/stores/adminStore'
-import api from '@/service/axios'
+import api from '@/services/axios'
 import Swal from 'sweetalert2'
 
 export default {
@@ -191,7 +191,6 @@ export default {
       if (!this.validateForm()) return
 
       try {
-        // แสดง loading
         Swal.fire({
           title: 'กำลังเข้าสู่ระบบ...',
           allowOutsideClick: false,
@@ -200,16 +199,13 @@ export default {
           }
         })
 
-        // 1. Login request
         const response = await api.post('/api/admin/login-admin', {
           email: this.form.email,
           password: this.form.password
         })
 
-        // 2. เก็บ token
         this.adminStore.setToken(response.data.token)
 
-        // แสดง success
         await Swal.fire({
           icon: 'success',
           title: 'เข้าสู่ระบบสำเร็จ',
@@ -217,10 +213,8 @@ export default {
           timer: 1500
         })
 
-        // 3. Redirect
         this.$router.push('/admin/dashboard')
       } catch (err) {
-        // แสดง error
         Swal.fire({
           icon: 'error',
           title: 'เข้าสู่ระบบไม่สำเร็จ',

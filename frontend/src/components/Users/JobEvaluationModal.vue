@@ -35,7 +35,9 @@
                   <div class="flex justify-between items-center">
                     <DialogTitle class="text-3xl font-semibold text-white">
                       ผลการประเมิน
-                      <p class="text-base font-base text-white/90 mt-1">งาน : {{ job?.title }}</p>
+                      <p class="text-base font-base text-white/90 mt-1">
+                        งาน : {{ job?.location }}
+                      </p>
                     </DialogTitle>
                     <button
                       @click="$emit('close')"
@@ -219,37 +221,37 @@ export default {
     },
 
     getScoreIconClass() {
-      return 'text-gray-500 dark:text-gray-300' // สีคงที่สำหรับไอคอน
+      return 'text-gray-500 dark:text-gray-300'
     },
 
     getProgressBarClass() {
       const score = this.getTotalScore()
       if (score === null)
-        return 'bg-gradient-to-r from-pink-300 to-red-300 dark:from-pink-700 dark:to-red-700' // สีพาสเทลแดง-ชมพูสำหรับค่า null (ไม่ผ่าน)
+        return 'bg-gradient-to-r from-pink-300 to-red-300 dark:from-pink-700 dark:to-red-700'
       if (score >= 8)
-        return 'bg-gradient-to-r from-green-200 to-green-400 dark:from-green-600 dark:to-green-800' // สีพาสเทลเขียวสำหรับดีมาก
+        return 'bg-gradient-to-r from-green-200 to-green-400 dark:from-green-600 dark:to-green-800'
       if (score >= 6)
-        return 'bg-gradient-to-r from-yellow-200 to-yellow-400 dark:from-yellow-600 dark:to-yellow-800' // สีพาสเทลเหลืองสำหรับปานกลาง
+        return 'bg-gradient-to-r from-yellow-200 to-yellow-400 dark:from-yellow-600 dark:to-yellow-800'
       if (score >= 4)
-        return 'bg-gradient-to-r from-orange-200 to-orange-400 dark:from-orange-600 dark:to-orange-800' // สีพาสเทลส้มสำหรับค่อนข้างต่ำ
-      return 'bg-gradient-to-r from-red-200 to-red-400 dark:from-red-600 dark:to-red-800' // สีพาสเทลแดงสำหรับคะแนนต่ำ
+        return 'bg-gradient-to-r from-orange-200 to-orange-400 dark:from-orange-600 dark:to-orange-800'
+      return 'bg-gradient-to-r from-red-200 to-red-400 dark:from-red-600 dark:to-red-800'
     },
 
     getScoreClass(score) {
-      if (score === null) return 'text-red-500 dark:text-red-600' // สีแดงเข้มสำหรับค่า null (ไม่ผ่าน)
+      if (score === null) return 'text-red-500 dark:text-red-600'
       const numScore = Number(score) || 0
-      if (numScore >= 2) return 'text-green-500 dark:text-green-400' // สีเขียวสำหรับคะแนนสูง
-      if (numScore >= 1) return 'text-blue-500 dark:text-blue-400' // สีฟ้าสำหรับคะแนนปานกลาง
-      return 'text-red-500 dark:text-red-400' // สีแดงสำหรับคะแนนต่ำ
+      if (numScore >= 2) return 'text-green-500 dark:text-green-400'
+      if (numScore >= 1) return 'text-blue-500 dark:text-blue-400'
+      return 'text-red-500 dark:text-red-400'
     },
 
     getTotalScoreClass() {
       const total = this.getTotalScore()
-      if (total === null) return 'text-red-500 dark:text-red-600' // สีแดงเข้มสำหรับค่า null (ไม่ผ่าน)
-      if (total >= 8) return 'text-green-600 dark:text-green-400' // ดีมาก
-      if (total >= 6) return 'text-yellow-600 dark:text-yellow-400' // ปานกลาง
-      if (total >= 4) return 'text-orange-600 dark:text-orange-400' // ค่อนข้างต่ำ
-      return 'text-red-600 dark:text-red-400' // สีแดงสำหรับคะแนนต่ำ
+      if (total === null) return 'text-red-500 dark:text-red-600'
+      if (total >= 8) return 'text-green-600 dark:text-green-400'
+      if (total >= 6) return 'text-yellow-600 dark:text-yellow-400'
+      if (total >= 4) return 'text-orange-600 dark:text-orange-400'
+      return 'text-red-600 dark:text-red-400'
     },
 
     formatDate(date) {

@@ -24,10 +24,10 @@ WORKDIR /app
 COPY --from=builder /app /app
 
 # สร้างโฟลเดอร์สำหรับเก็บไฟล์อัพโหลด
-RUN mkdir -p /app/uploads
+# RUN mkdir -p /app/uploads
 
 # กำหนด Volume สำหรับเก็บไฟล์
-VOLUME ["/app/uploads"]
+# VOLUME ["/app/uploads"]
 
 # Expose port 8002
 EXPOSE 8002

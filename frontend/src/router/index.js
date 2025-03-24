@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import api from '@/service/axios'
+import api from '@/services/axios'
 import Swal from 'sweetalert2'
 import { useUserStore } from '@/stores/userStore'
 import { useAdminStore } from '../stores/adminStore'
-import { checkTokenExpiration } from '@/service/auth'
+import { checkTokenExpiration } from '@/services/auth'
 
 
 
@@ -118,6 +118,15 @@ const router = createRouter({
           component: () => import('@/views/Payment/PaymentManagement.vue'),
           meta: { requiresAdmin: true }
         },
+        {
+          path: '/admin/user-management',
+          name: 'UserManagement',
+          component: () => import('@/views/admin/UserManagement.vue'),
+          meta: {
+            requiresAuth: true,
+            requiresAdmin: true
+          }
+        }
 
       ]
     },

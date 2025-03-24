@@ -86,7 +86,7 @@
               ></textarea>
             </div>
 
-            <!-- เพิ่มในส่วน Left Column หลัง Details Textarea -->
+            <!-- ในส่วน Left Column หลัง Details Textarea -->
             <div class="form-group">
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 เพิ่มผู้ดูแลงาน
@@ -136,6 +136,64 @@
                 >
                   <i class="fas fa-plus mr-2"></i>เพิ่มผู้ดูแล
                 </button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                เพิ่มผู้ปฏิบัติงาน
+              </label>
+              <div class="space-y-3">
+                <div
+                  v-for="(position, posIndex) in positions"
+                  :key="position.id"
+                  class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl space-y-3"
+                >
+                  <div class="font-medium text-gray-700 dark:text-gray-300">
+                    {{ position.name }}
+                  </div>
+
+                  <div
+                    v-for="(user, userIndex) in position.selectedUsers || []"
+                    :key="userIndex"
+                    class="flex gap-3 items-center"
+                  >
+                    <!-- เลือกผู้ใช้ -->
+                    <select
+                      v-model="user.id"
+                      class="flex-1 px-4 py-2 border dark:border-gray-700 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-300"
+                    >
+                      <option value="" disabled>เลือกผู้ปฏิบัติงาน</option>
+                      <option
+                        v-for="availableUser in filteredUsers(position, userIndex)"
+                        :key="availableUser.id"
+                        :value="availableUser.id"
+                      >
+                        {{ availableUser.first_name }} {{ availableUser.last_name }}
+                      </option>
+                    </select>
+
+                    <!-- ปุ่มลบ -->
+                    <button
+                      type="button"
+                      @click="removeUser(posIndex, userIndex)"
+                      class="text-red-500 hover:text-red-600 transition-colors"
+                    >
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+
+                  <!-- ปุ่มเพิ่มผู้ใช้ -->
+                  <button
+                    type="button"
+                    @click="addNewUser(posIndex)"
+                    class="w-full px-4 py-2 text-sm text-gray-600 dark:text-gray-300 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-400 dark:hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-300"
+                    :disabled="isPositionFull(position)"
+                  >
+                    <i class="fas fa-plus mr-2"></i>เพิ่มผู้ปฏิบัติงาน ({{
+                      position.selectedUsers?.length || 0
+                    }}/{{ position.requiredPeople }})
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -251,7 +309,6 @@ export default {
   data() {
     return {
       jobStore: useJobStore(),
-
       baseURL: import.meta.env.VITE_API_URL,
       form: {
         title: '',
@@ -266,10 +323,12 @@ export default {
       selectedSkills: [],
       showPositionModal: false,
       selectedAdmins: [], // เก็บแอดมินที่ถูกเลือก
-      availableAdmins: [] // เก็บรายชื่อแอดมินทั้งหมด
+      availableAdmins: [], // เก็บรายชื่อแอดมินทั้งหมด
+      availableUsers: []
     }
   },
   async created() {
+    await this.fetchAvailableUsers()
     const today = new Date()
     const year = today.getFullYear()
     const month = String(today.getMonth() + 1).padStart(2, '0')
@@ -291,6 +350,15 @@ export default {
         this.availableAdmins = response.data
       } catch (error) {
         console.error('Error fetching admins:', error)
+      }
+    },
+
+    async fetchAvailableUsers() {
+      try {
+        const response = await this.jobStore.fetchAvailableUsers()
+        this.availableUsers = response.data
+      } catch (error) {
+        console.error('Error fetching users:', error)
       }
     },
 
@@ -320,7 +388,8 @@ export default {
             name: position.position,
             wage: position.wage,
             details: position.detail,
-            requiredPeople: position.requiredPeople
+            requiredPeople: position.requiredPeople,
+            selectedUsers: []
           }
         }
       } else {
@@ -366,6 +435,30 @@ export default {
       this.showPositionModal = true
     },
 
+    addNewUser(positionIndex) {
+      if (!this.positions[positionIndex].selectedUsers) {
+        this.positions[positionIndex].selectedUsers = []
+      }
+      this.positions[positionIndex].selectedUsers.push({ id: '' })
+    },
+
+    removeUser(positionIndex, userIndex) {
+      this.positions[positionIndex].selectedUsers.splice(userIndex, 1)
+    },
+
+    filteredUsers(position, currentUserIndex) {
+      // กรองผู้ใช้ที่ถูกเลือกไปแล้วออก
+      const selectedUserIds = position.selectedUsers
+        .filter((_, index) => index !== currentUserIndex)
+        .map((user) => user.id)
+
+      return this.availableUsers.filter((user) => !selectedUserIds.includes(user.id))
+    },
+
+    isPositionFull(position) {
+      return (position.selectedUsers?.length || 0) >= position.requiredPeople
+    },
+
     async handleSubmit() {
       try {
         // ตรวจสอบข้อมูล
@@ -393,7 +486,11 @@ export default {
             name: pos.name,
             wage: Number(pos.wage),
             details: pos.details,
-            required_people: Number(pos.requiredPeople)
+            required_people: Number(pos.requiredPeople),
+            selected_users:
+              pos.selectedUsers?.map((user) => ({
+                user_id: parseInt(user.id)
+              })) || []
           })),
           admins: this.selectedAdmins.map((admin) => ({
             id: parseInt(admin.id),
@@ -429,6 +526,7 @@ export default {
         })
       }
     },
+
     formatDateTime(date, time) {
       if (!date || !time) return null
       const [hours, minutes] = time.split(':')

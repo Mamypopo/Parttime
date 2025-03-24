@@ -99,7 +99,7 @@
 </template>
 
 <script>
-import api from '@/service/axios'
+import api from '@/services/axios'
 import Swal from 'sweetalert2'
 
 export default {

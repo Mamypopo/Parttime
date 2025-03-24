@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import api from '@/service/axios'
+import api from '@/services/axios'
 import Swal from 'sweetalert2'
 
 export const useAdminUserStore = defineStore('adminUser', {
@@ -9,8 +9,6 @@ export const useAdminUserStore = defineStore('adminUser', {
         rejectedUsers: [], // rejected users
         totalVerifiedUsers: 0,
         totalNotVerifiedUsers: 0,
-        onlineUsersCount: 0,
-        onlineTrackingInterval: null,
         loading: false,
         error: null,
         pagination: {
@@ -211,36 +209,6 @@ export const useAdminUserStore = defineStore('adminUser', {
                 this.totalNotVerifiedUsers = 0
             } finally {
                 this.loading = false
-            }
-        },
-
-        startOnlineTracking() {
-            // ยกเลิก interval เก่าถ้ามี
-            if (this.onlineTrackingInterval) {
-                clearInterval(this.onlineTrackingInterval)
-            }
-
-            // เริ่ม interval ใหม่
-            this.onlineTrackingInterval = setInterval(async () => {
-                await this.fetchOnlineUsers()
-            }, 60000) // update ทุก 1 นาที
-        },
-
-        stopOnlineTracking() {
-            if (this.onlineTrackingInterval) {
-                clearInterval(this.onlineTrackingInterval)
-                this.onlineTrackingInterval = null
-            }
-        },
-
-        // ดึงคนที่ online
-        async fetchOnlineUsers() {
-            try {
-                const response = await api.get('/api/admin/online-users')
-                this.onlineUsersCount = response.data.onlineCount || 0
-            } catch (error) {
-                console.error('Error fetching online users:', error)
-                this.onlineUsersCount = 0
             }
         },
 

@@ -1,8 +1,6 @@
 import prisma from '../config/prisma.js';
 import bcrypt from 'bcrypt';
 
-
-// ฟังก์ชันสำหรับสร้างแอดมินใหม่
 export const createAdmin = async (adminData) => {
     const { email, password, first_name, last_name, phone, profile_pic } = adminData;
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -17,16 +15,6 @@ export const createAdmin = async (adminData) => {
         },
     });
 };
-
-
-// ฟังก์ชันอัพเดทรูปโปรไฟล์
-// export const updateAdminProfilePic = async (adminId, profilePicUrl) => {
-//     return prisma.admin.update({
-//         where: { id: adminId },
-//         data: { profile_pic: profilePicUrl }
-//     });
-// };
-
 
 export const verifyPassword = (password, hashedPassword) => bcrypt.compare(password, hashedPassword);
 
@@ -73,7 +61,6 @@ const baseUserSelect = {
     first_name: true,
     last_name: true,
     email: true,
-    email_verified: true,
     created_at: true,
     updated_at: true,
     skills: true,
@@ -157,79 +144,70 @@ export const findPendingUsers = (limit = 10, offset = 0, searchParams = {}) => {
 }
 
 export const countUsersPending = async (searchParams = {}) => {
-    const whereClause = {
-        approved: "pending"
-    }
-
-    if (searchParams.userId) {
-        whereClause.id = parseInt(searchParams.userId)
-    }
-
-    if (searchParams.idCard) {
-        whereClause.national_id = {
-            contains: searchParams.idCard,
-            mode: 'insensitive'
+    try {
+        const whereClause = {
+            approved: "pending"
         }
-    }
 
-    if (searchParams.name) {
-        const searchTerms = searchParams.name.trim().split(/\s+/)
-
-        if (searchTerms.length > 1) {
-            whereClause.AND = [
-                {
-                    first_name: {
-                        contains: searchTerms[0],
-                        mode: 'insensitive'
-                    }
-                },
-                {
-                    last_name: {
-                        contains: searchTerms[1],
-                        mode: 'insensitive'
-                    }
-                }
-            ]
-        } else {
-            whereClause.OR = [
-                {
-                    first_name: {
-                        contains: searchTerms[0],
-                        mode: 'insensitive'
-                    }
-                },
-                {
-                    last_name: {
-                        contains: searchTerms[0],
-                        mode: 'insensitive'
-                    }
-                }
-            ]
+        if (searchParams.userId) {
+            whereClause.id = parseInt(searchParams.userId)
         }
-    }
 
-    const [totalCount, emailStats] = await Promise.all([
-        prisma.user.count({
+        if (searchParams.idCard) {
+            whereClause.national_id = {
+                contains: searchParams.idCard,
+                mode: 'insensitive'
+            }
+        }
+
+        if (searchParams.name) {
+            const searchTerms = searchParams.name.trim().split(/\s+/)
+
+            if (searchTerms.length > 1) {
+                whereClause.AND = [
+                    {
+                        first_name: {
+                            contains: searchTerms[0],
+                            mode: 'insensitive'
+                        }
+                    },
+                    {
+                        last_name: {
+                            contains: searchTerms[1],
+                            mode: 'insensitive'
+                        }
+                    }
+                ]
+            } else {
+                whereClause.OR = [
+                    {
+                        first_name: {
+                            contains: searchTerms[0],
+                            mode: 'insensitive'
+                        }
+                    },
+                    {
+                        last_name: {
+                            contains: searchTerms[0],
+                            mode: 'insensitive'
+                        }
+                    }
+                ]
+            }
+        }
+
+        const totalCount = await prisma.user.count({
             where: whereClause
-        }),
-        prisma.user.groupBy({
-            by: ['email_verified'],
-            where: {
-                approved: 'pending'
-            },
-            _count: true
-        })
-    ]);
+        });
 
-    // แปลงผลลัพธ์จาก groupBy เป็นจำนวนตามสถานะการยืนยันอีเมล
-    const verifiedCount = emailStats.find(stat => stat.email_verified)?._count || 0;
-    const notVerifiedCount = emailStats.find(stat => !stat.email_verified)?._count || 0;
+        return {
+            total: totalCount
+        };
 
-    return {
-        total: totalCount,
-        totalVerified: verifiedCount,
-        totalNotVerified: notVerifiedCount
-    };
+    } catch (error) {
+        console.error('Error in countUsersPending:', error);
+        throw error;
+    }
 }
 
 
@@ -361,7 +339,6 @@ export const findRejectedUsers = (limit = 10, offset = 0, searchParams = {}) => 
         approved: "rejected"
     }
 
-    // เงื่อนไขการค้นหา
     if (searchParams.userId) {
         whereClause.id = parseInt(searchParams.userId)
     }
@@ -373,13 +350,10 @@ export const findRejectedUsers = (limit = 10, offset = 0, searchParams = {}) => 
         }
     }
 
-    // ค้นหาชื่อ-นามสกุล
     if (searchParams.name) {
-        // แยกคำค้นหาด้วย space
         const searchTerms = searchParams.name.trim().split(/\s+/)
 
         if (searchTerms.length > 1) {
-            // ถ้ามีการเว้นวรรค จะค้นหาทั้งชื่อและนามสกุล
             whereClause.AND = [
                 {
                     first_name: {
@@ -395,7 +369,6 @@ export const findRejectedUsers = (limit = 10, offset = 0, searchParams = {}) => 
                 }
             ]
         } else {
-            // ถ้ามีคำเดียว จะค้นหาในชื่อหรือนามสกุล
             whereClause.OR = [
                 {
                     first_name: {
@@ -500,27 +473,11 @@ export const countUsersRejected = async (searchParams = {}) => {
         }
     }
 
-    const [totalCount, emailStats] = await Promise.all([
-        prisma.user.count({
-            where: whereClause
-        }),
-        prisma.user.groupBy({
-            by: ['email_verified'],
-            where: {
-                approved: 'rejected'
-            },
-            _count: true
-        })
-    ]);
-
-    // แปลงผลลัพธ์
-    const verifiedCount = emailStats.find(stat => stat.email_verified)?._count || 0;
-    const notVerifiedCount = emailStats.find(stat => !stat.email_verified)?._count || 0;
-
+    const totalCount = await prisma.user.count({
+        where: whereClause
+    });
     return {
-        total: totalCount,
-        totalVerified: verifiedCount,
-        totalNotVerified: notVerifiedCount
+        total: totalCount
     };
 }
 
@@ -538,111 +495,6 @@ export const updateUserApprovalStatus = (userId, status) =>
         where: { id: userId },
         data: { approved: status },
     });
-
-
-
-
-//  ดึงข้อมูล pending skills ทั้งหมดพร้อมข้อมูลผู้ใช้
-export const getAllPendingSkillsForAdmin = async () => {
-    return prisma.pendingSkill.findMany({
-        where: {
-            status: 'pending'
-        },
-        include: {
-            user: {
-                select: {
-                    id: true,
-                    first_name: true,
-                    last_name: true,
-                    email: true
-                }
-            }
-        },
-        orderBy: {
-            created_at: 'desc'
-        }
-    });
-};
-
-// ดึงข้อมูล pending skill ตาม id
-export const getPendingSkillById = async (id) => {
-
-    return prisma.pendingSkill.findUnique({
-        where: {
-            id: parseInt(id)
-        },
-        include: {
-            user: true
-        }
-    });
-};
-
-// อัปเดตสถานะ pending skill
-export const updatePendingSkillStatus = async (id, status) => {
-    return prisma.pendingSkill.update({
-        where: {
-            id: parseInt(id)
-        },
-        data: { status },
-        include: {
-            user: true
-        }
-    });
-};
-
-// อัปเดต user skills
-export const updateUserSkills = async (userId, skills) => {
-    return prisma.user.update({
-        where: {
-            id: parseInt(userId)
-        },
-        data: { skills }
-    });
-};
-
-// ตรวจว่าเคยอัพเดทกกิลหรือยังภายใน สัปดาห์
-export const checkWeeklySkillRequest = async (userId) => {
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-    const recentRequest = await prisma.pendingSkill.findFirst({
-        where: {
-            userId: userId,
-            created_at: {
-                gte: oneWeekAgo
-            }
-        },
-        select: {
-            id: true,
-            skill: true,
-            status: true,
-            created_at: true
-        },
-        orderBy: {
-            created_at: 'desc'
-        }
-    });
-
-    return recentRequest;
-};
-
-
-
-export const getOnlineUsersCount = async () => {
-    try {
-        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-        return await prisma.user.count({
-            where: {
-                last_active: {
-                    gte: fiveMinutesAgo
-                }
-            }
-        });
-    } catch (error) {
-        console.error('Error counting online users:', error);
-        throw new Error('ไม่สามารถนับจำนวนผู้ใช้ออนไลน์ได้');
-    }
-};
 
 
 // ฟังก์ชันสำหรับ reject user จากการประเมินงาน
@@ -676,6 +528,124 @@ export const findAvailableAdmins = async () => {
         },
         orderBy: {
             first_name: 'asc'
+        }
+    });
+};
+
+
+export const findUsers = async (limit, offset, searchParams = {}) => {
+    const where = {
+        AND: [
+            {
+                OR: [
+                    { first_name: { contains: searchParams.search, mode: 'insensitive' } },
+                    { last_name: { contains: searchParams.search, mode: 'insensitive' } },
+                    { email: { contains: searchParams.search, mode: 'insensitive' } },
+                    { national_id: { contains: searchParams.search } }
+                ]
+            }
+        ]
+    };
+
+    // เพิ่ม filter ตาม status ถ้ามีการระบุ
+    if (searchParams.status) {
+        where.AND.push({ approved: searchParams.status });
+    }
+
+    return prisma.user.findMany({
+        where,
+        select: {
+            id: true,
+            prefix: true,
+            first_name: true,
+            last_name: true,
+            email: true,
+            national_id: true,
+            phone_number: true,
+            profile_image: true,
+            approved: true,
+            created_at: true,
+            updated_at: true,
+            gender: true,
+            birth_date: true,
+            education_certificate: true,
+            line_id: true,
+            skills: true
+        },
+        orderBy: { created_at: 'desc' },
+        take: limit,
+        skip: offset
+    });
+};
+
+export const countUsers = async (searchParams = {}) => {
+    const where = {
+        AND: [
+            {
+                OR: [
+                    { first_name: { contains: searchParams.search, mode: 'insensitive' } },
+                    { last_name: { contains: searchParams.search, mode: 'insensitive' } },
+                    { email: { contains: searchParams.search, mode: 'insensitive' } },
+                    { national_id: { contains: searchParams.search } }
+                ]
+            }
+        ]
+    };
+
+    if (searchParams.status) {
+        where.AND.push({ approved: searchParams.status });
+    }
+
+    return prisma.user.count({ where });
+};
+
+export const createUserByAdmin = async (userData) => {
+    return prisma.user.create({
+        data: userData,
+        select: {
+            id: true,
+            prefix: true,
+            first_name: true,
+            last_name: true,
+            email: true,
+            national_id: true,
+            phone_number: true,
+            gender: true,
+            birth_date: true,
+            age: true,
+            line_id: true,
+            skills: true,
+            profile_image: true,
+            education_certificate: true,
+            user_documents: true,
+            approved: true,
+            created_at: true
+        }
+    });
+};
+
+export const updateUserByAdmin = async (userId, userData) => {
+    return prisma.user.update({
+        where: { id: parseInt(userId) },
+        data: userData,
+        select: {
+            id: true,
+            prefix: true,
+            first_name: true,
+            last_name: true,
+            email: true,
+            national_id: true,
+            phone_number: true,
+            gender: true,
+            birth_date: true,
+            age: true,
+            line_id: true,
+            skills: true,
+            profile_image: true,
+            education_certificate: true,
+            user_documents: true,
+            approved: true,
+            updated_at: true
         }
     });
 };

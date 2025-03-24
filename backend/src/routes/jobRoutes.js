@@ -56,6 +56,7 @@ router.get('/assigned', checkAdminRole, jobController.getAssignedJobs);
 router.post('/:jobId/admins', authMiddleware, jobController.addJobAdmin);
 router.delete('/:jobId/admins/:adminId', authMiddleware, jobController.removeJobAdmin);
 
+router.get('/available-users', checkAdminRole, jobController.getAvailableUsers);
 
 
 export default router;

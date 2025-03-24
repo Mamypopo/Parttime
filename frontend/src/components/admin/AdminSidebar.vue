@@ -14,7 +14,7 @@
       leave-to="opacity-0 -translate-x-full"
     >
       <nav
-        class="sidebar h-screen fixed bg-white border-r shadow-lg transition-all duration-500 ease-in-out"
+        class="sidebar fixed inset-y-0 left-0 flex flex-col bg-white border-r shadow-lg transition-all duration-500 ease-in-out"
         :class="[
           sidebarStore.isCollapsed ? 'w-20' : 'w-72',
           'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
@@ -124,99 +124,100 @@
           </div>
         </div>
 
-        <!-- Navigation Menu -->
-        <div class="p-4 space-y-4">
-          <!-- Main Menu -->
-          <div>
-            <h2
-              v-if="!sidebarStore.isCollapsed"
-              class="text-xs font-semibold text-gray-400 mb-2 px-4 dark:text-gray-500"
-            >
-              เมนูหลัก
-            </h2>
-            <nav class="space-y-1">
-              <router-link
-                v-for="item in sidebarStore.mainMenuItems"
-                :key="item.path"
-                :to="item.path"
-                class="flex items-center px-4 py-3 rounded-xl transition-all duration-200"
-                :class="[
-                  $route.path === item.path
-                    ? 'bg-gradient-to-r from-purple-50 to-blue-50 text-purple-600  dark:from-purple-800/30 dark:to-blue-800/30 dark:text-purple-400'
-                    : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700',
-                  sidebarStore.isCollapsed ? 'justify-center' : 'gap-3'
-                ]"
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+          <!-- Navigation Menu -->
+          <div class="p-4 space-y-4">
+            <!-- Main Menu -->
+            <div>
+              <h2
+                v-if="!sidebarStore.isCollapsed"
+                class="text-xs font-semibold text-gray-400 mb-2 px-4 dark:text-gray-500"
               >
-                <i
+                เมนูหลัก
+              </h2>
+              <nav class="space-y-1">
+                <router-link
+                  v-for="item in sidebarStore.mainMenuItems"
+                  :key="item.path"
+                  :to="item.path"
+                  class="flex items-center px-4 py-3 rounded-xl transition-all duration-200"
                   :class="[
-                    item.icon,
-                    'text-xl',
                     $route.path === item.path
-                      ? 'text-purple-600 dark:text-purple-400'
-                      : 'text-gray-400 dark:text-gray-500'
+                      ? 'bg-gradient-to-r from-purple-50 to-blue-50 text-purple-600  dark:from-purple-800/30 dark:to-blue-800/30 dark:text-purple-400'
+                      : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700',
+                    sidebarStore.isCollapsed ? 'justify-center' : 'gap-3'
                   ]"
-                ></i>
-                <span v-if="!sidebarStore.isCollapsed" class="font-medium">{{ item.name }}</span>
-              </router-link>
-            </nav>
-          </div>
-
-          <!-- Jobs Section -->
-          <div>
-            <h2
-              v-if="!sidebarStore.isCollapsed"
-              class="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-2 px-4"
-            >
-              งาน
-            </h2>
-            <nav class="space-y-1">
-              <router-link
-                v-for="item in sidebarStore.jobMenuItems"
-                :key="item.path"
-                :to="item.path"
-                class="flex items-center px-4 py-3 rounded-xl transition-all duration-200"
-                :class="[
-                  $route.path === item.path
-                    ? 'bg-gradient-to-r from-purple-50 to-blue-50 text-purple-600 dark:from-purple-900/50 dark:to-blue-900/50 dark:text-purple-400'
-                    : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700',
-                  sidebarStore.isCollapsed ? 'justify-center' : 'gap-3'
-                ]"
-              >
-                <i
-                  :class="[
-                    item.icon,
-                    'text-xl',
-                    $route.path === item.path ? 'text-purple-600' : 'text-gray-400'
-                  ]"
-                ></i>
-                <span v-if="!sidebarStore.isCollapsed" class="font-medium">{{ item.name }}</span>
-                <span
-                  v-if="item.badge && jobStore.pendingApplicationsCount > 0"
-                  class="ml-auto text-xs bg-[#EA6B6B] dark:bg-[#FF8F8F] text-white font-medium px-2 py-0.5 rounded-full animate-pulse"
                 >
-                  {{ jobStore.pendingApplicationsCount }}
-                </span>
-              </router-link>
-            </nav>
-          </div>
-          <div>
-            <h2
-              v-if="!sidebarStore.isCollapsed"
-              class="text-xs font-semibold text-gray-400 mb-2 px-4"
-            >
-              การแจ้งเตือน
-            </h2>
-            <NotificationsPanel
-              v-model="sidebarStore.showNotifications"
-              :is-collapsed="sidebarStore.isCollapsed"
-              @show-all="sidebarStore.showAllNotifications = true"
-            />
+                  <i
+                    :class="[
+                      item.icon,
+                      'text-xl',
+                      $route.path === item.path
+                        ? 'text-purple-600 dark:text-purple-400'
+                        : 'text-gray-400 dark:text-gray-500'
+                    ]"
+                  ></i>
+                  <span v-if="!sidebarStore.isCollapsed" class="font-medium">{{ item.name }}</span>
+                </router-link>
+              </nav>
+            </div>
+
+            <!-- Jobs Section -->
+            <div>
+              <h2
+                v-if="!sidebarStore.isCollapsed"
+                class="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-2 px-4"
+              >
+                งาน
+              </h2>
+              <nav class="space-y-1">
+                <router-link
+                  v-for="item in sidebarStore.jobMenuItems"
+                  :key="item.path"
+                  :to="item.path"
+                  class="flex items-center px-4 py-3 rounded-xl transition-all duration-200"
+                  :class="[
+                    $route.path === item.path
+                      ? 'bg-gradient-to-r from-purple-50 to-blue-50 text-purple-600 dark:from-purple-900/50 dark:to-blue-900/50 dark:text-purple-400'
+                      : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700',
+                    sidebarStore.isCollapsed ? 'justify-center' : 'gap-3'
+                  ]"
+                >
+                  <i
+                    :class="[
+                      item.icon,
+                      'text-xl',
+                      $route.path === item.path ? 'text-purple-600' : 'text-gray-400'
+                    ]"
+                  ></i>
+                  <span v-if="!sidebarStore.isCollapsed" class="font-medium">{{ item.name }}</span>
+                  <span
+                    v-if="item.badge && jobStore.pendingApplicationsCount > 0"
+                    class="ml-auto text-xs bg-[#EA6B6B] dark:bg-[#FF8F8F] text-white font-medium px-2 py-0.5 rounded-full animate-pulse"
+                  >
+                    {{ jobStore.pendingApplicationsCount }}
+                  </span>
+                </router-link>
+              </nav>
+            </div>
+            <div>
+              <h2
+                v-if="!sidebarStore.isCollapsed"
+                class="text-xs font-semibold text-gray-400 mb-2 px-4"
+              >
+                การแจ้งเตือน
+              </h2>
+              <NotificationsPanel
+                v-model="sidebarStore.showNotifications"
+                :is-collapsed="sidebarStore.isCollapsed"
+                @show-all="sidebarStore.showAllNotifications = true"
+              />
+            </div>
           </div>
         </div>
-
         <!-- Profile Section -->
         <div
-          class="absolute bottom-0 left-0 right-0 p-4"
+          class="sticky bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-800 z-10"
           :class="[sidebarStore.isCollapsed ? 'py-4' : 'py-6']"
         >
           <div

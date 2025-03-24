@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useSidebarStore } from './sidebarStore'
-import api from '@/service/axios'
+import api from '@/services/axios'
 
 export const useUserStore = defineStore('user', {
     state: () => ({
@@ -115,23 +115,6 @@ export const useUserStore = defineStore('user', {
                 throw error
             }
         },
-        startHeartbeat() {
-            this.heartbeatInterval = setInterval(async () => {
-                try {
-                    await api.post('/api/user/heartbeat');
-                } catch (error) {
-                    console.error('Heartbeat failed:', error);
-                }
-            }, 30000); // 30 seconds
-        },
-
-        stopHeartbeat() {
-            if (this.heartbeatInterval) {
-                clearInterval(this.heartbeatInterval);
-            }
-        }
-
-
     },
 
     getters: {
