@@ -361,60 +361,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Pagination Controls -->
-      <div
-        v-if="jobs.length > 0"
-        class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4"
-      >
-        <!-- แสดงจำนวนรายการ -->
-        <div class="text-sm text-gray-600 dark:text-gray-400">
-          แสดง
-          {{ (pagination.currentPage - 1) * pagination.perPage + 1 }}
-          -
-          {{ Math.min(pagination.currentPage * pagination.perPage, pagination.totalItems) }}
-          จาก {{ pagination.totalItems }} รายการ
-        </div>
-
-        <div class="flex items-center gap-2">
-          <!-- ปุ่มย้อนกลับ -->
-          <button
-            @click="prevPage"
-            :disabled="pagination.currentPage === 1"
-            class="px-4 py-2 rounded-lg transition-all duration-300"
-            :class="[
-              pagination.currentPage === 1
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-800'
-                : 'bg-white hover:bg-gray-50 text-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200'
-            ]"
-          >
-            <i class="fas fa-chevron-left mr-2"></i>
-            ก่อนหน้า
-          </button>
-
-          <!-- แสดงหน้าปัจจุบัน -->
-          <span
-            class="px-4 py-2 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg"
-          >
-            หน้า {{ pagination.currentPage }} จาก {{ totalPages }}
-          </span>
-
-          <!-- ปุ่มถัดไป -->
-          <button
-            @click="nextPage"
-            :disabled="!hasMorePages"
-            class="px-4 py-2 rounded-lg transition-all duration-300"
-            :class="[
-              !hasMorePages
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-800'
-                : 'bg-white hover:bg-gray-50 text-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200'
-            ]"
-          >
-            ถัดไป
-            <i class="fas fa-chevron-right ml-2"></i>
-          </button>
-        </div>
-      </div>
     </div>
 
     <!-- Participants Modal -->
@@ -476,17 +422,10 @@ export default {
       showParticipantsModal: false,
       showWorkStatusModal: false,
       showEditModal: false,
-      jobParticipants: [],
-      loading: false,
-      pagination: {
-        currentPage: 1,
-        perPage: 10,
-        totalItems: 0
-      }
+      jobParticipants: []
     }
   },
   watch: {
-    // เมื่อมีการเปลี่ยนแปลงใน jobs หรือ participants
     async '$store.state.job.jobs'() {
       await this.jobStore.fetchJobsAndParticipants()
     }
@@ -498,11 +437,8 @@ export default {
     jobs() {
       return this.jobStore.jobs || []
     },
-    totalPages() {
-      return Math.max(1, Math.ceil(this.pagination.totalItems / this.pagination.perPage))
-    },
-    hasMorePages() {
-      return this.pagination.currentPage < this.totalPages
+    loading() {
+      return this.jobStore.loading
     },
     participants() {
       return this.jobStore.jobsWithParticipants || []
@@ -604,21 +540,15 @@ export default {
     },
 
     async loadJobs() {
-      this.loading = true
       try {
-        const params = {
-          page: this.pagination.currentPage,
-          limit: this.pagination.perPage
-        }
+        await this.jobStore.fetchJobsAndParticipants()
 
-        const response = await this.jobStore.fetchJobsAndParticipants(params)
-        if (response?.data) {
-          this.pagination.totalItems = response.data.totalCount || 0
+        // อัพเดท selectedJob ถ้ามีการเลือกอยู่
+        if (this.selectedJob) {
+          this.selectedJob = this.jobStore.jobs.find((job) => job.id === this.selectedJob.id)
         }
       } catch (error) {
         console.error('Failed to load jobs:', error)
-      } finally {
-        this.loading = false
       }
     },
 
@@ -959,24 +889,6 @@ export default {
         completed: '100%'
       }
       return widths[status]
-    },
-
-    async prevPage() {
-      if (this.pagination.currentPage > 1) {
-        this.pagination.currentPage--
-        await this.loadJobs()
-        // เลื่อนขึ้นด้านบนของหน้าอย่างนุ่มนวล
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-      }
-    },
-
-    async nextPage() {
-      if (this.hasMorePages) {
-        this.pagination.currentPage++
-        await this.loadJobs()
-        // เลื่อนขึ้นด้านบนของหน้าอย่างนุ่มนวล
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-      }
     }
   }
 }

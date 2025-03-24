@@ -164,7 +164,7 @@ export const getMyCreatedJobs = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const pageSize = parseInt(req.query.pageSize) || 10;
 
-        // เพิ่ม query parameters สำหรับการค้นหา
+        //  query parameters สำหรับการค้นหา
         const filters = {
             id: req.query.id ? parseInt(req.query.id) : undefined,
             title: req.query.title,
