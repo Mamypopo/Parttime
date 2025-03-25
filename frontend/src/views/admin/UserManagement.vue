@@ -11,13 +11,22 @@
           </h2>
           <p class="text-gray-500 dark:text-gray-400 mt-1">จัดการข้อมูลผู้ใช้งานทั้งหมดในระบบ</p>
         </div>
-        <button
-          @click="openCreateModal"
-          class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
-        >
-          <i class="fas fa-user-plus"></i>
-          เพิ่มผู้ใช้งาน
-        </button>
+        <div class="flex gap-2">
+          <button
+            @click="openImportModal"
+            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+          >
+            <i class="fas fa-file-excel"></i>
+            Import Excel
+          </button>
+          <button
+            @click="openCreateModal"
+            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+          >
+            <i class="fas fa-user-plus"></i>
+            เพิ่มผู้ใช้งาน
+          </button>
+        </div>
       </div>
     </div>
 
@@ -182,6 +191,12 @@
         </div>
       </div>
     </div>
+    <!-- Import Users Modal -->
+    <ImportUsersModal
+      :is-open="showImportModal"
+      @close="closeImportModal"
+      @success="handleImportSuccess"
+    />
 
     <!-- User Management Modal -->
     <UserManagementModal
@@ -197,6 +212,8 @@
 <script>
 import { debounce } from 'lodash'
 import UserManagementModal from '@/components/Users/UserManagementModal.vue'
+import ImportUsersModal from '@/components/Users/ImportUsersModal.vue'
+
 import adminService from '@/services/adminService'
 import Swal from 'sweetalert2'
 
@@ -204,6 +221,7 @@ export default {
   name: 'UserManagement',
 
   components: {
+    ImportUsersModal,
     UserManagementModal
   },
 
@@ -218,6 +236,7 @@ export default {
       showModal: false,
       isEditing: false,
       selectedUser: null,
+      showImportModal: false,
       baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000'
     }
   },
@@ -347,6 +366,28 @@ export default {
     closeModal() {
       this.showModal = false
       this.selectedUser = null
+    },
+
+    openImportModal() {
+      this.showImportModal = true
+    },
+
+    closeImportModal() {
+      this.showImportModal = false
+    },
+
+    handleImportSuccess() {
+      this.closeImportModal()
+      this.fetchUsers()
+      Swal.fire({
+        icon: 'success',
+        title: 'Import สำเร็จ',
+        text: 'นำเข้าข้อมูลผู้ใช้เรียบร้อยแล้ว',
+        showConfirmButton: false,
+        timer: 1500,
+        position: 'top-end',
+        toast: true
+      })
     },
 
     getStatusText(status) {

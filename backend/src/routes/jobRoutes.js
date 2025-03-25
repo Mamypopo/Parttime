@@ -58,5 +58,6 @@ router.delete('/:jobId/admins/:adminId', authMiddleware, jobController.removeJob
 
 router.get('/available-users', checkAdminRole, jobController.getAvailableUsers);
 
+router.get('/search-available-users', checkAdminRole, jobController.searchAvailableUsers);
 
 export default router;

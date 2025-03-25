@@ -668,6 +668,22 @@ export const useJobStore = defineStore('job', {
             }
         },
 
+        async searchAvailableUsers(query, selectedUserIds = []) {
+            try {
+                const response = await api.get('/api/jobs/search-available-users', {
+                    params: {
+                        query,
+                        selectedUserIds: JSON.stringify(selectedUserIds)
+                    },
+                    headers: this.getAuthHeaders()
+                });
+                return response.data;
+            } catch (error) {
+                console.error('Error searching available users:', error);
+                throw error;
+            }
+        },
+
         //   สำหรับ set filters
         setUserSearchFilters(filters) {
             this.userSearchFilters = { ...filters }

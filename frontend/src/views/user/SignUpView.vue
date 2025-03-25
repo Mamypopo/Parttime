@@ -599,7 +599,8 @@ export default {
         'อัลตร้าซาวด์',
         'ผู้ช่วยแพทย์',
         'วัดความดัน',
-        'ยานพาหนะ'
+        'ยานพาหนะ',
+        'หมอ'
       ],
       loading: false,
       passwordsMatch: true,

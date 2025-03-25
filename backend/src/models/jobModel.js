@@ -1538,3 +1538,28 @@ export const formatUserData = (users) => {
         }))
     }));
 };
+
+
+export const searchAvailableUsers = async (query, selectedUserIds = []) => {
+    return prisma.user.findMany({
+        where: {
+            OR: [
+                { first_name: { contains: query, mode: 'insensitive' } },
+                { last_name: { contains: query, mode: 'insensitive' } },
+                { email: { contains: query, mode: 'insensitive' } }
+            ],
+            AND: {
+                id: { notIn: selectedUserIds },
+                approved: 'approved'
+            }
+        },
+        select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            email: true,
+            profile_image: true
+        },
+        take: 10
+    });
+};

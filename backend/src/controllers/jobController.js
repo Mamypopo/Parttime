@@ -872,3 +872,20 @@ export const getAvailableUsers = async (req, res) => {
         });
     }
 };
+
+
+export const searchAvailableUsers = async (req, res) => {
+    try {
+        const { query, selectedUserIds } = req.query;
+        if (!query || query.length < 2) {
+            return res.status(200).json({ data: [] });
+        }
+
+        const parsedSelectedUserIds = selectedUserIds ? JSON.parse(selectedUserIds) : [];
+        const users = await jobModel.searchAvailableUsers(query, parsedSelectedUserIds);
+        res.status(200).json({ data: users });
+    } catch (error) {
+        console.error('Error searching available users:', error);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการค้นหาผู้ใช้' });
+    }
+};

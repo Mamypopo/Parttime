@@ -547,7 +547,7 @@ export const findUsers = async (limit, offset, searchParams = {}) => {
         ]
     };
 
-    // เพิ่ม filter ตาม status ถ้ามีการระบุ
+    //  filter ตาม status ถ้ามีการระบุ
     if (searchParams.status) {
         where.AND.push({ approved: searchParams.status });
     }
@@ -602,7 +602,10 @@ export const countUsers = async (searchParams = {}) => {
 
 export const createUserByAdmin = async (userData) => {
     return prisma.user.create({
-        data: userData,
+        data: {
+            ...userData,
+            source_type: 'manual'
+        },
         select: {
             id: true,
             prefix: true,
@@ -620,6 +623,7 @@ export const createUserByAdmin = async (userData) => {
             education_certificate: true,
             user_documents: true,
             approved: true,
+            source_type: true,
             created_at: true
         }
     });

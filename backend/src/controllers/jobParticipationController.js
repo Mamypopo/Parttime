@@ -160,6 +160,7 @@ export const updateWorkHistory = async (req, res) => {
         const jobPosition = await jobModel.findJobPositionById(currentJobParticipation.job_position_id);
         const positionName = jobPosition?.position_name || 'ไม่ระบุตำแหน่ง';
         const jobTitle = jobPosition?.job?.title || 'ไม่ระบุชื่องาน';
+        const location = jobPosition?.job?.location || 'ไม่ระบุสถานที่';
 
         // เตรียมข้อมูลสำหรับสร้าง WorkHistory
         let workHistoryData = {

@@ -4,6 +4,8 @@ import userRoutes from './routes/userRoutes.js';
 import jobRoutes from './routes/jobRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
+import excelRoutes from './routes/excel.routes.js';
+
 import evaluationRoutes from './routes/evaluationRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import authRoutes from './routes/authRoutes.js'
@@ -52,6 +54,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
 app.use('/api', evaluationRoutes);
+
+app.use('/api/excel', excelRoutes);
 
 app.use('/api/payments', paymentRoutes);
 

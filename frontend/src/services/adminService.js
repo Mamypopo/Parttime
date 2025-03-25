@@ -37,6 +37,14 @@ const adminService = {
     async getUserById(userId) {
         const response = await api.get(`/api/admin/users/${userId}`)
         return response.data
+    },
+
+    async importUsers(formData) {
+        return api.post('/api/excel/import', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
     }
 }
 

@@ -157,20 +157,113 @@
                     :key="userIndex"
                     class="flex gap-3 items-center"
                   >
-                    <!-- เลือกผู้ใช้ -->
-                    <select
-                      v-model="user.id"
-                      class="flex-1 px-4 py-2 border dark:border-gray-700 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-300"
-                    >
-                      <option value="" disabled>เลือกผู้ปฏิบัติงาน</option>
-                      <option
-                        v-for="availableUser in filteredUsers(position, userIndex)"
-                        :key="availableUser.id"
-                        :value="availableUser.id"
+                    <!-- ถ้ายังไม่ได้เลือก user แสดง input search -->
+                    <div v-if="!user.id" class="flex-1 relative">
+                      <input
+                        type="text"
+                        v-model="user.searchQuery"
+                        @input="searchUsers(posIndex, userIndex)"
+                        @focus="showDropdown(posIndex, userIndex)"
+                        placeholder="พิมพ์เพื่อค้นหาหรือเลือกจากรายชื่อ..."
+                        class="w-full px-4 py-2.5 border dark:border-gray-700 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-300"
+                      />
+                      <button
+                        type="button"
+                        @click.stop.prevent="toggleDropdown(posIndex, userIndex)"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      ></button>
+
+                      <!-- Dropdown & Search Results -->
+                      <div
+                        v-if="user.showDropdown || user.searchResults?.length > 0"
+                        class="w-full mt-1 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto"
+                        style="margin-bottom: 2rem"
                       >
-                        {{ availableUser.first_name }} {{ availableUser.last_name }}
-                      </option>
-                    </select>
+                        <div v-if="user.searchQuery && user.searchResults?.length > 0">
+                          <div
+                            class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/50"
+                          >
+                            ผลการค้นหา
+                          </div>
+                          <div
+                            v-for="result in user.searchResults"
+                            :key="result.id"
+                            @click="selectUser(posIndex, userIndex, result)"
+                            class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center gap-2"
+                          >
+                            <img
+                              v-if="result.profile_image"
+                              :src="`${baseURL}/uploads/profile/${result.profile_image}`"
+                              class="w-8 h-8 rounded-full object-cover"
+                            />
+                            <div
+                              v-else
+                              class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center"
+                            >
+                              <i class="fas fa-user text-gray-400"></i>
+                            </div>
+                            <div>
+                              <div>{{ result.first_name }} {{ result.last_name }}</div>
+                              <div class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ result.email }}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div v-if="!user.searchQuery">
+                          <div
+                            class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/50"
+                          >
+                            รายชื่อผู้ปฏิบัติงานทั้งหมด
+                          </div>
+                          <div
+                            v-for="availableUser in filteredAvailableUsers(posIndex)"
+                            :key="availableUser.id"
+                            @click="selectUser(posIndex, userIndex, availableUser)"
+                            class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center gap-2"
+                          >
+                            <img
+                              v-if="availableUser.profile_image"
+                              :src="`${baseURL}/uploads/profile/${availableUser.profile_image}`"
+                              class="w-8 h-8 rounded-full object-cover"
+                            />
+                            <div
+                              v-else
+                              class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center"
+                            >
+                              <i class="fas fa-user text-gray-400"></i>
+                            </div>
+                            <div>
+                              <div>
+                                {{ availableUser.first_name }} {{ availableUser.last_name }}
+                              </div>
+                              <div class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ availableUser.email }}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      v-else
+                      class="flex-1 flex items-center gap-2 px-3 py-2 bg-purple-100 dark:bg-purple-900/30 rounded-xl"
+                    >
+                      <img
+                        v-if="getUserProfile(user.id)"
+                        :src="`${baseURL}/uploads/profile/${getUserProfile(user.id)}`"
+                        class="w-6 h-6 rounded-full object-cover"
+                      />
+                      <div
+                        v-else
+                        class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center"
+                      >
+                        <i class="fas fa-user text-sm text-gray-400"></i>
+                      </div>
+                      <span>{{ getUserName(user.id) }}</span>
+                    </div>
 
                     <!-- ปุ่มลบ -->
                     <button
@@ -328,13 +421,23 @@ export default {
     }
   },
   async created() {
-    await this.fetchAvailableUsers()
-    const today = new Date()
-    const year = today.getFullYear()
-    const month = String(today.getMonth() + 1).padStart(2, '0')
-    const day = String(today.getDate()).padStart(2, '0')
-    ;(this.form.date = `${year}-${month}-${day}`),
-      (this.availableAdmins = await this.jobStore.fetchAvailableAdmins())
+    try {
+      // ดึงข้อมูล users ที่มีอยู่
+      const response = await this.jobStore.fetchAvailableUsers()
+      this.availableUsers = response.data
+
+      // ตั้งค่าวันที่
+      const today = new Date()
+      const year = today.getFullYear()
+      const month = String(today.getMonth() + 1).padStart(2, '0')
+      const day = String(today.getDate()).padStart(2, '0')
+      this.form.date = `${year}-${month}-${day}`
+
+      // ดึงข้อมูล admins
+      this.availableAdmins = await this.jobStore.fetchAvailableAdmins()
+    } catch (error) {
+      console.error('Error in created:', error)
+    }
   },
   computed: {
     filteredAdmins() {
@@ -527,6 +630,31 @@ export default {
       }
     },
 
+    getAllSelectedUserIds() {
+      return this.positions.reduce((ids, position) => {
+        const positionUserIds =
+          position.selectedUsers?.map((user) => user.id).filter((id) => id) || []
+        return [...ids, ...positionUserIds]
+      }, [])
+    },
+
+    async searchUsers(posIndex, userIndex) {
+      const searchQuery = this.positions[posIndex].selectedUsers[userIndex].searchQuery
+      if (!searchQuery || searchQuery.length < 2) {
+        this.positions[posIndex].selectedUsers[userIndex].searchResults = []
+        return
+      }
+
+      try {
+        const selectedUserIds = this.getAllSelectedUserIds()
+        const response = await this.jobStore.searchAvailableUsers(searchQuery, selectedUserIds)
+        this.positions[posIndex].selectedUsers[userIndex].searchResults = response.data
+      } catch (error) {
+        console.error('Error searching users:', error)
+        this.positions[posIndex].selectedUsers[userIndex].searchResults = []
+      }
+    },
+
     formatDateTime(date, time) {
       if (!date || !time) return null
       const [hours, minutes] = time.split(':')
@@ -550,6 +678,42 @@ export default {
     closeModal() {
       this.showPositionModal = false
       this.editingPosition = null
+    },
+    showDropdown(posIndex, userIndex) {
+      if (!this.positions[posIndex].selectedUsers[userIndex].id) {
+        this.positions[posIndex].selectedUsers[userIndex].showDropdown = true
+      }
+    },
+
+    toggleDropdown(posIndex, userIndex) {
+      if (!this.positions[posIndex].selectedUsers[userIndex].id) {
+        this.positions[posIndex].selectedUsers[userIndex].showDropdown =
+          !this.positions[posIndex].selectedUsers[userIndex].showDropdown
+      }
+    },
+
+    filteredAvailableUsers(posIndex) {
+      const selectedIds = this.getAllSelectedUserIds()
+      return this.availableUsers.filter((user) => !selectedIds.includes(user.id))
+    },
+
+    getUserProfile(userId) {
+      const user = this.availableUsers.find((u) => u.id === userId)
+      return user?.profile_image
+    },
+
+    getUserName(userId) {
+      const user = this.availableUsers.find((u) => u.id === userId)
+      return user?.first_name + ' ' + user?.last_name
+    },
+
+    selectUser(posIndex, userIndex, user) {
+      this.positions[posIndex].selectedUsers[userIndex] = {
+        id: user.id,
+        searchQuery: `${user.first_name} ${user.last_name}`,
+        showDropdown: false,
+        searchResults: []
+      }
     }
   }
 }

@@ -39,10 +39,6 @@ async function clearDatabase() {
         await prisma.notification.deleteMany();
         console.log('ล้างข้อมูล Notification เรียบร้อย');
 
-        // ลบ PendingSkill
-        await prisma.pendingSkill.deleteMany();
-        console.log('ล้างข้อมูล pendingSkill เรียบร้อย');
-
         // ลบ Log
         await prisma.log.deleteMany();
         console.log('ล้างข้อมูล Log เรียบร้อย');

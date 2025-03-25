@@ -27,13 +27,14 @@ model User {
   gender                String
   birth_date            DateTime           @db.Timestamptz // วันเกิด
   age                   Int // อายุ (คำนวณจากวันเกิด)
-  education_certificate String // วุฒิการศึกษา
+  education_certificate String? // วุฒิการศึกษา
   phone_number          String // เบอร์โทร
   line_id               String? // Line ID
   profile_image         String? // รูปโปรไฟล์
-  skills                String // ทักษะความสามารถ
+  skills                String? // ทักษะความสามารถ
   approved              String             @default("pending")
   role                  String             @default("user")
+  source_type           String             @default("register") // "register" - user สมัครเองผ่านเว็บ "import_excel" - นำเข้าจาก excel "manual" - admin สร้างให้
   created_at            DateTime           @default(now()) @db.Timestamptz
   updated_at            DateTime           @updatedAt @db.Timestamptz
   user_documents        String? // เอกสารของผู้ใช้
