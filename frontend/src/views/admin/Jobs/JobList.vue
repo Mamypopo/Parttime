@@ -195,6 +195,51 @@
           </tbody>
         </table>
       </div>
+      <!-- Pagination -->
+      <div class="px-4 py-3 flex items-center justify-between border-t">
+        <div class="flex-1 flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              แสดง
+              <span class="font-medium">{{ startItem }}</span>
+              ถึง
+              <span class="font-medium">{{ endItem }}</span>
+              จากทั้งหมด
+              <span class="font-medium">{{ pagination.totalItems }}</span>
+              รายการ
+            </p>
+          </div>
+          <div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+              <button @click="handlePrevPage" :disabled="currentPage === 1" class="btn-pagination">
+                <i class="fas fa-chevron-left"></i>
+              </button>
+
+              <button
+                v-for="page in displayedPages"
+                :key="page"
+                @click="goToPage(page)"
+                :class="[
+                  'btn-pagination',
+                  currentPage === page
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                ]"
+              >
+                {{ page }}
+              </button>
+
+              <button
+                @click="handleNextPage"
+                :disabled="currentPage === totalPages"
+                class="btn-pagination"
+              >
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Mobile Card View -->
@@ -287,53 +332,6 @@
       </div>
     </div>
 
-    <!-- Pagination -->
-    <div
-      v-if="!loading && jobs.length > 0"
-      class="mt-6 flex justify-center items-center space-x-3 pb-3"
-    >
-      <button
-        @click="handlePrevPage"
-        :disabled="currentPage <= 1"
-        class="px-4 py-2 rounded-lg transition-all duration-300 flex items-center"
-        :class="[
-          currentPage <= 1
-            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-            : 'bg-gradient-to-r from-purple-500/10 to-blue-500/10 dark:from-purple-500/20 dark:to-blue-500/20 text-purple-600 dark:text-purple-400 hover:from-purple-500/20 hover:to-blue-500/20 dark:hover:from-purple-500/30 dark:hover:to-blue-500/30 hover:shadow-md'
-        ]"
-      >
-        <i class="fas fa-chevron-left text-sm"></i>
-      </button>
-
-      <div class="flex items-center space-x-2">
-        <button
-          class="px-4 py-2 rounded-lg bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4a9490] dark:to-[#6667aa] text-white font-medium min-w-[40px]"
-        >
-          {{ currentPage }}
-        </button>
-
-        <span class="text-gray-500 dark:text-gray-400 font-medium">จาก</span>
-
-        <span
-          class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 text-gray-600 dark:text-gray-300 font-medium min-w-[40px] text-center"
-        >
-          {{ totalPages }}
-        </span>
-      </div>
-
-      <button
-        @click="handleNextPage"
-        :disabled="currentPage >= totalPages"
-        class="px-4 py-2 rounded-lg transition-all duration-300 flex items-center"
-        :class="[
-          currentPage >= totalPages
-            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            : 'bg-gradient-to-r from-purple-500/10 to-blue-500/10 text-purple-600 hover:from-purple-500/20 hover:to-blue-500/20 hover:shadow-md'
-        ]"
-      >
-        <i class="fas fa-chevron-right text-sm"></i>
-      </button>
-    </div>
     <!-- Job Detail Modal -->
     <JobDetailModal :is-open="isModalOpen" :job="selectedJob || {}" @close="closeModal" />
   </div>
@@ -386,11 +384,47 @@ export default {
         return this.jobStore.pagination.currentPage
       },
       set(value) {
-        this.jobStore.pagination.currentPage = value
+        this.jobStore.updatePagination(value)
       }
     },
     totalPages() {
-      return this.jobStore.totalPages
+      return this.pagination.totalPages
+    },
+    startItem() {
+      return (this.currentPage - 1) * this.pageSize + 1
+    },
+    endItem() {
+      return Math.min(this.currentPage * this.pageSize, this.pagination.totalItems)
+    },
+    displayedPages() {
+      const delta = 2
+      const range = []
+      const rangeWithDots = []
+      let l
+
+      for (let i = 1; i <= this.totalPages; i++) {
+        if (
+          i === 1 ||
+          i === this.totalPages ||
+          (i >= this.currentPage - delta && i <= this.currentPage + delta)
+        ) {
+          range.push(i)
+        }
+      }
+
+      range.forEach((i) => {
+        if (l) {
+          if (i - l === 2) {
+            rangeWithDots.push(l + 1)
+          } else if (i - l !== 1) {
+            rangeWithDots.push('...')
+          }
+        }
+        rangeWithDots.push(i)
+        l = i
+      })
+
+      return rangeWithDots
     }
   },
 
@@ -407,51 +441,48 @@ export default {
   methods: {
     async fetchJobs() {
       try {
-        await this.jobStore.fetchJobs()
+        await this.jobStore.fetchJobs({
+          page: this.currentPage,
+          pageSize: this.pageSize // เปลี่ยนจาก limit เป็น pageSize ตาม API
+        })
       } catch (error) {
         console.error('Error fetching jobs:', error)
       }
     },
     handleSearch(searchFilters) {
       this.jobStore.updateSearchFilters(searchFilters)
-      this.jobStore.resetPagination()
+      this.currentPage = 1 // รีเซ็ตกลับหน้าแรกเมื่อค้นหา
       this.fetchJobs()
     },
     handleClear() {
       this.jobStore.clearSearchFilters()
-      this.jobStore.resetPagination()
+      this.currentPage = 1 // รีเซ็ตกลับหน้าแรก
       this.fetchJobs()
     },
-    // Pagination
-    handlePrevPage() {
+    async handlePrevPage() {
       if (this.currentPage > 1) {
-        this.jobStore.setPage(this.currentPage - 1)
-        this.jobStore.fetchJobs()
+        this.currentPage--
+        await this.fetchJobs()
       }
     },
-
-    handleNextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.jobStore.setPage(this.currentPage + 1)
-        this.jobStore.fetchJobs()
+    async handleNextPage() {
+      if (this.currentPage < this.pagination.totalPages) {
+        this.currentPage++
+        await this.fetchJobs()
       }
     },
-
     formatDate(date) {
       return this.jobStore.formatDate(date)
     },
     formatTime(time) {
       return this.jobStore.formatTime(time)
     },
-
     calculateEstimatedCost(job) {
       return this.jobStore.calculateEstimatedCost(job)
     },
-
     calculateActualCost(job) {
       return this.jobStore.calculateActualCost(job)
     },
-    // Modal handlers
     openModal(job) {
       this.selectedJob = job
       this.isModalOpen = true
@@ -460,14 +491,12 @@ export default {
       this.isModalOpen = false
       this.selectedJob = null
     },
-    // ฟังก์ชันสำหรับแสดงสถานะ
     getJobStatus(job) {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
       const workDate = new Date(job.work_date)
       workDate.setHours(0, 0, 0, 0)
 
-      // ดูสถานะจริงของงานก่อน
       if (job.status === 'completed') {
         return { text: 'เสร็จสิ้น', class: 'text-green-600 bg-green-100' }
       }
@@ -475,7 +504,6 @@ export default {
         return { text: 'ยกเลิก', class: 'text-red-600 bg-red-100' }
       }
 
-      // ตรวจสอบตามวันที่
       if (workDate > today) {
         return { text: 'ประกาศรับสมัคร', class: 'text-blue-600 bg-blue-100' }
       }
@@ -484,6 +512,12 @@ export default {
       }
 
       return { text: 'เสร็จสิ้น', class: 'text-green-600 bg-green-100' }
+    },
+    goToPage(page) {
+      if (typeof page === 'number' && page !== this.currentPage) {
+        this.currentPage = page
+        this.fetchJobs()
+      }
     }
   }
 }
@@ -526,5 +560,13 @@ export default {
 
 .overflow-x-auto::-webkit-scrollbar-thumb:hover {
   @apply bg-gray-400 dark:bg-gray-500;
+}
+
+.btn-pagination {
+  @apply relative inline-flex items-center px-4 py-2 border text-sm font-medium;
+}
+
+.btn-pagination:disabled {
+  @apply cursor-not-allowed opacity-50;
 }
 </style>

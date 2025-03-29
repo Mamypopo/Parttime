@@ -39,7 +39,10 @@ export const useJobStore = defineStore('job', {
         pagination: {
             currentPage: 1,
             perPage: 10,
-            totalItems: 0
+            totalItems: 0,
+            totalPages: 1,
+            pageSize: 10
+
         },
 
     }),
@@ -58,12 +61,8 @@ export const useJobStore = defineStore('job', {
             }, 0);
         },
 
-        totalPages: (state) => {
-
-            if (!state.pagination.totalItems || isNaN(state.pagination.totalItems)) {
-                return 1
-            }
-            return Math.max(1, Math.ceil(state.pagination.totalItems / state.pagination.perPage))
+        totalPages(state) {
+            return Math.ceil(state.pagination.totalItems / state.pagination.perPage) || 1
         },
         hasMorePages: (state) => state.pagination.currentPage < state.totalPages,
 
@@ -115,16 +114,16 @@ export const useJobStore = defineStore('job', {
         },
 
         // ดึงข้อมูลงานทั้งหมด
-        async fetchJobs() {
+        async fetchJobs({ page = 1, pageSize = 10 } = {}) {
             this.loading = true
             try {
                 const headers = this.getAuthHeaders()
                 const params = {
-                    page: this.pagination.currentPage,
-                    limit: this.pagination.perPage,
-                    offset: (this.pagination.currentPage - 1) * this.pagination.perPage,
+                    page,
+                    pageSize,
                     ...this.searchFilters
                 }
+
 
                 // ลบ key ที่มีค่าเป็น '', null, หรือ undefined
                 Object.keys(params).forEach(key => {
@@ -140,31 +139,39 @@ export const useJobStore = defineStore('job', {
 
                 if (response.data) {
                     this.jobs = response.data.jobs || []
-                    if (response.data.pagination) {
-                        this.pagination.totalItems = parseInt(response.data.pagination.total || 0)
-                    } else {
-                        this.pagination.totalItems = 0
+                    this.pagination = {
+                        ...this.pagination,
+                        currentPage: page,
+                        totalPages: response.data.pagination.totalPages,
+                        totalItems: response.data.pagination.totalItems,
+                        pageSize: pageSize
                     }
                 }
             } catch (error) {
                 console.error('Error fetching jobs:', error)
-                // จัดการกรณี error
                 this.jobs = []
                 this.pagination.totalItems = 0
+                throw error
             } finally {
                 this.loading = false
             }
         },
 
+        updatePagination(page) {
+            this.pagination.currentPage = page
+        },
+
+
         // ดึงงานที่ตัวเองสร้างกับผู้สมัครพร้อมกัน
-        async fetchJobsAndParticipants() {
+        async fetchJobsAndParticipants({ page = 1, pageSize = 10 } = {}) {
             this.loading = true;
 
             try {
                 const headers = this.getAuthHeaders();
                 const params = new URLSearchParams();
-
-                // เพิ่มเงื่อนไขการค้นหาจาก searchFilters
+                params.append('page', String(page));
+                params.append('pageSize', String(pageSize));
+                // เงื่อนไขการค้นหาจาก searchFilters
                 if (this.searchFilters.id) params.append('id', this.searchFilters.id);
                 if (this.searchFilters.title) params.append('title', this.searchFilters.title);
                 if (this.searchFilters.location) params.append('location', this.searchFilters.location);
@@ -176,13 +183,21 @@ export const useJobStore = defineStore('job', {
                 if (this.searchFilters.maxWage) params.append('maxWage', this.searchFilters.maxWage);
                 if (this.searchFilters.peopleCount) params.append('peopleCount', this.searchFilters.peopleCount);
                 const queryString = params.toString();
-                const endpoint = queryString ? `?${queryString}` : '';
+                const endpoint = `?${queryString}`;
                 // เรียก API พร้อมกัน
                 const [jobsResponse, participantsResponse] = await Promise.all([
                     api.get(`/api/jobs/my-created-jobs${endpoint}`, { headers }),
                     api.get('/api/jobs/getJobsWithParticipants', { headers })
                 ]);
 
+                if (jobsResponse.data) {
+                    this.pagination = {
+                        currentPage: jobsResponse.data.page || 1,
+                        totalPages: jobsResponse.data.totalPages || 1,
+                        totalItems: jobsResponse.data.totalCount || 0,
+                        pageSize: jobsResponse.data.pageSize || 10
+                    };
+                }
 
                 //  ตรวจสอบว่า jobsResponse มีข้อมูลและเป็น array
                 this.jobs = Array.isArray(jobsResponse.data?.jobs) ? jobsResponse.data.jobs : [];
@@ -297,12 +312,11 @@ export const useJobStore = defineStore('job', {
                             ratings,
                             totalScore,
                         } : {}),
-                        comment: comment || 'ไม่ผ่านการประเมิน',
+                        comment: comment || (isPassedEvaluation ? 'ผ่านการประเมิน' : 'ไม่ผ่านการประเมิน'),
                         isPassedEvaluation,
                     },
                     { headers }
                 );
-
                 return response.data
             } catch (error) {
                 console.error('Error updating work evaluation:', error)
@@ -853,7 +867,8 @@ export const useJobStore = defineStore('job', {
             this.pagination = {
                 currentPage: 1,
                 pageSize: 10,
-                totalItems: 0
+                totalItems: 0,
+                totalPages: 1,
             }
         },
 

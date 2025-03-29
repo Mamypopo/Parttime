@@ -630,14 +630,6 @@ export default {
       }
     },
 
-    getAllSelectedUserIds() {
-      return this.positions.reduce((ids, position) => {
-        const positionUserIds =
-          position.selectedUsers?.map((user) => user.id).filter((id) => id) || []
-        return [...ids, ...positionUserIds]
-      }, [])
-    },
-
     async searchUsers(posIndex, userIndex) {
       const searchQuery = this.positions[posIndex].selectedUsers[userIndex].searchQuery
       if (!searchQuery || searchQuery.length < 2) {
@@ -646,8 +638,7 @@ export default {
       }
 
       try {
-        const selectedUserIds = this.getAllSelectedUserIds()
-        const response = await this.jobStore.searchAvailableUsers(searchQuery, selectedUserIds)
+        const response = await this.jobStore.searchAvailableUsers(searchQuery)
         this.positions[posIndex].selectedUsers[userIndex].searchResults = response.data
       } catch (error) {
         console.error('Error searching users:', error)
@@ -693,8 +684,8 @@ export default {
     },
 
     filteredAvailableUsers(posIndex) {
-      const selectedIds = this.getAllSelectedUserIds()
-      return this.availableUsers.filter((user) => !selectedIds.includes(user.id))
+      // แสดงผู้ใช้ทั้งหมดโดยไม่ต้องกรองออก
+      return this.availableUsers
     },
 
     getUserProfile(userId) {
@@ -707,7 +698,46 @@ export default {
       return user?.first_name + ' ' + user?.last_name
     },
 
-    selectUser(posIndex, userIndex, user) {
+    async selectUser(posIndex, userIndex, user) {
+      const isSelectedInSamePosition = this.positions[posIndex].selectedUsers?.some(
+        (selectedUser) => selectedUser.id === user.id
+      )
+
+      if (isSelectedInSamePosition) {
+        await Swal.fire({
+          title: 'ไม่สามารถเลือกซ้ำได้',
+          text: 'ผู้ปฏิบัติงานนี้ถูกเลือกในตำแหน่งนี้แล้ว',
+          icon: 'warning',
+          confirmButtonText: 'ตกลง',
+          confirmButtonColor: '#3085d6'
+        })
+        return
+      }
+
+      const isAlreadySelected = this.positions.some((position, pIndex) => {
+        return position.selectedUsers?.some(
+          (selectedUser) => selectedUser.id === user.id && pIndex !== posIndex
+        )
+      })
+
+      if (isAlreadySelected) {
+        const result = await Swal.fire({
+          title: 'ยืนยันการเลือกผู้ปฏิบัติงาน',
+          html: `คุณต้องการเลือก <b>${user.first_name} ${user.last_name}</b> ในตำแหน่งนี้ด้วยใช่หรือไม่?<br>
+            <small class="text-gray-500">(ผู้ปฏิบัติงานนี้ถูกเลือกในตำแหน่งอื่นแล้ว)</small>`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'ยืนยัน',
+          cancelButtonText: 'ยกเลิก',
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33'
+        })
+
+        if (!result.isConfirmed) {
+          return
+        }
+      }
+
       this.positions[posIndex].selectedUsers[userIndex] = {
         id: user.id,
         searchQuery: `${user.first_name} ${user.last_name}`,

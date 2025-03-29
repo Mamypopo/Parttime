@@ -126,10 +126,12 @@ export const getAllJobs = async (req, res) => {
 
         return res.status(200).json({
             jobs,
-            page,
-            pageSize,
-            totalPages: Math.ceil(totalCount / pageSize),
-            totalCount
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(totalCount / pageSize),
+                totalItems: totalCount,
+                pageSize
+            }
         });
     } catch (error) {
         console.error('เกิดข้อผิดพลาดในการดึงข้อมูลงาน:', error);

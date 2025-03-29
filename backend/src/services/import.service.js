@@ -135,61 +135,86 @@ class ImportService {
                 throw new Error('พบข้อผิดพลาดในข้อมูล:\n' + errors.join('\n'))
             }
 
-            const result = await prisma.$transaction(async (prisma) => {
-                const createdUsers = []
-                const logs = []
-                for (const userData of usersToCreate) {
-                    const user = await prisma.user.create({
-                        data: userData
-                    })
-                    createdUsers.push(user)
-                    logs.push({
-                        action: 'IMPORT_USER',
-                        request_url: '/api/excel/import',
-                        method: 'POST',
-                        details: JSON.stringify({
-                            action: 'import_user',
-                            user_email: user.email,
-                            source: 'excel_import'
-                        }),
-                        ip_address: ip,
-                        user_agent: userAgent,
-                        timestamp: new Date(),
-                        user: { connect: { id: user.id } },
-                        admin: { connect: { id: adminId } }
-                    })
-                }
+            const batchSize = 10
+            const batches = []
+            for (let i = 0; i < usersToCreate.length; i += batchSize) {
+                batches.push(usersToCreate.slice(i, i + batchSize))
+            }
 
-                for (const logData of logs) {
+            let totalCreated = 0
+            const createdUserIds = []
+
+            for (const batch of batches) {
+                try {
+                    const result = await prisma.$transaction(async (prisma) => {
+                        const batchUsers = []
+                        for (const userData of batch) {
+                            const user = await prisma.user.create({
+                                data: userData
+                            })
+                            batchUsers.push(user)
+                            createdUserIds.push(user.id)
+                        }
+                        return batchUsers
+                    }, {
+                        timeout: 180000
+                    })
+
+                    totalCreated += result.length
+
+                    await new Promise(resolve => setTimeout(resolve, 1000))
+                } catch (error) {
+                    console.error('Batch creation error:', error)
+                    errors.push(`Error in batch: ${error.message}`)
+                }
+            }
+
+            for (const userId of createdUserIds) {
+                try {
                     await prisma.log.create({
-                        data: logData
+                        data: {
+                            action: 'IMPORT_USER',
+                            request_url: '/api/excel/import',
+                            method: 'POST',
+                            details: JSON.stringify({
+                                action: 'import_user',
+                                user_id: userId,
+                                source: 'excel_import'
+                            }),
+                            ip_address: ip,
+                            user_agent: userAgent,
+                            timestamp: new Date(),
+                            user: { connect: { id: userId } },
+                            admin: { connect: { id: adminId } }
+                        }
                     })
+                } catch (error) {
+                    console.error('Log creation error:', error)
                 }
+            }
 
-                await prisma.log.create({
-                    data: {
-                        action: 'IMPORT_USERS_SUMMARY',
-                        request_url: '/api/excel/import',
-                        method: 'POST',
-                        details: JSON.stringify({
-                            total_processed: jsonData.length,
-                            success_count: createdUsers.length,
-                            error_count: errors.length,
-                            errors: errors
-                        }),
-                        ip_address: ip,
-                        user_agent: userAgent,
-                        timestamp: new Date(),
-                        admin: { connect: { id: adminId } }
-                    }
-                })
-                return {
-                    imported: createdUsers.length,
-                    errors: []
+            await prisma.log.create({
+                data: {
+                    action: 'IMPORT_USERS_SUMMARY',
+                    request_url: '/api/excel/import',
+                    method: 'POST',
+                    details: JSON.stringify({
+                        total_processed: jsonData.length,
+                        success_count: totalCreated,
+                        error_count: errors.length,
+                        errors: errors
+                    }),
+                    ip_address: ip,
+                    user_agent: userAgent,
+                    timestamp: new Date(),
+                    admin: { connect: { id: adminId } }
                 }
             })
 
-            return result
+            return {
+                imported: totalCreated,
+                errors: errors
+            }
 
         } catch (error) {
             await prisma.log.create({
@@ -207,6 +232,7 @@ class ImportService {
                     admin: { connect: { id: adminId } }
                 }
             })
+
             console.error('Process error:', error)
             return {
                 imported: 0,

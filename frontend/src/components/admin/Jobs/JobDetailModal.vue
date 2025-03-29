@@ -34,7 +34,13 @@
               >
                 <DialogTitle class="text-lg font-semibold text-white">
                   <i class="fas fa-clipboard-list mr-2"></i>
-                  รายละเอียดงาน #ID: {{ job?.id }} / {{ job?.location }}
+                  รายละเอียดงาน #ID: {{ job?.id }} /
+                  <template v-if="adminStore.getAdmin.role === 'admin'">
+                    {{ job?.title }}
+                  </template>
+                  <template v-else>
+                    {{ job?.location }}
+                  </template>
                 </DialogTitle>
                 <button
                   @click="closeModal"
@@ -248,6 +254,7 @@
 
 <script>
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
+import { useAdminStore } from '@/stores/adminStore'
 
 export default {
   name: 'JobDetailModal',
@@ -268,6 +275,12 @@ export default {
     job: {
       type: Object,
       default: null
+    }
+  },
+
+  data() {
+    return {
+      adminStore: useAdminStore()
     }
   },
 

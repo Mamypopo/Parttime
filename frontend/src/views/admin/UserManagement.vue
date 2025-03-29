@@ -13,6 +13,13 @@
         </div>
         <div class="flex gap-2">
           <button
+            @click="confirmDownloadTemplate"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          >
+            <i class="fas fa-download"></i>
+            Export Template
+          </button>
+          <button
             @click="openImportModal"
             class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
           >
@@ -58,139 +65,167 @@
         </div>
       </div>
     </div>
+    <transition name="fade" mode="out-in">
+      <!-- Loading State -->
+      <div v-if="loading" class="grid gap-4">
+        <div v-for="n in 5" :key="n" class="animate-pulse bg-white dark:bg-gray-800 p-4 rounded-lg">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+            <div class="space-y-2 flex-1">
+              <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+            </div>
+            <div class="flex space-x-2">
+              <div class="w-20 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+              <div class="w-20 h-8 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <!-- Users Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead class="bg-gray-50 dark:bg-gray-700">
-            <tr>
-              <th class="px-4 py-3 text-left">ชื่อ-นามสกุล</th>
-              <th class="px-4 py-3 text-left">อีเมล</th>
-              <th class="px-4 py-3 text-left">เบอร์โทร</th>
-              <th class="px-4 py-3 text-left">สถานะ</th>
-              <th class="px-4 py-3 text-left">วันที่สร้าง</th>
-              <th class="px-4 py-3 text-center">จัดการ</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-            <tr
-              v-for="user in users"
-              :key="user.id"
-              class="hover:bg-gray-50 dark:hover:bg-gray-700"
-            >
-              <td class="px-4 py-3">
-                <div class="flex items-center">
-                  <!-- Avatar -->
-                  <div
-                    class="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 flex items-center justify-center mr-3 text-white font-semibold text-base"
+      <!-- Empty State -->
+      <div v-else-if="users.length === 0" class="flex flex-col items-center justify-center py-12">
+        <div
+          class="w-24 h-24 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 text-gray-500 dark:text-gray-400 rounded-full flex items-center justify-center mb-4"
+        >
+          <i class="fas fa-users text-3xl text-[#EABF71] dark:text-[#F0C788]"></i>
+        </div>
+        <p class="text-gray-500 dark:text-gray-400 text-lg">ไม่พบข้อมูลผู้ใช้</p>
+        <p class="text-gray-400 dark:text-gray-500 text-sm mt-2">ลองปรับเงื่อนไขการค้นหาใหม่</p>
+      </div>
+      <!-- Users Table -->
+      <div v-else class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 dark:bg-gray-700">
+              <tr>
+                <th class="px-4 py-3 text-left">ชื่อ-นามสกุล</th>
+                <th class="px-4 py-3 text-left">อีเมล</th>
+                <th class="px-4 py-3 text-left">เบอร์โทร</th>
+                <th class="px-4 py-3 text-left">สถานะ</th>
+                <th class="px-4 py-3 text-left">วันที่สร้าง</th>
+                <th class="px-4 py-3 text-center">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+              <tr
+                v-for="user in users"
+                :key="user.id"
+                class="hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                <td class="px-4 py-3">
+                  <div class="flex items-center">
+                    <!-- Avatar -->
+                    <div
+                      class="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 flex items-center justify-center mr-3 text-white font-semibold text-base"
+                    >
+                      <img
+                        v-if="user.profile_image && user.profile_image.trim() !== ''"
+                        :src="`${baseURL}/uploads/profiles/${user.profile_image}`"
+                        :alt="user.first_name"
+                        class="w-full h-full object-cover"
+                      />
+                      <span v-else>
+                        {{ user.first_name?.charAt(0).toUpperCase() || '?' }}
+                      </span>
+                    </div>
+
+                    <!-- Name Info -->
+                    <div>
+                      <div class="text-gray-900 dark:text-white font-medium">
+                        {{ user.prefix }} {{ user.first_name }} {{ user.last_name }}
+                      </div>
+                      <div class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ user.national_id }}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                <td class="px-4 py-3">{{ user.email }}</td>
+                <td class="px-4 py-3">{{ user.phone_number }}</td>
+                <td class="px-4 py-3">
+                  <span
+                    :class="{
+                      'px-2 py-1 rounded-full text-xs': true,
+                      'bg-green-100 text-green-800': user.approved === 'approved',
+                      'bg-yellow-100 text-yellow-800': user.approved === 'pending',
+                      'bg-red-100 text-red-800': user.approved === 'rejected'
+                    }"
                   >
-                    <img
-                      v-if="user.profile_image && user.profile_image.trim() !== ''"
-                      :src="`${baseURL}/uploads/profiles/${user.profile_image}`"
-                      :alt="user.first_name"
-                      class="w-full h-full object-cover"
-                    />
-                    <span v-else>
-                      {{ user.first_name?.charAt(0).toUpperCase() || '?' }}
-                    </span>
-                  </div>
+                    {{ getStatusText(user.approved) }}
+                  </span>
+                </td>
+                <td class="px-4 py-3">{{ formatDate(user.created_at) }}</td>
+                <td class="px-4 py-3 text-center">
+                  <button
+                    @click="editUser(user)"
+                    class="text-yellow-600 hover:text-yellow-800 mx-1"
+                    title="แก้ไข"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-                  <!-- Name Info -->
-                  <div>
-                    <div class="text-gray-900 dark:text-white font-medium">
-                      {{ user.prefix }} {{ user.first_name }} {{ user.last_name }}
-                    </div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">
-                      {{ user.national_id }}
-                    </div>
-                  </div>
-                </div>
-              </td>
-
-              <td class="px-4 py-3">{{ user.email }}</td>
-              <td class="px-4 py-3">{{ user.phone_number }}</td>
-              <td class="px-4 py-3">
-                <span
-                  :class="{
-                    'px-2 py-1 rounded-full text-xs': true,
-                    'bg-green-100 text-green-800': user.approved === 'approved',
-                    'bg-yellow-100 text-yellow-800': user.approved === 'pending',
-                    'bg-red-100 text-red-800': user.approved === 'rejected'
-                  }"
-                >
-                  {{ getStatusText(user.approved) }}
-                </span>
-              </td>
-              <td class="px-4 py-3">{{ formatDate(user.created_at) }}</td>
-              <td class="px-4 py-3 text-center">
-                <button
-                  @click="editUser(user)"
-                  class="text-yellow-600 hover:text-yellow-800 mx-1"
-                  title="แก้ไข"
-                >
-                  <i class="fas fa-edit"></i>
+        <!-- Pagination -->
+        <div class="px-4 py-3 flex items-center justify-between border-t">
+          <div class="flex-1 flex justify-between sm:hidden">
+            <button @click="prevPage" :disabled="currentPage === 1" class="btn-pagination mobile">
+              ก่อนหน้า
+            </button>
+            <button
+              @click="nextPage"
+              :disabled="currentPage === totalPages"
+              class="btn-pagination mobile"
+            >
+              ถัดไป
+            </button>
+          </div>
+          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                แสดง
+                <span class="font-medium">{{ startItem }}</span>
+                ถึง
+                <span class="font-medium">{{ endItem }}</span>
+                จากทั้งหมด
+                <span class="font-medium">{{ totalItems }}</span>
+                รายการ
+              </p>
+            </div>
+            <div>
+              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                <button @click="prevPage" :disabled="currentPage === 1" class="btn-pagination">
+                  <i class="fas fa-chevron-left"></i>
                 </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Pagination -->
-      <div class="px-4 py-3 flex items-center justify-between border-t">
-        <div class="flex-1 flex justify-between sm:hidden">
-          <button @click="prevPage" :disabled="currentPage === 1" class="btn-pagination mobile">
-            ก่อนหน้า
-          </button>
-          <button
-            @click="nextPage"
-            :disabled="currentPage === totalPages"
-            class="btn-pagination mobile"
-          >
-            ถัดไป
-          </button>
-        </div>
-        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-          <div>
-            <p class="text-sm text-gray-700 dark:text-gray-300">
-              แสดง
-              <span class="font-medium">{{ startItem }}</span>
-              ถึง
-              <span class="font-medium">{{ endItem }}</span>
-              จากทั้งหมด
-              <span class="font-medium">{{ totalItems }}</span>
-              รายการ
-            </p>
-          </div>
-          <div>
-            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-              <button @click="prevPage" :disabled="currentPage === 1" class="btn-pagination">
-                <i class="fas fa-chevron-left"></i>
-              </button>
-              <button
-                v-for="page in displayedPages"
-                :key="page"
-                @click="goToPage(page)"
-                :class="[
-                  'btn-pagination',
-                  currentPage === page ? 'bg-purple-600 text-white' : 'bg-white text-gray-700'
-                ]"
-              >
-                {{ page }}
-              </button>
-              <button
-                @click="nextPage"
-                :disabled="currentPage === totalPages"
-                class="btn-pagination"
-              >
-                <i class="fas fa-chevron-right"></i>
-              </button>
-            </nav>
+                <button
+                  v-for="page in displayedPages"
+                  :key="page"
+                  @click="goToPage(page)"
+                  :class="[
+                    'btn-pagination',
+                    currentPage === page ? 'bg-purple-600 text-white' : 'bg-white text-gray-700'
+                  ]"
+                >
+                  {{ page }}
+                </button>
+                <button
+                  @click="nextPage"
+                  :disabled="currentPage === totalPages"
+                  class="btn-pagination"
+                >
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+              </nav>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </transition>
     <!-- Import Users Modal -->
     <ImportUsersModal
       :is-open="showImportModal"
@@ -228,6 +263,7 @@ export default {
   data() {
     return {
       users: [],
+      loading: true,
       currentPage: 1,
       totalItems: 0,
       itemsPerPage: 10,
@@ -283,9 +319,20 @@ export default {
     }
   },
 
+  async mounted() {
+    try {
+      this.loading = true
+      await this.fetchUsers()
+    } catch (error) {
+      console.error('Error in mounted:', error)
+    } finally {
+      this.loading = false
+    }
+  },
   methods: {
     async fetchUsers() {
       try {
+        this.loading = true
         const response = await adminService.getUsers({
           page: this.currentPage,
           limit: this.itemsPerPage,
@@ -301,6 +348,8 @@ export default {
           title: 'เกิดข้อผิดพลาด',
           text: 'ไม่สามารถดึงข้อมูลผู้ใช้งานได้'
         })
+      } finally {
+        this.loading = false
       }
     },
 
@@ -426,11 +475,51 @@ export default {
         this.currentPage = page
         this.fetchUsers()
       }
-    }
-  },
+    },
 
-  mounted() {
-    this.fetchUsers()
+    async confirmDownloadTemplate() {
+      try {
+        const result = await Swal.fire({
+          title: 'ดาวน์โหลด Template',
+          text: 'คุณต้องการดาวน์โหลดไฟล์ Template สำหรับนำเข้าข้อมูลผู้ใช้งานใช่หรือไม่?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'ดาวน์โหลด',
+          cancelButtonText: 'ยกเลิก',
+          confirmButtonColor: '#3B82F6',
+          cancelButtonColor: '#6B7280'
+        })
+
+        if (result.isConfirmed) {
+          // สร้าง link สำหรับดาวน์โหลด
+          const link = document.createElement('a')
+          link.href = '/templates/pt-namelist_import_template.xlsx'
+          link.download = 'pt-namelist_import_template.xlsx'
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+
+          await Swal.fire({
+            title: 'กำลังดาวน์โหลด',
+            text: 'ไฟล์ Template กำลังถูกดาวน์โหลด',
+            icon: 'success',
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true,
+            position: 'top-end',
+            toast: true
+          })
+        }
+      } catch (error) {
+        console.error('Error downloading template:', error)
+        Swal.fire({
+          title: 'เกิดข้อผิดพลาด',
+          text: 'ไม่สามารถดาวน์โหลดไฟล์ Template ได้',
+          icon: 'error',
+          confirmButtonColor: '#C5B4E3'
+        })
+      }
+    }
   }
 }
 </script>
@@ -446,5 +535,16 @@ export default {
 
 .btn-pagination:disabled {
   @apply cursor-not-allowed opacity-50;
+}
+
+/* Animation */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

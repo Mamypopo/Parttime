@@ -55,7 +55,7 @@
                           : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                       ]"
                     >
-                      {{ position.position_name }}
+                      {{ position.position_name }} / {{ position?.details }}
                       <span
                         v-if="getPendingParticipants(position).length"
                         class="ml-2 px-2 py-0.5 bg-[#f76363] dark:bg-red-600 text-white rounded-full text-xs animate-bounce"
@@ -379,6 +379,30 @@ export default {
       if (newVal && this.filteredPositions.length > 0) {
         this.activeTab = this.filteredPositions[0].id
       }
+    },
+
+    job: {
+      immediate: true,
+      deep: true,
+      handler(newJob) {
+        if (newJob && this.filteredPositions.length > 0) {
+          // อัพเดท activeTab ไปที่ตำแหน่งแรกที่ยังมีคนรอประเมิน
+          this.activeTab = this.filteredPositions[0].id
+          // เคลียร์ selectedParticipant เมื่อไม่มีคนที่รอประเมินในตำแหน่งปัจจุบัน
+          if (this.selectedParticipant) {
+            const currentPosition = this.filteredPositions.find((p) => p.id === this.activeTab)
+            const isPendingParticipant = currentPosition?.JobParticipation?.some(
+              (p) =>
+                p.id === this.selectedParticipant.id &&
+                p.status === 'approved' &&
+                !p.workHistories?.length
+            )
+            if (!isPendingParticipant) {
+              this.selectedParticipant = null
+            }
+          }
+        }
+      }
     }
   },
 
@@ -423,13 +447,20 @@ export default {
           isPassedEvaluation: true
         })
 
-        Swal.fire({
+        await this.$emit('evaluation-updated')
+
+        if (this.filteredPositions.length > 0) {
+          this.activeTab = this.filteredPositions[0].id
+        }
+
+        this.selectedParticipant = null
+
+        await Swal.fire({
           icon: 'success',
-          title: 'สำเร็จ',
-          text: 'บันทึกการประเมินเรียบร้อยแล้ว'
+          title: 'บันทึกการประเมินสำเร็จ',
+          timer: 1500,
+          showConfirmButton: false
         })
-        this.$emit('close')
-        this.$emit('evaluation-updated')
       } catch (error) {
         Swal.fire({
           icon: 'error',
@@ -468,14 +499,20 @@ export default {
             isPassedEvaluation: false
           })
 
-          Swal.fire({
-            icon: 'success',
-            title: 'สำเร็จ',
-            text: 'บันทึกการไม่ผ่านงานเรียบร้อยแล้ว'
-          })
+          await this.$emit('evaluation-updated')
 
-          this.$emit('close')
-          this.$emit('evaluation-updated')
+          if (this.filteredPositions.length > 0) {
+            this.activeTab = this.filteredPositions[0].id
+          }
+
+          this.selectedParticipant = null
+
+          await Swal.fire({
+            icon: 'success',
+            title: 'บันทึกการไม่ผ่านการประเมินสำเร็จ',
+            timer: 1500,
+            showConfirmButton: false
+          })
         } catch (error) {
           console.error('Error in confirmReject:', error)
           Swal.fire({

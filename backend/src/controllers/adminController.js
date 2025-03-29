@@ -84,7 +84,7 @@ export const registerAdmin = async (req, res) => {
                 first_name: newAdmin.first_name,
                 last_name: newAdmin.last_name,
                 phone: newAdmin.phone,
-                profile_pic: uploadedFile.filename
+                profile_pic: uploadedFile ? uploadedFile.filename : null
             }
         });
     } catch (error) {
@@ -107,6 +107,7 @@ export const registerAdmin = async (req, res) => {
         } catch (logError) {
             console.error('ไม่สามารถสร้างบันทึกสำหรับการลงทะเบียนแอดมินที่สำเร็จได้:', logError);
         }
+        console.error('Error in registerAdmin:', error);
         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการลงทะเบียนแอดมิน' });
     }
 };

@@ -22,7 +22,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const allowedOrigins = [
     'https://parttime.semedcheckup.com',
-    'http://localhost:3002'
+    'http://localhost:3002',
+    'http://192.168.1.74:3002'
 ].filter(Boolean);
 
 app.use(cors({

@@ -372,6 +372,52 @@
           </div>
         </div>
       </div>
+
+      <div
+        v-if="jobs.length > 0"
+        class="mt-6 px-4 py-3 flex items-center justify-between border-t dark:border-gray-700"
+      >
+        <div>
+          <p class="text-sm text-gray-700 dark:text-gray-300">
+            แสดง
+            <span class="font-medium">{{ startItem }}</span>
+            ถึง
+            <span class="font-medium">{{ endItem }}</span>
+            จากทั้งหมด
+            <span class="font-medium">{{ totalItems }}</span>
+            รายการ
+          </p>
+        </div>
+        <div>
+          <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+            <button @click="handlePrevPage" :disabled="currentPage === 1" class="btn-pagination">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <button
+              v-for="page in displayedPages"
+              :key="page"
+              @click="goToPage(page)"
+              :class="[
+                'btn-pagination',
+                currentPage === page
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+              ]"
+            >
+              {{ page }}
+            </button>
+
+            <button
+              @click="handleNextPage"
+              :disabled="currentPage === totalPages"
+              class="btn-pagination"
+            >
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </nav>
+        </div>
+      </div>
     </div>
 
     <!-- Participants Modal -->
@@ -401,6 +447,7 @@
       :show="showWorkStatusModal"
       :job="selectedJob"
       @close="closeWorkStatusModal"
+      @evaluation-updated="handleEvaluationUpdated"
     />
   </div>
 </template>
@@ -426,6 +473,7 @@ export default {
 
   data() {
     return {
+      pageSize: 10,
       baseURL: import.meta.env.VITE_API_URL,
       jobToDelete: null,
       selectedJob: null,
@@ -463,6 +511,64 @@ export default {
     },
     formatNumber(number) {
       return this.jobStore.formatNumber(number)
+    },
+
+    totalItems() {
+      return this.jobStore.pagination?.totalItems || 0
+    },
+
+    currentPage: {
+      get() {
+        return this.jobStore.pagination?.currentPage || 1
+      },
+      set(value) {
+        this.jobStore.updatePagination(value)
+      }
+    },
+
+    totalPages() {
+      return this.jobStore.pagination?.totalPages || 1
+    },
+
+    startItem() {
+      if (!this.jobs.length) return 0
+      return (this.currentPage - 1) * this.pageSize + 1
+    },
+
+    endItem() {
+      if (!this.jobs.length) return 0
+      return Math.min(this.currentPage * this.pageSize, this.totalItems)
+    },
+
+    displayedPages() {
+      const delta = 2
+      const range = []
+      const rangeWithDots = []
+      let l
+
+      for (let i = 1; i <= this.totalPages; i++) {
+        if (
+          i === 1 ||
+          i === this.totalPages ||
+          (i >= this.currentPage - delta && i <= this.currentPage + delta)
+        ) {
+          range.push(i)
+        }
+      }
+
+      range.forEach((i) => {
+        if (l) {
+          if (i - l === 2) {
+            rangeWithDots.push(l + 1)
+          } else if (i - l !== 1) {
+            rangeWithDots.push('...')
+          }
+        }
+        rangeWithDots.push(i)
+        l = i
+      })
+
+      return rangeWithDots
     }
   },
 
@@ -552,9 +658,10 @@ export default {
 
     async loadJobs() {
       try {
-        await this.jobStore.fetchJobsAndParticipants()
-
-        // อัพเดท selectedJob ถ้ามีการเลือกอยู่
+        await this.jobStore.fetchJobsAndParticipants({
+          page: Number(this.currentPage),
+          pageSize: Number(this.pageSize)
+        })
         if (this.selectedJob) {
           this.selectedJob = this.jobStore.jobs.find((job) => job.id === this.selectedJob.id)
         }
@@ -686,11 +793,9 @@ export default {
 
     async handleSearch(filters) {
       try {
-        // อัพเดท filters ใน store
         await this.jobStore.updateSearchFilters(filters)
-
-        // เรียกข้อมูลใหม่
         await this.jobStore.fetchJobsAndParticipants()
+        this.currentPage = 1
       } catch (error) {
         console.error('Error searching jobs:', error)
         // แสดง error message
@@ -705,10 +810,8 @@ export default {
 
     async handleClear() {
       try {
-        // เคลียร์ filters ใน store
         this.jobStore.clearSearchFilters()
-
-        // เรียกข้อมูลใหม่
+        this.currentPage = 1
         await this.jobStore.fetchJobsAndParticipants()
       } catch (error) {
         console.error('Error clearing search:', error)
@@ -778,14 +881,30 @@ export default {
     },
 
     openWorkStatusModal(job) {
-      // รีเฟรชข้อมูลงานก่อนเปิด modal
-      this.jobStore.fetchJobsAndParticipants().then(() => {
+      this.fetchJobData(job)
+    },
+
+    async fetchJobData(job) {
+      try {
+        await this.jobStore.fetchJobsAndParticipants({
+          page: this.currentPage,
+          pageSize: this.pageSize
+        })
+
         const updatedJob = this.jobs.find((j) => j.id === job.id)
         if (updatedJob) {
           this.selectedJob = { ...updatedJob }
           this.showWorkStatusModal = true
         }
-      })
+      } catch (error) {
+        console.error('Error fetching job data:', error)
+      }
+    },
+
+    async handleEvaluationUpdated() {
+      if (this.selectedJob) {
+        await this.fetchJobData(this.selectedJob)
+      }
     },
 
     closeWorkStatusModal() {
@@ -853,7 +972,7 @@ export default {
 
     async refreshJobs() {
       try {
-        // โหลดข้อมูลใหม่
+        this.currentPage = 1
         await this.jobStore.fetchJobsAndParticipants()
       } catch (error) {
         console.error('Error refreshing jobs:', error)
@@ -900,9 +1019,37 @@ export default {
         completed: '100%'
       }
       return widths[status]
+    },
+    async handlePrevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--
+        await this.loadJobs()
+      }
+    },
+
+    async handleNextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++
+        await this.loadJobs()
+      }
+    },
+
+    async goToPage(page) {
+      if (typeof page === 'number' && page !== this.currentPage) {
+        this.currentPage = page
+        await this.loadJobs()
+      }
     }
   }
 }
 </script>
 
-<style></style>
+<style scoped>
+.btn-pagination {
+  @apply relative inline-flex items-center px-4 py-2 border text-sm font-medium;
+}
+
+.btn-pagination:disabled {
+  @apply cursor-not-allowed opacity-50;
+}
+</style>

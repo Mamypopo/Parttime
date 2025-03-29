@@ -89,7 +89,9 @@
                         <div class="flex justify-between items-center mb-4">
                           <div>
                             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                              {{ job.jobPosition?.job?.location }}
+                              {{ job.jobPosition?.job?.title }} /
+                              {{ job.jobPosition?.job?.location }} /
+                              {{ formatDate(job.jobPosition?.job?.work_date, 'date-only') }}
                             </h3>
                             <p class="text-sm text-gray-500 dark:text-gray-400">
                               {{ job.jobPosition?.position_name }}
@@ -307,15 +309,15 @@ export default {
       return 'text-red-600 dark:text-red-400'
     },
 
-    formatDate(date) {
+    formatDate(date, format = 'full') {
       if (!date) return 'ไม่ระบุ'
-      return new Date(date).toLocaleDateString('th-TH', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
+
+      const options =
+        format === 'date-only'
+          ? { year: 'numeric', month: 'long', day: 'numeric' }
+          : { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }
+
+      return new Date(date).toLocaleDateString('th-TH', options)
     },
 
     onBeforeEnter() {

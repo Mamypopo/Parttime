@@ -134,7 +134,6 @@ export const updateWorkHistory = async (req, res) => {
     const { comment, ratings, isPassedEvaluation } = req.body;
     const jobParticipationId = parseInt(req.params.jobParticipationId);
     const adminId = req.user?.role === 'admin' ? req.user.id : null;
-
     if (!adminId) {
         return res.status(403).json({ message: 'คุณไม่มีสิทธิ์ในการดำเนินการนี้' });
     }

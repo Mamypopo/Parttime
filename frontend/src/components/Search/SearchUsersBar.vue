@@ -17,7 +17,7 @@
           <div v-if="showUserId" class="relative">
             <input
               v-model="localFilters.userId"
-              type="number"
+              type="text"
               class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="User ID"
               @input="debouncedSearch"
@@ -41,7 +41,7 @@
           <div v-if="showIdCard" class="relative">
             <input
               v-model="localFilters.idCard"
-              type="number"
+              type="text"
               class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="เลขบัตรประชาชน"
               @input="debouncedSearch"

@@ -18,7 +18,7 @@
           <div class="relative">
             <input
               v-model="filters.id"
-              type="number"
+              type="text"
               class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="ID"
               @input="debouncedSearch"
@@ -117,7 +117,7 @@
             <div class="relative min-w-[120px]">
               <input
                 v-model.number="filters.minWage"
-                type="number"
+                type="text"
                 class="w-full pl-8 pr-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                 placeholder="ค่าจ้างต่ำสุด"
                 @input="debouncedSearch"
@@ -133,7 +133,7 @@
             <div class="relative min-w-[120px]">
               <input
                 v-model.number="filters.maxWage"
-                type="number"
+                type="text"
                 class="w-full pl-8 pr-3 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                 placeholder="ค่าจ้างสูงสุด"
                 @input="debouncedSearch"

@@ -57,7 +57,7 @@
                     <div class="grid grid-cols-7 gap-3">
                       <div class="col-span-3">
                         <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
-                          >คำนำหน้า</label
+                          >คำนำหน้า <span class="text-red-500">*</span></label
                         >
                         <select
                           v-model="formData.prefix"
@@ -71,7 +71,7 @@
                       </div>
                       <div class="col-span-4">
                         <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
-                          >ชื่อ</label
+                          >ชื่อ <span class="text-red-500">*</span></label
                         >
                         <input
                           v-model="formData.first_name"
@@ -83,7 +83,7 @@
                     </div>
                     <div>
                       <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
-                        >นามสกุล</label
+                        >นามสกุล <span class="text-red-500">*</span></label
                       >
                       <input
                         v-model="formData.last_name"
@@ -94,7 +94,7 @@
                     </div>
                     <div>
                       <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
-                        >เลขบัตรประชาชน</label
+                        >เลขบัตรประชาชน <span class="text-red-500">*</span></label
                       >
                       <input
                         v-model="formData.national_id"
@@ -107,8 +107,8 @@
                     <div class="grid grid-cols-5 gap-3">
                       <div class="col-span-2">
                         <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
-                          >เพศ</label
-                        >
+                          >เพศ <span class="text-red-500">*</span>
+                        </label>
                         <select
                           v-model="formData.gender"
                           class="w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 dark:focus:ring-purple-500/30 transition-all duration-200"
@@ -120,7 +120,7 @@
                       </div>
                       <div class="col-span-3">
                         <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
-                          >วันเกิด</label
+                          >วันเกิด <span class="text-red-500">*</span></label
                         >
                         <div class="date-input-container">
                           <input
@@ -134,8 +134,8 @@
                     </div>
                     <div>
                       <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
-                        >เบอร์โทรศัพท์</label
-                      >
+                        >เบอร์โทรศัพท์ <span class="text-red-500">*</span>
+                      </label>
                       <input
                         v-model="formData.phone_number"
                         type="tel"
@@ -167,7 +167,7 @@
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
-                        >อีเมล</label
+                        >อีเมล <span class="text-red-500">*</span></label
                       >
                       <input
                         v-model="formData.email"
@@ -178,7 +178,7 @@
                     </div>
                     <div>
                       <label class="block text-sm text-gray-600 dark:text-gray-200 mb-1"
-                        >รหัสผ่าน</label
+                        >รหัสผ่าน <span class="text-red-500">*</span></label
                       >
                       <input
                         v-model="formData.password"
@@ -201,7 +201,7 @@
                     <!-- ทักษะความสามารถ -->
                     <div>
                       <label class="block text-sm text-gray-600 dark:text-gray-300 mb-1">
-                        ทักษะความสามารถ
+                        ทักษะความสามารถ <span class="text-red-500">*</span>
                       </label>
                       <div
                         class="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border border-gray-200 dark:border-gray-600"
@@ -521,14 +521,14 @@ export default {
           return
         }
 
-        if (!this.formData.education_file) {
-          Swal.fire({
-            icon: 'error',
-            title: 'กรุณาอัพโหลดเอกสารที่จำเป็น',
-            text: 'เอกสารเป็นข้อมูลที่จำเป็น'
-          })
-          return
-        }
+        // if (!this.formData.education_file) {
+        //   Swal.fire({
+        //     icon: 'error',
+        //     title: 'กรุณาอัพโหลดเอกสารที่จำเป็น',
+        //     text: 'เอกสารเป็นข้อมูลที่จำเป็น'
+        //   })
+        //   return
+        // }
 
         const result = await Swal.fire({
           title: 'ยืนยันการสร้างผู้ใช้',
