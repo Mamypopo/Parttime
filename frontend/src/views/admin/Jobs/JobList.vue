@@ -443,7 +443,7 @@ export default {
       try {
         await this.jobStore.fetchJobs({
           page: this.currentPage,
-          pageSize: this.pageSize // เปลี่ยนจาก limit เป็น pageSize ตาม API
+          pageSize: this.pageSize
         })
       } catch (error) {
         console.error('Error fetching jobs:', error)
@@ -451,12 +451,12 @@ export default {
     },
     handleSearch(searchFilters) {
       this.jobStore.updateSearchFilters(searchFilters)
-      this.currentPage = 1 // รีเซ็ตกลับหน้าแรกเมื่อค้นหา
+      this.currentPage = 1
       this.fetchJobs()
     },
     handleClear() {
       this.jobStore.clearSearchFilters()
-      this.currentPage = 1 // รีเซ็ตกลับหน้าแรก
+      this.currentPage = 1
       this.fetchJobs()
     },
     async handlePrevPage() {
