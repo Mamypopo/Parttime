@@ -23,7 +23,10 @@ const defaultSkills = [
     'ผู้ช่วยแพทย์',
     'วัดความดัน',
     'ยานพาหนะ',
-    'หมอ'
+    'หมอ',
+    'ล่าม',
+    'รอบเอว',
+    'นม-ขนม'
 ]
 
 function romanizeThaiName(text) {

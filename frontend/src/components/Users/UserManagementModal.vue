@@ -456,7 +456,10 @@ export default {
         'ผู้ช่วยแพทย์',
         'วัดความดัน',
         'ยานพาหนะ',
-        'หมอ'
+        'หมอ',
+        'ล่าม',
+        'รอบเอว',
+        'นม-ขนม'
       ],
       profilePreview: null,
       educationFileName: null,
