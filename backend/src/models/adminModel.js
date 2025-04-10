@@ -258,14 +258,11 @@ export const countUsersPending = async (searchParams = {}) => {
         }
     }
 
-
     const totalCount = await prisma.user.count({
         where: whereClause
     });
 
-    return {
-        total: totalCount
-    };
+    return totalCount;
 }
 
 
@@ -334,17 +331,19 @@ export const findApprovedUsers = (limit = 10, offset = 0, searchParams = {}) => 
     });
 }
 
-export const countUsersApproved = (searchParams = {}) => {
+export const countUsersApproved = async (searchParams = {}) => {
     const whereClause = {
         approved: "approved"
     }
+
     if (searchParams.userId) {
         whereClause.id = parseInt(searchParams.userId)
     }
 
     if (searchParams.idCard) {
         whereClause.national_id = {
-            contains: searchParams.idCard
+            contains: searchParams.idCard,
+            mode: 'insensitive'
         }
     }
 
@@ -384,9 +383,12 @@ export const countUsersApproved = (searchParams = {}) => {
         }
     }
 
-    return prisma.user.count({
+    const totalCount = await prisma.user.count({
         where: whereClause
     });
+
+    // ส่งค่ากลับเป็นตัวเลขโดยตรง ไม่ใช่ object
+    return totalCount;
 }
 
 // ดึงผู้ใช้ที่ถูกปฏิเสธ
@@ -571,9 +573,8 @@ export const countUsersRejected = async (searchParams = {}) => {
     const totalCount = await prisma.user.count({
         where: whereClause
     });
-    return {
-        total: totalCount
-    };
+
+    return totalCount;
 }
 
 // นับจำนวนผู้ใช้แต่ละสถานะ

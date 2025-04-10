@@ -7,6 +7,7 @@ export const useAdminUserStore = defineStore('adminUser', {
         users: [], // approved users
         pendingUsers: [], // pending users
         rejectedUsers: [], // rejected users
+        approvedUsers: [],
         totalVerifiedUsers: 0,
         totalNotVerifiedUsers: 0,
         loading: false,
@@ -24,9 +25,22 @@ export const useAdminUserStore = defineStore('adminUser', {
         },
         rejectedStats: {
             total: 0,
-            verified: 0,
-            notVerified: 0
-        }
+        },
+        pendingPagination: {
+            currentPage: 1,
+            perPage: 10,
+            totalItems: 0
+        },
+        rejectedPagination: {
+            currentPage: 1,
+            perPage: 10,
+            totalItems: 0
+        },
+        approvedPagination: {
+            currentPage: 1,
+            perPage: 10,
+            totalItems: 0
+        },
     }),
 
     getters: {
@@ -37,6 +51,15 @@ export const useAdminUserStore = defineStore('adminUser', {
                 return 1
             }
             return Math.max(1, Math.ceil(state.pagination.totalItems / state.pagination.perPage))
+        },
+        pendingTotalPages() {
+            return Math.ceil(this.pendingPagination.totalItems / this.pendingPagination.perPage)
+        },
+        rejectedTotalPages() {
+            return Math.ceil(this.rejectedPagination.totalItems / this.rejectedPagination.perPage)
+        },
+        approvedTotalPages() {
+            return Math.ceil(this.approvedPagination.totalItems / this.approvedPagination.perPage)
         },
         hasMorePages: (state) => state.pagination.currentPage < state.totalPages
     },
@@ -118,11 +141,16 @@ export const useAdminUserStore = defineStore('adminUser', {
             this.loading = true
             try {
                 const params = {
-                    page: this.pagination.currentPage,
-                    limit: this.pagination.perPage,
-                    offset: (this.pagination.currentPage - 1) * this.pagination.perPage,
-                    ...this.searchFilters,
-                    skill: this.searchFilters.skills || []
+                    page: this.pendingPagination.currentPage,
+                    limit: this.pendingPagination.perPage,
+                    userId: this.searchFilters.userId,
+                    name: this.searchFilters.name,
+                    idCard: this.searchFilters.idCard
+                }
+
+                if (this.searchFilters.skills && this.searchFilters.skills.length > 0) {
+                    const skillsArray = Array.from(this.searchFilters.skills);
+                    params.skill = skillsArray.join(',');
                 }
 
                 Object.keys(params).forEach(key => {
@@ -136,7 +164,7 @@ export const useAdminUserStore = defineStore('adminUser', {
                 if (response.data) {
                     this.pendingUsers = response.data.users.map(this.formatUserData)
                     if (response.data.pagination) {
-                        this.pagination.totalItems = parseInt(response.data.pagination.total)
+                        this.pendingPagination.totalItems = parseInt(response.data.pagination.total)
                     }
                     if (response.data.stats) {
                         this.rejectedStats = {
@@ -150,7 +178,7 @@ export const useAdminUserStore = defineStore('adminUser', {
             } catch (error) {
                 console.error('Error fetching pending users:', error)
                 this.pendingUsers = []
-                this.pagination.totalItems = 0
+                this.pendingPagination.totalItems = 0
                 this.totalVerifiedUsers = 0
                 this.totalNotVerifiedUsers = 0
             } finally {
@@ -183,21 +211,17 @@ export const useAdminUserStore = defineStore('adminUser', {
         async fetchRejectedUsers() {
             this.loading = true
             try {
-
                 const params = {
-                    page: this.pagination.currentPage,
-                    limit: this.pagination.perPage,
-                    offset: (this.pagination.currentPage - 1) * this.pagination.perPage,
+                    page: this.rejectedPagination.currentPage,
+                    limit: this.rejectedPagination.perPage,
                     userId: this.searchFilters.userId,
                     name: this.searchFilters.name,
                     idCard: this.searchFilters.idCard
                 }
 
-
                 if (this.searchFilters.skills && this.searchFilters.skills.length > 0) {
                     const skillsArray = Array.from(this.searchFilters.skills);
                     params.skill = skillsArray.join(',');
-
                 }
 
                 Object.keys(params).forEach(key => {
@@ -211,20 +235,55 @@ export const useAdminUserStore = defineStore('adminUser', {
                 if (response.data) {
                     this.rejectedUsers = response.data.users.map(this.formatUserData)
                     if (response.data.pagination) {
-                        this.pagination.totalItems = parseInt(response.data.pagination.total)
+                        this.rejectedPagination.totalItems = parseInt(response.data.pagination.total)
                     }
-                    if (response.data.stats) {
-                        this.totalVerifiedUsers = response.data.stats.totalVerified
-                        this.totalNotVerifiedUsers = response.data.stats.totalNotVerified
-                    }
+
                 }
 
             } catch (error) {
                 console.error('Error fetching rejected users:', error)
                 this.rejectedUsers = []
-                this.pagination.totalItems = 0
-                this.totalVerifiedUsers = 0
-                this.totalNotVerifiedUsers = 0
+                this.rejectedPagination.totalItems = 0
+            } finally {
+                this.loading = false
+            }
+        },
+
+        async fetchApprovedUsers() {
+            this.loading = true
+            try {
+                const params = {
+                    page: this.approvedPagination.currentPage,
+                    limit: this.approvedPagination.perPage,
+                    userId: this.searchFilters.userId,
+                    name: this.searchFilters.name,
+                    idCard: this.searchFilters.idCard
+                }
+
+                if (this.searchFilters.skills && this.searchFilters.skills.length > 0) {
+                    const skillsArray = Array.from(this.searchFilters.skills);
+                    params.skill = skillsArray.join(',');
+                }
+
+                Object.keys(params).forEach(key => {
+                    if (params[key] === '' || (Array.isArray(params[key]) && params[key].length === 0)) {
+                        delete params[key]
+                    }
+                })
+
+                const response = await api.get('/api/admin/approved', { params })
+
+                if (response.data) {
+                    this.approvedUsers = response.data.users.map(this.formatUserData)
+                    if (response.data.pagination) {
+                        this.approvedPagination.totalItems = parseInt(response.data.pagination.total)
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error fetching approved users:', error)
+                this.approvedUsers = []
+                this.approvedPagination.totalItems = 0
             } finally {
                 this.loading = false
             }
@@ -266,6 +325,18 @@ export const useAdminUserStore = defineStore('adminUser', {
                 month: 'long',
                 day: 'numeric'
             })
+        },
+
+        setPendingPage(page) {
+            this.pendingPagination.currentPage = page
+        },
+
+        setRejectedPage(page) {
+            this.rejectedPagination.currentPage = page
+        },
+
+        setApprovedPage(page) {
+            this.approvedPagination.currentPage = page
         },
     }
 })

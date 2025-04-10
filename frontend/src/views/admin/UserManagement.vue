@@ -268,7 +268,9 @@
                   @click="goToPage(page)"
                   :class="[
                     'btn-pagination',
-                    currentPage === page ? 'bg-purple-600 text-white' : 'bg-white text-gray-700'
+                    currentPage === page
+                      ? 'bg-purple-600 text-white '
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                   ]"
                 >
                   {{ page }}

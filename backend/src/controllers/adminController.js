@@ -228,37 +228,41 @@ export const getAdminById = async (req, res) => {
 
 
 
-// ดึงผู้ใช้ที่รอการอนุมัติ เข้าใช้งาน
+// ดึงผู้ใช้ที่รอการอนุมัติ
 export const getPendingUsers = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1
-        const limit = parseInt(req.query.limit) || 10
-        const offset = (page - 1) * limit
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
 
+        // รับค่าการค้นหาจาก query parameters
         const searchParams = {
             userId: req.query.userId,
             idCard: req.query.idCard,
             name: req.query.name,
             skill: req.query.skill || ''
-        }
+        };
 
-        const [users, counts] = await Promise.all([
+        // ใช้ Promise.all เพื่อดึงข้อมูลพร้อมกัน
+        const [users, total] = await Promise.all([
             adminModel.findPendingUsers(limit, offset, searchParams),
             adminModel.countUsersPending(searchParams)
         ]);
 
-        const totalPages = Math.ceil(counts.total / limit);
+        // ตรวจสอบว่า total เป็นตัวเลขหรือ object
+        const totalCount = typeof total === 'object' && total !== null ? total.total : total;
 
         res.json({
             users,
             pagination: {
-                total: counts.total,
+                total: totalCount,
                 page,
-                limit
-            },
-        })
+                limit,
+                totalPages: Math.ceil(totalCount / limit)
+            }
+        });
     } catch (error) {
-        console.error('Controller Error:', error)
+        console.error('Controller Error:', error);
         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูล' });
     }
 };
@@ -266,41 +270,9 @@ export const getPendingUsers = async (req, res) => {
 // ดึงผู้ใช้ที่อนุมัติแล้ว
 export const getApprovedUsers = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1
-        const limit = parseInt(req.query.limit) || 10
-        const offset = (page - 1) * limit
-
-        // รับค่าการค้นหาจาก query parameters
-        const searchParams = {
-            userId: req.query.userId,
-            idCard: req.query.idCard,
-            name: req.query.name
-        }
-
-        // ส่ง searchParams ไปยัง Model
-        const users = await adminModel.findApprovedUsers(limit, offset, searchParams)
-        const total = await adminModel.countUsersApproved(searchParams)
-
-        res.json({
-            users,
-            pagination: {
-                total,
-                page,
-                limit
-            }
-        })
-    } catch (error) {
-        console.error('Controller Error:', error)
-        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูล' });
-    }
-};
-
-// ดึงผู้ใช้ที่ถูกปฏิเสธ
-export const getRejectedUsers = async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1
-        const limit = parseInt(req.query.limit) || 10
-        const offset = (page - 1) * limit
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
 
         // รับค่าการค้นหาจาก query parameters
         const searchParams = {
@@ -308,22 +280,67 @@ export const getRejectedUsers = async (req, res) => {
             idCard: req.query.idCard,
             name: req.query.name,
             skill: req.query.skill || ''
-        }
+        };
 
-        // ส่ง searchParams ไปยัง Model
-        const users = await adminModel.findRejectedUsers(limit, offset, searchParams)
-        const total = await adminModel.countUsersRejected(searchParams)
+        // ใช้ Promise.all เพื่อดึงข้อมูลพร้อมกัน
+        const [users, total] = await Promise.all([
+            adminModel.findApprovedUsers(limit, offset, searchParams),
+            adminModel.countUsersApproved(searchParams)
+        ]);
+
+        // ตรวจสอบว่า total เป็นตัวเลขหรือ object
+        const totalCount = typeof total === 'object' && total !== null ? total.total : total;
 
         res.json({
             users,
             pagination: {
-                total,
+                total: totalCount,
                 page,
-                limit
+                limit,
+                totalPages: Math.ceil(totalCount / limit)
             }
-        })
+        });
     } catch (error) {
-        console.error('Controller Error:', error)
+        console.error('Controller Error:', error);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูล' });
+    }
+};
+
+// ดึงผู้ใช้ที่ถูกปฏิเสธ
+export const getRejectedUsers = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        // รับค่าการค้นหาจาก query parameters
+        const searchParams = {
+            userId: req.query.userId,
+            idCard: req.query.idCard,
+            name: req.query.name,
+            skill: req.query.skill || ''
+        };
+
+        // ใช้ Promise.all เพื่อดึงข้อมูลพร้อมกัน
+        const [users, total] = await Promise.all([
+            adminModel.findRejectedUsers(limit, offset, searchParams),
+            adminModel.countUsersRejected(searchParams)
+        ]);
+
+        // ตรวจสอบว่า total เป็นตัวเลขหรือ object
+        const totalCount = typeof total === 'object' && total !== null ? total.total : total;
+
+        res.json({
+            users,
+            pagination: {
+                total: totalCount,
+                page,
+                limit,
+                totalPages: Math.ceil(totalCount / limit)
+            }
+        });
+    } catch (error) {
+        console.error('Controller Error:', error);
         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูล' });
     }
 };

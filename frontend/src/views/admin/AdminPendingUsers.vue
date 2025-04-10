@@ -319,48 +319,128 @@
     <!-- Pagination -->
     <div
       v-if="!loading && formattedUsers.length > 0"
-      class="mt-6 flex justify-center items-center space-x-3 pb-3"
+      class="mt-6 flex justify-center items-center space-x-2 pb-3"
     >
+      <!-- ปุ่มไปหน้าแรก -->
       <button
-        @click="handlePrevPage"
+        @click="goToFirstPage"
         :disabled="currentPage <= 1"
-        class="px-4 py-2 rounded-lg transition-all duration-300 flex items-center"
+        class="px-3 py-2 rounded-lg transition-all duration-300 flex items-center"
         :class="[
           currentPage <= 1
             ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
             : 'bg-gradient-to-r from-purple-500/10 to-blue-500/10 dark:from-purple-400/10 dark:to-blue-400/10 text-purple-600 dark:text-purple-400 hover:from-purple-500/20 hover:to-blue-500/20 dark:hover:from-purple-400/20 dark:hover:to-blue-400/20 hover:shadow-md'
         ]"
+        title="หน้าแรก"
+      >
+        <i class="fas fa-angle-double-left text-sm"></i>
+      </button>
+
+      <!-- ปุ่มย้อนกลับ -->
+      <button
+        @click="handlePrevPage"
+        :disabled="currentPage <= 1"
+        class="px-3 py-2 rounded-lg transition-all duration-300 flex items-center"
+        :class="[
+          currentPage <= 1
+            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+            : 'bg-gradient-to-r from-purple-500/10 to-blue-500/10 dark:from-purple-400/10 dark:to-blue-400/10 text-purple-600 dark:text-purple-400 hover:from-purple-500/20 hover:to-blue-500/20 dark:hover:from-purple-400/20 dark:hover:to-blue-400/20 hover:shadow-md'
+        ]"
+        title="หน้าก่อนหน้า"
       >
         <i class="fas fa-chevron-left text-sm"></i>
       </button>
 
-      <div class="flex items-center space-x-2">
+      <!-- ตัวเลขหน้า -->
+      <div class="flex items-center space-x-1">
+        <!-- แสดงหน้าแรกเสมอถ้าไม่ได้อยู่ที่หน้าแรก และมีหน้ามากกว่า 5 หน้า -->
         <button
-          class="px-4 py-2 rounded-lg bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4a9490] dark:to-[#6667aa] text-white font-medium min-w-[40px]"
+          v-if="currentPage > 3 && totalPages > 5"
+          @click="goToPage(1)"
+          class="px-3 py-1 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 text-gray-600 dark:text-gray-300 font-medium min-w-[36px] text-center hover:shadow-sm"
+        >
+          1
+        </button>
+
+        <!-- แสดงจุดไข่ปลาถ้าหน้าปัจจุบันห่างจากหน้าแรกมากกว่า 3 หน้า -->
+        <span
+          v-if="currentPage > 4 && totalPages > 6"
+          class="px-2 text-gray-500 dark:text-gray-400"
+        >
+          ...
+        </span>
+
+        <!-- แสดงหน้าก่อนหน้าปัจจุบัน 1 หน้า (ถ้ามี) -->
+        <button
+          v-if="currentPage > 1"
+          @click="goToPage(currentPage - 1)"
+          class="px-3 py-1 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 text-gray-600 dark:text-gray-300 font-medium min-w-[36px] text-center hover:shadow-sm"
+        >
+          {{ currentPage - 1 }}
+        </button>
+
+        <!-- หน้าปัจจุบัน -->
+        <button
+          class="px-3 py-1 rounded-lg bg-gradient-to-r from-[#6ED7D1] to-[#9899ee] dark:from-[#4a9490] dark:to-[#6667aa] text-white font-medium min-w-[36px] text-center"
         >
           {{ currentPage }}
         </button>
 
-        <span class="text-gray-500 dark:text-gray-400 font-medium">จาก</span>
+        <!-- แสดงหน้าถัดจากปัจจุบัน 1 หน้า (ถ้ามี) -->
+        <button
+          v-if="currentPage < totalPages"
+          @click="goToPage(currentPage + 1)"
+          class="px-3 py-1 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 text-gray-600 dark:text-gray-300 font-medium min-w-[36px] text-center hover:shadow-sm"
+        >
+          {{ currentPage + 1 }}
+        </button>
 
+        <!-- แสดงจุดไข่ปลาถ้าหน้าปัจจุบันห่างจากหน้าสุดท้ายมากกว่า 3 หน้า -->
         <span
-          class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 text-gray-600 dark:text-gray-300 font-medium min-w-[40px] text-center"
+          v-if="currentPage < totalPages - 3 && totalPages > 6"
+          class="px-2 text-gray-500 dark:text-gray-400"
+        >
+          ...
+        </span>
+
+        <!-- แสดงหน้าสุดท้ายเสมอถ้าไม่ได้อยู่ที่หน้าสุดท้าย และมีหน้ามากกว่า 5 หน้า -->
+        <button
+          v-if="currentPage < totalPages - 2 && totalPages > 5"
+          @click="goToPage(totalPages)"
+          class="px-3 py-1 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 text-gray-600 dark:text-gray-300 font-medium min-w-[36px] text-center hover:shadow-sm"
         >
           {{ totalPages }}
-        </span>
+        </button>
       </div>
 
+      <!-- ปุ่มถัดไป -->
       <button
         @click="handleNextPage"
         :disabled="currentPage >= totalPages"
-        class="px-4 py-2 rounded-lg transition-all duration-300 flex items-center"
+        class="px-3 py-2 rounded-lg transition-all duration-300 flex items-center"
         :class="[
           currentPage >= totalPages
-            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            : 'bg-gradient-to-r from-purple-500/10 to-blue-500/10 text-purple-600 hover:from-purple-500/20 hover:to-blue-500/20 hover:shadow-md'
+            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+            : 'bg-gradient-to-r from-purple-500/10 to-blue-500/10 dark:from-purple-400/10 dark:to-blue-400/10 text-purple-600 dark:text-purple-400 hover:from-purple-500/20 hover:to-blue-500/20 dark:hover:from-purple-400/20 dark:hover:to-blue-400/20 hover:shadow-md'
         ]"
+        title="หน้าถัดไป"
       >
         <i class="fas fa-chevron-right text-sm"></i>
+      </button>
+
+      <!-- ปุ่มไปหน้าสุดท้าย -->
+      <button
+        @click="goToLastPage"
+        :disabled="currentPage >= totalPages"
+        class="px-3 py-2 rounded-lg transition-all duration-300 flex items-center"
+        :class="[
+          currentPage >= totalPages
+            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+            : 'bg-gradient-to-r from-purple-500/10 to-blue-500/10 dark:from-purple-400/10 dark:to-blue-400/10 text-purple-600 dark:text-purple-400 hover:from-purple-500/20 hover:to-blue-500/20 dark:hover:from-purple-400/20 dark:hover:to-blue-400/20 hover:shadow-md'
+        ]"
+        title="หน้าสุดท้าย"
+      >
+        <i class="fas fa-angle-double-right text-sm"></i>
       </button>
     </div>
 
@@ -400,14 +480,14 @@ export default {
     // Pagination
     currentPage: {
       get() {
-        return this.adminUserStore.pagination.currentPage
+        return this.adminUserStore.pendingPagination.currentPage
       },
       set(value) {
-        this.adminUserStore.pagination.currentPage = value
+        this.adminUserStore.pendingPagination.currentPage = value
       }
     },
     totalPages() {
-      return this.adminUserStore.totalPages
+      return this.adminUserStore.pendingTotalPages
     },
 
     // Store Data
@@ -421,7 +501,7 @@ export default {
       return this.adminUserStore.pendingUsers
     },
     totalPending() {
-      return this.adminUserStore.pagination.totalItems
+      return this.adminUserStore.pendingPagination.totalItems || 0
     }
   },
 
@@ -570,6 +650,26 @@ export default {
           text: 'ไม่สามารถรีเฟรชข้อมูลได้',
           confirmButtonText: 'ตกลง'
         })
+      }
+    },
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.adminUserStore.setPendingPage(page)
+        this.adminUserStore.fetchPendingUsers()
+      }
+    },
+
+    goToFirstPage() {
+      if (this.currentPage > 1) {
+        this.currentPage = 1
+        this.adminUserStore.fetchPendingUsers()
+      }
+    },
+
+    goToLastPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage = this.totalPages
+        this.adminUserStore.fetchPendingUsers()
       }
     }
   }
