@@ -17,7 +17,7 @@
           <div v-if="showUserId" class="relative">
             <input
               v-model="localFilters.userId"
-              type="text"
+              type="number"
               class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="User ID"
               @input="debouncedSearch"
@@ -51,11 +51,64 @@
             ></i>
           </div>
 
+          <!-- ทักษะ  -->
+          <div class="relative">
+            <div
+              @click="toggleSkillDropdown"
+              class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 cursor-pointer flex justify-between items-center"
+            >
+              <span>{{
+                localFilters.skills.length > 0
+                  ? `ทักษะ (${localFilters.skills.length})`
+                  : 'เลือกทักษะ'
+              }}</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <i class="fas fa-tools absolute left-3.5 top-3 text-gray-400 dark:text-gray-500"></i>
+
+            <!-- Dropdown Menu -->
+            <div
+              v-if="showSkillDropdown"
+              class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+            >
+              <div class="p-2 border-b border-gray-100 dark:border-gray-700 flex justify-between">
+                <button
+                  @click="selectAllSkills"
+                  class="text-xs text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300"
+                >
+                  เลือกทั้งหมด
+                </button>
+                <button
+                  @click="clearSkills"
+                  class="text-xs text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                >
+                  ล้างการเลือก
+                </button>
+              </div>
+              <div class="p-2">
+                <div
+                  v-for="skill in availableSkills"
+                  :key="skill"
+                  class="flex items-center px-2 py-1 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer"
+                  @click="toggleSkill(skill)"
+                >
+                  <input
+                    type="checkbox"
+                    :checked="localFilters.skills.includes(skill)"
+                    class="mr-2"
+                    @click.stop="toggleSkill(skill)"
+                  />
+                  <span>{{ skill }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- ปุ่มค้นหาและล้าง -->
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 lg:col-start-4 lg:justify-end">
             <button
               @click="handleSearch"
-              class="flex-1 px-6 py-2.5 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-purple-500 text-white rounded-lg hover:opacity-90 transition-opacity duration-200"
+              class="flex-1 lg:flex-none lg:w-auto px-6 py-2.5 bg-gradient-to-r from-[#C5B4E3] to-[#EAC6FC] dark:from-purple-600 dark:to-purple-500 text-white rounded-lg hover:opacity-90 transition-opacity duration-200"
             >
               <i class="fas fa-search mr-2"></i>
               ค้นหา
@@ -75,6 +128,23 @@
                 ล้างการค้นหา
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- แสดงทักษะที่เลือก -->
+        <div
+          v-if="localFilters.skills.length > 0"
+          class="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-2 border border-gray-100 dark:border-gray-700 rounded-lg"
+        >
+          <div
+            v-for="skill in localFilters.skills"
+            :key="skill"
+            class="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 text-xs px-2 py-1 rounded-full flex items-center"
+          >
+            <span>{{ skill }}</span>
+            <button @click="removeSkill(skill)" class="ml-1 text-xs">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -103,7 +173,8 @@ export default {
       default: () => ({
         userId: '',
         name: '',
-        idCard: ''
+        idCard: '',
+        skills: []
       })
     }
   },
@@ -114,19 +185,54 @@ export default {
       localFilters: {
         userId: '',
         name: '',
-        idCard: ''
+        idCard: '',
+        skills: []
       },
-      searchTimeout: null
+      searchTimeout: null,
+      showSkillDropdown: false,
+      availableSkills: [
+        'เอกซเรย์',
+        'พยาบาล',
+        'น้ำหนัก ส่วนสูง',
+        'ทะเบียน',
+        'การได้ยิน',
+        'เจาะเลือด',
+        'เป่าปอด',
+        'ตาอาชีวะ',
+        'ตาทั่วไป',
+        'มวลกระดูก',
+        'เก็บปัสสาวะ',
+        'คลื่นไฟฟ้าหัวใจ',
+        'กล้ามเนื้อ',
+        'มะเร็งปากมดลูก',
+        'อัลตร้าซาวด์',
+        'ผู้ช่วยแพทย์',
+        'วัดความดัน',
+        'ยานพาหนะ',
+        'หมอ',
+        'ล่าม',
+        'รอบเอว',
+        'นม-ขนม'
+      ]
     }
   },
 
   mounted() {
     this.isSearchVisible = window.innerWidth >= 1024
     window.addEventListener('resize', this.handleResize)
+    document.addEventListener('click', this.handleClickOutside)
+
+    // ตั้งค่าเริ่มต้นจาก props
+    this.localFilters = { ...this.filters }
+    if (!this.localFilters.skills) {
+      this.localFilters.skills = []
+    }
   },
+
   beforeUnmount() {
     clearTimeout(this.searchTimeout)
     window.removeEventListener('resize', this.handleResize)
+    document.removeEventListener('click', this.handleClickOutside)
   },
 
   methods: {
@@ -136,35 +242,63 @@ export default {
         this.handleSearch()
       }, 200)
     },
+
     toggleSearch() {
       this.isSearchVisible = !this.isSearchVisible
     },
+
     handleResize() {
       this.isSearchVisible = window.innerWidth >= 1024
     },
-    handleSearch() {
-      // กรองเฉพาะค่าที่มีข้อมูล
-      const validFilters = Object.entries(this.localFilters)
-        .filter(([key, value]) => {
-          if (value === null || value === undefined) return false
-          if (typeof value === 'string' && value.trim() === '') return false
-          if (typeof value === 'number' && isNaN(value)) return false
-          return true
-        })
-        .reduce((acc, [key, value]) => {
-          acc[key] = value
-          return acc
-        }, {})
 
-      this.$emit('search', validFilters)
+    handleSearch() {
+      this.$emit('search', { ...this.localFilters })
     },
+
     handleClear() {
       this.localFilters = {
         userId: '',
         name: '',
-        idCard: ''
+        idCard: '',
+        skills: []
       }
       this.$emit('clear')
+    },
+
+    toggleSkillDropdown(event) {
+      event.stopPropagation()
+      this.showSkillDropdown = !this.showSkillDropdown
+    },
+
+    handleClickOutside(event) {
+      const dropdown = this.$el.querySelector('.relative')
+      if (dropdown && !dropdown.contains(event.target)) {
+        this.showSkillDropdown = false
+      }
+    },
+
+    toggleSkill(skill) {
+      if (this.localFilters.skills.includes(skill)) {
+        this.localFilters.skills = this.localFilters.skills.filter((s) => s !== skill)
+      } else {
+        this.localFilters.skills.push(skill)
+      }
+      this.debouncedSearch()
+    },
+
+    selectAllSkills() {
+      this.localFilters.skills = [...this.availableSkills]
+      this.debouncedSearch()
+    },
+
+    clearSkills() {
+      this.localFilters.skills = []
+      this.debouncedSearch()
+    },
+
+    removeSkill(skill) {
+      this.localFilters.skills = this.localFilters.skills.filter((s) => s !== skill)
+      this.debouncedSearch()
     }
   }
 }
@@ -173,13 +307,12 @@ export default {
 <style scoped>
 .fade-enter-active,
 .fade-leave-active {
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease;
 }
 
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-  transform: translateY(-10px);
 }
 
 /* Hover effects */
@@ -231,10 +364,6 @@ button:not(:disabled):active {
 
 .overflow-y-auto::-webkit-scrollbar-thumb {
   background-color: #c5b4e3;
-  border-radius: 3px;
-}
-
-.dark .overflow-y-auto::-webkit-scrollbar-thumb {
-  background-color: #6b46c1;
+  border-radius: 20px;
 }
 </style>

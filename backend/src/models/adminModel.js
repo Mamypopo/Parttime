@@ -86,7 +86,6 @@ export const findPendingUsers = (limit = 10, offset = 0, searchParams = {}) => {
         approved: "pending"
     }
 
-    // เงื่อนไขการค้นหา
     if (searchParams.userId) {
         whereClause.id = parseInt(searchParams.userId)
     }
@@ -134,9 +133,54 @@ export const findPendingUsers = (limit = 10, offset = 0, searchParams = {}) => {
         }
     }
 
+    if (searchParams.skill) {
+        let skillArray = [];
+
+        if (typeof searchParams.skill === 'string') {
+            skillArray = searchParams.skill.split(',');
+        } else if (Array.isArray(searchParams.skill)) {
+            skillArray = searchParams.skill;
+        }
+
+        if (skillArray.length > 0) {
+            whereClause.OR = skillArray.map(skill => ({
+                skills: {
+                    contains: skill.trim(),
+                    mode: 'insensitive'
+                }
+            }));
+        }
+    }
+
+
     return prisma.user.findMany({
         where: whereClause,
-        select: baseUserSelect,
+        select: {
+            ...baseUserSelect,
+            JobParticipation: {
+                include: {
+                    workHistories: {
+                        select: {
+                            id: true,
+                            is_passed_evaluation: true,
+                            appearance_score: true,
+                            quality_score: true,
+                            quantity_score: true,
+                            manner_score: true,
+                            punctuality_score: true,
+                            total_score: true,
+                            comment: true,
+                            created_at: true
+                        }
+                    },
+                    jobPosition: {
+                        include: {
+                            job: true
+                        }
+                    }
+                }
+            }
+        },
         take: parseInt(limit),
         skip: parseInt(offset),
         orderBy: { created_at: 'desc' }
@@ -144,70 +188,84 @@ export const findPendingUsers = (limit = 10, offset = 0, searchParams = {}) => {
 }
 
 export const countUsersPending = async (searchParams = {}) => {
-    try {
-        const whereClause = {
-            approved: "pending"
-        }
-
-        if (searchParams.userId) {
-            whereClause.id = parseInt(searchParams.userId)
-        }
-
-        if (searchParams.idCard) {
-            whereClause.national_id = {
-                contains: searchParams.idCard,
-                mode: 'insensitive'
-            }
-        }
-
-        if (searchParams.name) {
-            const searchTerms = searchParams.name.trim().split(/\s+/)
-
-            if (searchTerms.length > 1) {
-                whereClause.AND = [
-                    {
-                        first_name: {
-                            contains: searchTerms[0],
-                            mode: 'insensitive'
-                        }
-                    },
-                    {
-                        last_name: {
-                            contains: searchTerms[1],
-                            mode: 'insensitive'
-                        }
-                    }
-                ]
-            } else {
-                whereClause.OR = [
-                    {
-                        first_name: {
-                            contains: searchTerms[0],
-                            mode: 'insensitive'
-                        }
-                    },
-                    {
-                        last_name: {
-                            contains: searchTerms[0],
-                            mode: 'insensitive'
-                        }
-                    }
-                ]
-            }
-        }
-
-        const totalCount = await prisma.user.count({
-            where: whereClause
-        });
-
-        return {
-            total: totalCount
-        };
-
-    } catch (error) {
-        console.error('Error in countUsersPending:', error);
-        throw error;
+    const whereClause = {
+        approved: "pending"
     }
+
+    if (searchParams.userId) {
+        whereClause.id = parseInt(searchParams.userId)
+    }
+
+    if (searchParams.idCard) {
+        whereClause.national_id = {
+            contains: searchParams.idCard,
+            mode: 'insensitive'
+        }
+    }
+
+    if (searchParams.name) {
+        const searchTerms = searchParams.name.trim().split(/\s+/)
+
+        if (searchTerms.length > 1) {
+            whereClause.AND = [
+                {
+                    first_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    last_name: {
+                        contains: searchTerms[1],
+                        mode: 'insensitive'
+                    }
+                }
+            ]
+        } else {
+            whereClause.OR = [
+                {
+                    first_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    last_name: {
+                        contains: searchTerms[0],
+                        mode: 'insensitive'
+                    }
+                }
+            ]
+        }
+    }
+
+    if (searchParams.skill) {
+        let skillArray = [];
+
+        if (typeof searchParams.skill === 'string') {
+            skillArray = searchParams.skill.split(',');
+        } else if (Array.isArray(searchParams.skill)) {
+            skillArray = searchParams.skill;
+        }
+
+        if (skillArray.length > 0) {
+            whereClause.OR = skillArray.map(skill => ({
+                skills: {
+                    contains: skill.trim(),
+                    mode: 'insensitive'
+                }
+            }));
+        }
+    }
+
+
+    const totalCount = await prisma.user.count({
+        where: whereClause
+    });
+
+    return {
+        total: totalCount
+    };
 }
 
 
@@ -218,7 +276,6 @@ export const findApprovedUsers = (limit = 10, offset = 0, searchParams = {}) => 
         approved: "approved"
     }
 
-    // เงื่อนไขการค้นหา
     if (searchParams.userId) {
         whereClause.id = parseInt(searchParams.userId)
     }
@@ -235,7 +292,6 @@ export const findApprovedUsers = (limit = 10, offset = 0, searchParams = {}) => 
         const searchTerms = searchParams.name.trim().split(/\s+/)
 
         if (searchTerms.length > 1) {
-            // ถ้ามีการเว้นวรรค จะค้นหาทั้งชื่อและนามสกุล
             whereClause.AND = [
                 {
                     first_name: {
@@ -386,6 +442,26 @@ export const findRejectedUsers = (limit = 10, offset = 0, searchParams = {}) => 
         }
     }
 
+    if (searchParams.skill) {
+        let skillArray = [];
+
+        if (typeof searchParams.skill === 'string') {
+            skillArray = searchParams.skill.split(',');
+        } else if (Array.isArray(searchParams.skill)) {
+            skillArray = searchParams.skill;
+        }
+
+        if (skillArray.length > 0) {
+            whereClause.OR = skillArray.map(skill => ({
+                skills: {
+                    contains: skill.trim(),
+                    mode: 'insensitive'
+                }
+            }));
+        }
+    }
+
+
     return prisma.user.findMany({
         where: whereClause,
         select: {
@@ -473,6 +549,25 @@ export const countUsersRejected = async (searchParams = {}) => {
         }
     }
 
+    if (searchParams.skill) {
+        let skillArray = [];
+
+        if (typeof searchParams.skill === 'string') {
+            skillArray = searchParams.skill.split(',');
+        } else if (Array.isArray(searchParams.skill)) {
+            skillArray = searchParams.skill;
+        }
+
+        if (skillArray.length > 0) {
+            whereClause.OR = skillArray.map(skill => ({
+                skills: {
+                    contains: skill.trim(),
+                    mode: 'insensitive'
+                }
+            }));
+        }
+    }
+
     const totalCount = await prisma.user.count({
         where: whereClause
     });
@@ -534,70 +629,143 @@ export const findAvailableAdmins = async () => {
 
 
 export const findUsers = async (limit, offset, searchParams = {}) => {
-    const where = {
-        AND: [
-            {
-                OR: [
-                    { first_name: { contains: searchParams.search, mode: 'insensitive' } },
-                    { last_name: { contains: searchParams.search, mode: 'insensitive' } },
-                    { email: { contains: searchParams.search, mode: 'insensitive' } },
-                    { national_id: { contains: searchParams.search } }
-                ]
+    try {
+        const where = {
+            OR: [
+                { first_name: { contains: searchParams.search || '', mode: 'insensitive' } },
+                { last_name: { contains: searchParams.search || '', mode: 'insensitive' } },
+                { email: { contains: searchParams.search || '', mode: 'insensitive' } },
+                { national_id: { contains: searchParams.search || '' } }
+            ]
+        };
+
+        if (searchParams.status) {
+            where.approved = searchParams.status;
+        }
+
+        const users = await prisma.user.findMany({
+            where,
+            select: {
+                id: true,
+                prefix: true,
+                first_name: true,
+                last_name: true,
+                email: true,
+                national_id: true,
+                phone_number: true,
+                profile_image: true,
+                approved: true,
+                created_at: true,
+                updated_at: true,
+                gender: true,
+                birth_date: true,
+                user_documents: true,
+                education_certificate: true,
+                line_id: true,
+                skills: true
+            },
+            orderBy: { created_at: 'desc' },
+            take: parseInt(limit),
+            skip: parseInt(offset)
+        });
+
+        const processedUsers = users.map(user => {
+            let userSkills = user.skills;
+
+            if (typeof user.skills === 'string') {
+                try {
+                    userSkills = JSON.parse(user.skills);
+                } catch (e) {
+                    console.error('Error parsing skills:', e);
+                    userSkills = [];
+                }
             }
-        ]
-    };
 
-    //  filter ตาม status ถ้ามีการระบุ
-    if (searchParams.status) {
-        where.AND.push({ approved: searchParams.status });
+            if (!Array.isArray(userSkills)) {
+                userSkills = [];
+            }
+
+            return {
+                ...user,
+                skills: userSkills
+            };
+        });
+
+        if (searchParams.skill && searchParams.skill.length > 0) {
+            const skills = Array.isArray(searchParams.skill)
+                ? searchParams.skill
+                : [searchParams.skill];
+
+            const filteredUsers = processedUsers.filter(user => {
+                return skills.some(skill => user.skills.includes(skill));
+            });
+
+            return filteredUsers;
+        }
+
+        return processedUsers;
+    } catch (error) {
+        console.error('Error in findUsers:', error);
+        throw error;
     }
-
-    return prisma.user.findMany({
-        where,
-        select: {
-            id: true,
-            prefix: true,
-            first_name: true,
-            last_name: true,
-            email: true,
-            national_id: true,
-            phone_number: true,
-            profile_image: true,
-            approved: true,
-            created_at: true,
-            updated_at: true,
-            gender: true,
-            birth_date: true,
-            user_documents: true,
-            education_certificate: true,
-            line_id: true,
-            skills: true
-        },
-        orderBy: { created_at: 'desc' },
-        take: limit,
-        skip: offset
-    });
 };
 
 export const countUsers = async (searchParams = {}) => {
-    const where = {
-        AND: [
-            {
-                OR: [
-                    { first_name: { contains: searchParams.search, mode: 'insensitive' } },
-                    { last_name: { contains: searchParams.search, mode: 'insensitive' } },
-                    { email: { contains: searchParams.search, mode: 'insensitive' } },
-                    { national_id: { contains: searchParams.search } }
-                ]
+    try {
+        const where = {
+            OR: [
+                { first_name: { contains: searchParams.search || '', mode: 'insensitive' } },
+                { last_name: { contains: searchParams.search || '', mode: 'insensitive' } },
+                { email: { contains: searchParams.search || '', mode: 'insensitive' } },
+                { national_id: { contains: searchParams.search || '' } }
+            ]
+        };
+
+        if (searchParams.status) {
+            where.approved = searchParams.status;
+        }
+
+        if (!searchParams.skill || (Array.isArray(searchParams.skill) && searchParams.skill.length === 0)) {
+            return prisma.user.count({ where });
+        }
+
+        const users = await prisma.user.findMany({
+            where,
+            select: {
+                id: true,
+                skills: true
             }
-        ]
-    };
+        });
 
-    if (searchParams.status) {
-        where.AND.push({ approved: searchParams.status });
+        const skills = Array.isArray(searchParams.skill)
+            ? searchParams.skill
+            : [searchParams.skill];
+
+        const filteredUsers = users.filter(user => {
+            if (!user.skills) return false;
+
+            let userSkills = user.skills;
+            if (typeof user.skills === 'string') {
+                try {
+                    userSkills = JSON.parse(user.skills);
+                } catch (e) {
+                    console.error('Error parsing skills:', e);
+                    return false;
+                }
+            }
+
+            if (!Array.isArray(userSkills)) {
+                return false;
+            }
+
+            return skills.some(skill => userSkills.includes(skill));
+        });
+
+        return filteredUsers.length;
+    } catch (error) {
+        console.error('Error in countUsers:', error);
+        throw error;
     }
-
-    return prisma.user.count({ where });
 };
 
 export const createUserByAdmin = async (userData) => {

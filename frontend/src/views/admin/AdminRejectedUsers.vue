@@ -153,7 +153,7 @@
                       </span>
                     </div>
                     <div class="min-w-0">
-                      <div class="font-medium text-gray-900 dark:text-gray-100 truncate">
+                      <div class="font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
                         {{ user.fullName }}
                       </div>
                       <div class="text-sm text-gray-500 dark:text-gray-400">ID: {{ user.id }}</div>
@@ -183,7 +183,7 @@
 
                 <!-- วันที่ไม่อนุมัติ -->
                 <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900 dark:text-gray-100">
+                  <div class="text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap">
                     {{ user.rejectedDate }}
                   </div>
                 </td>
@@ -528,7 +528,6 @@ export default {
         this.selectedUser = user
         await this.userHistoryStore.fetchUserHistory(user.id)
 
-        // ตรวจสอบว่ามีประวัติหรือไม่
         if (!this.userHistoryStore.history?.length) {
           await Swal.fire({
             icon: 'info',

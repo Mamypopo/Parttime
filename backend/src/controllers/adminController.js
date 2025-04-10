@@ -235,14 +235,13 @@ export const getPendingUsers = async (req, res) => {
         const limit = parseInt(req.query.limit) || 10
         const offset = (page - 1) * limit
 
-        // รับค่าการค้นหาจาก query parameters
         const searchParams = {
             userId: req.query.userId,
             idCard: req.query.idCard,
-            name: req.query.name
+            name: req.query.name,
+            skill: req.query.skill || ''
         }
 
-        // ส่ง searchParams ไปยัง Model
         const [users, counts] = await Promise.all([
             adminModel.findPendingUsers(limit, offset, searchParams),
             adminModel.countUsersPending(searchParams)
@@ -257,7 +256,6 @@ export const getPendingUsers = async (req, res) => {
                 page,
                 limit
             },
-
         })
     } catch (error) {
         console.error('Controller Error:', error)
@@ -308,7 +306,8 @@ export const getRejectedUsers = async (req, res) => {
         const searchParams = {
             userId: req.query.userId,
             idCard: req.query.idCard,
-            name: req.query.name
+            name: req.query.name,
+            skill: req.query.skill || ''
         }
 
         // ส่ง searchParams ไปยัง Model
@@ -493,9 +492,9 @@ export const getUsers = async (req, res) => {
 
         const searchParams = {
             search: req.query.search || '',
-            status: req.query.status
+            status: req.query.status || '',
+            skill: req.query.skill || []
         };
-
         const [users, total] = await Promise.all([
             adminModel.findUsers(limit, offset, searchParams),
             adminModel.countUsers(searchParams)

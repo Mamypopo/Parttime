@@ -140,3 +140,82 @@ export const getTopUsersWithRatings = async () => {
         topUsers
     };
 };
+
+
+// ฟังก์ชันอัปเดตประวัติการทำงาน
+export const updateWorkHistory = async (workHistoryId, data) => {
+    try {
+        const workHistoryData = {};
+
+        // อัปเดตความคิดเห็น
+        if (data.comment !== undefined) {
+            workHistoryData.comment = data.comment;
+        }
+
+        // อัปเดตสถานะการผ่านการประเมิน
+        if (data.is_passed_evaluation !== undefined) {
+            workHistoryData.is_passed_evaluation = data.is_passed_evaluation;
+
+            // เพิ่มคะแนนเฉพาะเมื่อผ่านการประเมิน
+            if (data.is_passed_evaluation === true) {
+                if (data.appearance_score !== undefined) workHistoryData.appearance_score = data.appearance_score;
+                if (data.quality_score !== undefined) workHistoryData.quality_score = data.quality_score;
+                if (data.quantity_score !== undefined) workHistoryData.quantity_score = data.quantity_score;
+                if (data.manner_score !== undefined) workHistoryData.manner_score = data.manner_score;
+                if (data.punctuality_score !== undefined) workHistoryData.punctuality_score = data.punctuality_score;
+                if (data.total_score !== undefined) workHistoryData.total_score = data.total_score;
+            } else {
+                // ถ้าไม่ผ่านการประเมิน ให้เซ็ตคะแนนเป็น null ทั้งหมด
+                workHistoryData.appearance_score = null;
+                workHistoryData.quality_score = null;
+                workHistoryData.quantity_score = null;
+                workHistoryData.manner_score = null;
+                workHistoryData.punctuality_score = null;
+                workHistoryData.total_score = null;
+            }
+        } else if (data.is_passed_evaluation === true || (data.is_passed_evaluation === undefined && data.appearance_score !== undefined)) {
+            // อัปเดตคะแนนเมื่อไม่ได้เปลี่ยนสถานะการผ่านการประเมิน
+            if (data.appearance_score !== undefined) workHistoryData.appearance_score = data.appearance_score;
+            if (data.quality_score !== undefined) workHistoryData.quality_score = data.quality_score;
+            if (data.quantity_score !== undefined) workHistoryData.quantity_score = data.quantity_score;
+            if (data.manner_score !== undefined) workHistoryData.manner_score = data.manner_score;
+            if (data.punctuality_score !== undefined) workHistoryData.punctuality_score = data.punctuality_score;
+            if (data.total_score !== undefined) workHistoryData.total_score = data.total_score;
+        }
+
+        return await prisma.workHistory.update({
+            where: { id: workHistoryId },
+            data: workHistoryData,
+            include: {
+                jobParticipation: {
+                    include: {
+                        jobPosition: true,
+                        Job: true,
+                        user: true
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error updating work history:', error);
+        throw error;
+    }
+};
+
+// ฟังก์ชันดึงข้อมูล workHistory ตาม ID
+export const getWorkHistoryById = async (workHistoryId) => {
+    return prisma.workHistory.findUnique({
+        where: {
+            id: workHistoryId
+        },
+        include: {
+            jobParticipation: {
+                include: {
+                    jobPosition: true,
+                    Job: true,
+                    user: true
+                }
+            }
+        }
+    });
+};

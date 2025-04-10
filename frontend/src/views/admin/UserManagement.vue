@@ -39,7 +39,7 @@
 
     <!-- Search & Filter -->
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label class="block text-sm font-medium mb-2">ค้นหา</label>
           <input
@@ -62,6 +62,66 @@
             <option value="pending">รออนุมัติ</option>
             <option value="rejected">ปฏิเสธ</option>
           </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">ทักษะ</label>
+          <div class="relative">
+            <div
+              @click="toggleSkillDropdown"
+              class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#c779d0]/30 transition-all duration-200 cursor-pointer flex justify-between items-center"
+            >
+              <span v-if="selectedSkills.length === 0">เลือกทักษะ</span>
+              <span v-else>เลือกแล้ว {{ selectedSkills.length }} ทักษะ</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+
+            <!-- Dropdown menu -->
+            <div
+              v-if="showSkillDropdown"
+              class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto"
+            >
+              <div class="p-2">
+                <div class="mb-2">
+                  <button
+                    @click="selectAllSkills"
+                    class="text-sm text-purple-600 hover:text-purple-800 mr-3"
+                  >
+                    เลือกทั้งหมด
+                  </button>
+                  <button @click="clearSkills" class="text-sm text-red-600 hover:text-red-800">
+                    ล้างการเลือก
+                  </button>
+                </div>
+
+                <div v-for="skill in availableSkillsforsearch" :key="skill" class="py-1">
+                  <label class="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      :value="skill"
+                      v-model="selectedSkills"
+                      @change="handleSearch"
+                      class="rounded text-purple-600 focus:ring-purple-500"
+                    />
+                    <span>{{ skill }}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- แสดงทักษะที่เลือก -->
+          <div v-if="selectedSkills.length > 0" class="mt-2 flex flex-wrap gap-2">
+            <div
+              v-for="skill in selectedSkills"
+              :key="skill"
+              class="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 text-xs px-2 py-1 rounded-full flex items-center"
+            >
+              <span>{{ skill }}</span>
+              <button @click="removeSkill(skill)" class="ml-1 text-xs">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -132,7 +192,7 @@
 
                     <!-- Name Info -->
                     <div>
-                      <div class="text-gray-900 dark:text-white font-medium">
+                      <div class="text-gray-900 dark:text-white font-medium whitespace-nowrap">
                         {{ user.prefix }} {{ user.first_name }} {{ user.last_name }}
                       </div>
                       <div class="text-sm text-gray-500 dark:text-gray-400">
@@ -156,7 +216,7 @@
                     {{ getStatusText(user.approved) }}
                   </span>
                 </td>
-                <td class="px-4 py-3">{{ formatDate(user.created_at) }}</td>
+                <td class="px-4 py-3 whitespace-nowrap">{{ formatDate(user.created_at) }}</td>
                 <td class="px-4 py-3 text-center">
                   <button
                     @click="editUser(user)"
@@ -273,7 +333,35 @@ export default {
       isEditing: false,
       selectedUser: null,
       showImportModal: false,
-      baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000'
+      baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+      filterSkill: '',
+      availableSkills: [],
+      availableSkillsforsearch: [
+        'เอกซเรย์',
+        'พยาบาล',
+        'น้ำหนัก ส่วนสูง',
+        'ทะเบียน',
+        'การได้ยิน',
+        'เจาะเลือด',
+        'เป่าปอด',
+        'ตาอาชีวะ',
+        'ตาทั่วไป',
+        'มวลกระดูก',
+        'เก็บปัสสาวะ',
+        'คลื่นไฟฟ้าหัวใจ',
+        'กล้ามเนื้อ',
+        'มะเร็งปากมดลูก',
+        'อัลตร้าซาวด์',
+        'ผู้ช่วยแพทย์',
+        'วัดความดัน',
+        'ยานพาหนะ',
+        'หมอ',
+        'ล่าม',
+        'รอบเอว',
+        'นม-ขนม'
+      ],
+      selectedSkills: [],
+      showSkillDropdown: false
     }
   },
 
@@ -337,10 +425,12 @@ export default {
           page: this.currentPage,
           limit: this.itemsPerPage,
           search: this.searchQuery,
-          status: this.filterStatus
+          status: this.filterStatus,
+          skill: this.selectedSkills
         })
         this.users = response.users
         this.totalItems = response.pagination.total
+        this.availableSkills = response.availableSkills
       } catch (error) {
         console.error('Error fetching users:', error)
         Swal.fire({
@@ -519,6 +609,28 @@ export default {
           confirmButtonColor: '#C5B4E3'
         })
       }
+    },
+
+    toggleSkillDropdown() {
+      this.showSkillDropdown = !this.showSkillDropdown
+    },
+
+    selectAllSkills() {
+      this.selectedSkills = [...this.availableSkillsforsearch]
+      this.currentPage = 1
+      this.fetchUsers()
+    },
+
+    clearSkills() {
+      this.selectedSkills = []
+      this.currentPage = 1
+      this.fetchUsers()
+    },
+
+    removeSkill(skill) {
+      this.selectedSkills = this.selectedSkills.filter((s) => s !== skill)
+      this.currentPage = 1
+      this.fetchUsers()
     }
   }
 }

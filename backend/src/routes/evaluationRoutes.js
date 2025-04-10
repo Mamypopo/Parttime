@@ -1,13 +1,12 @@
 import express from 'express';
-import {
-    generateEvaluationExcel,
-} from '../controllers/evaluationController.js';
-import { authMiddleware, checkAdminRole } from '../middleware/authMiddleware.js'
+import * as evaluationController from '../controllers/evaluationController.js';
 
 const router = express.Router();
 
+// ดึงข้อมูลการประเมินตาม ID
+router.get('/work-history/:workHistoryId', evaluationController.getEvaluationById);
 
-//  สำหรับ Export Excel
-router.get('/evaluations/:jobId/excel', authMiddleware, checkAdminRole, generateEvaluationExcel);
+// อัปเดตข้อมูลการประเมิน
+router.put('/work-history/:workHistoryId', evaluationController.updateEvaluation);
 
 export default router;

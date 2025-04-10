@@ -151,7 +151,7 @@
 
                     <!-- User Info -->
                     <div>
-                      <div class="font-medium text-gray-900 dark:text-gray-100">
+                      <div class="font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
                         {{ user.fullName }}
                       </div>
                       <div class="text-sm text-gray-500 dark:text-gray-400">ID: {{ user.id }}</div>
@@ -179,7 +179,7 @@
 
                 <!-- Approval Date -->
                 <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900 dark:text-gray-100">
+                  <div class="text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap">
                     {{ user.approvedDate }}
                   </div>
                 </td>
@@ -190,7 +190,7 @@
                     <!-- ปุ่มรายละเอียด -->
                     <button
                       @click="showUserDetails(user)"
-                      class="group px-4 py-2 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 items-center"
+                      class="group px-4 py-2 rounded-lg bg-gradient-to-r from-[#C5B4E3] to-[#9899EE] dark:from-purple-600 dark:to-blue-600 text-white text-sm hover:shadow-lg hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 items-center whitespace-nowrap"
                     >
                       <i
                         class="fas fa-info-circle text-xs mr-1.5 group-hover:scale-110 transition-transform"
@@ -201,10 +201,17 @@
                     <!-- ปุ่มประวัติ -->
                     <button
                       @click="handleViewHistory(user)"
-                      class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-orange-400 to-red-400 text-white hover:shadow-md hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 dark:from-orange-600 dark:to-red-500 dark:text-white items-center"
+                      class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-orange-400 to-red-400 text-white hover:shadow-md hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 dark:from-orange-600 dark:to-red-500 dark:text-white items-center whitespace-nowrap"
                     >
                       <i class="fas fa-history text-xs mr-1.5"></i>
                       <span>ประวัติ</span>
+                    </button>
+                    <button
+                      @click="goToEditEvaluation(user)"
+                      class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-400 to-green-400 text-white hover:shadow-md hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 dark:from-blue-600 dark:to-green-500 dark:text-white items-center whitespace-nowrap"
+                    >
+                      <i class="fas fa-edit text-xs mr-1.5"></i>
+                      <span>แก้ไขการประเมิน</span>
                     </button>
                   </div>
                 </td>
@@ -553,6 +560,7 @@ export default {
     async refreshData() {
       try {
         this.handleClear()
+
         await this.adminUserStore.fetchUsers()
         Swal.fire({
           icon: 'success',
@@ -565,6 +573,20 @@ export default {
           icon: 'error',
           title: 'เกิดข้อผิดพลาด',
           text: 'ไม่สามารถรีเฟรชข้อมูลได้',
+          confirmButtonText: 'ตกลง'
+        })
+      }
+    },
+
+    async goToEditEvaluation(user) {
+      if (user && user.id) {
+        // ส่งต่อไปยังหน้าแก้ไขการประเมินโดยใช้ userId
+        this.$router.push(`/admin/user/${user.id}/evaluation`)
+      } else {
+        Swal.fire({
+          icon: 'info',
+          title: 'ไม่พบข้อมูลผู้ใช้',
+          text: 'ไม่สามารถเข้าถึงข้อมูลการประเมินได้',
           confirmButtonText: 'ตกลง'
         })
       }

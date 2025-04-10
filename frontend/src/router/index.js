@@ -126,8 +126,19 @@ const router = createRouter({
             requiresAuth: true,
             requiresAdmin: true
           }
-        }
-
+        },
+        {
+          path: '/admin/user/:userId/evaluation',
+          name: 'UserEvaluation',
+          component: () => import('@/views/admin/EditEvaluation.vue'),
+          meta: { requiresAuth: true, requiresAdmin: true }
+        },
+        {
+          path: '/admin/evaluation/:id',
+          name: 'EditEvaluation',
+          component: () => import('@/views/admin/EditEvaluation.vue'),
+          meta: { requiresAuth: true, requiresAdmin: true }
+        },
       ]
     },
 
