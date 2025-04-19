@@ -14,28 +14,16 @@
           </option>
         </select>
 
-        <!-- Month Navigation -->
-        <div
-          class="flex items-center bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+        <!-- Month Selector (Dropdown) -->
+        <select
+          v-model="selectedMonth"
+          class="px-3 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:border-purple-400 dark:hover:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all duration-300"
+          @change="handleMonthChange"
         >
-          <button
-            @click="previousMonth"
-            class="p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-l-xl transition-all duration-300"
-            :disabled="loading"
-          >
-            <i class="fas fa-chevron-left text-gray-500 dark:text-gray-400"></i>
-          </button>
-          <span class="px-4 py-1.5 font-medium text-gray-700 dark:text-gray-200">
-            {{ currentMonthText }}
-          </span>
-          <button
-            @click="nextMonth"
-            class="p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-r-xl transition-all duration-300"
-            :disabled="loading"
-          >
-            <i class="fas fa-chevron-right text-gray-500 dark:text-gray-400"></i>
-          </button>
-        </div>
+          <option v-for="(month, index) in monthOptions" :key="index" :value="index">
+            {{ month }}
+          </option>
+        </select>
       </div>
     </div>
 
@@ -155,7 +143,21 @@ export default {
       store: useDashboardStore(),
       showJobList: false,
       jobListTitle: '',
-      jobListEvents: []
+      jobListEvents: [],
+      monthOptions: [
+        'มกราคม',
+        'กุมภาพันธ์',
+        'มีนาคม',
+        'เมษายน',
+        'พฤษภาคม',
+        'มิถุนายน',
+        'กรกฎาคม',
+        'สิงหาคม',
+        'กันยายน',
+        'ตุลาคม',
+        'พฤศจิกายน',
+        'ธันวาคม'
+      ]
     }
   },
 
@@ -232,6 +234,15 @@ export default {
       set(value) {
         this.currentDate = new Date(value, this.currentDate.getMonth(), 1)
       }
+    },
+
+    selectedMonth: {
+      get() {
+        return this.currentDate.getMonth()
+      },
+      set(value) {
+        this.currentDate = new Date(this.currentDate.getFullYear(), value, 1)
+      }
     }
   },
 
@@ -242,6 +253,10 @@ export default {
     },
 
     async handleYearChange() {
+      await this.debouncedLoadData()
+    },
+
+    async handleMonthChange() {
       await this.debouncedLoadData()
     },
 

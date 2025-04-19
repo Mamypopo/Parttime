@@ -115,6 +115,16 @@
                   ตำแหน่ง
                 </th>
                 <th
+                  class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left whitespace-nowrap"
+                >
+                  จำนวนงาน
+                </th>
+                <th
+                  class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left whitespace-nowrap"
+                >
+                  คะแนนเฉลี่ย
+                </th>
+                <th
                   class="px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 text-left"
                 >
                   วันที่อนุมัติ
@@ -166,14 +176,51 @@
 
                 <!-- Skills -->
                 <td class="px-6 py-4">
-                  <div class="flex flex-wrap gap-1">
+                  <div class="space-y-2 mb-3">
+                    <div class="flex flex-wrap gap-1.5">
+                      <!-- แสดงเพียง 5 ตำแหน่งแรก -->
+                      <span
+                        v-for="(skill, index) in user.skills?.slice(0, 5) || []"
+                        :key="skill + index"
+                        class="px-2.5 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400"
+                      >
+                        {{ skill }}
+                      </span>
+
+                      <!-- ถ้ามีมากกว่า 5 ตำแหน่ง แสดงจำนวนที่เหลือ -->
+                      <span
+                        v-if="(user.skills?.length || 0) > 5"
+                        class="px-2.5 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-pointer"
+                        @click="showAllSkills(user)"
+                      >
+                        +{{ (user.skills?.length || 0) - 5 }} เพิ่มเติม
+                      </span>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- จำนวนงาน -->
+                <td class="px-6 py-4">
+                  <div class="text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <span class="font-medium">{{ user.totalJobs || 0 }}</span>
+                      <span class="ml-1 text-xs text-gray-500 dark:text-gray-400">งาน</span>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- คะแนนเฉลี่ย -->
+                <td class="px-6 py-4">
+                  <div class="flex items-center">
                     <span
-                      v-for="skill in user.skills"
-                      :key="skill"
-                      class="px-2 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400"
+                      class="text-sm font-medium"
+                      :class="getOverallScoreClass(user.averageRating)"
                     >
-                      {{ skill }}
+                      {{ user.averageRating.toFixed(1) }}
                     </span>
+                    <div class="flex text-yellow-400 ml-1.5">
+                      <i class="fas fa-star text-xs"></i>
+                    </div>
                   </div>
                 </td>
 
@@ -255,12 +302,22 @@
             <div class="space-y-2 mb-3">
               <p class="text-sm text-gray-500 dark:text-gray-400">ทักษะ:</p>
               <div class="flex flex-wrap gap-1.5">
+                <!-- แสดงเพียง 5 ตำแหน่งแรก -->
                 <span
-                  v-for="skill in user.skills"
-                  :key="skill"
+                  v-for="(skill, index) in user.skills?.slice(0, 5) || []"
+                  :key="skill + index"
                   class="px-2.5 py-0.5 text-xs rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400"
                 >
                   {{ skill }}
+                </span>
+
+                <!-- ถ้ามีมากกว่า 5 ตำแหน่ง แสดงจำนวนที่เหลือ -->
+                <span
+                  v-if="(user.skills?.length || 0) > 5"
+                  class="px-2.5 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-pointer"
+                  @click="showAllSkills(user)"
+                >
+                  +{{ (user.skills?.length || 0) - 5 }} เพิ่มเติม
                 </span>
               </div>
             </div>
@@ -269,6 +326,24 @@
             <div class="flex justify-between text-sm mb-4">
               <span class="text-gray-500 dark:text-gray-400">วันที่อนุมัติ:</span>
               <span class="text-gray-900 dark:text-gray-100">{{ user.approvedDate }}</span>
+            </div>
+
+            <!-- จำนวนงานและคะแนนเฉลี่ย -->
+            <div class="flex justify-between text-sm mb-4">
+              <div class="flex items-center">
+                <span class="text-gray-500 dark:text-gray-400">จำนวนงาน:</span>
+                <span class="text-gray-900 dark:text-gray-100 ml-2 font-medium"
+                  >{{ user.totalJobs }} งาน</span
+                >
+              </div>
+
+              <div class="flex items-center">
+                <span class="text-gray-500 dark:text-gray-400">คะแนนเฉลี่ย:</span>
+                <span class="ml-2 font-medium" :class="getOverallScoreClass(user.averageRating)">
+                  {{ user.averageRating.toFixed(1) }}
+                  <i class="fas fa-star text-yellow-400 text-xs ml-1"></i>
+                </span>
+              </div>
             </div>
 
             <!-- Actions -->
@@ -690,6 +765,30 @@ export default {
         this.currentPage = this.totalPages
         this.adminUserStore.fetchUsers()
       }
+    },
+
+    showAllSkills(user) {
+      const skillsList =
+        user.skills
+          ?.map(
+            (skill) =>
+              `<span class="inline-block px-2 py-1 m-1 text-sm rounded-full bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">${skill}</span>`
+          )
+          .join('') || 'ไม่มีตำแหน่ง'
+
+      Swal.fire({
+        title: 'ตำแหน่งทั้งหมดของ ' + user.fullName,
+        html: `<div class="flex flex-wrap justify-center my-3">${skillsList}</div>`,
+        confirmButtonText: 'ปิด',
+        confirmButtonColor: '#C5B4E3'
+      })
+    },
+
+    getOverallScoreClass(score) {
+      if (score >= 8) return 'text-green-600 dark:text-green-400'
+      if (score >= 6) return 'text-yellow-600 dark:text-yellow-400'
+      if (score >= 4) return 'text-orange-600 dark:text-orange-400'
+      return 'text-red-600 dark:text-red-400'
     }
   }
 }

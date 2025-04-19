@@ -100,10 +100,13 @@ export const useAdminUserStore = defineStore('adminUser', {
                 profileImage: user.profile_image,
                 educationCertificate: user.education_certificate,
                 documents: user.user_documents || '-',
+                totalJobs: user.total_jobs || 0,
+                averageRating: parseFloat(user.average_rating || 0),
+                totalReviews: user.total_reviews || 0
             }
         },
 
-        async fetchUsers(options = {}) {
+        async fetchUsers() {
             try {
                 this.loading = true
 
@@ -121,7 +124,6 @@ export const useAdminUserStore = defineStore('adminUser', {
                 })
 
                 const response = await api.get('/api/admin/users', { params })
-
                 if (response.data) {
                     this.users = response.data.users.map(this.formatUserData)
                     if (response.data.pagination) {

@@ -663,7 +663,27 @@ export const findUsers = async (limit, offset, searchParams = {}) => {
                 user_documents: true,
                 education_certificate: true,
                 line_id: true,
-                skills: true
+                skills: true,
+                _count: {
+                    select: {
+                        JobParticipation: true,
+                    }
+                },
+                JobParticipation: {
+                    where: {
+                        workHistories: {
+                            some: {}
+                        }
+                    },
+                    select: {
+                        workHistories: {
+                            select: {
+                                total_score: true
+                            }
+                        }
+                    }
+                }
+
             },
             orderBy: { created_at: 'desc' },
             take: parseInt(limit),
@@ -686,9 +706,28 @@ export const findUsers = async (limit, offset, searchParams = {}) => {
                 userSkills = [];
             }
 
+            let totalScore = 0;
+            let evaluationCount = 0;
+
+            user.JobParticipation.forEach(participation => {
+                participation.workHistories.forEach(history => {
+                    if (history.total_score !== null && history.total_score !== undefined) {
+                        totalScore += history.total_score;
+                        evaluationCount++;
+                    }
+                });
+            });
+
+            const averageRating = evaluationCount > 0 ? (totalScore / evaluationCount).toFixed(1) : 0;
+
+            const { _count, JobParticipation, ...userData } = user;
+
             return {
-                ...user,
-                skills: userSkills
+                ...userData,
+                skills: userSkills,
+                total_jobs: _count.JobParticipation || 0,
+                average_rating: averageRating,
+                total_reviews: evaluationCount
             };
         });
 
