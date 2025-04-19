@@ -606,9 +606,17 @@ export default {
         if (!result.isConfirmed) return
 
         const formDataToSend = new FormData()
-
+        const excludedFields = [
+          'id',
+          'created_at',
+          'updated_at',
+          'email',
+          'total_jobs',
+          'average_rating',
+          'total_reviews'
+        ]
         Object.entries(this.formData).forEach(([key, value]) => {
-          if (['id', 'created_at', 'updated_at', 'email'].includes(key)) return
+          if (excludedFields.includes(key)) return
 
           if (value !== null && value !== undefined && value !== '') {
             if (key === 'birth_date') {

@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import api from '@/services/axios'
-import Swal from 'sweetalert2'
 
 export const useAdminUserStore = defineStore('adminUser', {
     state: () => ({
@@ -21,7 +20,8 @@ export const useAdminUserStore = defineStore('adminUser', {
             userId: '',
             idCard: '',
             name: '',
-            skills: []
+            skills: [],
+            sortBy: ''
         },
         rejectedStats: {
             total: 0,
@@ -114,7 +114,8 @@ export const useAdminUserStore = defineStore('adminUser', {
                     page: this.pagination.currentPage,
                     limit: this.pagination.perPage,
                     search: this.searchFilters.name || this.searchFilters.userId || this.searchFilters.idCard || '',
-                    skill: this.searchFilters.skills || []
+                    skill: this.searchFilters.skills || [],
+                    sortBy: this.searchFilters.sortBy || ''
                 }
 
                 Object.keys(params).forEach(key => {
@@ -125,7 +126,7 @@ export const useAdminUserStore = defineStore('adminUser', {
 
                 const response = await api.get('/api/admin/users', { params })
                 if (response.data) {
-                    this.users = response.data.users.map(this.formatUserData)
+                    this.users = response.data.users ? response.data.users.map(this.formatUserData) : []
                     if (response.data.pagination) {
                         this.pagination.totalItems = parseInt(response.data.pagination.total)
                     }
@@ -147,7 +148,9 @@ export const useAdminUserStore = defineStore('adminUser', {
                     limit: this.pendingPagination.perPage,
                     userId: this.searchFilters.userId,
                     name: this.searchFilters.name,
-                    idCard: this.searchFilters.idCard
+                    idCard: this.searchFilters.idCard,
+                    skill: this.searchFilters.skills || [],
+                    sortBy: this.searchFilters.sortBy || ''
                 }
 
                 if (this.searchFilters.skills && this.searchFilters.skills.length > 0) {

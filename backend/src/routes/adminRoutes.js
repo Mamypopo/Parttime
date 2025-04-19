@@ -48,11 +48,6 @@ router.post(
 // ดึงรายชื่อแอดมินที่สามารถเพิ่มเป็นผู้ดูแลงานได้
 router.get('/available', checkAdminRole, adminController.getAvailableAdmins);
 
-
-/**
- * จัดการแจ้งเตือน
- */
-
 // ดึงแจ้งเตือนทั้งหมดของแอดมิน  (ต้องเป็นแอดมินเท่านั้น)
 router.get('/notifications', checkAdminRole, adminController.getAdminNotifications);
 

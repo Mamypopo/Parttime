@@ -28,7 +28,7 @@
       <!-- Search Bar with Animation -->
       <div class="mt-6 flex items-center gap-2">
         <div class="flex-1 transform transition-all duration-300 hover:scale-[1.01]">
-          <SearchUsersBar
+          <SearchAdminUsersBar
             :filters="searchFilters"
             @search="handleSearch"
             @clear="handleClear"
@@ -515,7 +515,7 @@
 </template>
 <script>
 import Swal from 'sweetalert2'
-import SearchUsersBar from '@/components/Search/SearchUsersBar.vue'
+import SearchAdminUsersBar from '@/components/Search/SearchAdminUsersBar.vue'
 import UserDetailsModal from '@/components/Users/UserDetailsModal.vue'
 import JobHistoryModal from '@/components/Users/JobHistoryModal.vue'
 import { useSidebarStore } from '@/stores/sidebarStore'
@@ -533,7 +533,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 export default {
   name: 'AdminAllUsers',
   components: {
-    SearchUsersBar,
+    SearchAdminUsersBar,
     UserDetailsModal,
     JobHistoryModal,
     HeadlessDialog,
@@ -776,11 +776,20 @@ export default {
           )
           .join('') || 'ไม่มีตำแหน่ง'
 
+      const isDarkMode = document.documentElement.classList.contains('dark')
+
       Swal.fire({
         title: 'ตำแหน่งทั้งหมดของ ' + user.fullName,
         html: `<div class="flex flex-wrap justify-center my-3">${skillsList}</div>`,
         confirmButtonText: 'ปิด',
-        confirmButtonColor: '#C5B4E3'
+        confirmButtonColor: '#C5B4E3',
+        background: isDarkMode ? '#1F2937' : '#FFFFFF',
+        color: isDarkMode ? '#F3F4F6' : '#111827',
+        customClass: {
+          popup: isDarkMode ? 'swal2-dark' : '',
+          title: isDarkMode ? 'text-gray-100' : 'text-gray-800',
+          content: isDarkMode ? 'text-gray-300' : 'text-gray-600'
+        }
       })
     },
 

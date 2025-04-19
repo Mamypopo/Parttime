@@ -510,20 +510,19 @@ export const getUsers = async (req, res) => {
         const searchParams = {
             search: req.query.search || '',
             status: req.query.status || '',
-            skill: req.query.skill || []
+            skill: req.query.skill || [],
+            sortBy: req.query.sortBy || ''
         };
-        const [users, total] = await Promise.all([
-            adminModel.findUsers(limit, offset, searchParams),
-            adminModel.countUsers(searchParams)
-        ]);
+
+        const result = await adminModel.findUsers(limit, offset, searchParams);
 
         res.json({
-            users,
+            users: result.users,
             pagination: {
-                total,
+                total: result.total,
                 page,
                 limit,
-                totalPages: Math.ceil(total / limit)
+                totalPages: Math.ceil(result.total / limit)
             }
         });
     } catch (error) {

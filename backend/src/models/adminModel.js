@@ -644,7 +644,7 @@ export const findUsers = async (limit, offset, searchParams = {}) => {
             where.approved = searchParams.status;
         }
 
-        const users = await prisma.user.findMany({
+        const allUsers = await prisma.user.findMany({
             where,
             select: {
                 id: true,
@@ -666,44 +666,31 @@ export const findUsers = async (limit, offset, searchParams = {}) => {
                 skills: true,
                 _count: {
                     select: {
-                        JobParticipation: true,
+                        JobParticipation: true
                     }
                 },
                 JobParticipation: {
-                    where: {
-                        workHistories: {
-                            some: {}
-                        }
-                    },
                     select: {
+                        id: true,
                         workHistories: {
                             select: {
+                                id: true,
                                 total_score: true
                             }
                         }
                     }
                 }
-
-            },
-            orderBy: { created_at: 'desc' },
-            take: parseInt(limit),
-            skip: parseInt(offset)
+            }
         });
 
-        const processedUsers = users.map(user => {
-            let userSkills = user.skills;
-
-            if (typeof user.skills === 'string') {
+        const processedUsers = allUsers.map(user => {
+            let userSkills = [];
+            if (user.skills) {
                 try {
-                    userSkills = JSON.parse(user.skills);
+                    userSkills = typeof user.skills === 'string' ? JSON.parse(user.skills) : user.skills;
                 } catch (e) {
                     console.error('Error parsing skills:', e);
-                    userSkills = [];
                 }
-            }
-
-            if (!Array.isArray(userSkills)) {
-                userSkills = [];
             }
 
             let totalScore = 0;
@@ -718,7 +705,7 @@ export const findUsers = async (limit, offset, searchParams = {}) => {
                 });
             });
 
-            const averageRating = evaluationCount > 0 ? (totalScore / evaluationCount).toFixed(1) : 0;
+            const averageRating = evaluationCount > 0 ? (totalScore / evaluationCount) : 0;
 
             const { _count, JobParticipation, ...userData } = user;
 
@@ -726,24 +713,47 @@ export const findUsers = async (limit, offset, searchParams = {}) => {
                 ...userData,
                 skills: userSkills,
                 total_jobs: _count.JobParticipation || 0,
-                average_rating: averageRating,
+                average_rating: parseFloat(averageRating.toFixed(1)),
                 total_reviews: evaluationCount
             };
         });
 
+        let filteredUsers = processedUsers;
         if (searchParams.skill && searchParams.skill.length > 0) {
             const skills = Array.isArray(searchParams.skill)
                 ? searchParams.skill
                 : [searchParams.skill];
 
-            const filteredUsers = processedUsers.filter(user => {
+            filteredUsers = processedUsers.filter(user => {
                 return skills.some(skill => user.skills.includes(skill));
             });
-
-            return filteredUsers;
         }
 
-        return processedUsers;
+        if (searchParams.sortBy) {
+            switch (searchParams.sortBy) {
+                case 'rating_asc':
+                    filteredUsers.sort((a, b) => a.average_rating - b.average_rating);
+                    break;
+                case 'rating_desc':
+                    filteredUsers.sort((a, b) => b.average_rating - a.average_rating);
+                    break;
+                case 'jobs_asc':
+                    filteredUsers.sort((a, b) => a.total_jobs - b.total_jobs);
+                    break;
+                case 'jobs_desc':
+                    filteredUsers.sort((a, b) => b.total_jobs - a.total_jobs);
+                    break;
+                default:
+                    filteredUsers.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            }
+        }
+
+        const paginatedUsers = filteredUsers.slice(offset, offset + parseInt(limit));
+
+        return {
+            users: paginatedUsers,
+            total: filteredUsers.length
+        };
     } catch (error) {
         console.error('Error in findUsers:', error);
         throw error;
@@ -752,56 +762,9 @@ export const findUsers = async (limit, offset, searchParams = {}) => {
 
 export const countUsers = async (searchParams = {}) => {
     try {
-        const where = {
-            OR: [
-                { first_name: { contains: searchParams.search || '', mode: 'insensitive' } },
-                { last_name: { contains: searchParams.search || '', mode: 'insensitive' } },
-                { email: { contains: searchParams.search || '', mode: 'insensitive' } },
-                { national_id: { contains: searchParams.search || '' } }
-            ]
-        };
-
-        if (searchParams.status) {
-            where.approved = searchParams.status;
-        }
-
-        if (!searchParams.skill || (Array.isArray(searchParams.skill) && searchParams.skill.length === 0)) {
-            return prisma.user.count({ where });
-        }
-
-        const users = await prisma.user.findMany({
-            where,
-            select: {
-                id: true,
-                skills: true
-            }
-        });
-
-        const skills = Array.isArray(searchParams.skill)
-            ? searchParams.skill
-            : [searchParams.skill];
-
-        const filteredUsers = users.filter(user => {
-            if (!user.skills) return false;
-
-            let userSkills = user.skills;
-            if (typeof user.skills === 'string') {
-                try {
-                    userSkills = JSON.parse(user.skills);
-                } catch (e) {
-                    console.error('Error parsing skills:', e);
-                    return false;
-                }
-            }
-
-            if (!Array.isArray(userSkills)) {
-                return false;
-            }
-
-            return skills.some(skill => userSkills.includes(skill));
-        });
-
-        return filteredUsers.length;
+        // ใช้ผลลัพธ์จาก findUsers แทน
+        const result = await findUsers(Number.MAX_SAFE_INTEGER, 0, searchParams);
+        return result.total;
     } catch (error) {
         console.error('Error in countUsers:', error);
         throw error;
